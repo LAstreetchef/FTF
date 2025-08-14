@@ -440,14 +440,26 @@ def internal_error(error):
 def setup_admin():
     """One-time setup route to create admin user in production"""
     try:
+        # Debug info
+        db_url = os.environ.get('DATABASE_URL', 'Not set')[:50] + '...' if len(os.environ.get('DATABASE_URL', '')) > 50 else os.environ.get('DATABASE_URL', 'Not set')
+        all_admins = Admin.query.all()
+        admin_count = len(all_admins)
+        
+        debug_info = f"Database URL: {db_url}<br>Current admin count: {admin_count}<br><br>"
+        
         # Check if admin already exists
         admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
         
         if admin:
             # Update existing admin password
+            old_hash = admin.password_hash[:20] + '...'
             admin.password_hash = generate_password_hash('password')
             db.session.commit()
-            return "Admin user updated successfully! You can now login with truckstopsla@gmail.com / password"
+            
+            # Test the password
+            test_result = check_password_hash(admin.password_hash, 'password')
+            
+            return f"{debug_info}Admin user updated successfully!<br>Old hash: {old_hash}<br>Password test: {'PASS' if test_result else 'FAIL'}<br><br><strong>You can now login with truckstopsla@gmail.com / password</strong>"
         else:
             # Create new admin
             new_admin = Admin(
@@ -456,7 +468,12 @@ def setup_admin():
             )
             db.session.add(new_admin)
             db.session.commit()
-            return "Admin user created successfully! You can now login with truckstopsla@gmail.com / password"
+            
+            # Test the password
+            test_result = check_password_hash(new_admin.password_hash, 'password')
+            
+            return f"{debug_info}Admin user created successfully!<br>Password test: {'PASS' if test_result else 'FAIL'}<br><br><strong>You can now login with truckstopsla@gmail.com / password</strong>"
             
     except Exception as e:
-        return f"Error creating admin: {str(e)}"
+        import traceback
+        return f"Error creating admin: {str(e)}<br><br>Traceback:<br>{traceback.format_exc().replace(chr(10), '<br>')}"
