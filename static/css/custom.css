@@ -330,6 +330,22 @@ footer {
     min-width: 60px;
 }
 
+/* Menu item pledge buttons */
+.d-flex .btn-outline-primary.btn-sm {
+    min-width: 120px;
+    text-align: center;
+    padding: 8px 12px;
+    line-height: 1.2;
+    white-space: normal;
+    height: auto;
+}
+
+.d-flex .btn-outline-primary.btn-sm small {
+    display: block;
+    font-weight: bold;
+    color: inherit;
+}
+
 /* Event card spacing */
 .event-card .card-body {
     display: flex;

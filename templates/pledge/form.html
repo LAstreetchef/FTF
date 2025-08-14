@@ -74,34 +74,31 @@
                             <div class="form-text">Minimum pledge: $5.00</div>
                         </div>
                         
-                        <!-- Quick Amount Buttons -->
+                        <!-- Menu Item Pledge Buttons -->
+                        {% set menu_items = event.get_selected_menu_items() %}
+                        {% if menu_items %}
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% for item in menu_items %}
+                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                    onclick="setAmount({{ '%.2f'|format(item.marked_up_price) }})"
+                                    title="{{ item.name }}">
+                                {{ item.name }}<br>
+                                <small>${{ "%.2f"|format(item.marked_up_price) }}</small>
+                            </button>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <!-- Fallback quick amounts if no menu items -->
                         <div class="d-flex gap-2 flex-wrap">
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(10)">$10</button>
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(15)">$15</button>
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(20)">$20</button>
                             <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(25)">$25</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(50)">$50</button>
                         </div>
+                        {% endif %}
                     </div>
                     
-                    <!-- Menu Reference -->
-                    {% set menu_items = event.get_selected_menu_items() %}
-                    {% if menu_items %}
-                    <div class="mb-4">
-                        <h5>Menu Reference</h5>
-                        <p class="small text-muted">Use this as a guide for your pledge amount:</p>
-                        <div class="row">
-                            {% for item in menu_items[:6] %}
-                            <div class="col-md-6 mb-2">
-                                <div class="d-flex justify-content-between">
-                                    <span class="small">{{ item.name }}</span>
-                                    <span class="small text-primary">${{ "%.2f"|format(item.marked_up_price) }}</span>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
+
                     
                     <!-- Payment Info -->
                     <div class="mb-4">
