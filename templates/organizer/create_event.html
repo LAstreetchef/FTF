@@ -62,12 +62,18 @@
                         </div>
                         
                         <div id="truck-details" class="d-none">
-                            <div class="card bg-light">
+                            <div class="card">
                                 <div class="card-body">
-                                    <h6>Selected Truck Details</h6>
-                                    <p id="truck-description"></p>
-                                    <p><strong>Sales Goal:</strong> $<span id="truck-goal"></span></p>
-                                    <p class="text-muted small">This will be your event's funding goal</p>
+                                    <h6 class="card-title text-primary">
+                                        <i data-feather="truck" class="me-2"></i>Selected Truck Details
+                                    </h6>
+                                    <p id="truck-description" class="card-text"></p>
+                                    <div class="row">
+                                        <div class="col">
+                                            <p class="mb-0"><strong>Sales Goal:</strong> $<span id="truck-goal"></span></p>
+                                            <small class="text-muted">This will be your event's funding goal</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -179,6 +185,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (this.value) {
             // Show truck details
+            console.log('Selected option:', selectedOption);
+            console.log('Description:', selectedOption.dataset.description);
+            console.log('Goal:', selectedOption.dataset.goal);
+            
             truckDetails.classList.remove('d-none');
             truckDescription.textContent = selectedOption.dataset.description || 'No description available';
             truckGoal.textContent = selectedOption.dataset.goal;
@@ -198,12 +208,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedOption = truckSelect.options[truckSelect.selectedIndex];
         const menuData = selectedOption.dataset.menu;
         
+        console.log('Loading menu for truck:', truckId);
+        console.log('Menu data from option:', menuData);
+        
         try {
-            const items = JSON.parse(menuData);
+            const items = menuData ? JSON.parse(menuData) : [];
             menuItemsList.innerHTML = '';
             
             if (!items || items.length === 0) {
-                menuItemsList.innerHTML = '<p class="text-muted">No menu items available for this truck.</p>';
+                menuItemsList.innerHTML = '<div class="alert alert-info">No menu items available for this truck yet.</div>';
+                menuSelection.classList.remove('d-none');
                 return;
             }
             
@@ -211,14 +225,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'form-check mb-2 p-3 border rounded';
                 itemDiv.innerHTML = `
-                    <input class="form-check-input" type="checkbox" name="selected_items" value="${index}" id="item_${index}">
+                    <input class="form-check-input" type="checkbox" name="selected_items" value="${index}" id="item_${index}" checked>
                     <label class="form-check-label w-100" for="item_${index}">
-                        <div class="d-flex justify-content-between">
+                        <div class="d-flex justify-content-between align-items-center">
                             <span><strong>${item.name}</strong></span>
                             <span>
-                                <span class="text-muted">$${item.price.toFixed(2)}</span>
+                                <span class="text-muted">$${parseFloat(item.price).toFixed(2)}</span>
                                 →
-                                <span class="text-primary marked-up-price">$${(item.price * 1.15).toFixed(2)}</span>
+                                <span class="text-primary marked-up-price">$${(parseFloat(item.price) * 1.15).toFixed(2)}</span>
                             </span>
                         </div>
                     </label>
@@ -229,8 +243,9 @@ document.addEventListener('DOMContentLoaded', function() {
             menuSelection.classList.remove('d-none');
             updatePricing();
         } catch (error) {
-            console.error('Error parsing menu data:', error);
-            menuItemsList.innerHTML = '<p class="text-danger">Error loading menu items.</p>';
+            console.error('Error parsing menu data:', error, menuData);
+            menuItemsList.innerHTML = '<div class="alert alert-danger">Error loading menu items: ' + error.message + '</div>';
+            menuSelection.classList.remove('d-none');
         }
     }
     
