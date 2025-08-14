@@ -379,6 +379,20 @@ def make_pledge(event_id):
                         f"Event Goal Met: {event.name}",
                         f"The event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}. Please review and approve the event to charge all pledges."
                     )
+                    
+                    # Send goal reached confirmation to pledger
+                    send_email(
+                        email,
+                        f"Event Funded! - {event.name}",
+                        f"Great news! Your pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
+                    )
+                else:
+                    # Send regular pledge confirmation
+                    send_email(
+                        email,
+                        f"Pledge Confirmation - {event.name}",
+                        f"Thank you for your ${amount:.2f} pledge for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
+                    )
                 
                 flash('Pledge created successfully! You will only be charged if the event reaches its funding goal.', 'success')
                 return redirect(url_for('pledge_success', pledge_id=pledge.id))

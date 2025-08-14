@@ -8,6 +8,14 @@ A Flask-based web application that enables community crowdfunding for food truck
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **2025-08-14**: Fixed email confirmation system for pledges
+  - Configured Gmail SMTP with proper credentials
+  - Added automatic email confirmations for all pledges
+  - Enhanced notifications when events reach funding goals
+  - Resolved Stripe integration issues with proper error handling
+
 ## System Architecture
 
 ### Backend Architecture
