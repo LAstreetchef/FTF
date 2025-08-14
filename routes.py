@@ -319,9 +319,16 @@ def organizer_create_event():
 # Public Routes
 @app.route('/events')
 def events_list():
-    """Public page listing all active events"""
-    events = Event.query.filter(Event.status.in_(['pending', 'funded'])).order_by(Event.created_at.desc()).all()
-    return render_template('events/list.html', events=events)
+    """Public page listing all events by status"""
+    # Get events by different status categories
+    active_events = Event.query.filter(Event.status.in_(['pending', 'funded'])).order_by(Event.created_at.desc()).all()
+    completed_events = Event.query.filter(Event.status == 'approved').order_by(Event.created_at.desc()).all()
+    all_events = Event.query.order_by(Event.created_at.desc()).all()
+    
+    return render_template('events/list.html', 
+                         active_events=active_events, 
+                         completed_events=completed_events,
+                         all_events=all_events)
 
 @app.route('/events/<int:event_id>')
 def event_detail(event_id):

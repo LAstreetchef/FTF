@@ -16,95 +16,260 @@
     </div>
 </div>
 
-<!-- Events Grid -->
-{% if events %}
-<div class="row g-4">
-    {% for event in events %}
-    <div class="col-md-6 col-lg-4">
-        <div class="card h-100">
-            <div class="card-body d-flex flex-column">
-                <!-- Event Header -->
-                <div class="mb-3">
-                    <h5 class="card-title">{{ event.name }}</h5>
-                    <p class="text-muted small mb-2">
-                        <i data-feather="truck" class="me-1"></i>
-                        {{ event.food_truck.name }}
-                    </p>
-                    <p class="text-muted small mb-2">
-                        <i data-feather="calendar" class="me-1"></i>
-                        {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
-                    </p>
-                    <p class="text-muted small">
-                        <i data-feather="map-pin" class="me-1"></i>
-                        {{ event.location }}
-                    </p>
-                </div>
-                
-                <!-- Description -->
-                {% if event.description %}
-                <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
-                {% endif %}
-                
-                <!-- Progress Bar -->
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <small class="text-muted">Funding Progress</small>
-                        <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' }}">
-                            {{ event.status.title() }}
-                        </span>
+<!-- Navigation Tabs -->
+<ul class="nav nav-pills justify-content-center mb-4" id="eventTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-events" type="button" role="tab">
+            <i data-feather="calendar" class="me-2"></i>
+            All Events ({{ all_events|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="active-tab" data-bs-toggle="pill" data-bs-target="#active-events" type="button" role="tab">
+            <i data-feather="clock" class="me-2"></i>
+            Active ({{ active_events|length }})
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="completed-tab" data-bs-toggle="pill" data-bs-target="#completed-events" type="button" role="tab">
+            <i data-feather="check-circle" class="me-2"></i>
+            Completed ({{ completed_events|length }})
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="eventTabsContent">
+    <!-- All Events Tab -->
+    <div class="tab-pane fade show active" id="all-events" role="tabpanel">
+        {% if all_events %}
+        <div class="row g-4">
+            {% for event in all_events %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <!-- Status Badge -->
+                    {% if event.status == 'approved' %}
+                    <div class="card-header bg-success text-white">
+                        <i data-feather="check-circle" class="me-2"></i>
+                        Successfully Completed!
                     </div>
-                    
-                    <div class="progress mb-2">
-                        <div class="progress-bar {{ 'bg-success' if event.is_goal_met() else 'bg-warning' }}" 
-                             role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
-                            {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                    {% elif event.status == 'funded' %}
+                    <div class="card-header bg-warning text-dark">
+                        <i data-feather="clock" class="me-2"></i>
+                        Funded - Awaiting Approval
+                    </div>
+                    {% elif event.status == 'pending' %}
+                    <div class="card-header bg-primary text-white">
+                        <i data-feather="heart" class="me-2"></i>
+                        Seeking Support
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body d-flex flex-column">
+                        <!-- Event Header -->
+                        <div class="mb-3">
+                            <h5 class="card-title">{{ event.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="truck" class="me-1"></i>
+                                {{ event.food_truck.name }}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="calendar" class="me-1"></i>
+                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </p>
+                            <p class="text-muted small">
+                                <i data-feather="map-pin" class="me-1"></i>
+                                {{ event.location }}
+                            </p>
                         </div>
-                    </div>
-                    
-                    <div class="d-flex justify-content-between">
-                        <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} raised</small>
-                        <small class="text-muted">Goal: ${{ "%.2f"|format(event.pledge_goal) }}</small>
-                    </div>
-                    
-                    <small class="text-muted">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }}</small>
-                </div>
-                
-                <!-- Sample Menu Items -->
-                {% set menu_items = event.get_selected_menu_items() %}
-                {% if menu_items %}
-                <div class="mb-3">
-                    <small class="text-muted">Sample Menu:</small>
-                    <ul class="list-unstyled small">
-                        {% for item in menu_items[:3] %}
-                        <li class="d-flex justify-content-between">
-                            <span>{{ item.name }}</span>
-                            <span>${{ "%.2f"|format(item.marked_up_price) }}</span>
-                        </li>
-                        {% endfor %}
-                        {% if menu_items|length > 3 %}
-                        <li class="text-muted">and {{ menu_items|length - 3 }} more item{{ 's' if (menu_items|length - 3) != 1 else '' }}...</li>
+                        
+                        <!-- Description -->
+                        {% if event.description %}
+                        <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
                         {% endif %}
-                    </ul>
-                </div>
-                {% endif %}
-                
-                <!-- Actions -->
-                <div class="mt-auto">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary">
-                            <i data-feather="heart" class="me-2"></i>
-                            Support This Event
-                        </a>
-                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-secondary btn-sm">
-                            <i data-feather="eye" class="me-1"></i>
-                            View Details
-                        </a>
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-3">
+                            <div class="progress mb-2">
+                                <div class="progress-bar {{ 'bg-success' if event.is_goal_met() else 'bg-warning' }}" 
+                                     role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                    {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} raised</small>
+                                <small class="text-muted">Goal: ${{ "%.2f"|format(event.pledge_goal) }}</small>
+                            </div>
+                            
+                            <small class="text-muted">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }}</small>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="mt-auto">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary">
+                                    {% if event.status == 'approved' %}
+                                        <i data-feather="eye" class="me-2"></i>
+                                        View Results
+                                    {% elif event.status in ['pending', 'funded'] %}
+                                        <i data-feather="heart" class="me-2"></i>
+                                        Support This Event
+                                    {% else %}
+                                        <i data-feather="eye" class="me-2"></i>
+                                        View Details
+                                    {% endif %}
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i data-feather="calendar" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+            <h4 class="text-muted">No Events Yet</h4>
+            <p class="text-muted">Check back later for fundraising events!</p>
+        </div>
+        {% endif %}
     </div>
-    {% endfor %}
+
+    <!-- Active Events Tab -->
+    <div class="tab-pane fade" id="active-events" role="tabpanel">
+        {% if active_events %}
+        <div class="row g-4">
+            {% for event in active_events %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <h5 class="card-title">{{ event.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="truck" class="me-1"></i>
+                                {{ event.food_truck.name }}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="calendar" class="me-1"></i>
+                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </p>
+                            <p class="text-muted small">
+                                <i data-feather="map-pin" class="me-1"></i>
+                                {{ event.location }}
+                            </p>
+                        </div>
+                        
+                        {% if event.description %}
+                        <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <div class="progress mb-2">
+                                <div class="progress-bar {{ 'bg-success' if event.is_goal_met() else 'bg-warning' }}" 
+                                     role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                    {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} raised</small>
+                                <small class="text-muted">Goal: ${{ "%.2f"|format(event.pledge_goal) }}</small>
+                            </div>
+                            
+                            <small class="text-muted">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }}</small>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary">
+                                    <i data-feather="heart" class="me-2"></i>
+                                    Support This Event
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i data-feather="clock" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+            <h4 class="text-muted">No Active Events</h4>
+            <p class="text-muted">No events are currently accepting pledges.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Completed Events Tab -->
+    <div class="tab-pane fade" id="completed-events" role="tabpanel">
+        {% if completed_events %}
+        <div class="row g-4">
+            {% for event in completed_events %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header bg-success text-white">
+                        <i data-feather="check-circle" class="me-2"></i>
+                        Successfully Completed!
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <h5 class="card-title">{{ event.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="truck" class="me-1"></i>
+                                {{ event.food_truck.name }}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="calendar" class="me-1"></i>
+                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </p>
+                            <p class="text-muted small">
+                                <i data-feather="map-pin" class="me-1"></i>
+                                {{ event.location }}
+                            </p>
+                        </div>
+                        
+                        {% if event.description %}
+                        <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <div class="progress mb-2">
+                                <div class="progress-bar bg-success" 
+                                     role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                    {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <small class="text-success">${{ "%.2f"|format(event.current_pledges) }} raised</small>
+                                <small class="text-muted">Goal: ${{ "%.2f"|format(event.pledge_goal) }}</small>
+                            </div>
+                            
+                            <small class="text-success">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }} - Event successful!</small>
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-success">
+                                    <i data-feather="eye" class="me-2"></i>
+                                    View Results
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i data-feather="check-circle" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+            <h4 class="text-muted">No Completed Events</h4>
+            <p class="text-muted">No events have been successfully funded yet.</p>
+        </div>
+        {% endif %}
+    </div>
 </div>
 
 <!-- Call to Action for Organizers -->
@@ -123,28 +288,21 @@
     </div>
 </div>
 
-{% else %}
-<!-- Empty State -->
-<div class="text-center py-5">
-    <i data-feather="calendar" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
-    <h3 class="text-muted">No Active Events</h3>
-    <p class="text-muted">There are currently no food truck events seeking funding. Check back soon!</p>
-    
-    <div class="mt-4">
-        <a href="{{ url_for('organizer_login') }}" class="btn btn-primary">
-            <i data-feather="plus-circle" class="me-2"></i>
-            Create the First Event
-        </a>
-    </div>
-</div>
-{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
-// Auto-refresh page every 30 seconds to show updated progress
-setTimeout(function() {
-    location.reload();
-}, 30000);
+// Initialize feather icons when tab content is shown
+document.addEventListener('DOMContentLoaded', function() {
+    feather.replace();
+    
+    // Replace icons when tabs are switched
+    var tabButtons = document.querySelectorAll('button[data-bs-toggle="pill"]');
+    tabButtons.forEach(function(button) {
+        button.addEventListener('shown.bs.tab', function() {
+            feather.replace();
+        });
+    });
+});
 </script>
 {% endblock %}
