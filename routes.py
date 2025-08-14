@@ -434,3 +434,29 @@ def not_found(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+# Setup route for production deployment
+@app.route('/setup-admin-secret-xyz123')
+def setup_admin():
+    """One-time setup route to create admin user in production"""
+    try:
+        # Check if admin already exists
+        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        
+        if admin:
+            # Update existing admin password
+            admin.password_hash = generate_password_hash('password')
+            db.session.commit()
+            return "Admin user updated successfully! You can now login with truckstopsla@gmail.com / password"
+        else:
+            # Create new admin
+            new_admin = Admin(
+                username='truckstopsla@gmail.com',
+                password_hash=generate_password_hash('password')
+            )
+            db.session.add(new_admin)
+            db.session.commit()
+            return "Admin user created successfully! You can now login with truckstopsla@gmail.com / password"
+            
+    except Exception as e:
+        return f"Error creating admin: {str(e)}"
