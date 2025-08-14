@@ -142,7 +142,13 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Stripe
-    const stripe = Stripe('{{ config.STRIPE_PUBLISHABLE_KEY or "pk_test_..." }}');
+    {% if config.STRIPE_PUBLISHABLE_KEY %}
+    const stripe = Stripe('{{ config.STRIPE_PUBLISHABLE_KEY }}');
+    {% else %}
+    // Stripe not properly configured - show error
+    document.getElementById('payment-errors').innerHTML = '<div class="alert alert-danger">Stripe not configured properly</div>';
+    return;
+    {% endif %}
     let elements;
     let paymentElement;
     

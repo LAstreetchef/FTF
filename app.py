@@ -1,5 +1,6 @@
 import os
 import logging
+import stripe
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
@@ -34,6 +35,10 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = os.environ.get('GMAIL_USERNAME', 'truckstopsla@gmail.com')
 app.config['MAIL_PASSWORD'] = os.environ.get('GMAIL_PASSWORD', 'your-app-password')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('GMAIL_USERNAME', 'truckstopsla@gmail.com')
+
+# Configure Stripe
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY')
 
 # Initialize extensions
 db.init_app(app)
