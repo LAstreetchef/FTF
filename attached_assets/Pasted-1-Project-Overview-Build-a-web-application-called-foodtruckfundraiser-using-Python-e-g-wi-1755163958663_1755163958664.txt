@@ -1,0 +1,55 @@
+1. **Project Overview**: Build a web application called "foodtruckfundraiser" using Python (e.g., with Flask or Django framework) that allows event organizers to crowdsource funding for food trucks at events via pledges for meal e-tickets. The app must integrate Stripe for payments (in test mode) and use existing Gmail credentials for any email notifications (do not use SendGrid). Ensure the app runs in a Replit environment.
+
+2. **Database Setup**: Use a suitable database like SQLite or Replit's built-in database to store:
+   - Trucks: Name, menus (items with preset prices), sales goal (minimum pledges required for attendance).
+   - Events: Organizer details, selected truck, menu, pledge goal (based on truck's sales goal), % markup on menu prices, current pledges total, status (e.g., pending, funded, completed).
+   - Pledges: Email, credit card token (via Stripe), amount pledged, associated event.
+   - Admins: Predefined admin username "truckstopsla@gmail.com" and password "password".
+
+3. **Admin Panel**:
+   - Create a login-protected section accessible only with the predefined username/password.
+   - Features:
+     - Add/edit/delete food trucks, including their menus (item names and preset prices) and sales goal.
+     - View all events, approve events once goals are met, and trigger card charges via Stripe.
+     - Note: Event organizer payments after completion will be handled manually outside the app for now.
+
+4. **Event Creation by Organizers**:
+   - Allow event organizers to create an account or use simple authentication (e.g., email-based).
+   - When creating an event:
+     - Select a food truck from the available list (populated from admin inputs).
+     - Select menu items from the truck's menu.
+     - Set a % markup on the food truck's preset pricing (this markup difference becomes the event's profit).
+     - The pledge goal is automatically set based on the truck's sales goal defined in the admin panel.
+     - Provide event details like name, date, location, description.
+
+5. **Public Events Page**:
+   - Create a public-facing page listing all active events, shareable on social media.
+   - For each event, display details: Truck, menu with marked-up prices, current pledges progress toward goal, e-ticket options.
+   - Enable easy pledging without requiring an account:
+     - Users enter only email and credit card details.
+     - Use Stripe to tokenize the card (do not charge immediately).
+     - Store the pledge (token, email, amount) linked to the event.
+     - Pledges are for meal e-tickets redeemable at the event.
+
+6. **Pledge Processing and Funding**:
+   - Track pledges in real-time; update event progress.
+   - Once the pledge total meets or exceeds the goal:
+     - Notify admin for approval (via email using Gmail credentials).
+     - Upon admin approval, charge all pledged cards via Stripe.
+     - If goal not met by event deadline, cancel pledges (no charges).
+   - E-tickets: Send confirmation emails with e-ticket details upon successful charge.
+
+7. **Integrations**:
+   - Stripe: Use test mode with existing credentials for card tokenization and charging.
+   - Email: Use existing Gmail credentials for notifications (e.g., event creation, goal met, approvals, e-tickets).
+   - No external services like SendGrid.
+
+8. **Security and Best Practices**:
+   - Handle sensitive data securely (e.g., never store full card details; use Stripe tokens).
+   - Implement basic authentication for admin and organizers.
+   - Ensure the app is responsive and user-friendly for mobile sharing/pledging.
+
+9. **Deployment in Replit**:
+   - Structure the code with clear files (e.g., app.py for main app, models.py for database, templates for HTML).
+   - Use Replit's web server to host the app.
+   - Test thoroughly: Create sample trucks/menus, events, pledges, and simulate goal achievement/charging.
