@@ -25,14 +25,25 @@ def admin_login():
         username = request.form['username']
         password = request.form['password']
         
+        # Debug logging
+        logging.debug(f"Admin login attempt for username: {username}")
+        
         admin = Admin.query.filter_by(username=username).first()
-        if admin and check_password_hash(admin.password_hash, password):
-            session['admin_id'] = admin.id
-            session['user_type'] = 'admin'
-            flash('Successfully logged in as admin', 'success')
-            return redirect(url_for('admin_dashboard'))
-        else:
-            flash('Invalid credentials', 'error')
+        logging.debug(f"Admin found in database: {admin is not None}")
+        
+        if admin:
+            password_valid = check_password_hash(admin.password_hash, password)
+            logging.debug(f"Password validation result: {password_valid}")
+            
+            if password_valid:
+                session['admin_id'] = admin.id
+                session['user_type'] = 'admin'
+                logging.debug(f"Admin logged in successfully, session set with admin_id: {admin.id}")
+                flash('Successfully logged in as admin', 'success')
+                return redirect(url_for('admin_dashboard'))
+        
+        logging.debug("Login failed - invalid credentials")
+        flash('Invalid credentials', 'error')
     
     return render_template('admin/login.html')
 
@@ -434,6 +445,29 @@ def not_found(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+# Debug route to test admin login
+@app.route('/debug-admin-login')
+def debug_admin_login():
+    """Debug route to test admin credentials"""
+    try:
+        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        if admin:
+            password_test = check_password_hash(admin.password_hash, 'password')
+            return f"""
+            <h3>Admin Debug Info</h3>
+            <p><strong>Username:</strong> {admin.username}</p>
+            <p><strong>ID:</strong> {admin.id}</p>
+            <p><strong>Password Hash (first 30 chars):</strong> {admin.password_hash[:30]}...</p>
+            <p><strong>Password 'password' test:</strong> {'✓ PASS' if password_test else '✗ FAIL'}</p>
+            <hr>
+            <p>Try logging in with: truckstopsla@gmail.com / password</p>
+            <p><a href="/admin/login">Go to Admin Login</a></p>
+            """
+        else:
+            return "❌ No admin user found in database"
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
 
 # Setup route for production deployment
 @app.route('/setup-admin-secret-xyz123')
