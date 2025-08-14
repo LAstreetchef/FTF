@@ -167,8 +167,8 @@ def admin_approve_event(event_id):
         pledges = Pledge.query.filter_by(event_id=event_id, status='pending').all()
         
         for pledge in pledges:
-            if pledge.stripe_token:
-                success = charge_stripe_payment(pledge.stripe_token, pledge.amount, f"Food Truck Event: {event.name}")
+            if pledge.stripe_payment_intent_id:
+                success = charge_stripe_payment(pledge.stripe_payment_intent_id, pledge.amount, f"Food Truck Event: {event.name}")
                 if success:
                     pledge.status = 'charged'
                     pledge.charged_at = datetime.utcnow()
