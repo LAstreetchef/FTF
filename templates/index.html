@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Food Truck Fundraiser - Home{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="jumbotron bg-primary text-white rounded p-5 mb-5">
+            <div class="container">
+                <h1 class="display-4">
+                    <i data-feather="truck" class="me-3"></i>
+                    Food Truck Fundraiser
+                </h1>
+                <p class="lead">Bringing communities together through crowdfunded food truck events. Support local events and enjoy amazing food!</p>
+                <hr class="my-4">
+                <p>Organizers can create events, communities can pledge for food tickets, and everyone wins when goals are met.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-light btn-lg" href="{{ url_for('events_list') }}" role="button">
+                        <i data-feather="calendar" class="me-2"></i>
+                        View Events
+                    </a>
+                    <a class="btn btn-outline-light btn-lg" href="{{ url_for('organizer_login') }}" role="button">
+                        <i data-feather="plus-circle" class="me-2"></i>
+                        Create Event
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-4">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="user-plus" class="text-primary mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5 class="card-title">1. Create an Event</h5>
+                        <p class="card-text">Event organizers select a food truck, set menu items with markup pricing, and create their fundraising event.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="heart" class="text-success mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5 class="card-title">2. Community Pledges</h5>
+                        <p class="card-text">Community members pledge money for meal e-tickets. Payments are only charged if the funding goal is met.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="check-circle" class="text-warning mb-3" style="width: 48px; height: 48px;"></i>
+                        <h5 class="card-title">3. Event Happens</h5>
+                        <p class="card-text">When goals are met, pledges are charged, e-tickets are sent, and the food truck attends the event!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Events -->
+{% if recent_events %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4">Recent Events</h2>
+        <div class="row g-4">
+            {% for event in recent_events %}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i data-feather="truck" class="me-1"></i>{{ event.food_truck.name }}
+                            </small><br>
+                            <small class="text-muted">
+                                <i data-feather="calendar" class="me-1"></i>{{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small><br>
+                            <small class="text-muted">
+                                <i data-feather="map-pin" class="me-1"></i>{{ event.location }}
+                            </small>
+                        </p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress mb-2">
+                            <div class="progress-bar" role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} of ${{ "%.2f"|format(event.pledge_goal) }} goal</small>
+                        
+                        <div class="mt-3">
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary btn-sm">
+                                <i data-feather="eye" class="me-1"></i>
+                                View Details
+                            </a>
+                            {% if event.status == 'pending' or event.status == 'funded' %}
+                            <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' }}">
+                                {{ event.status.title() }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('events_list') }}" class="btn btn-outline-primary">
+                <i data-feather="arrow-right" class="me-1"></i>
+                View All Events
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Call to Action -->
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-dark text-white">
+            <div class="card-body text-center p-5">
+                <h3>Ready to Get Started?</h3>
+                <p class="lead">Whether you're organizing an event or looking to support your community, we're here to help!</p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('organizer_login') }}" class="btn btn-primary btn-lg">
+                        <i data-feather="user-plus" class="me-2"></i>
+                        Become an Organizer
+                    </a>
+                    <a href="{{ url_for('events_list') }}" class="btn btn-outline-light btn-lg">
+                        <i data-feather="search" class="me-2"></i>
+                        Find Events to Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

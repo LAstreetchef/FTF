@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Pledge Successful - {{ pledge.event.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Success Header -->
+        <div class="text-center mb-4">
+            <div class="mb-3">
+                <i data-feather="check-circle" class="text-success" style="width: 64px; height: 64px;"></i>
+            </div>
+            <h1 class="text-success">Pledge Successful!</h1>
+            <p class="lead">Thank you for supporting this food truck event</p>
+        </div>
+        
+        <!-- Pledge Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="info" class="me-2"></i>
+                    Your Pledge Details
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <strong>Event:</strong><br>
+                        {{ pledge.event.name }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Pledge Amount:</strong><br>
+                        ${{ "%.2f"|format(pledge.amount) }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Email:</strong><br>
+                        {{ pledge.email }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Event Date:</strong><br>
+                        {{ pledge.event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Location:</strong><br>
+                        {{ pledge.event.location }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Food Truck:</strong><br>
+                        {{ pledge.event.food_truck.name }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- What Happens Next -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="clock" class="me-2"></i>
+                    What Happens Next?
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="users" class="text-primary mb-2" style="width: 32px; height: 32px;"></i>
+                            <h6>Community Support</h6>
+                            <p class="small text-muted">Other community members continue to pledge until the funding goal is reached.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="credit-card" class="text-warning mb-2" style="width: 32px; height: 32px;"></i>
+                            <h6>Payment Processing</h6>
+                            <p class="small text-muted">If the goal is met, your payment method will be charged and the event will be approved.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="mail" class="text-success mb-2" style="width: 32px; height: 32px;"></i>
+                            <h6>E-Ticket Delivery</h6>
+                            <p class="small text-muted">You'll receive your meal e-ticket via email to redeem at the food truck.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Important Notice -->
+        <div class="alert alert-info">
+            <i data-feather="info" class="me-2"></i>
+            <strong>Important:</strong> Your payment method will only be charged if this event reaches its funding goal. 
+            If the goal isn't met by the event deadline, your pledge will be cancelled and you won't be charged.
+        </div>
+        
+        <!-- Current Event Progress -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Current Event Progress</h5>
+            </div>
+            <div class="card-body">
+                <div class="progress mb-3" style="height: 20px;">
+                    <div class="progress-bar {{ 'bg-success' if pledge.event.is_goal_met() else 'bg-warning' }}" 
+                         role="progressbar" style="width: {{ pledge.event.get_progress_percentage() }}%">
+                        {{ "%.0f"|format(pledge.event.get_progress_percentage()) }}%
+                    </div>
+                </div>
+                
+                <div class="row text-center g-3">
+                    <div class="col-4">
+                        <h5 class="text-primary mb-0">${{ "%.2f"|format(pledge.event.current_pledges) }}</h5>
+                        <small class="text-muted">Total Raised</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-muted mb-0">${{ "%.2f"|format(pledge.event.pledge_goal) }}</h5>
+                        <small class="text-muted">Goal</small>
+                    </div>
+                    <div class="col-4">
+                        <h5 class="text-info mb-0">{{ pledge.event.pledges|length }}</h5>
+                        <small class="text-muted">Supporters</small>
+                    </div>
+                </div>
+                
+                {% if not pledge.event.is_goal_met() %}
+                <div class="text-center mt-3">
+                    <p class="mb-2">
+                        <strong>${{ "%.2f"|format(pledge.event.pledge_goal - pledge.event.current_pledges) }}</strong> 
+                        still needed to reach the goal
+                    </p>
+                </div>
+                {% else %}
+                <div class="alert alert-success mt-3 mb-0">
+                    <i data-feather="check-circle" class="me-2"></i>
+                    <strong>Goal Reached!</strong> This event is now funded and awaiting admin approval.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Share Event -->
+        <div class="card mb-4">
+            <div class="card-body text-center">
+                <h5>Help This Event Succeed!</h5>
+                <p class="text-muted">Share this event with friends and family to help it reach its funding goal.</p>
+                
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <button class="btn btn-primary" onclick="shareEvent()">
+                        <i data-feather="share-2" class="me-2"></i>
+                        Share Event
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="copyEventLink()">
+                        <i data-feather="link" class="me-2"></i>
+                        Copy Link
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a href="{{ url_for('event_detail', event_id=pledge.event.id) }}" class="btn btn-outline-primary">
+                <i data-feather="arrow-left" class="me-2"></i>
+                Back to Event
+            </a>
+            <a href="{{ url_for('events_list') }}" class="btn btn-outline-secondary">
+                <i data-feather="calendar" class="me-2"></i>
+                View Other Events
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i data-feather="home" class="me-2"></i>
+                Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function shareEvent() {
+    const eventUrl = '{{ url_for("event_detail", event_id=pledge.event.id, _external=True) }}';
+    const eventName = '{{ pledge.event.name }}';
+    const eventDate = '{{ pledge.event.date.strftime("%B %d, %Y") }}';
+    
+    const shareText = `Support "${eventName}" food truck event on ${eventDate}! Help us reach our funding goal.`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: eventName,
+            text: shareText,
+            url: eventUrl
+        }).catch(console.error);
+    } else {
+        copyEventLink();
+    }
+}
+
+function copyEventLink() {
+    const eventUrl = '{{ url_for("event_detail", event_id=pledge.event.id, _external=True) }}';
+    
+    navigator.clipboard.writeText(eventUrl).then(function() {
+        // Show temporary success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="check" class="me-2"></i>Copied!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+            feather.replace();
+        }, 2000);
+        
+        feather.replace();
+    }).catch(function() {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = eventUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        alert('Event link copied to clipboard!');
+    });
+}
+
+// Auto-refresh to show updated progress
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}

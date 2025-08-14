@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Organizer Dashboard - Food Truck Fundraiser{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i data-feather="user" class="me-2"></i>
+        Welcome, {{ organizer.name }}
+    </h1>
+    <a href="{{ url_for('organizer_create_event') }}" class="btn btn-primary">
+        <i data-feather="plus" class="me-2"></i>
+        Create New Event
+    </a>
+</div>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Events</h5>
+                        <h2 class="mb-0">{{ events|length }}</h2>
+                    </div>
+                    <div>
+                        <i data-feather="calendar" style="width: 48px; height: 48px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Funded Events</h5>
+                        <h2 class="mb-0">{{ events|selectattr('status', 'equalto', 'funded')|list|length + events|selectattr('status', 'equalto', 'approved')|list|length }}</h2>
+                    </div>
+                    <div>
+                        <i data-feather="check-circle" style="width: 48px; height: 48px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card bg-warning text-dark">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Pending Events</h5>
+                        <h2 class="mb-0">{{ events|selectattr('status', 'equalto', 'pending')|list|length }}</h2>
+                    </div>
+                    <div>
+                        <i data-feather="clock" style="width: 48px; height: 48px;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events List -->
+{% if events %}
+<div class="row">
+    <div class="col-12">
+        <h3>Your Events</h3>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Event Name</th>
+                        <th>Food Truck</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Progress</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>
+                            <strong>{{ event.name }}</strong>
+                            {% if event.description %}
+                            <br><small class="text-muted">{{ event.description[:50] }}{% if event.description|length > 50 %}...{% endif %}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.food_truck.name }}</td>
+                        <td>
+                            {{ event.date.strftime('%m/%d/%Y') }}<br>
+                            <small class="text-muted">{{ event.date.strftime('%I:%M %p') }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' if event.status == 'pending' else 'primary' if event.status == 'approved' else 'secondary' }}">
+                                {{ event.status.title() }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="progress mb-1" style="width: 120px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                    {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                                </div>
+                            </div>
+                            <small class="text-muted">
+                                ${{ "%.2f"|format(event.current_pledges) }} / ${{ "%.2f"|format(event.pledge_goal) }}
+                            </small>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary btn-sm">
+                                <i data-feather="eye" class="me-1"></i>
+                                View
+                            </a>
+                            {% if event.status in ['pending', 'funded'] %}
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-success btn-sm">
+                                <i data-feather="share-2" class="me-1"></i>
+                                Share
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i data-feather="calendar" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
+    <h3 class="text-muted">No Events Yet</h3>
+    <p class="text-muted">Create your first event to start raising funds for food truck attendance.</p>
+    <a href="{{ url_for('organizer_create_event') }}" class="btn btn-primary">
+        <i data-feather="plus" class="me-2"></i>
+        Create Your First Event
+    </a>
+</div>
+{% endif %}
+
+<!-- Tips Section -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card bg-dark text-white">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i data-feather="lightbulb" class="me-2"></i>
+                    Tips for Successful Events
+                </h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>Share Widely</h6>
+                        <p class="small">Share your event on social media, with friends, and in your community to reach your funding goal faster.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Choose Popular Trucks</h6>
+                        <p class="small">Select food trucks with appealing menus and good reputations to attract more pledges.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Set Reasonable Markup</h6>
+                        <p class="small">Keep markup reasonable (10-25%) to encourage pledging while still generating profit for your event.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Create Event - Food Truck Fundraiser{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="plus-circle" class="me-2"></i>
+                    Create New Event
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <!-- Basic Event Info -->
+                    <div class="mb-4">
+                        <h5>Event Details</h5>
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Event Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" 
+                                      placeholder="Describe your event, what it's for, and why people should support it..."></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="date" class="form-label">Event Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="date" name="date" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       placeholder="Event venue or address" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Food Truck Selection -->
+                    <div class="mb-4">
+                        <h5>Food Truck Selection</h5>
+                        
+                        <div class="mb-3">
+                            <label for="food_truck_id" class="form-label">Choose Food Truck</label>
+                            <select class="form-select" id="food_truck_id" name="food_truck_id" required>
+                                <option value="">Select a food truck...</option>
+                                {% for truck in trucks %}
+                                <option value="{{ truck.id }}" data-goal="{{ truck.sales_goal }}">
+                                    {{ truck.name }} (Goal: ${{ "%.2f"|format(truck.sales_goal) }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div id="truck-details" class="d-none">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6>Selected Truck Details</h6>
+                                    <p id="truck-description"></p>
+                                    <p><strong>Sales Goal:</strong> $<span id="truck-goal"></span></p>
+                                    <p class="text-muted small">This will be your event's funding goal</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Menu Selection -->
+                    <div class="mb-4">
+                        <h5>Menu Selection</h5>
+                        
+                        <div class="mb-3">
+                            <label for="markup_percentage" class="form-label">Markup Percentage</label>
+                            <div class="input-group">
+                                <input type="number" step="0.1" min="0" max="100" class="form-control" 
+                                       id="markup_percentage" name="markup_percentage" value="15" required>
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="form-text">The percentage you'll add to the truck's base prices. This becomes your event's profit.</div>
+                        </div>
+                        
+                        <div id="menu-selection" class="d-none">
+                            <label class="form-label">Select Menu Items</label>
+                            <div class="form-text mb-3">Choose which items from the truck's menu you want to offer at your event.</div>
+                            <div id="menu-items-list">
+                                <!-- Menu items will be loaded here via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit -->
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-feather="calendar-plus" class="me-2"></i>
+                            Create Event
+                        </button>
+                        <a href="{{ url_for('organizer_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i data-feather="help-circle" class="me-2"></i>
+                    How It Works
+                </h5>
+                
+                <div class="d-flex mb-3">
+                    <div class="me-3">
+                        <span class="badge bg-primary rounded-pill">1</span>
+                    </div>
+                    <div>
+                        <h6>Choose Your Details</h6>
+                        <p class="small text-muted">Set up your event details, date, and location.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-3">
+                    <div class="me-3">
+                        <span class="badge bg-primary rounded-pill">2</span>
+                    </div>
+                    <div>
+                        <h6>Select Food Truck</h6>
+                        <p class="small text-muted">Pick from available trucks. Their sales goal becomes your funding target.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-3">
+                    <div class="me-3">
+                        <span class="badge bg-primary rounded-pill">3</span>
+                    </div>
+                    <div>
+                        <h6>Set Your Markup</h6>
+                        <p class="small text-muted">Add a percentage to truck prices. This markup is your event's profit.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex">
+                    <div class="me-3">
+                        <span class="badge bg-primary rounded-pill">4</span>
+                    </div>
+                    <div>
+                        <h6>Share & Raise Funds</h6>
+                        <p class="small text-muted">Share your event to collect pledges. When you hit the goal, cards are charged!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const truckSelect = document.getElementById('food_truck_id');
+    const truckDetails = document.getElementById('truck-details');
+    const truckDescription = document.getElementById('truck-description');
+    const truckGoal = document.getElementById('truck-goal');
+    const menuSelection = document.getElementById('menu-selection');
+    const menuItemsList = document.getElementById('menu-items-list');
+    const markupInput = document.getElementById('markup_percentage');
+    
+    // Handle truck selection
+    truckSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (this.value) {
+            // Show truck details
+            truckDetails.classList.remove('d-none');
+            truckGoal.textContent = selectedOption.dataset.goal;
+            
+            // Load menu items
+            loadMenuItems(this.value);
+        } else {
+            truckDetails.classList.add('d-none');
+            menuSelection.classList.add('d-none');
+        }
+    });
+    
+    // Handle markup changes
+    markupInput.addEventListener('input', updatePricing);
+    
+    function loadMenuItems(truckId) {
+        fetch(`/api/truck/${truckId}/menu`)
+            .then(response => response.json())
+            .then(items => {
+                menuItemsList.innerHTML = '';
+                
+                if (items.length === 0) {
+                    menuItemsList.innerHTML = '<p class="text-muted">No menu items available for this truck.</p>';
+                    return;
+                }
+                
+                items.forEach((item, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'form-check mb-2 p-3 border rounded';
+                    itemDiv.innerHTML = `
+                        <input class="form-check-input" type="checkbox" name="selected_items" value="${index}" id="item_${index}">
+                        <label class="form-check-label w-100" for="item_${index}">
+                            <div class="d-flex justify-content-between">
+                                <span><strong>${item.name}</strong></span>
+                                <span>
+                                    <span class="text-muted">$${item.price.toFixed(2)}</span>
+                                    →
+                                    <span class="text-primary marked-up-price">$${(item.price * 1.15).toFixed(2)}</span>
+                                </span>
+                            </div>
+                        </label>
+                    `;
+                    menuItemsList.appendChild(itemDiv);
+                });
+                
+                menuSelection.classList.remove('d-none');
+                updatePricing();
+            })
+            .catch(error => {
+                console.error('Error loading menu items:', error);
+                menuItemsList.innerHTML = '<p class="text-danger">Error loading menu items.</p>';
+            });
+    }
+    
+    function updatePricing() {
+        const markup = parseFloat(markupInput.value) || 0;
+        const markedUpPrices = document.querySelectorAll('.marked-up-price');
+        
+        markedUpPrices.forEach(priceElement => {
+            const itemDiv = priceElement.closest('.form-check');
+            const originalPriceText = itemDiv.querySelector('.text-muted').textContent;
+            const originalPrice = parseFloat(originalPriceText.replace('$', ''));
+            const newPrice = originalPrice * (1 + markup / 100);
+            priceElement.textContent = `$${newPrice.toFixed(2)}`;
+        });
+    }
+});
+</script>
+{% endblock %}

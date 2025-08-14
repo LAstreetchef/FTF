@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Support {{ event.name }} - Make a Pledge{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Event Summary -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="card-title">{{ event.name }}</h4>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">Food Truck:</small><br>
+                        <strong>{{ event.food_truck.name }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Event Date:</small><br>
+                        <strong>{{ event.date.strftime('%B %d, %Y at %I:%M %p') }}</strong>
+                    </div>
+                </div>
+                
+                <!-- Progress -->
+                <div class="mt-3">
+                    <div class="progress mb-2">
+                        <div class="progress-bar" role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                            {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} raised</small>
+                        <small class="text-muted">Goal: ${{ "%.2f"|format(event.pledge_goal) }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pledge Form -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="heart" class="me-2"></i>
+                    Make Your Pledge
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Important Notice -->
+                <div class="alert alert-info">
+                    <i data-feather="info" class="me-2"></i>
+                    <strong>Important:</strong> Your payment will only be charged if this event reaches its funding goal. 
+                    If the goal isn't met, your pledge will be cancelled and you won't be charged.
+                </div>
+                
+                <form method="POST" id="pledge-form">
+                    <!-- Contact Info -->
+                    <div class="mb-4">
+                        <h5>Contact Information</h5>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                            <div class="form-text">We'll send your e-ticket to this email if the event is funded.</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pledge Amount -->
+                    <div class="mb-4">
+                        <h5>Pledge Amount</h5>
+                        <div class="mb-3">
+                            <label for="amount" class="form-label">How much would you like to pledge?</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" min="5" class="form-control" id="amount" name="amount" required>
+                            </div>
+                            <div class="form-text">Minimum pledge: $5.00</div>
+                        </div>
+                        
+                        <!-- Quick Amount Buttons -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(10)">$10</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(15)">$15</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(20)">$20</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(25)">$25</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(50)">$50</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Menu Reference -->
+                    {% set menu_items = event.get_selected_menu_items() %}
+                    {% if menu_items %}
+                    <div class="mb-4">
+                        <h5>Menu Reference</h5>
+                        <p class="small text-muted">Use this as a guide for your pledge amount:</p>
+                        <div class="row">
+                            {% for item in menu_items[:6] %}
+                            <div class="col-md-6 mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <span class="small">{{ item.name }}</span>
+                                    <span class="small text-primary">${{ "%.2f"|format(item.marked_up_price) }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Payment Info -->
+                    <div class="mb-4">
+                        <h5>Payment Information</h5>
+                        <div class="alert alert-warning">
+                            <i data-feather="shield" class="me-2"></i>
+                            <strong>Secure Payment:</strong> Payment details are processed securely by Stripe. 
+                            We never store your full card information.
+                        </div>
+                        
+                        <!-- Stripe Elements will be inserted here -->
+                        <div id="payment-element" class="mb-3">
+                            <!-- Stripe Elements will create form elements here -->
+                        </div>
+                        
+                        <div id="payment-errors" class="text-danger" role="alert"></div>
+                    </div>
+                    
+                    <!-- Submit -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-button">
+                            <i data-feather="heart" class="me-2"></i>
+                            <span id="button-text">Pledge <span id="button-amount">$0</span></span>
+                        </button>
+                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-secondary">
+                            Back to Event
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Stripe
+    const stripe = Stripe('{{ config.STRIPE_PUBLISHABLE_KEY or "pk_test_..." }}');
+    let elements;
+    let paymentElement;
+    
+    // Initialize payment form
+    initializePaymentForm();
+    
+    // Amount input handling
+    const amountInput = document.getElementById('amount');
+    const buttonAmount = document.getElementById('button-amount');
+    
+    amountInput.addEventListener('input', function() {
+        const amount = parseFloat(this.value) || 0;
+        buttonAmount.textContent = `$${amount.toFixed(2)}`;
+    });
+    
+    // Form submission
+    const form = document.getElementById('pledge-form');
+    form.addEventListener('submit', handleSubmit);
+    
+    async function initializePaymentForm() {
+        try {
+            // For demo purposes, we'll use a simple card element
+            // In production, you'd create a PaymentIntent on the server first
+            elements = stripe.elements();
+            
+            const cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#424770',
+                        '::placeholder': {
+                            color: '#aab7c4',
+                        },
+                    },
+                },
+            });
+            
+            cardElement.mount('#payment-element');
+            paymentElement = cardElement;
+            
+            cardElement.on('change', function(event) {
+                displayError(event.error);
+            });
+            
+        } catch (error) {
+            console.error('Error initializing payment form:', error);
+            displayError({message: 'Error loading payment form. Please refresh and try again.'});
+        }
+    }
+    
+    async function handleSubmit(event) {
+        event.preventDefault();
+        
+        const submitButton = document.getElementById('submit-button');
+        const buttonText = document.getElementById('button-text');
+        
+        // Disable submit button
+        submitButton.disabled = true;
+        buttonText.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+        
+        try {
+            // Create token
+            const {token, error} = await stripe.createToken(paymentElement);
+            
+            if (error) {
+                displayError(error);
+                resetButton();
+                return;
+            }
+            
+            // Add token to form
+            const tokenInput = document.createElement('input');
+            tokenInput.type = 'hidden';
+            tokenInput.name = 'stripe_token';
+            tokenInput.value = token.id;
+            form.appendChild(tokenInput);
+            
+            // Submit form
+            form.submit();
+            
+        } catch (error) {
+            console.error('Error processing payment:', error);
+            displayError({message: 'Error processing payment. Please try again.'});
+            resetButton();
+        }
+    }
+    
+    function displayError(error) {
+        const errorElement = document.getElementById('payment-errors');
+        if (error) {
+            errorElement.textContent = error.message;
+        } else {
+            errorElement.textContent = '';
+        }
+    }
+    
+    function resetButton() {
+        const submitButton = document.getElementById('submit-button');
+        const buttonText = document.getElementById('button-text');
+        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        
+        submitButton.disabled = false;
+        buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge $${amount.toFixed(2)}`;
+        feather.replace();
+    }
+});
+
+function setAmount(amount) {
+    document.getElementById('amount').value = amount;
+    document.getElementById('button-amount').textContent = `$${amount.toFixed(2)}`;
+}
+</script>
+{% endblock %}

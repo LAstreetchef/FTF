@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.name }} - Food Truck Event{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Event Details -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <!-- Event Header -->
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <h1 class="h2">{{ event.name }}</h1>
+                        <p class="text-muted mb-0">
+                            Organized by {{ event.organizer.name }}
+                        </p>
+                    </div>
+                    <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' if event.status == 'pending' else 'primary' }} fs-6">
+                        {{ event.status.title() }}
+                    </span>
+                </div>
+                
+                <!-- Event Info -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i data-feather="truck" class="me-2 text-primary"></i>
+                            <div>
+                                <strong>{{ event.food_truck.name }}</strong>
+                                {% if event.food_truck.description %}
+                                <br><small class="text-muted">{{ event.food_truck.description }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i data-feather="calendar" class="me-2 text-primary"></i>
+                            <div>
+                                <strong>{{ event.date.strftime('%B %d, %Y') }}</strong>
+                                <br><small class="text-muted">{{ event.date.strftime('%I:%M %p') }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i data-feather="map-pin" class="me-2 text-primary"></i>
+                            <div>
+                                <strong>{{ event.location }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex align-items-center">
+                            <i data-feather="users" class="me-2 text-primary"></i>
+                            <div>
+                                <strong>{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                {% if event.description %}
+                <div class="mb-4">
+                    <h5>About This Event</h5>
+                    <p>{{ event.description }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Menu -->
+                {% set menu_items = event.get_selected_menu_items() %}
+                {% if menu_items %}
+                <div class="mb-4">
+                    <h5>Menu & Pricing</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-end">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in menu_items %}
+                                <tr>
+                                    <td>{{ item.name }}</td>
+                                    <td class="text-end">
+                                        <strong>${{ "%.2f"|format(item.marked_up_price) }}</strong>
+                                        {% if item.original_price != item.marked_up_price %}
+                                        <br><small class="text-muted">Base: ${{ "%.2f"|format(item.original_price) }}</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- How It Works -->
+                <div class="mb-4">
+                    <h5>How Pledging Works</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i data-feather="heart" class="text-primary mb-2" style="width: 32px; height: 32px;"></i>
+                                <h6>Make a Pledge</h6>
+                                <small class="text-muted">Choose your amount and provide payment info</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i data-feather="target" class="text-warning mb-2" style="width: 32px; height: 32px;"></i>
+                                <h6>Goal is Met</h6>
+                                <small class="text-muted">Your card is only charged if the event gets funded</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i data-feather="mail" class="text-success mb-2" style="width: 32px; height: 32px;"></i>
+                                <h6>Get Your E-Ticket</h6>
+                                <small class="text-muted">Receive your meal ticket via email to redeem at the event</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Pledge Progress -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Funding Progress</h5>
+                
+                <!-- Progress Bar -->
+                <div class="progress mb-3" style="height: 20px;">
+                    <div class="progress-bar {{ 'bg-success' if event.is_goal_met() else 'bg-warning' }}" 
+                         role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                        {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                    </div>
+                </div>
+                
+                <!-- Stats -->
+                <div class="row text-center g-3 mb-3">
+                    <div class="col-6">
+                        <h4 class="text-primary mb-0">${{ "%.2f"|format(event.current_pledges) }}</h4>
+                        <small class="text-muted">Raised</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-muted mb-0">${{ "%.2f"|format(event.pledge_goal) }}</h4>
+                        <small class="text-muted">Goal</small>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="mb-2">
+                        <strong>${{ "%.2f"|format(event.pledge_goal - event.current_pledges) }}</strong> 
+                        needed to reach goal
+                    </p>
+                    
+                    {% if event.status in ['pending', 'funded'] %}
+                    <a href="{{ url_for('make_pledge', event_id=event.id) }}" class="btn btn-primary btn-lg w-100">
+                        <i data-feather="heart" class="me-2"></i>
+                        Support This Event
+                    </a>
+                    {% elif event.status == 'approved' %}
+                    <div class="alert alert-success">
+                        <i data-feather="check-circle" class="me-2"></i>
+                        Event funded and approved! Food truck confirmed.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-secondary">
+                        This event is no longer accepting pledges.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Social Sharing -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Share This Event</h5>
+                <p class="small text-muted">Help spread the word about this event!</p>
+                
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="shareEvent()">
+                        <i data-feather="share-2" class="me-2"></i>
+                        Share Event
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="copyLink()">
+                        <i data-feather="link" class="me-2"></i>
+                        Copy Link
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Organizer Info -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Event Organizer</h5>
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 48px; height: 48px;">
+                            <i data-feather="user" class="text-white"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h6 class="mb-0">{{ event.organizer.name }}</h6>
+                        <small class="text-muted">Event Organizer</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function shareEvent() {
+    if (navigator.share) {
+        navigator.share({
+            title: '{{ event.name }}',
+            text: 'Support this food truck event: {{ event.name }}',
+            url: window.location.href
+        });
+    } else {
+        copyLink();
+    }
+}
+
+function copyLink() {
+    navigator.clipboard.writeText(window.location.href).then(function() {
+        // Show temporary success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="check" class="me-2"></i>Copied!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+            feather.replace();
+        }, 2000);
+    });
+}
+
+// Auto-refresh every 30 seconds to show updated progress
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}

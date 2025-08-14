@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Organizer Registration' if register_mode else 'Organizer Login' }} - Food Truck Fundraiser{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="user" class="me-2"></i>
+                    {{ 'Create Organizer Account' if register_mode else 'Organizer Login' }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% if register_mode %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        {% if register_mode %}
+                        <div class="form-text">Use a secure password for your account.</div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i data-feather="{{ 'user-plus' if register_mode else 'log-in' }}" class="me-2"></i>
+                        {{ 'Create Account' if register_mode else 'Login' }}
+                    </button>
+                </form>
+                
+                <hr>
+                <div class="text-center">
+                    {% if register_mode %}
+                    <p class="mb-0">Already have an account?</p>
+                    <a href="{{ url_for('organizer_login') }}" class="btn btn-outline-primary">
+                        <i data-feather="log-in" class="me-2"></i>
+                        Login Instead
+                    </a>
+                    {% else %}
+                    <p class="mb-0">Don't have an account?</p>
+                    <a href="{{ url_for('organizer_register') }}" class="btn btn-outline-primary">
+                        <i data-feather="user-plus" class="me-2"></i>
+                        Create Account
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

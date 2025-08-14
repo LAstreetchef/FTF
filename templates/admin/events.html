@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Events - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i data-feather="calendar" class="me-2"></i>
+        Events Management
+    </h1>
+</div>
+
+{% if events %}
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Event Name</th>
+                <th>Food Truck</th>
+                <th>Organizer</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Goal Progress</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>
+                    <strong>{{ event.name }}</strong>
+                    {% if event.description %}
+                    <br><small class="text-muted">{{ event.description[:50] }}{% if event.description|length > 50 %}...{% endif %}</small>
+                    {% endif %}
+                </td>
+                <td>{{ event.food_truck.name }}</td>
+                <td>
+                    {{ event.organizer.name }}<br>
+                    <small class="text-muted">{{ event.organizer.email }}</small>
+                </td>
+                <td>{{ event.date.strftime('%m/%d/%Y<br>%I:%M %p')|safe }}</td>
+                <td>{{ event.location }}</td>
+                <td>
+                    <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' if event.status == 'pending' else 'primary' if event.status == 'approved' else 'secondary' }}">
+                        {{ event.status.title() }}
+                    </span>
+                </td>
+                <td>
+                    <div class="progress mb-1" style="width: 120px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                            {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        ${{ "%.2f"|format(event.current_pledges) }} / ${{ "%.2f"|format(event.pledge_goal) }}
+                    </small>
+                    <br>
+                    <small class="text-muted">
+                        {{ event.pledges|length }} pledge{{ 's' if event.pledges|length != 1 else '' }}
+                    </small>
+                </td>
+                <td>
+                    <div class="btn-group-vertical btn-group-sm">
+                        {% if event.status == 'funded' %}
+                        <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm" 
+                                    onclick="return confirm('Are you sure you want to approve this event and charge all pledges?')">
+                                <i data-feather="check" class="me-1"></i>
+                                Approve & Charge
+                            </button>
+                        </form>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i data-feather="eye" class="me-1"></i>
+                            View Public
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Events Statistics -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h3>Event Statistics</h3>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Pending</h5>
+                        <h3>{{ events|selectattr('status', 'equalto', 'pending')|list|length }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Funded</h5>
+                        <h3>{{ events|selectattr('status', 'equalto', 'funded')|list|length }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Approved</h5>
+                        <h3>{{ events|selectattr('status', 'equalto', 'approved')|list|length }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Completed</h5>
+                        <h3>{{ events|selectattr('status', 'equalto', 'completed')|list|length }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="text-center py-5">
+    <i data-feather="calendar" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
+    <h3 class="text-muted">No Events Yet</h3>
+    <p class="text-muted">Events will appear here as organizers create them.</p>
+</div>
+{% endif %}
+{% endblock %}
