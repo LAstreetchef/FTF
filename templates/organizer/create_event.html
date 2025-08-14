@@ -51,7 +51,10 @@
                             <select class="form-select" id="food_truck_id" name="food_truck_id" required>
                                 <option value="">Select a food truck...</option>
                                 {% for truck in trucks %}
-                                <option value="{{ truck.id }}" data-goal="{{ truck.sales_goal }}">
+                                <option value="{{ truck.id }}" 
+                                        data-goal="{{ truck.sales_goal }}"
+                                        data-description="{{ truck.description }}"
+                                        data-menu="{{ truck.menu_items|tojson|e }}">
                                     {{ truck.name }} (Goal: ${{ "%.2f"|format(truck.sales_goal) }})
                                 </option>
                                 {% endfor %}
@@ -177,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (this.value) {
             // Show truck details
             truckDetails.classList.remove('d-none');
+            truckDescription.textContent = selectedOption.dataset.description || 'No description available';
             truckGoal.textContent = selectedOption.dataset.goal;
             
             // Load menu items
@@ -191,42 +195,43 @@ document.addEventListener('DOMContentLoaded', function() {
     markupInput.addEventListener('input', updatePricing);
     
     function loadMenuItems(truckId) {
-        fetch(`/api/truck/${truckId}/menu`)
-            .then(response => response.json())
-            .then(items => {
-                menuItemsList.innerHTML = '';
-                
-                if (items.length === 0) {
-                    menuItemsList.innerHTML = '<p class="text-muted">No menu items available for this truck.</p>';
-                    return;
-                }
-                
-                items.forEach((item, index) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'form-check mb-2 p-3 border rounded';
-                    itemDiv.innerHTML = `
-                        <input class="form-check-input" type="checkbox" name="selected_items" value="${index}" id="item_${index}">
-                        <label class="form-check-label w-100" for="item_${index}">
-                            <div class="d-flex justify-content-between">
-                                <span><strong>${item.name}</strong></span>
-                                <span>
-                                    <span class="text-muted">$${item.price.toFixed(2)}</span>
-                                    →
-                                    <span class="text-primary marked-up-price">$${(item.price * 1.15).toFixed(2)}</span>
-                                </span>
-                            </div>
-                        </label>
-                    `;
-                    menuItemsList.appendChild(itemDiv);
-                });
-                
-                menuSelection.classList.remove('d-none');
-                updatePricing();
-            })
-            .catch(error => {
-                console.error('Error loading menu items:', error);
-                menuItemsList.innerHTML = '<p class="text-danger">Error loading menu items.</p>';
+        const selectedOption = truckSelect.options[truckSelect.selectedIndex];
+        const menuData = selectedOption.dataset.menu;
+        
+        try {
+            const items = JSON.parse(menuData);
+            menuItemsList.innerHTML = '';
+            
+            if (!items || items.length === 0) {
+                menuItemsList.innerHTML = '<p class="text-muted">No menu items available for this truck.</p>';
+                return;
+            }
+            
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'form-check mb-2 p-3 border rounded';
+                itemDiv.innerHTML = `
+                    <input class="form-check-input" type="checkbox" name="selected_items" value="${index}" id="item_${index}">
+                    <label class="form-check-label w-100" for="item_${index}">
+                        <div class="d-flex justify-content-between">
+                            <span><strong>${item.name}</strong></span>
+                            <span>
+                                <span class="text-muted">$${item.price.toFixed(2)}</span>
+                                →
+                                <span class="text-primary marked-up-price">$${(item.price * 1.15).toFixed(2)}</span>
+                            </span>
+                        </div>
+                    </label>
+                `;
+                menuItemsList.appendChild(itemDiv);
             });
+            
+            menuSelection.classList.remove('d-none');
+            updatePricing();
+        } catch (error) {
+            console.error('Error parsing menu data:', error);
+            menuItemsList.innerHTML = '<p class="text-danger">Error loading menu items.</p>';
+        }
     }
     
     function updatePricing() {
