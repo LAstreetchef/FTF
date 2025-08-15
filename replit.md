@@ -10,6 +10,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **2025-08-15**: Database integrity verification and admin system fixes
+  - Fixed admin login credentials for deployed environment with debug routes
+  - Updated pledge system to show menu-specific amounts instead of generic buttons
+  - Verified and corrected database integrity (pledge totals, status consistency)
+  - Fixed event status workflow to properly show "funded" events awaiting approval
+  - Generated missing ticket codes for all charged pledges
+
 - **2025-08-14**: Complete fundraising workflow implemented and tested
   - Fixed email confirmation system for pledges with Gmail SMTP
   - Successfully processed funded event with automatic payment charging
