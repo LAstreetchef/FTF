@@ -74,6 +74,73 @@ def admin_dashboard():
                          funded_events=funded_events,
                          recent_events=recent_events)
 
+@app.route('/debug-database-xyz123')
+def debug_database():
+    """Debug route to check database contents for troubleshooting"""
+    debug_info = {
+        'database_type': 'development' if 'dev' in str(db.engine.url) else 'production',
+        'database_url': str(db.engine.url).split('@')[1] if '@' in str(db.engine.url) else 'unknown',
+        'admin_count': Admin.query.count(),
+        'food_truck_count': FoodTruck.query.count(),
+        'event_count': Event.query.count(),
+        'pledge_count': Pledge.query.count()
+    }
+    
+    # Get admin users (without passwords)
+    admins = Admin.query.all()
+    admin_list = [{'id': a.id, 'username': a.username, 'created_at': a.created_at} for a in admins]
+    
+    # Get food trucks
+    trucks = FoodTruck.query.all()
+    truck_list = [{'id': t.id, 'name': t.name, 'description': t.description, 'sales_goal': t.sales_goal} for t in trucks]
+    
+    # Get events
+    events = Event.query.all()
+    event_list = [{'id': e.id, 'title': e.title, 'status': e.status, 'goal': e.goal, 'current_pledges': e.current_pledges} for e in events]
+    
+    return jsonify({
+        'debug_info': debug_info,
+        'admins': admin_list,
+        'food_trucks': truck_list,
+        'events': event_list
+    })
+
+@app.route('/setup-admin-secret-xyz123')
+def setup_admin():
+    """Setup admin user for production environment"""
+    try:
+        # Check if admin already exists
+        existing_admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        if existing_admin:
+            return jsonify({
+                'status': 'exists',
+                'message': 'Admin user already exists',
+                'admin_id': existing_admin.id
+            })
+        
+        # Create admin user
+        password_hash = generate_password_hash('password')
+        admin = Admin(
+            username='truckstopsla@gmail.com',
+            password_hash=password_hash
+        )
+        
+        db.session.add(admin)
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'created',
+            'message': 'Admin user created successfully',
+            'admin_id': admin.id
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error creating admin: {str(e)}'
+        })
+
 @app.route('/admin/trucks')
 def admin_trucks():
     if not session.get('admin_id'):
