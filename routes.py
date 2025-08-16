@@ -132,6 +132,34 @@ def sync_data():
                     {"name": "Combo Meal", "price": 12.0}
                 ],
                 'sales_goal': 500
+            },
+            {
+                'name': 'Acai Truck',
+                'description': 'Fresh and healthy acai bowls made with organic ingredients',
+                'menu_items': [
+                    {"name": "Classic Acai Bowl", "price": 12.50},
+                    {"name": "Berry Blast Bowl", "price": 14.00},
+                    {"name": "Green Goddess Bowl", "price": 13.25},
+                    {"name": "Protein Power Bowl", "price": 15.50},
+                    {"name": "Mini Acai Bowl", "price": 8.75},
+                    {"name": "Acai Smoothie", "price": 7.50}
+                ],
+                'sales_goal': 1750
+            },
+            {
+                'name': 'Ho-Lee Chow',
+                'description': 'Healthy Asian inspired food. All our bowls are gluten-free. Vegan, grain-free, and customizable options.',
+                'menu_items': [
+                    {"name": "Korean BBQ Bowl", "price": 14.50},
+                    {"name": "Teriyaki Chicken Bowl", "price": 13.25},
+                    {"name": "Vegetable Pad Thai", "price": 12.00},
+                    {"name": "Asian Fusion Bowl", "price": 15.75},
+                    {"name": "Poke Bowl", "price": 16.00},
+                    {"name": "Spring Rolls (3pc)", "price": 8.50},
+                    {"name": "Miso Soup", "price": 6.00},
+                    {"name": "Asian Salad", "price": 11.25}
+                ],
+                'sales_goal': 2000
             }
         ]
         
@@ -158,11 +186,30 @@ def sync_data():
                 db.session.add(new_truck)
                 results.append(f"Created: {truck_data['name']}")
         
+        # Also update any Amazon gate events to use Ho-Lee Chow
+        amazon_events = Event.query.filter(Event.name.like('%Amazon%')).all()
+        for event in amazon_events:
+            ho_lee_truck = FoodTruck.query.filter_by(name='Ho-Lee Chow').first()
+            if ho_lee_truck:
+                event.food_truck_id = ho_lee_truck.id
+                event.pledge_goal = 2000
+                event.selected_menu_items = json.dumps([
+                    {"name": "Korean BBQ Bowl", "price": 14.50, "original_price": 14.50, "marked_up_price": 16.68},
+                    {"name": "Teriyaki Chicken Bowl", "price": 13.25, "original_price": 13.25, "marked_up_price": 15.24},
+                    {"name": "Vegetable Pad Thai", "price": 12.00, "original_price": 12.00, "marked_up_price": 13.80},
+                    {"name": "Asian Fusion Bowl", "price": 15.75, "original_price": 15.75, "marked_up_price": 18.11},
+                    {"name": "Poke Bowl", "price": 16.00, "original_price": 16.00, "marked_up_price": 18.40},
+                    {"name": "Spring Rolls (3pc)", "price": 8.50, "original_price": 8.50, "marked_up_price": 9.78},
+                    {"name": "Miso Soup", "price": 6.00, "original_price": 6.00, "marked_up_price": 6.90},
+                    {"name": "Asian Salad", "price": 11.25, "original_price": 11.25, "marked_up_price": 12.94}
+                ])
+                results.append(f"Updated event: {event.name} to use Ho-Lee Chow")
+        
         db.session.commit()
         
         return jsonify({
             'status': 'success',
-            'message': 'Data sync completed',
+            'message': 'Data sync completed - all trucks and Amazon events updated',
             'results': results,
             'total_trucks': FoodTruck.query.count()
         })
