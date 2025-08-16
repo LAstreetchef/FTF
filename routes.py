@@ -633,21 +633,47 @@ def login_admin_direct():
         # Process login
         admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
         if admin and check_password_hash(admin.password_hash, 'password'):
+            # Clear any existing session data first
+            session.clear()
+            # Set new session data
             session['admin_id'] = admin.id
             session['user_type'] = 'admin'
-            return redirect(url_for('admin_dashboard'))
+            session.permanent = True
+            
+            # Debug session setting
+            logging.debug(f"Session set: admin_id={session.get('admin_id')}, user_type={session.get('user_type')}")
+            
+            return f"""
+            <h3>✅ Login Successful!</h3>
+            <p><strong>Admin ID:</strong> {admin.id}</p>
+            <p><strong>Session admin_id:</strong> {session.get('admin_id')}</p>
+            <p><strong>Session user_type:</strong> {session.get('user_type')}</p>
+            <hr>
+            <p><a href="/admin/dashboard" style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">Go to Admin Dashboard</a></p>
+            <p><a href="/admin/login">Regular Login Page</a></p>
+            """
         else:
-            return "<h3>Login failed</h3><p>Admin user not found or password incorrect</p>"
+            return "<h3>❌ Login failed</h3><p>Admin user not found or password incorrect</p>"
     
-    # Show login form
-    return """
-    <h3>Direct Admin Login</h3>
+    # Show current session status and login form
+    return f"""
+    <h3>Admin Login Debug Tool</h3>
+    
+    <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px;">
+        <h4>Current Session Status:</h4>
+        <p><strong>Admin ID:</strong> {session.get('admin_id', 'Not set')}</p>
+        <p><strong>User Type:</strong> {session.get('user_type', 'Not set')}</p>
+        <p><strong>Session Keys:</strong> {list(session.keys())}</p>
+    </div>
+    
     <form method="POST">
         <p><button type="submit" style="padding: 15px 30px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px;">
             Login as Admin (truckstopsla@gmail.com)
         </button></p>
     </form>
+    
     <p><a href="/admin/login">Go to regular login page</a></p>
+    <p><a href="/admin/dashboard">Try accessing dashboard directly</a></p>
     """
 
 @app.route('/setup-admin-secret-xyz123')
