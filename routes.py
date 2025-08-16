@@ -96,7 +96,7 @@ def debug_database():
     
     # Get events
     events = Event.query.all()
-    event_list = [{'id': e.id, 'title': e.title, 'status': e.status, 'goal': e.goal, 'current_pledges': e.current_pledges} for e in events]
+    event_list = [{'id': e.id, 'name': e.name, 'status': e.status, 'pledge_goal': e.pledge_goal, 'current_pledges': e.current_pledges} for e in events]
     
     return jsonify({
         'debug_info': debug_info,
