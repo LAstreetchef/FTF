@@ -147,6 +147,21 @@ def sync_data():
                 'sales_goal': 1750
             },
             {
+                'name': 'Green Truck',
+                'description': 'Fresh, locally-sourced meals with a focus on sustainability and health.',
+                'menu_items': [
+                    {"name": "Green Goddess Bowl", "price": 13.50},
+                    {"name": "Quinoa Power Salad", "price": 12.75},
+                    {"name": "Avocado Toast Deluxe", "price": 9.25},
+                    {"name": "Veggie Wrap", "price": 11.00},
+                    {"name": "Green Smoothie", "price": 7.50},
+                    {"name": "Kale Caesar Salad", "price": 12.00},
+                    {"name": "Buddha Bowl", "price": 14.25},
+                    {"name": "Raw Veggie Tacos", "price": 10.75}
+                ],
+                'sales_goal': 1800
+            },
+            {
                 'name': 'Ho-Lee Chow',
                 'description': 'Healthy Asian inspired food. All our bowls are gluten-free. Vegan, grain-free, and customizable options.',
                 'menu_items': [
@@ -223,43 +238,54 @@ def sync_data():
 
 @app.route('/fix-menu-items-xyz123')
 def fix_menu_items():
-    """Fix menu items for events that are missing them"""
+    """Fix menu items for ALL events that are missing them - universal solution"""
     try:
         results = []
         
-        # Find all events using Ho-Lee Chow that don't have menu items
-        ho_lee_truck = FoodTruck.query.filter_by(name='Ho-Lee Chow').first()
-        if not ho_lee_truck:
-            return jsonify({'status': 'error', 'message': 'Ho-Lee Chow truck not found'})
+        # Get all events that have empty or missing menu items
+        all_events = Event.query.all()
         
-        # Find events with Ho-Lee Chow that have empty or missing menu items
-        events = Event.query.filter_by(food_truck_id=ho_lee_truck.id).all()
-        
-        for event in events:
+        for event in all_events:
+            # Check if event has empty or missing menu items
             menu_items = event.get_selected_menu_items() if event.selected_menu_items else []
             
-            if not menu_items:
-                # Add the menu items
-                event.selected_menu_items = json.dumps([
-                    {"name": "Korean BBQ Bowl", "price": 14.50, "original_price": 14.50, "marked_up_price": 16.68},
-                    {"name": "Teriyaki Chicken Bowl", "price": 13.25, "original_price": 13.25, "marked_up_price": 15.24},
-                    {"name": "Vegetable Pad Thai", "price": 12.00, "original_price": 12.00, "marked_up_price": 13.80},
-                    {"name": "Asian Fusion Bowl", "price": 15.75, "original_price": 15.75, "marked_up_price": 18.11},
-                    {"name": "Poke Bowl", "price": 16.00, "original_price": 16.00, "marked_up_price": 18.40},
-                    {"name": "Spring Rolls (3pc)", "price": 8.50, "original_price": 8.50, "marked_up_price": 9.78},
-                    {"name": "Miso Soup", "price": 6.00, "original_price": 6.00, "marked_up_price": 6.90},
-                    {"name": "Asian Salad", "price": 11.25, "original_price": 11.25, "marked_up_price": 12.94}
-                ])
-                event.pledge_goal = 2000
-                results.append(f"Fixed menu items for: {event.name}")
-        
+            if not menu_items and event.food_truck:
+                truck = event.food_truck
+                truck_menu = truck.get_menu_items() if truck.menu_items else []
+                
+                if truck_menu:
+                    # Generate menu items with markup for this event
+                    marked_up_items = []
+                    for item in truck_menu:
+                        original_price = item.get('price', 15.0)
+                        markup_rate = 0.15  # 15% markup
+                        marked_up_price = round(original_price * (1 + markup_rate), 2)
+                        
+                        marked_up_items.append({
+                            "name": item.get('name', 'Menu Item'),
+                            "price": original_price,
+                            "original_price": original_price,
+                            "marked_up_price": marked_up_price
+                        })
+                    
+                    # Update the event with proper menu items
+                    event.selected_menu_items = json.dumps(marked_up_items)
+                    
+                    # Set appropriate pledge goal based on truck
+                    if truck.sales_goal:
+                        event.pledge_goal = truck.sales_goal
+                    
+                    results.append(f"Fixed {truck.name} menu for event: {event.name} ({len(marked_up_items)} items)")
+                else:
+                    results.append(f"Warning: {truck.name} has no menu items to copy for event: {event.name}")
+            
         db.session.commit()
         
         return jsonify({
             'status': 'success',
-            'message': 'Menu items fixed for all Ho-Lee Chow events',
+            'message': 'Menu items fixed for all events missing them',
             'results': results,
-            'events_updated': len(results)
+            'events_updated': len([r for r in results if r.startswith('Fixed')])
         })
         
     except Exception as e:
@@ -267,6 +293,140 @@ def fix_menu_items():
         return jsonify({
             'status': 'error',
             'message': f'Error fixing menu items: {str(e)}'
+        })
+
+@app.route('/auto-fix-all-menus-xyz123')
+def auto_fix_all_menus():
+    """Emergency fix for all events and trucks - runs sync and menu fix together"""
+    try:
+        results = []
+        
+        # First run the sync to ensure all trucks are properly configured
+        sync_results = []
+        standard_trucks = [
+            {
+                'name': 'Tasty Tacos',
+                'description': "LA's premiere healthy food truck",
+                'menu_items': [
+                    {"name": "Carnitas Taco", "price": 4.5},
+                    {"name": "Chicken Taco", "price": 4.0},
+                    {"name": "Veggie Taco", "price": 3.75},
+                    {"name": "Combo Meal", "price": 12.0}
+                ],
+                'sales_goal': 1500
+            },
+            {
+                'name': 'Green Truck',
+                'description': 'Fresh, locally-sourced meals with a focus on sustainability and health.',
+                'menu_items': [
+                    {"name": "Green Goddess Bowl", "price": 13.50},
+                    {"name": "Quinoa Power Salad", "price": 12.75},
+                    {"name": "Avocado Toast Deluxe", "price": 9.25},
+                    {"name": "Veggie Wrap", "price": 11.00},
+                    {"name": "Green Smoothie", "price": 7.50},
+                    {"name": "Kale Caesar Salad", "price": 12.00},
+                    {"name": "Buddha Bowl", "price": 14.25},
+                    {"name": "Raw Veggie Tacos", "price": 10.75}
+                ],
+                'sales_goal': 1800
+            },
+            {
+                'name': 'Acai Truck',
+                'description': 'Fresh and healthy acai bowls made with organic ingredients',
+                'menu_items': [
+                    {"name": "Classic Acai Bowl", "price": 12.50},
+                    {"name": "Berry Blast Bowl", "price": 14.00},
+                    {"name": "Green Goddess Bowl", "price": 13.25},
+                    {"name": "Protein Power Bowl", "price": 15.50},
+                    {"name": "Mini Acai Bowl", "price": 8.75},
+                    {"name": "Acai Smoothie", "price": 7.50}
+                ],
+                'sales_goal': 1750
+            },
+            {
+                'name': 'Ho-Lee Chow',
+                'description': 'Healthy Asian inspired food. All our bowls are gluten-free. Vegan, grain-free, and customizable options.',
+                'menu_items': [
+                    {"name": "Korean BBQ Bowl", "price": 14.50},
+                    {"name": "Teriyaki Chicken Bowl", "price": 13.25},
+                    {"name": "Vegetable Pad Thai", "price": 12.00},
+                    {"name": "Asian Fusion Bowl", "price": 15.75},
+                    {"name": "Poke Bowl", "price": 16.00},
+                    {"name": "Spring Rolls (3pc)", "price": 8.50},
+                    {"name": "Miso Soup", "price": 6.00},
+                    {"name": "Asian Salad", "price": 11.25}
+                ],
+                'sales_goal': 2000
+            }
+        ]
+        
+        # Sync trucks
+        for truck_data in standard_trucks:
+            existing_truck = FoodTruck.query.filter_by(name=truck_data['name']).first()
+            
+            if existing_truck:
+                existing_truck.description = truck_data['description']
+                existing_truck.menu_items = json.dumps(truck_data['menu_items'])
+                existing_truck.sales_goal = truck_data['sales_goal']
+                sync_results.append(f"Updated: {truck_data['name']}")
+            else:
+                new_truck = FoodTruck(
+                    name=truck_data['name'],
+                    description=truck_data['description'],
+                    menu_items=json.dumps(truck_data['menu_items']),
+                    sales_goal=truck_data['sales_goal']
+                )
+                db.session.add(new_truck)
+                sync_results.append(f"Created: {truck_data['name']}")
+        
+        # Fix all events missing menu items
+        fix_results = []
+        all_events = Event.query.all()
+        
+        for event in all_events:
+            menu_items = event.get_selected_menu_items() if event.selected_menu_items else []
+            
+            if not menu_items and event.food_truck:
+                truck = event.food_truck
+                truck_menu = truck.get_menu_items() if truck.menu_items else []
+                
+                if truck_menu:
+                    marked_up_items = []
+                    for item in truck_menu:
+                        original_price = item.get('price', 15.0)
+                        markup_rate = 0.15  # 15% markup
+                        marked_up_price = round(original_price * (1 + markup_rate), 2)
+                        
+                        marked_up_items.append({
+                            "name": item.get('name', 'Menu Item'),
+                            "price": original_price,
+                            "original_price": original_price,
+                            "marked_up_price": marked_up_price
+                        })
+                    
+                    event.selected_menu_items = json.dumps(marked_up_items)
+                    
+                    if truck.sales_goal:
+                        event.pledge_goal = truck.sales_goal
+                    
+                    fix_results.append(f"Fixed {truck.name} menu for event: {event.name} ({len(marked_up_items)} items)")
+        
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Complete fix applied - all trucks synced and all events have menu items',
+            'sync_results': sync_results,
+            'fix_results': fix_results,
+            'trucks_synced': len(sync_results),
+            'events_fixed': len(fix_results)
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error during auto-fix: {str(e)}'
         })
         
     except Exception as e:
@@ -565,6 +725,14 @@ def organizer_create_event():
                 item['original_price'] = item['price']
                 item['marked_up_price'] = item['price'] * (1 + event.markup_percentage / 100)
                 selected_items.append(item)
+        
+        # If no menu items were selected (frontend issue), auto-select all items with 15% markup
+        if not selected_items and truck_menu:
+            for item in truck_menu:
+                fallback_item = item.copy()
+                fallback_item['original_price'] = item['price']
+                fallback_item['marked_up_price'] = round(item['price'] * 1.15, 2)  # 15% default markup
+                selected_items.append(fallback_item)
         
         event.set_selected_menu_items(selected_items)
         
