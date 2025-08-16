@@ -174,6 +174,60 @@ def sync_data():
             'message': f'Error syncing data: {str(e)}'
         })
 
+@app.route('/test-admin-login-xyz123', methods=['GET', 'POST'])
+def test_admin_login():
+    """Test admin login functionality for debugging"""
+    if request.method == 'POST':
+        username = request.form.get('username', 'truckstopsla@gmail.com')
+        password = request.form.get('password', 'password')
+        
+        try:
+            admin = Admin.query.filter_by(username=username).first()
+            if admin:
+                password_valid = check_password_hash(admin.password_hash, password)
+                
+                if password_valid:
+                    session['admin_id'] = admin.id
+                    session['user_type'] = 'admin'
+                    return f"""
+                    <h3>✅ Login Test Successful!</h3>
+                    <p><strong>Admin ID:</strong> {admin.id}</p>
+                    <p><strong>Username:</strong> {admin.username}</p>
+                    <p><strong>Session Set:</strong> admin_id = {session.get('admin_id')}</p>
+                    <p><strong>Session Type:</strong> {session.get('user_type')}</p>
+                    <hr>
+                    <p><a href="/admin/dashboard">Go to Admin Dashboard</a></p>
+                    <p><a href="/admin/login">Go to Regular Admin Login</a></p>
+                    """
+                else:
+                    return f"""
+                    <h3>❌ Password Invalid</h3>
+                    <p><strong>Username found:</strong> {admin.username}</p>
+                    <p><strong>Password hash (first 30):</strong> {admin.password_hash[:30]}...</p>
+                    <p><strong>Password test result:</strong> {password_valid}</p>
+                    """
+            else:
+                return f"""
+                <h3>❌ Admin Not Found</h3>
+                <p><strong>Searched for:</strong> {username}</p>
+                <p><strong>Total admins in DB:</strong> {Admin.query.count()}</p>
+                """
+        except Exception as e:
+            return f"<h3>❌ Error:</h3><p>{str(e)}</p>"
+    
+    return f"""
+    <h3>Admin Login Test</h3>
+    <form method="POST">
+        <p><label>Username: <input type="text" name="username" value="truckstopsla@gmail.com"></label></p>
+        <p><label>Password: <input type="password" name="password" value="password"></label></p>
+        <p><button type="submit">Test Login</button></p>
+    </form>
+    <hr>
+    <p><strong>Database Info:</strong></p>
+    <p>Admin count: {Admin.query.count()}</p>
+    <p>Database URL: {str(db.engine.url).split('@')[1] if '@' in str(db.engine.url) else 'unknown'}</p>
+    """
+
 
 
 @app.route('/admin/trucks')
