@@ -105,41 +105,76 @@ def debug_database():
         'events': event_list
     })
 
-@app.route('/setup-admin-secret-xyz123')
-def setup_admin():
-    """Setup admin user for production environment"""
+@app.route('/sync-data-xyz123')
+def sync_data():
+    """Sync food truck data to production environment"""
     try:
-        # Check if admin already exists
-        existing_admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
-        if existing_admin:
-            return jsonify({
-                'status': 'exists',
-                'message': 'Admin user already exists',
-                'admin_id': existing_admin.id
-            })
+        # Define the standard food trucks data
+        standard_trucks = [
+            {
+                'name': 'Tasty Tacos',
+                'description': "LA's premiere healthy food truck",
+                'menu_items': [
+                    {"name": "Carnitas Taco", "price": 4.5},
+                    {"name": "Chicken Taco", "price": 4.0},
+                    {"name": "Veggie Taco", "price": 3.75},
+                    {"name": "Combo Meal", "price": 12.0}
+                ],
+                'sales_goal': 1500
+            },
+            {
+                'name': 'Tasty Tacos Truck',
+                'description': 'Authentic Mexican street tacos with fresh ingredients',
+                'menu_items': [
+                    {"name": "Carnitas Taco", "price": 4.5},
+                    {"name": "Chicken Taco", "price": 4.0},
+                    {"name": "Veggie Taco", "price": 3.75},
+                    {"name": "Combo Meal", "price": 12.0}
+                ],
+                'sales_goal': 500
+            }
+        ]
         
-        # Create admin user
-        password_hash = generate_password_hash('password')
-        admin = Admin(
-            username='truckstopsla@gmail.com',
-            password_hash=password_hash
-        )
+        results = []
         
-        db.session.add(admin)
+        # Sync each food truck
+        for truck_data in standard_trucks:
+            existing_truck = FoodTruck.query.filter_by(name=truck_data['name']).first()
+            
+            if existing_truck:
+                # Update existing truck
+                existing_truck.description = truck_data['description']
+                existing_truck.menu_items = json.dumps(truck_data['menu_items'])
+                existing_truck.sales_goal = truck_data['sales_goal']
+                results.append(f"Updated: {truck_data['name']}")
+            else:
+                # Create new truck
+                new_truck = FoodTruck(
+                    name=truck_data['name'],
+                    description=truck_data['description'],
+                    menu_items=json.dumps(truck_data['menu_items']),
+                    sales_goal=truck_data['sales_goal']
+                )
+                db.session.add(new_truck)
+                results.append(f"Created: {truck_data['name']}")
+        
         db.session.commit()
         
         return jsonify({
-            'status': 'created',
-            'message': 'Admin user created successfully',
-            'admin_id': admin.id
+            'status': 'success',
+            'message': 'Data sync completed',
+            'results': results,
+            'total_trucks': FoodTruck.query.count()
         })
         
     except Exception as e:
         db.session.rollback()
         return jsonify({
             'status': 'error',
-            'message': f'Error creating admin: {str(e)}'
+            'message': f'Error syncing data: {str(e)}'
         })
+
+
 
 @app.route('/admin/trucks')
 def admin_trucks():
