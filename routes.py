@@ -626,6 +626,30 @@ def debug_admin_login():
         return f"❌ Error: {str(e)}"
 
 # Setup route for production deployment
+@app.route('/login-admin-direct-xyz123', methods=['GET', 'POST'])
+def login_admin_direct():
+    """Direct admin login for troubleshooting"""
+    if request.method == 'POST':
+        # Process login
+        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        if admin and check_password_hash(admin.password_hash, 'password'):
+            session['admin_id'] = admin.id
+            session['user_type'] = 'admin'
+            return redirect(url_for('admin_dashboard'))
+        else:
+            return "<h3>Login failed</h3><p>Admin user not found or password incorrect</p>"
+    
+    # Show login form
+    return """
+    <h3>Direct Admin Login</h3>
+    <form method="POST">
+        <p><button type="submit" style="padding: 15px 30px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px;">
+            Login as Admin (truckstopsla@gmail.com)
+        </button></p>
+    </form>
+    <p><a href="/admin/login">Go to regular login page</a></p>
+    """
+
 @app.route('/setup-admin-secret-xyz123')
 def setup_admin():
     """One-time setup route to create admin user in production"""
