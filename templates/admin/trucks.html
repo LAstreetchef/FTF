@@ -146,7 +146,11 @@
                 </div>
                 
                 <small class="text-muted">
+                    {% if truck.created_at %}
                     Created {{ truck.created_at.strftime('%B %d, %Y') }}
+                    {% else %}
+                    Created recently
+                    {% endif %}
                 </small>
             </div>
         </div>
