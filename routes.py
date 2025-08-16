@@ -213,6 +213,54 @@ def sync_data():
             'results': results,
             'total_trucks': FoodTruck.query.count()
         })
+
+@app.route('/fix-menu-items-xyz123')
+def fix_menu_items():
+    """Fix menu items for events that are missing them"""
+    try:
+        results = []
+        
+        # Find all events using Ho-Lee Chow that don't have menu items
+        ho_lee_truck = FoodTruck.query.filter_by(name='Ho-Lee Chow').first()
+        if not ho_lee_truck:
+            return jsonify({'status': 'error', 'message': 'Ho-Lee Chow truck not found'})
+        
+        # Find events with Ho-Lee Chow that have empty or missing menu items
+        events = Event.query.filter_by(food_truck_id=ho_lee_truck.id).all()
+        
+        for event in events:
+            menu_items = event.get_selected_menu_items() if event.selected_menu_items else []
+            
+            if not menu_items:
+                # Add the menu items
+                event.selected_menu_items = json.dumps([
+                    {"name": "Korean BBQ Bowl", "price": 14.50, "original_price": 14.50, "marked_up_price": 16.68},
+                    {"name": "Teriyaki Chicken Bowl", "price": 13.25, "original_price": 13.25, "marked_up_price": 15.24},
+                    {"name": "Vegetable Pad Thai", "price": 12.00, "original_price": 12.00, "marked_up_price": 13.80},
+                    {"name": "Asian Fusion Bowl", "price": 15.75, "original_price": 15.75, "marked_up_price": 18.11},
+                    {"name": "Poke Bowl", "price": 16.00, "original_price": 16.00, "marked_up_price": 18.40},
+                    {"name": "Spring Rolls (3pc)", "price": 8.50, "original_price": 8.50, "marked_up_price": 9.78},
+                    {"name": "Miso Soup", "price": 6.00, "original_price": 6.00, "marked_up_price": 6.90},
+                    {"name": "Asian Salad", "price": 11.25, "original_price": 11.25, "marked_up_price": 12.94}
+                ])
+                event.pledge_goal = 2000
+                results.append(f"Fixed menu items for: {event.name}")
+        
+        db.session.commit()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Menu items fixed for all Ho-Lee Chow events',
+            'results': results,
+            'events_updated': len(results)
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error fixing menu items: {str(e)}'
+        })
         
     except Exception as e:
         db.session.rollback()
