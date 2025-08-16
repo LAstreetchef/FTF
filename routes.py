@@ -213,6 +213,13 @@ def sync_data():
             'results': results,
             'total_trucks': FoodTruck.query.count()
         })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'status': 'error',
+            'message': f'Error syncing data: {str(e)}'
+        })
 
 @app.route('/fix-menu-items-xyz123')
 def fix_menu_items():
