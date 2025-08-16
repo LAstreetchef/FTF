@@ -649,7 +649,22 @@ def setup_admin():
             # Test the password
             test_result = check_password_hash(admin.password_hash, 'password')
             
-            return f"{debug_info}Admin user updated successfully!<br>Old hash: {old_hash}<br>Password test: {'PASS' if test_result else 'FAIL'}<br><br><strong>You can now login with truckstopsla@gmail.com / password</strong>"
+            return f"""
+            {debug_info}Admin user updated successfully!<br>
+            Old hash: {old_hash}<br>
+            Password test: {'PASS' if test_result else 'FAIL'}<br><br>
+            <strong>You can now login with truckstopsla@gmail.com / password</strong><br><br>
+            <hr>
+            <h4>Quick Login Test:</h4>
+            <form action="/admin/login" method="POST" style="margin: 10px 0;">
+                <input type="hidden" name="username" value="truckstopsla@gmail.com">
+                <input type="hidden" name="password" value="password">
+                <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">
+                    Login as Admin Now
+                </button>
+            </form>
+            <p><a href="/admin/login">Or go to regular login page</a></p>
+            """
         else:
             # Create new admin
             new_admin = Admin(
@@ -662,7 +677,21 @@ def setup_admin():
             # Test the password
             test_result = check_password_hash(new_admin.password_hash, 'password')
             
-            return f"{debug_info}Admin user created successfully!<br>Password test: {'PASS' if test_result else 'FAIL'}<br><br><strong>You can now login with truckstopsla@gmail.com / password</strong>"
+            return f"""
+            {debug_info}Admin user created successfully!<br>
+            Password test: {'PASS' if test_result else 'FAIL'}<br><br>
+            <strong>You can now login with truckstopsla@gmail.com / password</strong><br><br>
+            <hr>
+            <h4>Quick Login Test:</h4>
+            <form action="/admin/login" method="POST" style="margin: 10px 0;">
+                <input type="hidden" name="username" value="truckstopsla@gmail.com">
+                <input type="hidden" name="password" value="password">
+                <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">
+                    Login as Admin Now
+                </button>
+            </form>
+            <p><a href="/admin/login">Or go to regular login page</a></p>
+            """
             
     except Exception as e:
         import traceback
