@@ -1,0 +1,10 @@
+HTTP/1.1 302 FOUND
+Server: gunicorn
+Date: Tue, 19 Aug 2025 18:27:25 GMT
+Connection: close
+Content-Type: text/html; charset=utf-8
+Content-Length: 227
+Location: /organizer/dashboard
+Vary: Cookie
+Set-Cookie: session=.eJxFybEKgCAURuFXkX92afU1GiNE8mrCRcObg4XvXtDQdD44N2xgJzsJzHJDnW8gbdtIBBrzp9CYu-ISI3mVMtaxapQaXU4XVZs8zKTR5PXZD4L5J8YDuLMi6A.aKTCDQ.px3a-pO4LwDGwdMwCPDtHOo4JsI; HttpOnly; Path=/
+
