@@ -10,13 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **2025-08-19**: Application stability and code quality improvements
+- **2025-08-19**: Event deletion system and application stability improvements
+  - Implemented comprehensive event deletion functionality with safety checks
+  - Added admin route `/admin/events/<id>/delete` with proper pledge handling
+  - Created automatic email notifications for cancelled events (pledgers and organizers)
+  - Added safety validation preventing deletion of events with charged pledges
+  - Enhanced Event model with `can_be_deleted()` and `get_deletion_warnings()` methods
+  - Updated admin events template with delete buttons and confirmation prompts
   - Fixed critical Flask startup error caused by duplicate route function definitions
-  - Removed duplicate `test_admin_login` route that was preventing app startup
   - Added null safety checks for SQLAlchemy relationships (organizer, food truck objects)
-  - Improved error handling in event creation and dashboard loading
-  - Fixed LSP relationship access issues for better code quality
-  - Reduced LSP errors from 14 to 7 (remaining are SQLAlchemy constructor false positives)
+  - Reduced LSP errors and improved code quality throughout the application
 
 - **2025-08-16**: Universal menu synchronization system implemented
   - Created comprehensive fix for menu display issues affecting all food trucks
