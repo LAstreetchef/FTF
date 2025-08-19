@@ -622,6 +622,57 @@ def admin_approve_event(event_id):
     
     return redirect(url_for('admin_events'))
 
+@app.route('/admin/events/<int:event_id>/delete', methods=['POST'])
+def admin_delete_event(event_id):
+    """Delete an event with proper handling of associated pledges"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    event = Event.query.get_or_404(event_id)
+    
+    # Check for existing pledges
+    pledges = Pledge.query.filter_by(event_id=event_id).all()
+    charged_pledges = [p for p in pledges if p.status == 'charged']
+    
+    # Safety check: don't allow deletion of events with charged pledges
+    if charged_pledges:
+        flash(f'Cannot delete event "{event.name}" - it has {len(charged_pledges)} charged pledges. Contact customers first.', 'error')
+        return redirect(url_for('admin_events'))
+    
+    # For events with pending pledges, notify users about cancellation
+    if pledges:
+        try:
+            # Send cancellation emails to pledgers
+            for pledge in pledges:
+                send_email(
+                    pledge.email,
+                    f"Event Cancelled: {event.name}",
+                    f"We regret to inform you that the event '{event.name}' scheduled for {event.date.strftime('%B %d, %Y at %I:%M %p')} has been cancelled.\n\nYour pledge of ${pledge.amount:.2f} has not been charged and no payment was processed.\n\nWe apologize for any inconvenience."
+                )
+            
+            # Send notification to organizer
+            if event.organizer:
+                send_email(
+                    event.organizer.email,
+                    f"Event Deleted: {event.name}",
+                    f"Your event '{event.name}' has been deleted by an administrator.\n\nIf you have questions, please contact support."
+                )
+                
+        except Exception as e:
+            logging.error(f"Error sending cancellation emails for event {event_id}: {str(e)}")
+            flash('Event will be deleted but some notification emails may not have been sent', 'warning')
+    
+    # Delete all associated pledges first (database cascade)
+    Pledge.query.filter_by(event_id=event_id).delete()
+    
+    # Now delete the event
+    event_name = event.name  # Store for flash message
+    db.session.delete(event)
+    db.session.commit()
+    
+    flash(f'Event "{event_name}" deleted successfully. {len(pledges)} associated pledges were also removed.', 'success')
+    return redirect(url_for('admin_events'))
+
 # Organizer Routes
 @app.route('/organizer/login', methods=['GET', 'POST'])
 def organizer_login():

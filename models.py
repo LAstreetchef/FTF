@@ -92,6 +92,27 @@ class Event(db.Model):
         total = db.session.query(func.sum(Pledge.amount)).filter_by(event_id=self.id).scalar() or 0
         self.current_pledges = total
         db.session.commit()
+    
+    def can_be_deleted(self):
+        """Check if event can be safely deleted"""
+        charged_pledges = [p for p in self.pledges if p.status == 'charged']
+        return len(charged_pledges) == 0
+    
+    def get_deletion_warnings(self):
+        """Get warnings about deleting this event"""
+        warnings = []
+        pledges = self.pledges
+        charged_pledges = [p for p in pledges if p.status == 'charged']
+        
+        if charged_pledges:
+            warnings.append(f"Has {len(charged_pledges)} charged pledges - cannot delete")
+        elif pledges:
+            warnings.append(f"Has {len(pledges)} pending pledges - will send cancellation emails")
+        
+        if self.status == 'approved':
+            warnings.append("Event is already approved")
+            
+        return warnings
 
 class Pledge(db.Model):
     id = db.Column(db.Integer, primary_key=True)
