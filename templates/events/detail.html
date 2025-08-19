@@ -88,9 +88,6 @@
                                     <td>{{ item.name }}</td>
                                     <td class="text-end">
                                         <strong>${{ "%.2f"|format(item.marked_up_price) }}</strong>
-                                        {% if item.original_price != item.marked_up_price %}
-                                        <br><small class="text-muted">Base: ${{ "%.2f"|format(item.original_price) }}</small>
-                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
