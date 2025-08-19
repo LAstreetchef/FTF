@@ -18,6 +18,11 @@ def index():
     recent_events = Event.query.filter(Event.status.in_(['pending', 'funded'])).order_by(Event.created_at.desc()).limit(3).all()
     return render_template('index.html', recent_events=recent_events)
 
+@app.route('/test-credentials')
+def test_credentials():
+    """Simple credential testing page"""
+    return render_template('test_credentials.html')
+
 # Admin Routes
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
