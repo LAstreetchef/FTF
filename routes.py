@@ -428,6 +428,52 @@ def auto_fix_all_menus():
             'status': 'error',
             'message': f'Error during auto-fix: {str(e)}'
         })
+
+@app.route('/test-admin-login-xyz123', methods=['GET', 'POST'])
+def test_admin_login():
+    """Debug route to test admin login credentials"""
+    try:
+        if request.method == 'POST':
+            username = request.form.get('username', 'truckstopsla@gmail.com')
+            password = request.form.get('password', 'password')
+        else:
+            username = 'truckstopsla@gmail.com'
+            password = 'password'
+        
+        # Find admin user
+        admin = Admin.query.filter_by(username=username).first()
+        
+        if not admin:
+            return jsonify({
+                'status': 'error',
+                'message': f'Admin user not found: {username}',
+                'all_admins': [a.username for a in Admin.query.all()],
+                'admin_count': Admin.query.count()
+            })
+        
+        # Test password
+        from werkzeug.security import check_password_hash
+        password_valid = check_password_hash(admin.password_hash, password)
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Admin login test completed',
+            'username': username,
+            'admin_exists': True,
+            'admin_id': admin.id,
+            'password_valid': password_valid,
+            'password_hash_prefix': admin.password_hash[:20] + '...',
+            'test_credentials': {
+                'username': 'truckstopsla@gmail.com',
+                'password': 'password'
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error testing admin login: {str(e)}'
+        })
         
     except Exception as e:
         db.session.rollback()
