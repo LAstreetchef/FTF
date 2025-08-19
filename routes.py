@@ -388,7 +388,7 @@ def auto_fix_all_menus():
             
             if not menu_items and event.food_truck:
                 truck = event.food_truck
-                truck_menu = truck.get_menu_items() if truck.menu_items else []
+                truck_menu = truck.get_menu_items() if truck and truck.menu_items else []
                 
                 if truck_menu:
                     marked_up_items = []
@@ -673,6 +673,9 @@ def organizer_dashboard():
         return redirect(url_for('organizer_login'))
     
     organizer = Organizer.query.get(session['organizer_id'])
+    if not organizer:
+        flash('Organizer not found', 'error')
+        return redirect(url_for('organizer_login'))
     events = Event.query.filter_by(organizer_id=organizer.id).order_by(Event.created_at.desc()).all()
     
     return render_template('organizer/dashboard.html', organizer=organizer, events=events)
@@ -686,6 +689,9 @@ def organizer_create_event():
         # Create new event
         truck_id = int(request.form['food_truck_id'])
         truck = FoodTruck.query.get(truck_id)
+        if not truck:
+            flash('Food truck not found', 'error')
+            return redirect(url_for('organizer_create_event'))
         
         event = Event(
             name=request.form['name'],
@@ -695,13 +701,13 @@ def organizer_create_event():
             organizer_id=session['organizer_id'],
             food_truck_id=truck_id,
             markup_percentage=float(request.form['markup_percentage']),
-            pledge_goal=truck.sales_goal
+            pledge_goal=truck.sales_goal if truck.sales_goal else 1000.0
         )
         
         # Parse selected menu items with markup
         selected_items = []
         selected_item_ids = request.form.getlist('selected_items')
-        truck_menu = truck.get_menu_items()
+        truck_menu = truck.get_menu_items() if truck else []
         
         for item_id in selected_item_ids:
             item_idx = int(item_id)
@@ -725,10 +731,12 @@ def organizer_create_event():
         db.session.commit()
         
         # Send notification email to admin
+        organizer = Organizer.query.get(session['organizer_id'])
+        organizer_name = organizer.name if organizer else "Unknown Organizer"
         send_email(
             'truckstopsla@gmail.com',
             f"New Event Created: {event.name}",
-            f"A new event has been created:\n\nEvent: {event.name}\nOrganizer: {event.organizer.name}\nFood Truck: {truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}"
+            f"A new event has been created:\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}"
         )
         
         flash('Event created successfully', 'success')
