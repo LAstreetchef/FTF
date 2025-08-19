@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
-from models import Admin, Organizer, FoodTruck, Event, Pledge, EmailLog
+from models import Admin, Organizer, FoodTruck, Event, Order, EmailLog
 from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
 import stripe
 import os
@@ -88,7 +88,7 @@ def debug_database():
         'admin_count': Admin.query.count(),
         'food_truck_count': FoodTruck.query.count(),
         'event_count': Event.query.count(),
-        'pledge_count': Pledge.query.count()
+        'order_count': Order.query.count()
     }
     
     # Get admin users (without passwords)
@@ -582,26 +582,26 @@ def admin_approve_event(event_id):
         return redirect(url_for('admin_events'))
     
     try:
-        # Charge all pledges for this event
-        pledges = Pledge.query.filter_by(event_id=event_id, status='pending').all()
+        # Charge all orders for this event
+        orders = Order.query.filter_by(event_id=event_id, status='pending').all()
         
-        for pledge in pledges:
-            if pledge.stripe_payment_intent_id:
-                success = charge_stripe_payment(pledge.stripe_payment_intent_id, pledge.amount, f"Food Truck Event: {event.name}")
+        for order in orders:
+            if order.stripe_payment_intent_id:
+                success = charge_stripe_payment(order.stripe_payment_intent_id, order.amount, f"Food Truck Event: {event.name}")
                 if success:
-                    pledge.status = 'charged'
-                    pledge.charged_at = datetime.utcnow()
+                    order.status = 'charged'
+                    order.charged_at = datetime.utcnow()
                     
                     # Generate and send e-ticket
-                    pledge.ticket_code = generate_ticket_code()
+                    order.ticket_code = generate_ticket_code()
                     send_email(
-                        pledge.email,
+                        order.email,
                         f"Your E-Ticket for {event.name}",
-                        f"Thank you for your pledge! Your e-ticket code is: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\nLocation: {event.location}\n\nShow this code at the food truck to redeem your meal."
+                        f"Thank you for your order! Your e-ticket code is: {order.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\nLocation: {event.location}\n\nShow this code at the food truck to redeem your meal."
                     )
-                    pledge.ticket_sent = True
+                    order.ticket_sent = True
                 else:
-                    flash(f'Failed to charge pledge from {pledge.email}', 'error')
+                    flash(f'Failed to charge order from {order.email}', 'error')
         
         event.status = 'approved'
         event.approved_at = datetime.utcnow()
@@ -611,10 +611,10 @@ def admin_approve_event(event_id):
         send_email(
             event.organizer.email,
             f"Event Approved: {event.name}",
-            f"Great news! Your event '{event.name}' has been approved and all pledges have been charged. The food truck will attend your event."
+            f"Great news! Your event '{event.name}' has been approved and all orders have been charged. The food truck will attend your event."
         )
         
-        flash('Event approved and pledges charged successfully', 'success')
+        flash('Event approved and orders charged successfully', 'success')
         
     except Exception as e:
         logging.error(f"Error approving event {event_id}: {str(e)}")
@@ -624,30 +624,30 @@ def admin_approve_event(event_id):
 
 @app.route('/admin/events/<int:event_id>/delete', methods=['POST'])
 def admin_delete_event(event_id):
-    """Delete an event with proper handling of associated pledges"""
+    """Delete an event with proper handling of associated orders"""
     if not session.get('admin_id'):
         return redirect(url_for('admin_login'))
     
     event = Event.query.get_or_404(event_id)
     
-    # Check for existing pledges
-    pledges = Pledge.query.filter_by(event_id=event_id).all()
-    charged_pledges = [p for p in pledges if p.status == 'charged']
+    # Check for existing orders
+    orders = Order.query.filter_by(event_id=event_id).all()
+    charged_orders = [p for p in orders if p.status == 'charged']
     
-    # Safety check: don't allow deletion of events with charged pledges
-    if charged_pledges:
-        flash(f'Cannot delete event "{event.name}" - it has {len(charged_pledges)} charged pledges. Contact customers first.', 'error')
+    # Safety check: don't allow deletion of events with charged orders
+    if charged_orders:
+        flash(f'Cannot delete event "{event.name}" - it has {len(charged_orders)} charged orders. Contact customers first.', 'error')
         return redirect(url_for('admin_events'))
     
-    # For events with pending pledges, notify users about cancellation
-    if pledges:
+    # For events with pending orders, notify users about cancellation
+    if orders:
         try:
-            # Send cancellation emails to pledgers
-            for pledge in pledges:
+            # Send cancellation emails to customers
+            for order in orders:
                 send_email(
-                    pledge.email,
+                    order.email,
                     f"Event Cancelled: {event.name}",
-                    f"We regret to inform you that the event '{event.name}' scheduled for {event.date.strftime('%B %d, %Y at %I:%M %p')} has been cancelled.\n\nYour pledge of ${pledge.amount:.2f} has not been charged and no payment was processed.\n\nWe apologize for any inconvenience."
+                    f"We regret to inform you that the event '{event.name}' scheduled for {event.date.strftime('%B %d, %Y at %I:%M %p')} has been cancelled.\n\nYour order of ${order.amount:.2f} has not been charged and no payment was processed.\n\nWe apologize for any inconvenience."
                 )
             
             # Send notification to organizer
@@ -662,15 +662,15 @@ def admin_delete_event(event_id):
             logging.error(f"Error sending cancellation emails for event {event_id}: {str(e)}")
             flash('Event will be deleted but some notification emails may not have been sent', 'warning')
     
-    # Delete all associated pledges first (database cascade)
-    Pledge.query.filter_by(event_id=event_id).delete()
+    # Delete all associated orders first (database cascade)
+    Order.query.filter_by(event_id=event_id).delete()
     
     # Now delete the event
     event_name = event.name  # Store for flash message
     db.session.delete(event)
     db.session.commit()
     
-    flash(f'Event "{event_name}" deleted successfully. {len(pledges)} associated pledges were also removed.', 'success')
+    flash(f'Event "{event_name}" deleted successfully. {len(orders)} associated orders were also removed.', 'success')
     return redirect(url_for('admin_events'))
 
 # Organizer Routes
@@ -827,13 +827,13 @@ def event_detail(event_id):
     
     return render_template('events/detail.html', event=event)
 
-@app.route('/events/<int:event_id>/pledge', methods=['GET', 'POST'])
-def make_pledge(event_id):
-    """Handle pledge creation with Stripe tokenization"""
+@app.route('/events/<int:event_id>/order', methods=['GET', 'POST'])
+def make_order(event_id):
+    """Handle order creation with Stripe tokenization"""
     event = Event.query.get_or_404(event_id)
     
     if event.status not in ['pending', 'funded']:
-        flash('This event is no longer accepting pledges', 'error')
+        flash('This event is no longer accepting orders', 'error')
         return redirect(url_for('event_detail', event_id=event_id))
     
     if request.method == 'POST':
@@ -843,11 +843,11 @@ def make_pledge(event_id):
         
         try:
             # Create payment intent with Stripe
-            payment_intent_id = create_stripe_payment_intent(amount, email, f"Pledge for {event.name}")
+            payment_intent_id = create_stripe_payment_intent(amount, email, f"Order for {event.name}")
             
             if payment_intent_id:
-                # Create pledge record
-                pledge = Pledge(
+                # Create order record
+                order = Order(
                     email=email,
                     amount=amount,
                     stripe_token=stripe_token,
@@ -855,11 +855,11 @@ def make_pledge(event_id):
                     event_id=event_id
                 )
                 
-                db.session.add(pledge)
+                db.session.add(order)
                 db.session.commit()
                 
-                # Update event pledge total
-                event.update_pledge_total()
+                # Update event order total
+                event.update_order_total()
                 
                 # Check if goal is met
                 if event.is_goal_met() and event.status == 'pending':
@@ -870,39 +870,39 @@ def make_pledge(event_id):
                     send_email(
                         'truckstopsla@gmail.com',
                         f"Event Goal Met: {event.name}",
-                        f"The event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}. Please review and approve the event to charge all pledges."
+                        f"The event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}. Please review and approve the event to charge all orders."
                     )
                     
-                    # Send goal reached confirmation to pledger
+                    # Send goal reached confirmation to customer
                     send_email(
                         email,
                         f"Event Funded! - {event.name}",
-                        f"Great news! Your pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
+                        f"Great news! Your order of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
                     )
                 else:
-                    # Send regular pledge confirmation
+                    # Send regular order confirmation
                     send_email(
                         email,
-                        f"Pledge Confirmation - {event.name}",
-                        f"Thank you for your ${amount:.2f} pledge for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
+                        f"Order Confirmation - {event.name}",
+                        f"Thank you for your ${amount:.2f} order for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
                     )
                 
-                flash('Pledge created successfully! You will only be charged if the event reaches its funding goal.', 'success')
-                return redirect(url_for('pledge_success', pledge_id=pledge.id))
+                flash('Order created successfully! You will only be charged if the event reaches its funding goal.', 'success')
+                return redirect(url_for('order_success', order_id=order.id))
             else:
                 flash('Error processing payment. Please try again.', 'error')
                 
         except Exception as e:
-            logging.error(f"Error creating pledge: {str(e)}")
-            flash('Error processing pledge. Please try again.', 'error')
+            logging.error(f"Error creating order: {str(e)}")
+            flash('Error processing order. Please try again.', 'error')
     
-    return render_template('pledge/form.html', event=event)
+    return render_template('order/form.html', event=event)
 
-@app.route('/pledge/<int:pledge_id>/success')
-def pledge_success(pledge_id):
-    """Pledge success page"""
-    pledge = Pledge.query.get_or_404(pledge_id)
-    return render_template('pledge/success.html', pledge=pledge)
+@app.route('/order/<int:order_id>/success')
+def order_success(order_id):
+    """Order success page"""
+    order = Order.query.get_or_404(order_id)
+    return render_template('order/success.html', order=order)
 
 # API Routes for AJAX
 @app.route('/api/truck/<int:truck_id>/menu')

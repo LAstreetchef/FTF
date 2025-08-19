@@ -64,7 +64,7 @@ class Event(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    pledges = db.relationship('Pledge', backref='event', lazy=True)
+    orders = db.relationship('Order', backref='event', lazy=True)
     
     def get_selected_menu_items(self):
         """Parse selected menu items from JSON string"""
@@ -84,37 +84,37 @@ class Event(db.Model):
         return min(100, (self.current_pledges / self.pledge_goal) * 100)
     
     def is_goal_met(self):
-        """Check if pledge goal is met"""
+        """Check if order goal is met"""
         return self.current_pledges >= self.pledge_goal
     
-    def update_pledge_total(self):
-        """Update current pledges total from all pledges"""
-        total = db.session.query(func.sum(Pledge.amount)).filter_by(event_id=self.id).scalar() or 0
+    def update_order_total(self):
+        """Update current orders total from all orders"""
+        total = db.session.query(func.sum(Order.amount)).filter_by(event_id=self.id).scalar() or 0
         self.current_pledges = total
         db.session.commit()
     
     def can_be_deleted(self):
         """Check if event can be safely deleted"""
-        charged_pledges = [p for p in self.pledges if p.status == 'charged']
-        return len(charged_pledges) == 0
+        charged_orders = [p for p in self.orders if p.status == 'charged']
+        return len(charged_orders) == 0
     
     def get_deletion_warnings(self):
         """Get warnings about deleting this event"""
         warnings = []
-        pledges = self.pledges
-        charged_pledges = [p for p in pledges if p.status == 'charged']
+        orders = self.orders
+        charged_orders = [p for p in orders if p.status == 'charged']
         
-        if charged_pledges:
-            warnings.append(f"Has {len(charged_pledges)} charged pledges - cannot delete")
-        elif pledges:
-            warnings.append(f"Has {len(pledges)} pending pledges - will send cancellation emails")
+        if charged_orders:
+            warnings.append(f"Has {len(charged_orders)} charged orders - cannot delete")
+        elif orders:
+            warnings.append(f"Has {len(orders)} pending orders - will send cancellation emails")
         
         if self.status == 'approved':
             warnings.append("Event is already approved")
             
         return warnings
 
-class Pledge(db.Model):
+class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False)
     amount = db.Column(db.Float, nullable=False)
