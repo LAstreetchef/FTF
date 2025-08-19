@@ -6,23 +6,22 @@
 <!-- Hero Section -->
 <div class="row">
     <div class="col-12">
-        <div class="jumbotron bg-primary text-white rounded p-5 mb-5">
-            <div class="container">
-                <h1 class="display-4">
-                    <i data-feather="truck" class="me-3"></i>
+        <div class="hero-section text-center">
+            <div class="container position-relative">
+                <h1 class="display-3 mb-4" style="font-family: 'Dancing Script', cursive;">
+                    <i data-feather="truck" class="me-3" style="width: 60px; height: 60px;"></i>
                     Food Truck Fundraiser
                 </h1>
-                <p class="lead">Bringing communities together through crowdfunded food truck events. Support local events and enjoy amazing food!</p>
-                <hr class="my-4">
-                <p>Organizers can create events, communities can pledge for food tickets, and everyone wins when goals are met.</p>
-                <div class="d-flex flex-wrap gap-2">
-                    <a class="btn btn-light btn-lg" href="{{ url_for('events_list') }}" role="button">
+                <p class="lead fs-4 mb-4">🍕 Bringing communities together through crowdfunded food truck events 🌮</p>
+                <p class="fs-5 mb-5">Support local events, enjoy amazing food, and build stronger communities one meal at a time!</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a class="btn btn-cta btn-lg" href="{{ url_for('events_list') }}" role="button">
                         <i data-feather="calendar" class="me-2"></i>
-                        View Events
+                        Discover Events
                     </a>
                     <a class="btn btn-outline-light btn-lg" href="{{ url_for('organizer_login') }}" role="button">
                         <i data-feather="plus-circle" class="me-2"></i>
-                        Create Event
+                        Start Fundraising
                     </a>
                 </div>
             </div>
@@ -33,33 +32,35 @@
 <!-- How It Works -->
 <div class="row mb-5">
     <div class="col-12">
-        <h2 class="text-center mb-4">How It Works</h2>
+        <h2 class="text-center mb-5 display-6" style="color: var(--foodie-earth); font-weight: 700;">
+            🍽️ How Our Food Magic Works ✨
+        </h2>
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i data-feather="user-plus" class="text-primary mb-3" style="width: 48px; height: 48px;"></i>
-                        <h5 class="card-title">1. Create an Event</h5>
-                        <p class="card-text">Event organizers select a food truck, set menu items with markup pricing, and create their fundraising event.</p>
+                <div class="stats-card h-100">
+                    <div class="icon">
+                        <i data-feather="user-plus"></i>
                     </div>
+                    <h5 class="card-title">1. Create an Event</h5>
+                    <p class="card-text">Event organizers select a food truck, choose delicious menu items with markup pricing, and launch their community fundraising campaign.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i data-feather="heart" class="text-success mb-3" style="width: 48px; height: 48px;"></i>
-                        <h5 class="card-title">2. Community Pledges</h5>
-                        <p class="card-text">Community members pledge money for meal e-tickets. Payments are only charged if the funding goal is met.</p>
+                <div class="stats-card h-100">
+                    <div class="icon">
+                        <i data-feather="heart"></i>
                     </div>
+                    <h5 class="card-title">2. Community Rallies</h5>
+                    <p class="card-text">Food lovers pledge for meal e-tickets that support their community. Payments are secure and only charged when goals are met.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <i data-feather="check-circle" class="text-warning mb-3" style="width: 48px; height: 48px;"></i>
-                        <h5 class="card-title">3. Event Happens</h5>
-                        <p class="card-text">When goals are met, pledges are charged, e-tickets are sent, and the food truck attends the event!</p>
+                <div class="stats-card h-100">
+                    <div class="icon">
+                        <i data-feather="check-circle"></i>
                     </div>
+                    <h5 class="card-title">3. Food Truck Arrives!</h5>
+                    <p class="card-text">Goals achieved means delicious food served! E-tickets are delivered, and the community celebrates together with amazing meals.</p>
                 </div>
             </div>
         </div>

@@ -1,48 +1,194 @@
-/* Custom CSS for Food Truck Fundraiser */
-/* Minimal overrides to complement Bootstrap dark theme */
+/* Custom CSS for Food Truck Fundraiser - Foodie Theme */
+/* Warm, appetite-stimulating color scheme with modern foodie aesthetics */
 
-/* Root variables for consistency */
+/* Root variables for foodie theme */
 :root {
-    --brand-primary: var(--bs-primary);
-    --brand-success: var(--bs-success);
-    --brand-warning: var(--bs-warning);
-    --brand-danger: var(--bs-danger);
-    --border-radius-lg: 0.75rem;
-    --transition-fast: 0.15s ease-in-out;
-    --transition-smooth: 0.3s ease-in-out;
+    /* Primary Foodie Colors */
+    --foodie-primary: #ff6b35;           /* Warm Orange - appetite stimulating */
+    --foodie-secondary: #f7931e;         /* Golden Yellow - warmth & energy */
+    --foodie-accent: #c8102e;            /* Deep Red - passion & urgency */
+    --foodie-success: #4caf50;           /* Fresh Green - organic & healthy */
+    --foodie-earth: #8b4513;             /* Rich Brown - comfort & stability */
+    --foodie-cream: #fdf6e3;             /* Warm Cream - background warmth */
+    
+    /* Enhanced Styling */
+    --border-radius-lg: 1rem;
+    --border-radius-xl: 1.5rem;
+    --transition-fast: 0.2s ease-in-out;
+    --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.15);
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--foodie-primary) 0%, var(--foodie-secondary) 100%);
+    --gradient-success: linear-gradient(135deg, var(--foodie-success) 0%, #66bb6a 100%);
+    --gradient-warm: linear-gradient(135deg, #ff8a50 0%, #ff6b35 50%, #f7931e 100%);
 }
 
-/* Custom card enhancements */
+/* Foodie-themed card enhancements */
 .card {
-    transition: box-shadow var(--transition-smooth), transform var(--transition-smooth);
+    transition: all var(--transition-smooth);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-soft);
+    border: none;
+    overflow: hidden;
+    position: relative;
 }
 
 .card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-4px) scale(1.01);
 }
 
-/* Progress bar enhancements */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-primary);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+/* Food truck themed cards */
+.card.truck-card {
+    background: linear-gradient(145deg, #fff 0%, #fefefe 100%);
+}
+
+.card.event-card {
+    position: relative;
+    background: linear-gradient(145deg, #fdfcfb 0%, #fff 100%);
+}
+
+.card.event-card::after {
+    content: '🍴';
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    opacity: 0.1;
+    transition: opacity var(--transition-fast);
+}
+
+.card.event-card:hover::after {
+    opacity: 0.3;
+}
+
+/* Foodie progress bar enhancements */
 .progress {
     border-radius: var(--border-radius-lg);
     overflow: hidden;
+    height: 12px;
+    background: rgba(255, 107, 53, 0.1);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .progress-bar {
     transition: width var(--transition-smooth);
+    background: var(--gradient-primary);
+    position: relative;
+    overflow: hidden;
 }
 
-/* Button enhancements */
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 35%, 
+        rgba(255,255,255,0.3) 50%, 
+        transparent 65%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Special progress variants */
+.progress-success .progress-bar {
+    background: var(--gradient-success);
+}
+
+.progress-warning .progress-bar {
+    background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);
+}
+
+/* Foodie-themed button enhancements */
 .btn {
     transition: all var(--transition-fast);
+    border-radius: var(--border-radius-lg);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #e55a2e 0%, #e0841a 100%);
+    color: white;
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    border: none;
+}
+
+.btn-outline-primary {
+    border: 2px solid var(--foodie-primary);
+    color: var(--foodie-primary);
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: var(--foodie-primary);
+    border-color: var(--foodie-primary);
+    color: white;
+    transform: translateY(-2px);
 }
 
 .btn-lg {
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.75rem 2rem;
+}
+
+/* CTA Buttons */
+.btn-cta {
+    background: var(--gradient-warm);
+    border: none;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius-xl);
+}
+
+.btn-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+    color: white;
 }
 
 /* Form enhancements */
@@ -51,9 +197,39 @@
     box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
-/* Badge enhancements */
+/* Foodie badge enhancements */
 .badge {
-    font-weight: 500;
+    font-weight: 600;
+    border-radius: var(--border-radius-lg);
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.badge.bg-success {
+    background: var(--gradient-success) !important;
+    color: white;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%) !important;
+    color: white;
+}
+
+.badge.bg-primary {
+    background: var(--gradient-primary) !important;
+    color: white;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #ef5350 0%, #e53935 100%) !important;
+    color: white;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%) !important;
+    color: white;
 }
 
 /* Alert enhancements */
@@ -62,14 +238,105 @@
     border-radius: var(--border-radius-lg);
 }
 
-/* Navigation enhancements */
-.navbar-brand {
-    font-weight: 600;
+/* Foodie navigation enhancements */
+.navbar {
+    background: linear-gradient(90deg, #2c3e50 0%, #34495e 100%) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 1rem 0;
 }
 
-/* Footer styling */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white !important;
+    transition: all var(--transition-fast);
+}
+
+.navbar-brand:hover {
+    color: var(--foodie-secondary) !important;
+    transform: scale(1.05);
+}
+
+.navbar-brand i {
+    color: var(--foodie-primary);
+    margin-right: 0.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--foodie-secondary) !important;
+    transform: translateY(-1px);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--foodie-primary);
+    transition: all var(--transition-fast);
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+    width: 80%;
+}
+
+/* Foodie footer styling */
 footer {
     margin-top: auto;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 3rem 0 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+footer::before {
+    content: '🍴🚚🍕🌮🍔🍟🥗';
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    opacity: 0.1;
+    font-size: 2rem;
+    letter-spacing: 2rem;
+    animation: foodFloat 10s linear infinite;
+}
+
+@keyframes foodFloat {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+footer h5 {
+    color: var(--foodie-secondary);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+footer p {
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+footer a {
+    color: var(--foodie-secondary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+footer a:hover {
+    color: white;
 }
 
 /* Jumbotron-like styling for hero sections */
@@ -272,23 +539,94 @@ footer {
     }
 }
 
-/* Dark mode specific adjustments */
-[data-bs-theme="dark"] {
-    --bs-body-bg: #0d1117;
-    --bs-body-color: #f0f6fc;
+/* Foodie theme adjustments for warm feel */
+body {
+    background: linear-gradient(145deg, #fefefe 0%, #f8f8f8 100%);
+    color: #2c3e50;
+    font-family: 'Poppins', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
 }
 
-[data-bs-theme="dark"] .jumbotron {
-    background: linear-gradient(135deg, var(--bs-primary) 0%, #0969da 100%);
+/* Hero/Jumbotron sections */
+.hero-section {
+    background: var(--gradient-warm);
+    color: white;
+    padding: 4rem 0;
+    border-radius: var(--border-radius-xl);
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
 }
 
-[data-bs-theme="dark"] .card {
-    background-color: #161b22;
-    border-color: #30363d;
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 200%;
+    height: 200%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+    background-size: 50px 50px;
+    animation: float 20s linear infinite;
+    opacity: 0.3;
 }
 
-[data-bs-theme="dark"] .table-hover tbody tr:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.1);
+@keyframes float {
+    0% { transform: translateX(-100px) translateY(-100px); }
+    100% { transform: translateX(100px) translateY(100px); }
+}
+
+.hero-section h1 {
+    font-weight: 700;
+    font-size: 3rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+}
+
+/* Stats cards */
+.stats-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow-soft);
+    transition: all var(--transition-smooth);
+    border-left: 4px solid var(--foodie-primary);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+}
+
+.stats-card .icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.stats-card h3 {
+    color: var(--foodie-primary);
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin: 0.5rem 0;
+}
+
+.stats-card p {
+    color: #666;
+    margin: 0;
+    font-weight: 500;
 }
 
 /* Stripe Elements styling to match theme */
@@ -309,13 +647,71 @@ footer {
     border-color: var(--bs-danger);
 }
 
-/* Menu item styling */
+/* Menu item styling - enhanced for food appeal */
 .menu-item {
-    transition: background-color var(--transition-fast);
+    transition: all var(--transition-fast);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    margin: 0.5rem 0;
+    border: 2px solid transparent;
+    background: white;
+    position: relative;
 }
 
 .menu-item:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.05);
+    background: linear-gradient(145deg, #fff9f5 0%, #fff 100%);
+    border-color: var(--foodie-primary);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-soft);
+}
+
+.menu-item::before {
+    content: '🍽️';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    opacity: 0.1;
+    font-size: 1.2rem;
+    transition: opacity var(--transition-fast);
+}
+
+.menu-item:hover::before {
+    opacity: 0.3;
+}
+
+.menu-item h5 {
+    color: var(--foodie-earth);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.menu-item .price {
+    color: var(--foodie-primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.menu-item .description {
+    color: #666;
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+/* Pledge buttons in menu items */
+.menu-item .btn-pledge {
+    background: var(--gradient-primary);
+    border: none;
+    color: white;
+    font-weight: 600;
+    border-radius: var(--border-radius-lg);
+    min-width: 140px;
+    padding: 0.7rem 1.2rem;
+}
+
+.menu-item .btn-pledge:hover {
+    background: linear-gradient(135deg, #e55a2e 0%, #e0841a 100%);
+    transform: translateY(-2px);
+    color: white;
 }
 
 /* Status indicators */
