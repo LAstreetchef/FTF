@@ -18,6 +18,8 @@ Preferred communication style: Simple, everyday language.
   - Implemented shimmer effects on progress bars and smooth transitions
   - Updated navigation with gradient backgrounds and interactive hover states
   - Added foodie-themed buttons with warm gradients and enhanced hover effects
+  - Replaced hero background with authentic food truck scene image for better engagement
+  - Removed base price display from public event pages for cleaner pricing presentation
   - Created comprehensive event deletion functionality with safety checks
   - Added admin route `/admin/events/<id>/delete` with proper pledge handling
   - Fixed critical Flask startup error and improved overall code quality
