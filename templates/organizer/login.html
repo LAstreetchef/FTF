@@ -46,7 +46,7 @@
                 // Enhanced iframe support for organizer form
                 document.getElementById('organizerForm').addEventListener('submit', function(e) {
                     const inIframe = window.self !== window.top;
-                    const isLogin = !{{ 'true' if register_mode else 'false' }};
+                    const isLogin = {% if register_mode %}false{% else %}true{% endif %};
                     
                     console.log('Organizer form submitted - Login mode:', isLogin, 'In iframe:', inIframe);
                     console.log('Current URL:', window.location.href);
@@ -65,7 +65,7 @@
                 // Log status on page load
                 window.addEventListener('load', function() {
                     const inIframe = window.self !== window.top;
-                    const isLogin = !{{ 'true' if register_mode else 'false' }};
+                    const isLogin = {% if register_mode %}false{% else %}true{% endif %};
                     console.log('Organizer page loaded - Login mode:', isLogin, 'In iframe:', inIframe);
                 });
                 </script>
