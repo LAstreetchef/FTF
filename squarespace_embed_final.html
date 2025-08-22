@@ -1,0 +1,126 @@
+<!-- Food Truck Fundraiser - Desktop Embed for Squarespace -->
+<div id="fundraiser-wrapper" style="
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 0;
+  text-align: center;
+  font-family: Arial, sans-serif;
+">
+  
+  <h2 style="color: #ff6b35; margin-bottom: 10px;">Food Truck Fundraiser</h2>
+  <p style="color: #666; margin-bottom: 30px;">Create and manage food truck fundraising events</p>
+  
+  <!-- Desktop-optimized iframe -->
+  <div style="
+    position: relative;
+    width: 100%;
+    height: 900px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fa;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  ">
+    <iframe 
+      id="desktop-fundraiser"
+      src="https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/?embed=desktop&width=1200"
+      style="
+        width: 100%;
+        height: 100%;
+        border: none;
+        transform: scale(1);
+        transform-origin: top left;
+      "
+      scrolling="yes"
+      allow="payment; forms; scripts">
+    </iframe>
+  </div>
+  
+  <div style="margin-top: 20px; text-align: center;">
+    <p style="color: #888; font-size: 14px;">
+      Having issues? 
+      <a href="https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/" 
+         target="_blank" 
+         style="color: #ff6b35; text-decoration: none; font-weight: bold;">
+        Open in new window
+      </a>
+    </p>
+  </div>
+</div>
+
+<script>
+// Force desktop view by adjusting iframe if needed
+document.addEventListener('DOMContentLoaded', function() {
+  const iframe = document.getElementById('desktop-fundraiser');
+  const wrapper = document.getElementById('fundraiser-wrapper');
+  
+  // Ensure iframe loads with desktop parameters
+  setTimeout(function() {
+    if (iframe.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage({
+          type: 'FORCE_DESKTOP_VIEW',
+          width: 1200,
+          source: 'squarespace_embed'
+        }, '*');
+      } catch(e) {
+        console.log('Cross-origin messaging blocked, using URL parameters instead');
+      }
+    }
+  }, 2000);
+  
+  // Handle responsive scaling for smaller screens
+  function adjustIframeScale() {
+    const containerWidth = wrapper.offsetWidth;
+    if (containerWidth < 1200) {
+      const scale = containerWidth / 1200;
+      iframe.style.transform = `scale(${scale})`;
+      iframe.style.transformOrigin = 'top left';
+      iframe.parentElement.style.height = (900 * scale) + 'px';
+    } else {
+      iframe.style.transform = 'scale(1)';
+      iframe.parentElement.style.height = '900px';
+    }
+  }
+  
+  // Initial adjustment
+  adjustIframeScale();
+  
+  // Adjust on window resize
+  window.addEventListener('resize', adjustIframeScale);
+});
+</script>
+
+<style>
+/* Ensure proper display on all devices */
+#fundraiser-wrapper {
+  box-sizing: border-box;
+}
+
+#fundraiser-wrapper * {
+  box-sizing: border-box;
+}
+
+/* Override any Squarespace restrictions */
+#fundraiser-wrapper iframe {
+  min-width: unset !important;
+  max-width: unset !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  #fundraiser-wrapper {
+    padding: 10px;
+  }
+  
+  #fundraiser-wrapper > div {
+    height: 600px !important;
+  }
+  
+  #desktop-fundraiser {
+    transform: scale(0.6) !important;
+    transform-origin: top left !important;
+  }
+}
+</style>
