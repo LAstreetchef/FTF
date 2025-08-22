@@ -36,9 +36,27 @@
                     // Check if in iframe and log for debugging
                     const inIframe = window.self !== window.top;
                     console.log('Form submitted, in iframe:', inIframe);
+                    console.log('Current URL:', window.location.href);
                     console.log('Referrer:', document.referrer);
+                    console.log('Parent URL:', inIframe ? window.parent.location.href : 'Not in iframe');
                     
-                    // Let the form submit normally - server will handle iframe detection
+                    // Add iframe indicator to form if needed
+                    if (inIframe) {
+                        const iframeField = document.createElement('input');
+                        iframeField.type = 'hidden';
+                        iframeField.name = 'iframe_context';
+                        iframeField.value = 'true';
+                        this.appendChild(iframeField);
+                    }
+                });
+                
+                // Also log iframe status on page load
+                window.addEventListener('load', function() {
+                    const inIframe = window.self !== window.top;
+                    console.log('Admin login page loaded, in iframe:', inIframe);
+                    if (inIframe) {
+                        console.log('Parent domain:', document.referrer);
+                    }
                 });
                 </script>
                 
