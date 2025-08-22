@@ -1088,43 +1088,31 @@ def organizer_dashboard():
 
 @app.route('/organizer/create-event', methods=['GET', 'POST'])
 def organizer_create_event():
-    # Enhanced authentication with auth token support (same as dashboard)
-    organizer_id = session.get('organizer_id')
+    # Simplified iframe-compatible authentication
+    organizer_id = None
     auth_token = request.args.get('auth_token')
     
-    # Enhanced auth token debugging
-    logging.info(f"Create event: organizer_id from session: {organizer_id}")
-    logging.info(f"Create event: auth_token from URL: {auth_token}")
-    logging.info(f"Create event: session contents: {dict(session)}")
-    
-    # Check if we have a valid auth token (for iframe compatibility)
-    if not organizer_id and auth_token:
-        logging.info("Create event: No session found, attempting auth token validation...")
+    # Direct token validation without relying on sessions
+    if auth_token:
+        logging.info(f"Create event: Validating auth token: {auth_token[:20]}...")
         token_record = AuthToken.query.filter_by(
             token=auth_token,
             is_active=True
         ).filter(AuthToken.expires_at > datetime.utcnow()).first()
         
-        logging.info(f"Create event: Token lookup result: {token_record is not None}")
-        if token_record:
-            logging.info(f"Create event: Token organizer_id: {token_record.organizer_id}")
-        
         if token_record:
             organizer_id = token_record.organizer_id
-            # Restore session for seamless navigation
-            session.clear()  # Clear any stale session data
-            session['organizer_id'] = organizer_id
-            session['user_type'] = 'organizer'
-            session['auth_token'] = auth_token
-            session.permanent = True
-            session.modified = True
-            logging.info(f"Create event: Auth token validated, restored session for organizer_id: {organizer_id}")
-            logging.info(f"Create event: New session contents: {dict(session)}")
+            logging.info(f"Create event: Token validated for organizer_id: {organizer_id}")
         else:
-            logging.warning(f"Create event: Invalid auth token: {auth_token}")
+            logging.warning("Create event: Invalid or expired auth token")
+    
+    # Fallback to session if no token
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+        logging.info(f"Create event: Using session organizer_id: {organizer_id}")
     
     if not organizer_id:
-        logging.warning("Create event: Access denied - no organizer_id and no valid auth token")
+        logging.warning("Create event: No valid authentication found")
         return redirect(url_for('organizer_login'))
     
     if request.method == 'POST':
@@ -1133,14 +1121,14 @@ def organizer_create_event():
         truck = FoodTruck.query.get(truck_id)
         if not truck:
             flash('Food truck not found', 'error')
-            return redirect(url_for('organizer_create_event') + f'?auth_token={session.get("auth_token", "")}')
+            return redirect(url_for('organizer_create_event') + f'?auth_token={auth_token}')
         
         event = Event(
             name=request.form['name'],
             description=request.form['description'],
             date=datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M'),
             location=request.form['location'],
-            organizer_id=session['organizer_id'],
+            organizer_id=organizer_id,
             food_truck_id=truck_id,
             markup_percentage=float(request.form['markup_percentage']),
             pledge_goal=truck.sales_goal if truck.sales_goal else 1000.0
@@ -1173,7 +1161,7 @@ def organizer_create_event():
         db.session.commit()
         
         # Send notification email to admin
-        organizer = Organizer.query.get(session['organizer_id'])
+        organizer = Organizer.query.get(organizer_id)
         organizer_name = organizer.name if organizer else "Unknown Organizer"
         send_email(
             'truckstopsla@gmail.com',
@@ -1182,13 +1170,12 @@ def organizer_create_event():
         )
         
         flash('Event created successfully', 'success')
-        return redirect(url_for('organizer_dashboard') + f'?auth_token={session.get("auth_token", "")}')
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}')
     
     # GET request - show form
     trucks = FoodTruck.query.all()
     # Pass auth token to template for form submission consistency  
-    current_auth_token = session.get('auth_token', auth_token or '')
-    return render_template('organizer/create_event.html', trucks=trucks, auth_token=current_auth_token)
+    return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
 
 # Public Routes
 @app.route('/events')
