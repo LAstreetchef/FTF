@@ -2,7 +2,7 @@
 <html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" id="viewport-meta">
     <title>{% block title %}Food Truck Fundraiser{% endblock %}</title>
     
     <!-- Iframe compatibility -->
@@ -19,30 +19,56 @@
                 window.parentDomain = document.referrer ? new URL(document.referrer).hostname : 'unknown';
                 console.log('Running in iframe from:', window.parentDomain);
                 
-                // Force desktop view in iframe by overriding viewport
-                const viewport = document.querySelector('meta[name="viewport"]');
+                // Apply iframe-specific styling
+                document.body.classList.add('iframe-embed');
+                
+                // Force wider viewport for better layout
+                const viewport = document.querySelector('#viewport-meta');
                 if (viewport) {
-                    viewport.setAttribute('content', 'width=1200, initial-scale=1.0');
+                    viewport.setAttribute('content', 'width=1024, initial-scale=0.8, user-scalable=yes');
                 }
                 
-                // Add CSS to force desktop layout
+                // Add CSS optimized for iframe embedding
                 const style = document.createElement('style');
                 style.textContent = `
-                    /* Force desktop layout in iframe */
-                    body {
-                        min-width: 1200px !important;
+                    .iframe-embed {
+                        font-size: 14px !important;
+                        line-height: 1.4 !important;
                     }
                     
-                    .container {
-                        max-width: 1140px !important;
+                    .iframe-embed .container {
+                        max-width: 960px !important;
+                        padding: 0 15px !important;
                     }
                     
-                    /* Disable mobile responsive breakpoints in iframe */
-                    @media (max-width: 768px) {
-                        .navbar-toggler { display: none !important; }
-                        .navbar-collapse { display: flex !important; }
-                        .navbar-nav { flex-direction: row !important; }
+                    .iframe-embed .navbar {
+                        padding: 0.5rem 0 !important;
+                        min-height: 50px !important;
                     }
+                    
+                    .iframe-embed .navbar-brand {
+                        font-size: 1.1rem !important;
+                    }
+                    
+                    .iframe-embed .card {
+                        margin-bottom: 1rem !important;
+                    }
+                    
+                    .iframe-embed .btn {
+                        padding: 0.375rem 0.75rem !important;
+                        font-size: 0.875rem !important;
+                    }
+                    
+                    .iframe-embed h1 { font-size: 1.75rem !important; }
+                    .iframe-embed h2 { font-size: 1.5rem !important; }
+                    .iframe-embed h3 { font-size: 1.25rem !important; }
+                    .iframe-embed h4 { font-size: 1.1rem !important; }
+                    .iframe-embed h5 { font-size: 1rem !important; }
+                    
+                    /* Force horizontal navbar */
+                    .iframe-embed .navbar-toggler { display: none !important; }
+                    .iframe-embed .navbar-collapse { display: flex !important; }
+                    .iframe-embed .navbar-nav { flex-direction: row !important; }
                 `;
                 document.head.appendChild(style);
                 
