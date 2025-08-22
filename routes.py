@@ -1082,11 +1082,35 @@ def organizer_dashboard():
         return redirect(url_for('organizer_login'))
     events = Event.query.filter_by(organizer_id=organizer.id).order_by(Event.created_at.desc()).all()
     
-    return render_template('organizer/dashboard.html', organizer=organizer, events=events)
+    # Pass auth token to template for iframe navigation
+    current_auth_token = session.get('auth_token', '')
+    return render_template('organizer/dashboard.html', organizer=organizer, events=events, auth_token=current_auth_token)
 
 @app.route('/organizer/create-event', methods=['GET', 'POST'])
 def organizer_create_event():
-    if not session.get('organizer_id'):
+    # Enhanced authentication with auth token support (same as dashboard)
+    organizer_id = session.get('organizer_id')
+    auth_token = request.args.get('auth_token')
+    
+    # Check if we have a valid auth token (for iframe compatibility)
+    if not organizer_id and auth_token:
+        logging.info("Create event: No session found, attempting auth token validation...")
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+            # Restore session for seamless navigation
+            session['organizer_id'] = organizer_id
+            session['user_type'] = 'organizer'
+            session.permanent = True
+            session.modified = True
+            logging.info(f"Create event: Auth token validated, restored session for organizer_id: {organizer_id}")
+    
+    if not organizer_id:
+        logging.warning("Create event: Access denied - no organizer_id and no valid auth token")
         return redirect(url_for('organizer_login'))
     
     if request.method == 'POST':

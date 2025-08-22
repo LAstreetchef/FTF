@@ -8,7 +8,7 @@
         <i data-feather="user" class="me-2"></i>
         Welcome, {{ organizer.name }}
     </h1>
-    <a href="{{ url_for('organizer_create_event') }}" class="btn btn-primary">
+    <a href="{{ url_for('organizer_create_event') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-primary">
         <i data-feather="plus" class="me-2"></i>
         Create New Event
     </a>
@@ -135,7 +135,7 @@
     <i data-feather="calendar" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
     <h3 class="text-muted">No Events Yet</h3>
     <p class="text-muted">Create your first event to start raising funds for food truck attendance.</p>
-    <a href="{{ url_for('organizer_create_event') }}" class="btn btn-primary">
+    <a href="{{ url_for('organizer_create_event') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-primary">
         <i data-feather="plus" class="me-2"></i>
         Create Your First Event
     </a>

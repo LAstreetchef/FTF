@@ -71,7 +71,7 @@
                         </li>
                     {% elif session.get('organizer_id') %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('organizer_dashboard') }}">Dashboard</a>
+                            <a class="nav-link" href="{{ url_for('organizer_dashboard') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}">Dashboard</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('organizer_logout') }}">Logout</a>
