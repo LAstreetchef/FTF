@@ -23,14 +23,12 @@
                     
                     <div class="mb-3">
                         <label for="email" class="form-label">Email Address</label>
-                        <input type="email" class="form-control" id="email" name="email" required 
-                               {% if not register_mode %}value="kammiceli@gmail.com"{% endif %}>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
                     
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" name="password" required
-                               {% if not register_mode %}value="password"{% endif %}>
+                        <input type="password" class="form-control" id="password" name="password" required>
                         {% if register_mode %}
                         <div class="form-text">Use a secure password for your account.</div>
                         {% endif %}
