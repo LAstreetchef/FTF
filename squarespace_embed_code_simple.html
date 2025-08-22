@@ -1,7 +1,7 @@
 <!-- Simple Food Truck Fundraiser Embed (Alternative Version) -->
 <!-- If the main embed doesn't work, try this simpler version -->
 
-<div style="width: 100%; text-align: center; margin: 20px 0;">
+<div style="width: 100vw; max-width: none; text-align: center; margin: 20px calc(-50vw + 50%); padding: 0;">
   <h3>Food Truck Fundraiser</h3>
   <p>Create and manage food truck fundraising events</p>
   
@@ -11,7 +11,7 @@
     width="100%"
     height="800"
     frameborder="0"
-    style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    style="border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); min-width: 800px; width: 100vw; max-width: 100vw;">
   </iframe>
   
   <p style="margin-top: 15px;">
@@ -27,10 +27,23 @@
 </div>
 
 <style>
-  /* Mobile responsive */
+  /* Force full width and responsive */
+  iframe {
+    min-width: 800px !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
+  @media (max-width: 1200px) {
+    iframe {
+      min-width: 100% !important;
+    }
+  }
+  
   @media (max-width: 768px) {
     iframe {
       height: 600px !important;
+      min-width: 100% !important;
     }
   }
 </style>

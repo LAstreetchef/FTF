@@ -1,7 +1,7 @@
 <!-- Food Truck Fundraiser Embed Code for Squarespace -->
 <!-- Instructions: Copy this entire code block and paste it into a Code Block element in Squarespace -->
 
-<div id="foodtruck-fundraiser-container" style="width: 100%; min-height: 800px; position: relative;">
+<div id="foodtruck-fundraiser-container" style="width: 100%; max-width: none; min-height: 800px; position: relative; margin: 0; padding: 0;">
   <!-- Loading indicator -->
   <div id="fundraiser-loading" style="
     position: absolute;
@@ -30,6 +30,7 @@
     src="https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/"
     style="
       width: 100%;
+      min-width: 800px;
       height: 800px;
       border: none;
       border-radius: 8px;
@@ -48,16 +49,32 @@
     100% { transform: rotate(360deg); }
   }
   
+  /* Force full width in Squarespace */
+  #foodtruck-fundraiser-container {
+    margin-left: calc(-50vw + 50%) !important;
+    margin-right: calc(-50vw + 50%) !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+  
   /* Responsive design */
+  @media (max-width: 1200px) {
+    #fundraiser-iframe {
+      min-width: 100%;
+    }
+  }
+  
   @media (max-width: 768px) {
     #fundraiser-iframe {
       height: 600px;
+      min-width: 100%;
     }
   }
   
   @media (max-width: 480px) {
     #fundraiser-iframe {
       height: 500px;
+      min-width: 100%;
     }
   }
 </style>
