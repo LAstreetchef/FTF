@@ -1,0 +1,120 @@
+<!-- Food Truck Fundraiser Embed Code for Squarespace -->
+<!-- Instructions: Copy this entire code block and paste it into a Code Block element in Squarespace -->
+
+<div id="foodtruck-fundraiser-container" style="width: 100%; min-height: 800px; position: relative;">
+  <!-- Loading indicator -->
+  <div id="fundraiser-loading" style="
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-family: Arial, sans-serif;
+    color: #666;
+  ">
+    <div style="
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #ff6b35;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    "></div>
+    <p>Loading Food Truck Fundraiser...</p>
+  </div>
+
+  <!-- Main iframe -->
+  <iframe 
+    id="fundraiser-iframe"
+    src="https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/"
+    style="
+      width: 100%;
+      height: 800px;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none;
+    "
+    allow="payment"
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+    loading="lazy">
+  </iframe>
+</div>
+
+<style>
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    #fundraiser-iframe {
+      height: 600px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    #fundraiser-iframe {
+      height: 500px;
+    }
+  }
+</style>
+
+<script>
+(function() {
+  // Wait for iframe to load
+  const iframe = document.getElementById('fundraiser-iframe');
+  const loading = document.getElementById('fundraiser-loading');
+  
+  iframe.onload = function() {
+    // Hide loading indicator and show iframe
+    loading.style.display = 'none';
+    iframe.style.display = 'block';
+    
+    // Send initial message to iframe
+    iframe.contentWindow.postMessage({
+      type: 'PARENT_READY',
+      origin: window.location.origin
+    }, '*');
+  };
+  
+  // Handle messages from iframe (for dynamic height adjustment)
+  window.addEventListener('message', function(event) {
+    // Security check - only accept messages from your Replit domain
+    if (event.origin !== 'https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev') {
+      return;
+    }
+    
+    if (event.data.type === 'RESIZE_IFRAME') {
+      const newHeight = Math.max(event.data.height || 800, 400);
+      iframe.style.height = newHeight + 'px';
+    }
+    
+    if (event.data.type === 'NAVIGATE') {
+      // Handle navigation events if needed
+      console.log('Fundraiser navigation:', event.data.url);
+    }
+  });
+  
+  // Handle iframe errors
+  iframe.onerror = function() {
+    loading.innerHTML = `
+      <div style="color: #e74c3c; text-align: center;">
+        <h3>Unable to load Food Truck Fundraiser</h3>
+        <p>Please check your internet connection and try refreshing the page.</p>
+        <button onclick="location.reload()" style="
+          background: #ff6b35;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+          margin-top: 10px;
+        ">Retry</button>
+      </div>
+    `;
+  };
+})();
+</script>
