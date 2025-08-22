@@ -21,6 +21,14 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
+# Configure session cookies for iframe compatibility
+app.config.update(
+    SESSION_COOKIE_SECURE=True,      # Require HTTPS
+    SESSION_COOKIE_HTTPONLY=True,    # Prevent XSS
+    SESSION_COOKIE_SAMESITE=None,    # Allow cross-origin iframe embedding
+    SESSION_COOKIE_DOMAIN=None       # Don't restrict domain
+)
+
 # Configure the database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///foodtruckfundraiser.db")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
@@ -51,18 +59,29 @@ def after_request(response):
     response.headers['X-Frame-Options'] = 'ALLOWALL'
     response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com"
     
-    # Configure cookies for iframe/cross-origin use
-    # Set SameSite to None for cross-origin embedding
+    # Configure ALL cookies for iframe/cross-origin use
     if 'Set-Cookie' in response.headers:
         cookies = response.headers.getlist('Set-Cookie')
         response.headers['Set-Cookie'] = []
         for cookie in cookies:
-            # Add SameSite=None and Secure for iframe compatibility
-            if 'SameSite' not in cookie:
-                if 'Secure' not in cookie:
-                    cookie += '; Secure'
+            # Ensure all cookies have the right attributes for iframe embedding
+            if 'SameSite' not in cookie and 'Secure' not in cookie:
+                # Add both Secure and SameSite=None for iframe compatibility
+                cookie = cookie.rstrip('; ')  # Remove trailing semicolons
+                cookie += '; Secure; SameSite=None'
+            elif 'SameSite' not in cookie:
+                cookie = cookie.rstrip('; ')
                 cookie += '; SameSite=None'
+            elif 'Secure' not in cookie:
+                cookie = cookie.rstrip('; ')
+                cookie += '; Secure'
             response.headers.add('Set-Cookie', cookie)
+    
+    # Add CORS headers for cross-origin requests
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Allow-Origin'] = 'https://www.thefoodtruckstop.com'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
     
     return response
 

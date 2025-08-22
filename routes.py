@@ -24,6 +24,43 @@ def test_credentials():
     return render_template('test_credentials.html')
 
 # Admin Routes
+@app.route('/iframe-debug')
+def iframe_debug():
+    """Debug endpoint to check iframe functionality"""
+    import json
+    from flask import request, session
+    
+    debug_info = {
+        'session_data': dict(session),
+        'cookies': dict(request.cookies),
+        'headers': dict(request.headers),
+        'is_secure': request.is_secure,
+        'referrer': request.referrer,
+        'user_agent': request.headers.get('User-Agent', 'None')
+    }
+    
+    return f"""
+    <h2>Iframe Debug Information</h2>
+    <pre>{json.dumps(debug_info, indent=2)}</pre>
+    
+    <h3>Test Cookie Set</h3>
+    <script>
+        document.cookie = "test_iframe_cookie=working; SameSite=None; Secure; path=/";
+        console.log('Cookies:', document.cookie);
+    </script>
+    
+    <h3>Iframe Detection</h3>
+    <script>
+        console.log('In iframe:', window.self !== window.top);
+        console.log('Parent domain:', document.referrer);
+        document.write('<p>In iframe: ' + (window.self !== window.top) + '</p>');
+        document.write('<p>Referrer: ' + document.referrer + '</p>');
+    </script>
+    
+    <p><a href="/admin/login">Try Admin Login</a></p>
+    <p><a href="/organizer/login">Try Organizer Login</a></p>
+    """
+
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
     if request.method == 'POST':
