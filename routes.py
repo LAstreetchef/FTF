@@ -7,6 +7,7 @@ import stripe
 import os
 import json
 import logging
+import secrets
 from datetime import datetime
 
 # Configure Stripe
@@ -869,6 +870,10 @@ def organizer_login():
             session['authenticated'] = True
             session['login_time'] = datetime.now().isoformat()
             
+            # Create a temporary auth token for iframe compatibility
+            auth_token = secrets.token_urlsafe(32)
+            session['auth_token'] = auth_token
+            
             logging.info(f"Organizer {email} logged in successfully, session set with organizer_id: {organizer.id}")
             logging.info(f"Session contents after login: {dict(session)}")
             flash('Successfully logged in', 'success')
@@ -879,7 +884,7 @@ def organizer_login():
             <html>
             <head>
                 <title>Organizer Login Success</title>
-                <meta http-equiv="refresh" content="3;url={url_for('organizer_dashboard')}">
+                <meta http-equiv="refresh" content="3;url={url_for('organizer_dashboard')}?auth_token={session.get('auth_token', '')}">
                 <script>
                     console.log('Organizer login successful!');
                     console.log('In iframe:', window.self !== window.top);
@@ -890,17 +895,19 @@ def organizer_login():
                     if (typeof(Storage) !== "undefined") {{
                         localStorage.setItem('organizer_logged_in', 'true');
                         localStorage.setItem('organizer_id', '{session.get('organizer_id', '')}');
-                        console.log('Session stored in localStorage');
+                        localStorage.setItem('auth_token', '{session.get('auth_token', '')}');
+                        console.log('Session stored in localStorage with auth token');
                     }}
                     
                     // Multiple redirect approaches for iframe compatibility
                     let redirected = false;
                     
-                    // Method 1: Immediate redirect (works if session persists)
+                    // Method 1: Redirect with auth token for iframe compatibility
                     setTimeout(function() {{
                         if (!redirected) {{
-                            console.log('Attempting immediate redirect...');
-                            window.location.href = '{url_for('organizer_dashboard')}';
+                            console.log('Attempting redirect with auth token...');
+                            const authToken = '{session.get('auth_token', '')}';
+                            window.location.href = '{url_for('organizer_dashboard')}?auth_token=' + authToken;
                             redirected = true;
                         }}
                     }}, 1000);
@@ -915,7 +922,7 @@ def organizer_login():
                     <p>Redirecting to dashboard in 3 seconds...</p>
                     <div id="countdown">3</div>
                     <br>
-                    <p><strong><a href="{url_for('organizer_dashboard')}">Click here if not redirected</a></strong></p>
+                    <p><strong><a href="{url_for('organizer_dashboard')}?auth_token={session.get('auth_token', '')}">Click here if not redirected</a></strong></p>
                     <hr>
                     <small>
                         Session ID: {session.get('organizer_id', 'None')}<br>
@@ -1028,13 +1035,26 @@ def organizer_dashboard():
     organizer_id = session.get('organizer_id')
     user_type = session.get('user_type')
     is_embedded = request.referrer and 'thefoodtruckstop.com' in request.referrer
+    auth_token = request.args.get('auth_token')
     
     logging.info(f"Dashboard access - Organizer ID: {organizer_id}, User type: {user_type}, Embedded: {is_embedded}")
+    logging.info(f"Auth token provided: {auth_token is not None}")
     logging.info(f"Session data: {dict(session)}")
     logging.info(f"Request cookies: {dict(request.cookies)}")
     
+    # Check if we have a valid auth token (for iframe compatibility)
+    if not organizer_id and auth_token:
+        logging.info("No session found, attempting auth token validation...")
+        # Find session with matching auth token (basic approach)
+        # For now, we'll just check if the token exists in current session
+        if session.get('auth_token') == auth_token and session.get('organizer_id'):
+            organizer_id = session.get('organizer_id')
+            logging.info(f"Auth token validated, organizer_id: {organizer_id}")
+        else:
+            logging.warning("Invalid or expired auth token")
+    
     if not organizer_id:
-        logging.warning("Dashboard access denied - no organizer_id in session, redirecting to login")
+        logging.warning("Dashboard access denied - no organizer_id in session and no valid auth token, redirecting to login")
         return redirect(url_for('organizer_login'))
     
     organizer = Organizer.query.get(session['organizer_id'])
