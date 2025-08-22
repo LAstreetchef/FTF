@@ -826,9 +826,13 @@ def organizer_login():
         email = request.form['email']
         password = request.form['password']
         
-        # Enhanced logging for iframe debugging
-        is_embedded = request.referrer and 'thefoodtruckstop.com' in request.referrer
-        logging.info(f"Organizer login attempt - Email: {email}, Embedded: {is_embedded}, Referrer: {request.referrer}")
+        # Enhanced iframe detection (same as admin)
+        is_embedded = (request.referrer and 'thefoodtruckstop.com' in request.referrer) or \
+                     request.form.get('iframe_context') == 'true'
+        
+        logging.info(f"Organizer login attempt - Email: {email}, Embedded: {is_embedded}")
+        logging.info(f"Request details - Referrer: {request.referrer}, Iframe field: {request.form.get('iframe_context')}")
+        logging.info(f"Form data: {dict(request.form)}")
         
         organizer = Organizer.query.filter_by(email=email).first()
         if organizer and check_password_hash(organizer.password_hash, password):
@@ -846,31 +850,51 @@ def organizer_login():
             logging.info(f"Organizer {email} logged in successfully, session set with organizer_id: {organizer.id}")
             flash('Successfully logged in', 'success')
             
-            # For iframe contexts, use a different approach
-            if is_embedded:
-                # Return a page that will redirect the parent frame
-                return f"""
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Login Success</title>
-                    <script>
-                        // For iframe contexts, redirect the parent window
+            # Always return a smart page that handles both iframe and regular contexts
+            return f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Organizer Login Success</title>
+                <script>
+                    console.log('Organizer login successful!');
+                    console.log('In iframe:', window.self !== window.top);
+                    console.log('Server detected embedded:', {str(is_embedded).lower()});
+                    
+                    // Wait a moment for session to be saved, then redirect
+                    setTimeout(function() {{
                         if (window.self !== window.top) {{
-                            window.parent.location.href = 'https://www.thefoodtruckstop.com/fundraiser';
+                            // In iframe - try to redirect parent
+                            try {{
+                                console.log('Redirecting parent window...');
+                                window.parent.location.href = 'https://www.thefoodtruckstop.com/fundraiser';
+                            }} catch(e) {{
+                                console.log('Parent redirect failed, using direct redirect:', e);
+                                window.location.href = '{url_for('organizer_dashboard')}';
+                            }}
                         }} else {{
+                            // Regular context
+                            console.log('Regular redirect to dashboard...');
                             window.location.href = '{url_for('organizer_dashboard')}';
                         }}
-                    </script>
-                </head>
-                <body>
-                    <p>Login successful! Redirecting...</p>
-                    <p>If you are not redirected, <a href="{url_for('organizer_dashboard')}">click here</a></p>
-                </body>
-                </html>
-                """
-            else:
-                return redirect(url_for('organizer_dashboard'))
+                    }}, 500);
+                </script>
+            </head>
+            <body>
+                <div style="text-align: center; margin-top: 50px;">
+                    <h2>✅ Organizer Login Successful!</h2>
+                    <p>Redirecting to dashboard...</p>
+                    <p>If not redirected: <a href="{url_for('organizer_dashboard')}" target="_top">Click here for Dashboard</a></p>
+                    <hr>
+                    <small>
+                        Debug: Iframe detected: {is_embedded}<br>
+                        Referrer: {request.referrer}<br>
+                        Session ID: {session.get('organizer_id', 'None')}
+                    </small>
+                </div>
+            </body>
+            </html>
+            """
         else:
             flash('Invalid credentials', 'error')
     
