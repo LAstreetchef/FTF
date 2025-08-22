@@ -18,6 +18,34 @@
             try {
                 window.parentDomain = document.referrer ? new URL(document.referrer).hostname : 'unknown';
                 console.log('Running in iframe from:', window.parentDomain);
+                
+                // Force desktop view in iframe by overriding viewport
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 'width=1200, initial-scale=1.0');
+                }
+                
+                // Add CSS to force desktop layout
+                const style = document.createElement('style');
+                style.textContent = `
+                    /* Force desktop layout in iframe */
+                    body {
+                        min-width: 1200px !important;
+                    }
+                    
+                    .container {
+                        max-width: 1140px !important;
+                    }
+                    
+                    /* Disable mobile responsive breakpoints in iframe */
+                    @media (max-width: 768px) {
+                        .navbar-toggler { display: none !important; }
+                        .navbar-collapse { display: flex !important; }
+                        .navbar-nav { flex-direction: row !important; }
+                    }
+                `;
+                document.head.appendChild(style);
+                
             } catch(e) {
                 window.parentDomain = 'unknown';
             }
