@@ -37,7 +37,7 @@
       display: none;
     "
     allow="payment"
-    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
     loading="lazy">
   </iframe>
 </div>
@@ -98,8 +98,36 @@
     }
   });
   
-  // Handle iframe errors
+  // Handle iframe errors and timeout
+  let loadTimeout = setTimeout(function() {
+    if (iframe.style.display === 'none') {
+      loading.innerHTML = `
+        <div style="color: #e74c3c; text-align: center;">
+          <h3>Loading Issue Detected</h3>
+          <p>The fundraiser is taking longer than expected to load.</p>
+          <p><small>This may be due to browser security settings or network issues.</small></p>
+          <button onclick="location.reload()" style="
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+          ">Retry</button>
+          <br><br>
+          <a href="https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/" 
+             target="_blank" 
+             style="color: #ff6b35; text-decoration: none;">
+            Open in New Tab Instead
+          </a>
+        </div>
+      `;
+    }
+  }, 10000); // 10 second timeout
+  
   iframe.onerror = function() {
+    clearTimeout(loadTimeout);
     loading.innerHTML = `
       <div style="color: #e74c3c; text-align: center;">
         <h3>Unable to load Food Truck Fundraiser</h3>
@@ -113,8 +141,26 @@
           cursor: pointer;
           margin-top: 10px;
         ">Retry</button>
+        <br><br>
+        <a href="https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/" 
+           target="_blank" 
+           style="color: #ff6b35; text-decoration: none;">
+          Open in New Tab Instead
+        </a>
       </div>
     `;
+  };
+  
+  // Clear timeout when iframe loads successfully
+  iframe.onload = function() {
+    clearTimeout(loadTimeout);
+    loading.style.display = 'none';
+    iframe.style.display = 'block';
+    
+    iframe.contentWindow.postMessage({
+      type: 'PARENT_READY',
+      origin: window.location.origin
+    }, '*');
   };
 })();
 </script>
