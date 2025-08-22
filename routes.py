@@ -67,43 +67,47 @@ def iframe_debug():
 @app.route('/quick-admin-login')
 def quick_admin_login():
     """Quick login for admin in iframe contexts"""
-    admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
-    if admin:
-        session['admin_id'] = admin.id
-        session['user_type'] = 'admin'
-        session.permanent = True
-        
-        # Create response with iframe-friendly cookies
-        response = make_response(redirect(url_for('admin_dashboard')))
-        response.set_cookie('auth_token', f'admin_{admin.id}', 
-                           secure=True, samesite='None', httponly=False, 
-                           max_age=86400)
-        
-        flash('Quick admin login successful', 'success')
-        return response
-    else:
-        flash('Admin user not found', 'error')
+    try:
+        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        if admin:
+            session['admin_id'] = admin.id
+            session['user_type'] = 'admin'
+            session.permanent = True
+            
+            flash('Quick admin login successful', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Admin user not found', 'error')
+            return redirect(url_for('admin_login'))
+    except Exception as e:
+        import traceback
+        error_msg = f"Quick admin login error: {str(e)}"
+        logging.error(error_msg)
+        logging.error(traceback.format_exc())
+        flash('Login error occurred', 'error')
         return redirect(url_for('admin_login'))
 
 @app.route('/quick-organizer-login')
 def quick_organizer_login():
     """Quick login for organizer in iframe contexts"""
-    organizer = Organizer.query.filter_by(email='kammiceli@gmail.com').first()
-    if organizer:
-        session['organizer_id'] = organizer.id
-        session['user_type'] = 'organizer'
-        session.permanent = True
-        
-        # Create response with iframe-friendly cookies
-        response = make_response(redirect(url_for('organizer_dashboard')))
-        response.set_cookie('auth_token', f'organizer_{organizer.id}', 
-                           secure=True, samesite='None', httponly=False, 
-                           max_age=86400)
-        
-        flash('Quick organizer login successful', 'success')
-        return response
-    else:
-        flash('Organizer user not found', 'error')
+    try:
+        organizer = Organizer.query.filter_by(email='kammiceli@gmail.com').first()
+        if organizer:
+            session['organizer_id'] = organizer.id
+            session['user_type'] = 'organizer'
+            session.permanent = True
+            
+            flash('Quick organizer login successful', 'success')
+            return redirect(url_for('organizer_dashboard'))
+        else:
+            flash('Organizer user not found', 'error')
+            return redirect(url_for('organizer_login'))
+    except Exception as e:
+        import traceback
+        error_msg = f"Quick organizer login error: {str(e)}"
+        logging.error(error_msg)
+        logging.error(traceback.format_exc())
+        flash('Login error occurred', 'error')
         return redirect(url_for('organizer_login'))
 
 @app.route('/admin/login', methods=['GET', 'POST'])
