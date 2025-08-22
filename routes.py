@@ -64,6 +64,17 @@ def iframe_debug():
     <p><a href="/organizer/login">Try Organizer Login</a></p>
     <p><a href="/organizer/dashboard">Test Organizer Dashboard Access</a></p>
     <p><a href="/admin/dashboard">Test Admin Dashboard Access</a></p>
+    
+    <h3>Full Iframe Test Sequence</h3>
+    <div style="border: 2px solid #007bff; padding: 15px; margin: 10px 0;">
+        <h4>Test Login → Dashboard Flow:</h4>
+        <ol>
+            <li><a href="/organizer/login" target="_blank">1. Open Organizer Login</a></li>
+            <li>Login with: kammiceli@gmail.com / password</li>
+            <li>Should redirect to dashboard automatically</li>
+        </ol>
+        <p><strong>If failing:</strong> Check browser console and server logs</p>
+    </div>
     """
 
 @app.route('/quick-admin-login')
@@ -874,9 +885,10 @@ def organizer_login():
                     console.log('Server detected embedded:', {str(is_embedded).lower()});
                     
                     // Wait a moment for session to be saved, then redirect
-                    // Immediately redirect to dashboard within iframe instead of parent
+                    console.log('Waiting 1 second for session persistence...');
                     setTimeout(function() {{
-                        console.log('Redirecting to organizer dashboard in iframe...');
+                        console.log('Now redirecting to organizer dashboard...');
+                        console.log('Target URL: {url_for('organizer_dashboard')}');
                         window.location.href = '{url_for('organizer_dashboard')}';
                     }}, 1000);
                 </script>
