@@ -141,3 +141,11 @@ class EmailLog(db.Model):
     status = db.Column(db.String(20), default='pending')  # pending, sent, failed
     sent_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class AuthToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(64), unique=True, nullable=False)
+    organizer_id = db.Column(db.Integer, db.ForeignKey('organizer.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    is_active = db.Column(db.Boolean, default=True)

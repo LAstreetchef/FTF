@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
-from models import Admin, Organizer, FoodTruck, Event, Pledge, EmailLog
+from models import Admin, Organizer, FoodTruck, Event, Pledge, EmailLog, AuthToken
 from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
 import stripe
 import os
@@ -870,9 +870,19 @@ def organizer_login():
             session['authenticated'] = True
             session['login_time'] = datetime.now().isoformat()
             
-            # Create a temporary auth token for iframe compatibility
+            # Create a persistent auth token for iframe compatibility
             auth_token = secrets.token_urlsafe(32)
             session['auth_token'] = auth_token
+            
+            # Store token in database with 24 hour expiration
+            from datetime import timedelta
+            token_record = AuthToken(
+                token=auth_token,
+                organizer_id=organizer.id,
+                expires_at=datetime.utcnow() + timedelta(hours=24)
+            )
+            db.session.add(token_record)
+            db.session.commit()
             
             logging.info(f"Organizer {email} logged in successfully, session set with organizer_id: {organizer.id}")
             logging.info(f"Session contents after login: {dict(session)}")
@@ -1045,11 +1055,20 @@ def organizer_dashboard():
     # Check if we have a valid auth token (for iframe compatibility)
     if not organizer_id and auth_token:
         logging.info("No session found, attempting auth token validation...")
-        # Find session with matching auth token (basic approach)
-        # For now, we'll just check if the token exists in current session
-        if session.get('auth_token') == auth_token and session.get('organizer_id'):
-            organizer_id = session.get('organizer_id')
-            logging.info(f"Auth token validated, organizer_id: {organizer_id}")
+        # Look up token in database
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+            # Restore session for seamless navigation
+            session['organizer_id'] = organizer_id
+            session['user_type'] = 'organizer'
+            session.permanent = True
+            session.modified = True
+            logging.info(f"Auth token validated, restored session for organizer_id: {organizer_id}")
         else:
             logging.warning("Invalid or expired auth token")
     
