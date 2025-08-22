@@ -1092,6 +1092,11 @@ def organizer_create_event():
     organizer_id = session.get('organizer_id')
     auth_token = request.args.get('auth_token')
     
+    # Enhanced auth token debugging
+    logging.info(f"Create event: organizer_id from session: {organizer_id}")
+    logging.info(f"Create event: auth_token from URL: {auth_token}")
+    logging.info(f"Create event: session contents: {dict(session)}")
+    
     # Check if we have a valid auth token (for iframe compatibility)
     if not organizer_id and auth_token:
         logging.info("Create event: No session found, attempting auth token validation...")
@@ -1100,14 +1105,23 @@ def organizer_create_event():
             is_active=True
         ).filter(AuthToken.expires_at > datetime.utcnow()).first()
         
+        logging.info(f"Create event: Token lookup result: {token_record is not None}")
+        if token_record:
+            logging.info(f"Create event: Token organizer_id: {token_record.organizer_id}")
+        
         if token_record:
             organizer_id = token_record.organizer_id
             # Restore session for seamless navigation
+            session.clear()  # Clear any stale session data
             session['organizer_id'] = organizer_id
             session['user_type'] = 'organizer'
+            session['auth_token'] = auth_token
             session.permanent = True
             session.modified = True
             logging.info(f"Create event: Auth token validated, restored session for organizer_id: {organizer_id}")
+            logging.info(f"Create event: New session contents: {dict(session)}")
+        else:
+            logging.warning(f"Create event: Invalid auth token: {auth_token}")
     
     if not organizer_id:
         logging.warning("Create event: Access denied - no organizer_id and no valid auth token")
@@ -1119,7 +1133,7 @@ def organizer_create_event():
         truck = FoodTruck.query.get(truck_id)
         if not truck:
             flash('Food truck not found', 'error')
-            return redirect(url_for('organizer_create_event'))
+            return redirect(url_for('organizer_create_event') + f'?auth_token={session.get("auth_token", "")}')
         
         event = Event(
             name=request.form['name'],
@@ -1168,11 +1182,13 @@ def organizer_create_event():
         )
         
         flash('Event created successfully', 'success')
-        return redirect(url_for('organizer_dashboard'))
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={session.get("auth_token", "")}')
     
     # GET request - show form
     trucks = FoodTruck.query.all()
-    return render_template('organizer/create_event.html', trucks=trucks)
+    # Pass auth token to template for form submission consistency  
+    current_auth_token = session.get('auth_token', auth_token or '')
+    return render_template('organizer/create_event.html', trucks=trucks, auth_token=current_auth_token)
 
 # Public Routes
 @app.route('/events')

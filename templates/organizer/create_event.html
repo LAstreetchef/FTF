@@ -14,6 +14,9 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    {% if auth_token %}
+                    <input type="hidden" name="auth_token" value="{{ auth_token }}">
+                    {% endif %}
                     <!-- Basic Event Info -->
                     <div class="mb-4">
                         <h5>Event Details</h5>
