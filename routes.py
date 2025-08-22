@@ -116,34 +116,59 @@ def admin_login():
         username = request.form['username']
         password = request.form['password']
         
-        # Debug logging
-        logging.debug(f"Admin login attempt for username: {username}")
+        # Enhanced logging for iframe debugging
+        is_embedded = request.referrer and 'thefoodtruckstop.com' in request.referrer
+        logging.info(f"Admin login attempt - Username: {username}, Embedded: {is_embedded}, Referrer: {request.referrer}")
         
         admin = Admin.query.filter_by(username=username).first()
-        logging.debug(f"Admin found in database: {admin is not None}")
+        logging.info(f"Admin found in database: {admin is not None}")
         
         if admin:
             password_valid = check_password_hash(admin.password_hash, password)
-            logging.debug(f"Password validation result: {password_valid}")
+            logging.info(f"Password validation result: {password_valid}")
             
             if password_valid:
+                # Clear any existing session data first
+                session.clear()
+                
+                # Set session data
                 session['admin_id'] = admin.id
                 session['user_type'] = 'admin'
-                session.permanent = True  # Make session persistent
+                session.permanent = True
                 
-                # Create response with additional cookie for iframe compatibility
-                response = make_response(redirect(url_for('admin_dashboard')))
+                # Force session save for iframe contexts
+                session.modified = True
                 
-                # Set additional authentication cookie for iframe
-                response.set_cookie('auth_token', f'admin_{admin.id}', 
-                                   secure=True, samesite='None', httponly=False, 
-                                   max_age=86400)  # 24 hours
-                
-                logging.debug(f"Admin logged in successfully, session set with admin_id: {admin.id}")
+                logging.info(f"Admin {username} logged in successfully, session set with admin_id: {admin.id}")
                 flash('Successfully logged in as admin', 'success')
-                return response
+                
+                # For iframe contexts, use a different approach
+                if is_embedded:
+                    # Return a page that will redirect the parent frame
+                    return f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Login Success</title>
+                        <script>
+                            // For iframe contexts, redirect the parent window
+                            if (window.self !== window.top) {{
+                                window.parent.location.href = 'https://www.thefoodtruckstop.com/fundraiser';
+                            }} else {{
+                                window.location.href = '{url_for('admin_dashboard')}';
+                            }}
+                        </script>
+                    </head>
+                    <body>
+                        <p>Login successful! Redirecting...</p>
+                        <p>If you are not redirected, <a href="{url_for('admin_dashboard')}">click here</a></p>
+                    </body>
+                    </html>
+                    """
+                else:
+                    return redirect(url_for('admin_dashboard'))
         
-        logging.debug("Login failed - invalid credentials")
+        logging.warning(f"Login failed for username: {username}")
         flash('Invalid credentials', 'error')
     
     return render_template('admin/login.html')
@@ -776,22 +801,51 @@ def organizer_login():
         email = request.form['email']
         password = request.form['password']
         
+        # Enhanced logging for iframe debugging
+        is_embedded = request.referrer and 'thefoodtruckstop.com' in request.referrer
+        logging.info(f"Organizer login attempt - Email: {email}, Embedded: {is_embedded}, Referrer: {request.referrer}")
+        
         organizer = Organizer.query.filter_by(email=email).first()
         if organizer and check_password_hash(organizer.password_hash, password):
+            # Clear any existing session data first
+            session.clear()
+            
+            # Set session data
             session['organizer_id'] = organizer.id
             session['user_type'] = 'organizer'
-            session.permanent = True  # Make session persistent
+            session.permanent = True
             
-            # Create response with additional cookie for iframe compatibility
-            response = make_response(redirect(url_for('organizer_dashboard')))
+            # Force session save for iframe contexts
+            session.modified = True
             
-            # Set additional authentication cookie for iframe
-            response.set_cookie('auth_token', f'organizer_{organizer.id}', 
-                               secure=True, samesite='None', httponly=False, 
-                               max_age=86400)  # 24 hours
-            
+            logging.info(f"Organizer {email} logged in successfully, session set with organizer_id: {organizer.id}")
             flash('Successfully logged in', 'success')
-            return response
+            
+            # For iframe contexts, use a different approach
+            if is_embedded:
+                # Return a page that will redirect the parent frame
+                return f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Login Success</title>
+                    <script>
+                        // For iframe contexts, redirect the parent window
+                        if (window.self !== window.top) {{
+                            window.parent.location.href = 'https://www.thefoodtruckstop.com/fundraiser';
+                        }} else {{
+                            window.location.href = '{url_for('organizer_dashboard')}';
+                        }}
+                    </script>
+                </head>
+                <body>
+                    <p>Login successful! Redirecting...</p>
+                    <p>If you are not redirected, <a href="{url_for('organizer_dashboard')}">click here</a></p>
+                </body>
+                </html>
+                """
+            else:
+                return redirect(url_for('organizer_dashboard'))
         else:
             flash('Invalid credentials', 'error')
     
