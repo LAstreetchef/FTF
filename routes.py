@@ -694,13 +694,33 @@ def organizer_login():
 @app.route('/organizer/register', methods=['GET', 'POST'])
 def organizer_register():
     if request.method == 'POST':
-        email = request.form['email']
-        name = request.form['name']
-        password = request.form['password']
-        
-        if Organizer.query.filter_by(email=email).first():
-            flash('Email already registered', 'error')
-        else:
+        try:
+            email = request.form.get('email', '').strip()
+            name = request.form.get('name', '').strip()
+            password = request.form.get('password', '').strip()
+            
+            # Debug logging
+            logging.debug(f"Organizer registration attempt - Email: {email}, Name: {name}")
+            
+            # Validation
+            if not email or not name or not password:
+                flash('All fields are required', 'error')
+                logging.debug("Registration failed: Missing fields")
+                return render_template('organizer/login.html', register_mode=True)
+            
+            if len(password) < 6:
+                flash('Password must be at least 6 characters long', 'error')
+                logging.debug("Registration failed: Password too short")
+                return render_template('organizer/login.html', register_mode=True)
+            
+            # Check if email already exists
+            existing_organizer = Organizer.query.filter_by(email=email).first()
+            if existing_organizer:
+                flash('Email already registered', 'error')
+                logging.debug(f"Registration failed: Email {email} already exists")
+                return render_template('organizer/login.html', register_mode=True)
+            
+            # Create new organizer
             organizer = Organizer(
                 email=email,
                 name=name,
@@ -708,11 +728,19 @@ def organizer_register():
             )
             db.session.add(organizer)
             db.session.commit()
+            logging.debug(f"Organizer created successfully with ID: {organizer.id}")
             
+            # Set session
             session['organizer_id'] = organizer.id
             session['user_type'] = 'organizer'
-            flash('Registration successful', 'success')
+            flash('Registration successful! Welcome to Food Truck Fundraiser', 'success')
             return redirect(url_for('organizer_dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Organizer registration error: {str(e)}")
+            flash('Registration failed. Please try again.', 'error')
+            return render_template('organizer/login.html', register_mode=True)
     
     return render_template('organizer/login.html', register_mode=True)
 
@@ -1065,3 +1093,66 @@ def setup_admin():
     except Exception as e:
         import traceback
         return f"Error creating admin: {str(e)}<br><br>Traceback:<br>{traceback.format_exc().replace(chr(10), '<br>')}"
+
+# Test routes for debugging organizer registration
+@app.route('/test-organizer-reg')
+def test_organizer_registration():
+    """Test endpoint to check organizer registration functionality in production"""
+    try:
+        from models import Organizer
+        from werkzeug.security import generate_password_hash
+        
+        # Check current organizer count
+        current_count = Organizer.query.count()
+        
+        # Test form data extraction
+        test_data = {
+            'email': 'debugtest@example.com',
+            'name': 'Debug Test User', 
+            'password': 'testpassword123'
+        }
+        
+        # Check if test user already exists
+        existing = Organizer.query.filter_by(email=test_data['email']).first()
+        if existing:
+            db.session.delete(existing)
+            db.session.commit()
+        
+        # Test password hashing
+        password_hash = generate_password_hash(test_data['password'])
+        
+        # Test database write
+        test_organizer = Organizer(
+            email=test_data['email'],
+            name=test_data['name'],
+            password_hash=password_hash
+        )
+        
+        db.session.add(test_organizer)
+        db.session.commit()
+        
+        return f"""
+        <h3>Organizer Registration Test Results</h3>
+        <p><strong>SUCCESS!</strong> Test organizer created successfully!</p>
+        <ul>
+        <li>ID: {test_organizer.id}</li>
+        <li>Email: {test_organizer.email}</li>
+        <li>Name: {test_organizer.name}</li>
+        <li>Password Hash Length: {len(test_organizer.password_hash)}</li>
+        <li>Previous organizer count: {current_count}</li>
+        <li>New organizer count: {Organizer.query.count()}</li>
+        </ul>
+        <p>✅ Database connection and organizer creation working properly in production!</p>
+        <p><a href="/organizer/register">Try actual registration form</a></p>
+        """
+        
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        return f"""
+        <h3>Organizer Registration Test Results</h3>
+        <p><strong>ERROR:</strong> Registration test failed</p>
+        <p>Error: {str(e)}</p>
+        <p>Traceback:</p>
+        <pre>{traceback.format_exc()}</pre>
+        """
