@@ -24,9 +24,11 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 # Configure session cookies for iframe compatibility
 app.config.update(
     SESSION_COOKIE_SECURE=True,      # Require HTTPS
-    SESSION_COOKIE_HTTPONLY=True,    # Prevent XSS
+    SESSION_COOKIE_HTTPONLY=False,   # Allow JS access for debugging
     SESSION_COOKIE_SAMESITE=None,    # Allow cross-origin iframe embedding
-    SESSION_COOKIE_DOMAIN=None       # Don't restrict domain
+    SESSION_COOKIE_DOMAIN=None,      # Don't restrict domain
+    SESSION_COOKIE_PATH='/',         # Available on all paths
+    PERMANENT_SESSION_LIFETIME=86400 # 24 hours
 )
 
 # Configure the database

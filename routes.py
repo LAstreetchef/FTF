@@ -873,41 +873,90 @@ def organizer_login():
             logging.info(f"Session contents after login: {dict(session)}")
             flash('Successfully logged in', 'success')
             
-            # Always return a smart page that handles both iframe and regular contexts
-            return f"""
+            # Create a response with enhanced cookie handling for iframe
+            response_html = f"""
             <!DOCTYPE html>
             <html>
             <head>
                 <title>Organizer Login Success</title>
+                <meta http-equiv="refresh" content="3;url={url_for('organizer_dashboard')}">
                 <script>
                     console.log('Organizer login successful!');
                     console.log('In iframe:', window.self !== window.top);
                     console.log('Server detected embedded:', {str(is_embedded).lower()});
+                    console.log('Session created with organizer_id:', {session.get('organizer_id', 'None')});
                     
-                    // Wait a moment for session to be saved, then redirect
-                    console.log('Waiting 1 second for session persistence...');
+                    // Store session info in localStorage for iframe persistence
+                    if (typeof(Storage) !== "undefined") {{
+                        localStorage.setItem('organizer_logged_in', 'true');
+                        localStorage.setItem('organizer_id', '{session.get('organizer_id', '')}');
+                        console.log('Session stored in localStorage');
+                    }}
+                    
+                    // Multiple redirect approaches for iframe compatibility
+                    let redirected = false;
+                    
+                    // Method 1: Immediate redirect (works if session persists)
                     setTimeout(function() {{
-                        console.log('Now redirecting to organizer dashboard...');
-                        console.log('Target URL: {url_for('organizer_dashboard')}');
-                        window.location.href = '{url_for('organizer_dashboard')}';
+                        if (!redirected) {{
+                            console.log('Attempting immediate redirect...');
+                            window.location.href = '{url_for('organizer_dashboard')}';
+                            redirected = true;
+                        }}
                     }}, 1000);
+                    
+                    // Method 2: Meta refresh backup (3 second delay)
+                    console.log('Meta refresh will redirect in 3 seconds if JS redirect fails');
                 </script>
             </head>
             <body>
                 <div style="text-align: center; margin-top: 50px;">
                     <h2>✅ Organizer Login Successful!</h2>
-                    <p>Redirecting to dashboard...</p>
-                    <p>If not redirected: <a href="{url_for('organizer_dashboard')}" target="_top">Click here for Dashboard</a></p>
+                    <p>Redirecting to dashboard in 3 seconds...</p>
+                    <div id="countdown">3</div>
+                    <br>
+                    <p><strong><a href="{url_for('organizer_dashboard')}">Click here if not redirected</a></strong></p>
                     <hr>
                     <small>
-                        Debug: Iframe detected: {is_embedded}<br>
-                        Referrer: {request.referrer}<br>
-                        Session ID: {session.get('organizer_id', 'None')}
+                        Session ID: {session.get('organizer_id', 'None')}<br>
+                        Iframe: {is_embedded}<br>
+                        Login Time: {session.get('login_time', 'None')[:19]}
                     </small>
                 </div>
+                
+                <script>
+                    // Countdown display
+                    let count = 3;
+                    let countdown = setInterval(function() {{
+                        count--;
+                        if (count > 0) {{
+                            document.getElementById('countdown').textContent = count;
+                        }} else {{
+                            clearInterval(countdown);
+                            document.getElementById('countdown').textContent = 'Redirecting...';
+                        }}
+                    }}, 1000);
+                </script>
             </body>
             </html>
             """
+            
+            response = make_response(response_html)
+            
+            # Enhanced cookie settings for iframe session persistence
+            if 'session' in session:
+                # Force session cookie to be set with iframe-compatible attributes
+                response.set_cookie(
+                    'session', 
+                    session.get('_id', ''),
+                    secure=True,
+                    samesite='None',
+                    httponly=False,  # Allow JS access for debugging
+                    path='/',
+                    domain=None
+                )
+            
+            return response
         else:
             flash('Invalid credentials', 'error')
     
