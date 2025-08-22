@@ -62,6 +62,8 @@ def iframe_debug():
     <p><a href="/quick-organizer-login" target="_top">Organizer Quick Login</a></p>
     <p><a href="/admin/login">Try Admin Login</a></p>
     <p><a href="/organizer/login">Try Organizer Login</a></p>
+    <p><a href="/organizer/dashboard">Test Organizer Dashboard Access</a></p>
+    <p><a href="/admin/dashboard">Test Admin Dashboard Access</a></p>
     """
 
 @app.route('/quick-admin-login')
@@ -141,10 +143,15 @@ def admin_login():
                 session['user_type'] = 'admin'
                 session.permanent = True
                 
-                # Force session save for iframe contexts
+                # Force session save for iframe contexts with additional persistence
                 session.modified = True
                 
+                # Also set a simple auth flag for debugging
+                session['authenticated'] = True
+                session['login_time'] = datetime.now().isoformat()
+                
                 logging.info(f"Admin {username} logged in successfully, session set with admin_id: {admin.id}")
+                logging.info(f"Session contents after login: {dict(session)}")
                 flash('Successfully logged in as admin', 'success')
                 
                 # Always return a page that handles both iframe and regular contexts
@@ -844,10 +851,15 @@ def organizer_login():
             session['user_type'] = 'organizer'
             session.permanent = True
             
-            # Force session save for iframe contexts
+            # Force session save for iframe contexts with additional persistence
             session.modified = True
             
+            # Also set a simple auth flag for debugging
+            session['authenticated'] = True
+            session['login_time'] = datetime.now().isoformat()
+            
             logging.info(f"Organizer {email} logged in successfully, session set with organizer_id: {organizer.id}")
+            logging.info(f"Session contents after login: {dict(session)}")
             flash('Successfully logged in', 'success')
             
             # Always return a smart page that handles both iframe and regular contexts
@@ -862,22 +874,11 @@ def organizer_login():
                     console.log('Server detected embedded:', {str(is_embedded).lower()});
                     
                     // Wait a moment for session to be saved, then redirect
+                    // Immediately redirect to dashboard within iframe instead of parent
                     setTimeout(function() {{
-                        if (window.self !== window.top) {{
-                            // In iframe - try to redirect parent
-                            try {{
-                                console.log('Redirecting parent window...');
-                                window.parent.location.href = 'https://www.thefoodtruckstop.com/fundraiser';
-                            }} catch(e) {{
-                                console.log('Parent redirect failed, using direct redirect:', e);
-                                window.location.href = '{url_for('organizer_dashboard')}';
-                            }}
-                        }} else {{
-                            // Regular context
-                            console.log('Regular redirect to dashboard...');
-                            window.location.href = '{url_for('organizer_dashboard')}';
-                        }}
-                    }}, 500);
+                        console.log('Redirecting to organizer dashboard in iframe...');
+                        window.location.href = '{url_for('organizer_dashboard')}';
+                    }}, 1000);
                 </script>
             </head>
             <body>
@@ -962,7 +963,17 @@ def organizer_logout():
 
 @app.route('/organizer/dashboard')
 def organizer_dashboard():
-    if not session.get('organizer_id'):
+    # Enhanced debugging for iframe session issues
+    organizer_id = session.get('organizer_id')
+    user_type = session.get('user_type')
+    is_embedded = request.referrer and 'thefoodtruckstop.com' in request.referrer
+    
+    logging.info(f"Dashboard access - Organizer ID: {organizer_id}, User type: {user_type}, Embedded: {is_embedded}")
+    logging.info(f"Session data: {dict(session)}")
+    logging.info(f"Request cookies: {dict(request.cookies)}")
+    
+    if not organizer_id:
+        logging.warning("Dashboard access denied - no organizer_id in session, redirecting to login")
         return redirect(url_for('organizer_login'))
     
     organizer = Organizer.query.get(session['organizer_id'])
