@@ -44,6 +44,28 @@ app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY')
 db.init_app(app)
 mail.init_app(app)
 
+# Configure app for iframe embedding
+@app.after_request
+def after_request(response):
+    # Allow embedding in iframes from your custom domain
+    response.headers['X-Frame-Options'] = 'ALLOWALL'
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com"
+    
+    # Configure cookies for iframe/cross-origin use
+    # Set SameSite to None for cross-origin embedding
+    if 'Set-Cookie' in response.headers:
+        cookies = response.headers.getlist('Set-Cookie')
+        response.headers['Set-Cookie'] = []
+        for cookie in cookies:
+            # Add SameSite=None and Secure for iframe compatibility
+            if 'SameSite' not in cookie:
+                if 'Secure' not in cookie:
+                    cookie += '; Secure'
+                cookie += '; SameSite=None'
+            response.headers.add('Set-Cookie', cookie)
+    
+    return response
+
 with app.app_context():
     import models
     import routes
