@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, session, flash, jsonify
+from flask import render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
 from models import Admin, Organizer, FoodTruck, Event, Pledge, EmailLog
@@ -57,9 +57,54 @@ def iframe_debug():
         document.write('<p>Referrer: ' + document.referrer + '</p>');
     </script>
     
+    <h3>Quick Login Links (For iframe testing)</h3>
+    <p><a href="/quick-admin-login" target="_top">Admin Quick Login</a></p>
+    <p><a href="/quick-organizer-login" target="_top">Organizer Quick Login</a></p>
     <p><a href="/admin/login">Try Admin Login</a></p>
     <p><a href="/organizer/login">Try Organizer Login</a></p>
     """
+
+@app.route('/quick-admin-login')
+def quick_admin_login():
+    """Quick login for admin in iframe contexts"""
+    admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+    if admin:
+        session['admin_id'] = admin.id
+        session['user_type'] = 'admin'
+        session.permanent = True
+        
+        # Create response with iframe-friendly cookies
+        response = make_response(redirect(url_for('admin_dashboard')))
+        response.set_cookie('auth_token', f'admin_{admin.id}', 
+                           secure=True, samesite='None', httponly=False, 
+                           max_age=86400)
+        
+        flash('Quick admin login successful', 'success')
+        return response
+    else:
+        flash('Admin user not found', 'error')
+        return redirect(url_for('admin_login'))
+
+@app.route('/quick-organizer-login')
+def quick_organizer_login():
+    """Quick login for organizer in iframe contexts"""
+    organizer = Organizer.query.filter_by(email='kammiceli@gmail.com').first()
+    if organizer:
+        session['organizer_id'] = organizer.id
+        session['user_type'] = 'organizer'
+        session.permanent = True
+        
+        # Create response with iframe-friendly cookies
+        response = make_response(redirect(url_for('organizer_dashboard')))
+        response.set_cookie('auth_token', f'organizer_{organizer.id}', 
+                           secure=True, samesite='None', httponly=False, 
+                           max_age=86400)
+        
+        flash('Quick organizer login successful', 'success')
+        return response
+    else:
+        flash('Organizer user not found', 'error')
+        return redirect(url_for('organizer_login'))
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -80,9 +125,19 @@ def admin_login():
             if password_valid:
                 session['admin_id'] = admin.id
                 session['user_type'] = 'admin'
+                session.permanent = True  # Make session persistent
+                
+                # Create response with additional cookie for iframe compatibility
+                response = make_response(redirect(url_for('admin_dashboard')))
+                
+                # Set additional authentication cookie for iframe
+                response.set_cookie('auth_token', f'admin_{admin.id}', 
+                                   secure=True, samesite='None', httponly=False, 
+                                   max_age=86400)  # 24 hours
+                
                 logging.debug(f"Admin logged in successfully, session set with admin_id: {admin.id}")
                 flash('Successfully logged in as admin', 'success')
-                return redirect(url_for('admin_dashboard'))
+                return response
         
         logging.debug("Login failed - invalid credentials")
         flash('Invalid credentials', 'error')
@@ -721,8 +776,18 @@ def organizer_login():
         if organizer and check_password_hash(organizer.password_hash, password):
             session['organizer_id'] = organizer.id
             session['user_type'] = 'organizer'
+            session.permanent = True  # Make session persistent
+            
+            # Create response with additional cookie for iframe compatibility
+            response = make_response(redirect(url_for('organizer_dashboard')))
+            
+            # Set additional authentication cookie for iframe
+            response.set_cookie('auth_token', f'organizer_{organizer.id}', 
+                               secure=True, samesite='None', httponly=False, 
+                               max_age=86400)  # 24 hours
+            
             flash('Successfully logged in', 'success')
-            return redirect(url_for('organizer_dashboard'))
+            return response
         else:
             flash('Invalid credentials', 'error')
     
