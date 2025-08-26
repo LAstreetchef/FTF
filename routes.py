@@ -2234,7 +2234,7 @@ def chat_escalate():
         db.session.add(escalation_msg)
         
         # Send notification to admin
-        recent_messages = conversation.messages.order_by(SupportMessage.created_at.desc()).limit(5).all()
+        recent_messages = SupportMessage.query.filter_by(conversation_id=conversation.id).order_by(SupportMessage.created_at.desc()).limit(5).all()
         conversation_preview = '\n'.join([f"{msg.sender_type}: {msg.content}" for msg in reversed(recent_messages)])
         
         send_email(
@@ -2266,7 +2266,8 @@ def chat_poll():
             return jsonify({'success': False, 'error': 'Conversation not found'}), 404
         
         # Get new messages from admin
-        new_messages = conversation.messages.filter(
+        new_messages = SupportMessage.query.filter(
+            SupportMessage.conversation_id == conversation.id,
             SupportMessage.id > last_message_id,
             SupportMessage.sender_type == 'admin'
         ).all()
