@@ -10,9 +10,7 @@
                 <h1 class="display-5 mb-3 text-gradient">🚚 {{ owner.business_name }}</h1>
                 <p class="lead">Welcome back, {{ owner.name }}!</p>
                 <div class="d-flex justify-content-center gap-3">
-                    <span class="badge bg-{{ 'success' if owner.status == 'approved' else 'warning' }} fs-6">
-                        {% if owner.status == 'approved' %}✅ Approved{% else %}⏳ Pending Approval{% endif %}
-                    </span>
+                    <span class="badge bg-success fs-6">✅ Account Active</span>
                     <a href="{{ url_for('food_truck_logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
                 </div>
             </div>
@@ -32,13 +30,7 @@
         {% endif %}
     {% endwith %}
 
-    {% if owner.status != 'approved' %}
-        <div class="alert alert-warning" role="alert">
-            <h5 class="alert-heading">⏳ Account Pending Approval</h5>
-            <p>Your food truck registration is currently under review by our admin team. You'll receive an email once your account is approved and you can start participating in events.</p>
-            <p class="mb-0"><strong>Registered:</strong> {{ owner.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
-        </div>
-    {% endif %}
+    <!-- Food truck owners are auto-approved - individual trucks require payment for approval -->
 
     <!-- Quick Stats -->
     <div class="row mb-4">

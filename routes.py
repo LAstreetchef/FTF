@@ -2357,7 +2357,8 @@ def food_truck_register():
                 phone=phone,
                 business_name=business_name,
                 business_license=business_license,
-                password_hash=generate_password_hash(password)
+                password_hash=generate_password_hash(password),
+                status='approved'  # Auto-approve food truck owners - they pay $25 to participate
             )
             
             db.session.add(owner)
