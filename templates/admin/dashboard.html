@@ -192,7 +192,14 @@
                             <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline">
                                 <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to approve this event and charge all pledges?')">
                                     <i data-feather="check" class="me-1"></i>
-                                    Approve
+                                    Approve & Pool
+                                </button>
+                            </form>
+                            {% elif event.status == 'pending' and event.current_pledges > 0 %}
+                            <form method="POST" action="{{ url_for('admin_pool_partial_event', event_id=event.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('This event has not reached its goal yet. Are you sure you want to pool the pledges anyway? This will charge all pledgers.')">
+                                    <i data-feather="dollar-sign" class="me-1"></i>
+                                    Pool Pledges
                                 </button>
                             </form>
                             {% endif %}

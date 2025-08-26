@@ -1137,6 +1137,77 @@ def admin_approve_event(event_id):
     
     return redirect(url_for('admin_events'))
 
+@app.route('/admin/events/<int:event_id>/pool-partial', methods=['POST'])
+def admin_pool_partial_event(event_id):
+    """Pool pledges for partially funded events"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    event = Event.query.get_or_404(event_id)
+    
+    if event.status not in ['pending']:
+        flash('Can only pool pledges for pending events', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    if event.current_pledges == 0:
+        flash('No pledges to pool for this event', 'warning')
+        return redirect(url_for('admin_dashboard'))
+    
+    try:
+        # Charge all pledges for this event
+        pledges = Pledge.query.filter_by(event_id=event_id, status='pending').all()
+        charged_count = 0
+        
+        for pledge in pledges:
+            if pledge.stripe_payment_intent_id:
+                success = charge_stripe_payment(pledge.stripe_payment_intent_id, pledge.amount, f"Food Truck Event: {event.name}")
+                if success:
+                    pledge.status = 'charged'
+                    pledge.charged_at = datetime.utcnow()
+                    
+                    # Generate and send e-ticket
+                    pledge.ticket_code = generate_ticket_code()
+                    send_email(
+                        pledge.email,
+                        f"Your E-Ticket for {event.name}",
+                        f"Thank you for your pledge! Your e-ticket code is: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\nLocation: {event.location}\n\nNote: This event was approved with partial funding (${event.current_pledges:.2f} of ${event.pledge_goal:.2f} goal).\n\nShow this code at the food truck to redeem your meal."
+                    )
+                    pledge.ticket_sent = True
+                    charged_count += 1
+                else:
+                    flash(f'Failed to charge pledge from {pledge.email}', 'error')
+        
+        event.status = 'approved'
+        event.approved_at = datetime.utcnow()
+        
+        # Generate organizer entree ticket if they paid the organizer fee
+        organizer_entree_ticket = None
+        if event.organizer_fee_charged and not event.organizer_entree_claimed:
+            organizer_entree_ticket = generate_ticket_code()
+            event.organizer_entree_claimed = True
+        
+        db.session.commit()
+        
+        # Send notification to organizer with their free entree ticket
+        organizer_email_content = f"Your event '{event.name}' has been approved with partial funding (${event.current_pledges:.2f} of ${event.pledge_goal:.2f} goal). All {charged_count} pledges have been charged and the food truck will attend your event."
+        
+        if organizer_entree_ticket:
+            organizer_email_content += f"\n\n🎁 YOUR FREE ENTREE TICKET: {organizer_entree_ticket}\n\nAs the event organizer, you get any menu item FREE! Show this code to the food truck at your event to redeem your complimentary meal."
+        
+        send_email(
+            event.organizer.email,
+            f"Event Approved (Partial Funding): {event.name}" + (" + Your Free Entree!" if organizer_entree_ticket else ""),
+            organizer_email_content
+        )
+        
+        flash(f'Event approved with partial funding. {charged_count} pledges charged successfully.', 'success')
+        
+    except Exception as e:
+        logging.error(f"Error pooling partial event {event_id}: {str(e)}")
+        flash('Error processing pledge pooling', 'error')
+    
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/admin/events/<int:event_id>/delete', methods=['POST'])
 def admin_delete_event(event_id):
     """Delete an event with proper handling of associated pledges"""
