@@ -12,15 +12,17 @@ Preferred communication style: Simple, everyday language.
 
 - **2025-08-26**: AI-Powered Customer Support Chat System
   - Implemented complete AI + human hybrid support chat system
-  - Added floating chat widget with modern orange/foodie theme design to all pages
+  - Added floating chat widget with modern orange/foodie theme design and headphones icon
   - Created intelligent AI assistant trained specifically on food truck platform knowledge
   - Built seamless escalation system allowing users to request human support
   - Added real-time messaging functionality for live support conversations
   - Created comprehensive admin panel at `/admin/support` for managing conversations
-  - Integrated OpenAI GPT-5 for intelligent, context-aware responses about platform features
+  - Integrated OpenAI GPT-4o for intelligent, context-aware responses about platform features
   - Added conversation tracking, confidence scoring, and automatic escalation triggers
   - Email notifications sent to admins when conversations require human attention
   - Support for anonymous users with optional email/name collection
+  - Fixed all database query errors and ensured reliable AI responses
+  - Added Customer Support button to admin dashboard for easy access
 
 - **2025-08-19**: Modern foodie theme transformation and event deletion system
   - Transformed app with vibrant, appetite-stimulating orange/yellow color scheme
