@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
-from models import Admin, Organizer, FoodTruck, Event, Pledge, EmailLog, AuthToken
+from models import Admin, Organizer, FoodTruck, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent
 from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
 import stripe
 import os
@@ -1176,6 +1176,204 @@ def organizer_create_event():
     trucks = FoodTruck.query.all()
     # Pass auth token to template for form submission consistency  
     return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
+
+@app.route('/organizer/events/<int:event_id>/transfer-pledges', methods=['POST'])
+def transfer_pledges(event_id):
+    """Initiate pledge transfer process"""
+    # Authentication check (same pattern as other organizer routes)
+    organizer_id = None
+    auth_token = request.args.get('auth_token')
+    
+    if auth_token:
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+        else:
+            logging.warning("Transfer pledges: Invalid or expired auth token")
+    
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+    
+    if not organizer_id:
+        flash('Authentication required', 'error')
+        return redirect(url_for('organizer_login'))
+    
+    # Get source and target events
+    source_event = Event.query.get_or_404(event_id)
+    target_event_id = int(request.form['target_event_id'])
+    target_event = Event.query.get_or_404(target_event_id)
+    
+    # Verify organizer owns both events
+    if source_event.organizer_id != organizer_id or target_event.organizer_id != organizer_id:
+        flash('You can only transfer pledges between your own events', 'error')
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
+    
+    # Validation checks
+    if source_event.status not in ['pending']:
+        flash('Can only transfer pledges from pending events', 'error')
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
+    
+    if target_event.status not in ['pending', 'funded']:
+        flash('Can only transfer pledges to events that are still accepting pledges', 'error')
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
+    
+    if source_event.id == target_event.id:
+        flash('Cannot transfer pledges to the same event', 'error')
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
+    
+    # Get pending pledges from source event
+    pending_pledges = [p for p in source_event.pledges.all() if p.status == 'pending']
+    
+    if not pending_pledges:
+        flash('No pending pledges found to transfer', 'error')
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
+    
+    try:
+        # Create transfer record
+        transfer = PledgeTransfer(
+            source_event_id=source_event.id,
+            target_event_id=target_event.id,
+            organizer_id=organizer_id,
+            total_pledges_requested=len(pending_pledges),
+            total_amount_requested=sum(p.amount for p in pending_pledges),
+            status='consent_requested',
+            consent_requested_at=datetime.utcnow()
+        )
+        
+        db.session.add(transfer)
+        db.session.flush()  # Get transfer ID
+        
+        # Create consent requests for each pledge
+        import secrets
+        for pledge in pending_pledges:
+            consent_token = secrets.token_urlsafe(32)
+            consent_request = PledgeTransferConsent(
+                transfer_id=transfer.id,
+                pledge_id=pledge.id,
+                consent_token=consent_token
+            )
+            db.session.add(consent_request)
+        
+        db.session.commit()
+        
+        # Send consent emails to all pledgers
+        for pledge in pending_pledges:
+            consent_request = PledgeTransferConsent.query.filter_by(
+                transfer_id=transfer.id,
+                pledge_id=pledge.id
+            ).first()
+            
+            if consent_request:
+                consent_url = url_for('pledge_transfer_consent', 
+                                    token=consent_request.consent_token, 
+                                    _external=True)
+                
+                send_email(
+                    pledge.email,
+                    f"Transfer Request: Your {source_event.name} Pledge",
+                    f"""Hello!
+                    
+Your event organizer has requested to transfer your pledge from "{source_event.name}" to "{target_event.name}".
+
+Original Event: {source_event.name}
+Date: {source_event.date.strftime('%B %d, %Y at %I:%M %p')}
+Your Pledge: ${pledge.amount:.2f}
+
+New Event: {target_event.name}
+Date: {target_event.date.strftime('%B %d, %Y at %I:%M %p')}
+Location: {target_event.location}
+
+Your pledge amount will remain the same (${pledge.amount:.2f}), and your payment method won't be charged until the new event reaches its funding goal.
+
+Please click one of the links below to respond:
+
+APPROVE TRANSFER: {consent_url}&response=approve
+DECLINE TRANSFER: {consent_url}&response=decline
+
+If you decline, your original pledge will be cancelled and no payment will be processed.
+
+You have 7 days to respond to this request.
+
+Thank you!
+"""
+                )
+        
+        flash(f'Transfer request sent to {len(pending_pledges)} pledgers. You will be notified once they respond.', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error creating pledge transfer: {str(e)}")
+        flash('Error initiating transfer. Please try again.', 'error')
+    
+    return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
+
+@app.route('/pledge-transfer/consent/<token>')
+def pledge_transfer_consent(token):
+    """Handle pledge transfer consent"""
+    response = request.args.get('response')  # 'approve' or 'decline'
+    
+    consent_request = PledgeTransferConsent.query.filter_by(consent_token=token).first_or_404()
+    
+    if consent_request.status != 'pending':
+        return render_template('transfer_consent_already_responded.html', 
+                             consent_request=consent_request)
+    
+    # Update consent status
+    if response == 'approve':
+        consent_request.status = 'consented'
+        consent_request.responded_at = datetime.utcnow()
+        
+        # Transfer the pledge to the new event
+        pledge = consent_request.pledge
+        transfer = consent_request.transfer
+        
+        # Update pledge event_id
+        old_event = pledge.event
+        new_event = transfer.target_event
+        
+        pledge.event_id = transfer.target_event_id
+        
+        # Update pledge totals for both events
+        old_event.update_pledge_total()
+        new_event.update_pledge_total()
+        
+        # Update transfer statistics
+        transfer.pledges_consented += 1
+        transfer.amount_transferred += pledge.amount
+        
+        db.session.commit()
+        
+        return render_template('transfer_consent_approved.html', 
+                             transfer=transfer, 
+                             pledge=pledge,
+                             old_event=old_event,
+                             new_event=new_event)
+        
+    elif response == 'decline':
+        consent_request.status = 'declined'
+        consent_request.responded_at = datetime.utcnow()
+        
+        # Cancel the pledge
+        pledge = consent_request.pledge
+        pledge.status = 'cancelled'
+        
+        # Update event pledge total
+        pledge.event.update_pledge_total()
+        
+        db.session.commit()
+        
+        return render_template('transfer_consent_declined.html', 
+                             transfer=consent_request.transfer,
+                             pledge=pledge)
+    
+    else:
+        # Show consent form
+        return render_template('transfer_consent_form.html', 
+                             consent_request=consent_request)
 
 # Public Routes
 @app.route('/events')

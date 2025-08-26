@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Transfer Declined - Food Truck Fundraiser{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="mb-0">
+                        <i data-feather="x-circle" class="me-2"></i>
+                        Transfer Declined
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="alert alert-warning">
+                        <h5>Your pledge transfer has been declined.</h5>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i data-feather="info" class="me-2"></i>
+                        <strong>Your original pledge has been cancelled.</strong><br>
+                        No payment will be processed for your ${{ "%.2f"|format(pledge.amount) }} pledge.
+                    </div>
+                    
+                    <p>If you'd like to support a different event, you can browse available events and make a new pledge.</p>
+                    
+                    <a href="{{ url_for('events_list') }}" class="btn btn-primary">
+                        <i data-feather="calendar" class="me-2"></i>
+                        Browse Events
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

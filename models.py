@@ -95,13 +95,13 @@ class Event(db.Model):
     
     def can_be_deleted(self):
         """Check if event can be safely deleted"""
-        charged_pledges = [p for p in self.pledges if p.status == 'charged']
+        charged_pledges = [p for p in self.pledges.all() if p.status == 'charged']
         return len(charged_pledges) == 0
     
     def get_deletion_warnings(self):
         """Get warnings about deleting this event"""
         warnings = []
-        pledges = self.pledges
+        pledges = self.pledges.all()
         charged_pledges = [p for p in pledges if p.status == 'charged']
         
         if charged_pledges:
@@ -149,3 +149,43 @@ class AuthToken(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
+
+class PledgeTransfer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Transfer details
+    source_event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    target_event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    organizer_id = db.Column(db.Integer, db.ForeignKey('organizer.id'), nullable=False)
+    
+    # Status tracking
+    status = db.Column(db.String(20), default='pending')  # pending, consent_requested, completed, cancelled
+    consent_requested_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Transfer summary
+    total_pledges_requested = db.Column(db.Integer, default=0)  # Number of pledges to transfer
+    total_amount_requested = db.Column(db.Float, default=0.0)  # Total amount to transfer
+    pledges_consented = db.Column(db.Integer, default=0)  # Number of pledges that consented
+    amount_transferred = db.Column(db.Float, default=0.0)  # Actual amount transferred
+    
+    # Relationships
+    source_event = db.relationship('Event', foreign_keys=[source_event_id], backref='outgoing_transfers')
+    target_event = db.relationship('Event', foreign_keys=[target_event_id], backref='incoming_transfers')
+    organizer = db.relationship('Organizer', backref='pledge_transfers')
+
+class PledgeTransferConsent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    transfer_id = db.Column(db.Integer, db.ForeignKey('pledge_transfer.id'), nullable=False)
+    pledge_id = db.Column(db.Integer, db.ForeignKey('pledge.id'), nullable=False)
+    
+    # Consent tracking
+    consent_token = db.Column(db.String(64), unique=True, nullable=False)  # Unique token for consent link
+    status = db.Column(db.String(20), default='pending')  # pending, consented, declined
+    responded_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    transfer = db.relationship('PledgeTransfer', backref='consent_requests')
+    pledge = db.relationship('Pledge', backref='transfer_consents')

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Transfer Approved - Food Truck Fundraiser{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i data-feather="check-circle" class="me-2"></i>
+                        Transfer Approved
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="alert alert-success">
+                        <h5>Thank you! Your pledge has been successfully transferred.</h5>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <h6>Your pledge is now for:</h6>
+                            <div class="border rounded p-3 mb-3 bg-light">
+                                <strong>{{ new_event.name }}</strong><br>
+                                <small class="text-muted">{{ new_event.date.strftime('%B %d, %Y at %I:%M %p') }}</small><br>
+                                <small class="text-muted">{{ new_event.location }}</small><br>
+                                <strong>Your Pledge: ${{ "%.2f"|format(pledge.amount) }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i data-feather="info" class="me-2"></i>
+                        Your payment will only be charged if this event reaches its funding goal. You'll receive an email confirmation and e-ticket if the event is successfully funded.
+                    </div>
+                    
+                    <a href="{{ url_for('event_detail', event_id=new_event.id) }}" class="btn btn-primary">
+                        <i data-feather="eye" class="me-2"></i>
+                        View Event Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

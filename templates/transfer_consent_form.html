@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Pledge Transfer Request - Food Truck Fundraiser{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0">
+                        <i data-feather="arrow-right" class="me-2"></i>
+                        Pledge Transfer Request
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i data-feather="info" class="me-2"></i>
+                        Your event organizer has requested to transfer your pledge to a different event.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Original Event:</h6>
+                            <div class="border rounded p-3 mb-3">
+                                <strong>{{ consent_request.transfer.source_event.name }}</strong><br>
+                                <small class="text-muted">{{ consent_request.transfer.source_event.date.strftime('%B %d, %Y at %I:%M %p') }}</small><br>
+                                <small class="text-muted">{{ consent_request.transfer.source_event.location }}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>New Event:</h6>
+                            <div class="border rounded p-3 mb-3">
+                                <strong>{{ consent_request.transfer.target_event.name }}</strong><br>
+                                <small class="text-muted">{{ consent_request.transfer.target_event.date.strftime('%B %d, %Y at %I:%M %p') }}</small><br>
+                                <small class="text-muted">{{ consent_request.transfer.target_event.location }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-secondary">
+                        <strong>Your Pledge Amount:</strong> ${{ "%.2f"|format(consent_request.pledge.amount) }}<br>
+                        <small>This amount will remain the same. Your payment method will only be charged if the new event reaches its funding goal.</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <a href="{{ url_for('pledge_transfer_consent', token=consent_request.consent_token, response='approve') }}" 
+                           class="btn btn-success btn-lg me-md-2">
+                            <i data-feather="check" class="me-2"></i>
+                            Approve Transfer
+                        </a>
+                        <a href="{{ url_for('pledge_transfer_consent', token=consent_request.consent_token, response='decline') }}" 
+                           class="btn btn-danger btn-lg">
+                            <i data-feather="x" class="me-2"></i>
+                            Decline Transfer
+                        </a>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            <strong>Note:</strong> If you decline, your original pledge will be cancelled and no payment will be processed.
+                            You have 7 days to respond to this request.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

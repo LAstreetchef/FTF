@@ -122,6 +122,12 @@
                                 Share
                             </a>
                             {% endif %}
+                            {% if event.status == 'pending' and event.pledges|length > 0 %}
+                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="showTransferModal({{ event.id }}, '{{ event.name }}', {{ event.current_pledges }}, {{ event.pledges|length }})">
+                                <i data-feather="arrow-right" class="me-1"></i>
+                                Transfer
+                            </button>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -169,4 +175,93 @@
         </div>
     </div>
 </div>
+
+<!-- Transfer Pledges Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferModalLabel">Transfer Pledges</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="transferForm" method="POST">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i data-feather="info" class="me-2"></i>
+                        <strong>Transfer Pledges:</strong> Move pledges from an event that won't meet its goal to another event you're organizing.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>From Event:</strong></label>
+                        <div id="fromEventInfo" class="p-2 bg-light rounded"></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="targetEventId" class="form-label"><strong>To Event:</strong></label>
+                        <select class="form-select" id="targetEventId" name="target_event_id" required>
+                            <option value="">Select an event to transfer pledges to...</option>
+                            {% for target_event in events %}
+                                {% if target_event.status in ['pending', 'funded'] %}
+                                <option value="{{ target_event.id }}" data-name="{{ target_event.name }}" data-goal="{{ target_event.pledge_goal }}" data-current="{{ target_event.current_pledges }}">
+                                    {{ target_event.name }} - ${{ "%.2f"|format(target_event.current_pledges) }} / ${{ "%.2f"|format(target_event.pledge_goal) }}
+                                </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <small class="form-text text-muted">Only events that are still accepting pledges are shown</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label"><strong>What happens:</strong></label>
+                        <ul class="small text-muted">
+                            <li>All pledgers from the source event will be emailed asking for consent</li>
+                            <li>Only pledgers who consent will have their pledges transferred</li>
+                            <li>The source event will be cancelled for non-consenting pledgers</li>
+                            <li>Pledgers keep the same payment method and amount</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i data-feather="arrow-right" class="me-1"></i>
+                        Start Transfer Process
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTransferModal(eventId, eventName, currentPledges, pledgeCount) {
+    // Update modal content
+    document.getElementById('fromEventInfo').innerHTML = `
+        <strong>${eventName}</strong><br>
+        <small class="text-muted">$${currentPledges.toFixed(2)} from ${pledgeCount} pledgers</small>
+    `;
+    
+    // Set form action
+    document.getElementById('transferForm').action = `/organizer/events/${eventId}/transfer-pledges{% if auth_token %}?auth_token={{ auth_token }}{% endif %}`;
+    
+    // Filter out the source event from target options
+    const targetSelect = document.getElementById('targetEventId');
+    const options = targetSelect.querySelectorAll('option');
+    options.forEach(option => {
+        if (option.value == eventId) {
+            option.style.display = 'none';
+        } else {
+            option.style.display = 'block';
+        }
+    });
+    
+    // Reset selection
+    targetSelect.value = '';
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('transferModal'));
+    modal.show();
+}
+</script>
+
 {% endblock %}
