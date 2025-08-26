@@ -1226,7 +1226,7 @@ def transfer_pledges(event_id):
         return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
     
     # Get pending pledges from source event
-    pending_pledges = [p for p in source_event.pledges.all() if p.status == 'pending']
+    pending_pledges = [p for p in source_event.pledges if p.status == 'pending']
     
     if not pending_pledges:
         flash('No pending pledges found to transfer', 'error')
