@@ -68,7 +68,7 @@
                                         {% if truck.instagram %}
                                             <p><strong>Instagram:</strong> @{{ truck.instagram }}</p>
                                         {% endif %}
-                                        <p><strong>Submitted:</strong> {{ truck.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                                        <p><strong>Submitted:</strong> {{ truck.created_at.strftime('%B %d, %Y at %I:%M %p') if truck.created_at else 'Legacy truck' }}</p>
                                         
                                         <!-- Show menu items -->
                                         {% set menu_items = truck.get_menu_items() %}
@@ -196,7 +196,7 @@
                                             Owner: {% if truck.owner %}{{ truck.owner.name }}{% else %}Legacy{% endif %} | 
                                             Cuisine: {{ truck.cuisine_type or 'Not specified' }}
                                         </p>
-                                        <small class="text-muted">Submitted: {{ truck.created_at.strftime('%B %d, %Y') }}</small>
+                                        <small class="text-muted">Submitted: {{ truck.created_at.strftime('%B %d, %Y') if truck.created_at else 'Legacy truck' }}</small>
                                     </div>
                                     <div class="col-md-4 text-end">
                                         <span class="badge bg-danger">❌ Rejected</span>
