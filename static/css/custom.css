@@ -154,7 +154,7 @@
 }
 
 .chat-toggle::after {
-    content: "💬";
+    content: "🎧";
     position: absolute;
     font-size: 24px;
     display: none;
