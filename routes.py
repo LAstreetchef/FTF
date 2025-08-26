@@ -1275,31 +1275,69 @@ def transfer_pledges(event_id):
                 send_email(
                     pledge.email,
                     f"Transfer Request: Your {source_event.name} Pledge",
-                    f"""Hello!
-                    
-Your event organizer has requested to transfer your pledge from "{source_event.name}" to "{target_event.name}".
-
-Original Event: {source_event.name}
-Date: {source_event.date.strftime('%B %d, %Y at %I:%M %p')}
-Your Pledge: ${pledge.amount:.2f}
-
-New Event: {target_event.name}
-Date: {target_event.date.strftime('%B %d, %Y at %I:%M %p')}
-Location: {target_event.location}
-
-Your pledge amount will remain the same (${pledge.amount:.2f}), and your payment method won't be charged until the new event reaches its funding goal.
-
-Please click one of the links below to respond:
-
-APPROVE TRANSFER: {consent_url}?response=approve
-DECLINE TRANSFER: {consent_url}?response=decline
-
-If you decline, your original pledge will be cancelled and no payment will be processed.
-
-You have 7 days to respond to this request.
-
-Thank you!
-"""
+                    f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Request</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #ff8a00, #e52e71); color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }}
+        .content {{ background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; }}
+        .event-box {{ background: white; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ff8a00; }}
+        .buttons {{ text-align: center; margin: 30px 0; }}
+        .btn {{ display: inline-block; padding: 15px 30px; margin: 10px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; transition: all 0.3s; }}
+        .btn-approve {{ background: #28a745; color: white; }}
+        .btn-approve:hover {{ background: #218838; }}
+        .btn-decline {{ background: #dc3545; color: white; }}
+        .btn-decline:hover {{ background: #c82333; }}
+        .footer {{ font-size: 12px; color: #666; text-align: center; margin-top: 20px; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍴 Pledge Transfer Request</h1>
+    </div>
+    
+    <div class="content">
+        <p><strong>Hello!</strong></p>
+        
+        <p>Your event organizer has requested to transfer your pledge from <strong>"{source_event.name}"</strong> to <strong>"{target_event.name}"</strong>.</p>
+        
+        <div class="event-box">
+            <h3>📅 Original Event</h3>
+            <strong>{source_event.name}</strong><br>
+            <strong>Date:</strong> {source_event.date.strftime('%B %d, %Y at %I:%M %p')}<br>
+            <strong>Your Pledge:</strong> ${pledge.amount:.2f}
+        </div>
+        
+        <div class="event-box">
+            <h3>📅 New Event</h3>
+            <strong>{target_event.name}</strong><br>
+            <strong>Date:</strong> {target_event.date.strftime('%B %d, %Y at %I:%M %p')}<br>
+            <strong>Location:</strong> {target_event.location}
+        </div>
+        
+        <p><strong>💰 Your pledge amount will remain the same (${pledge.amount:.2f})</strong>, and your payment method won't be charged until the new event reaches its funding goal.</p>
+        
+        <div class="buttons">
+            <a href="{consent_url}?response=approve" class="btn btn-approve">✅ APPROVE TRANSFER</a>
+            <a href="{consent_url}?response=decline" class="btn btn-decline">❌ DECLINE TRANSFER</a>
+        </div>
+        
+        <p><em>⚠️ If you decline, your original pledge will be cancelled and no payment will be processed.</em></p>
+        
+        <p><strong>⏰ You have 7 days to respond to this request.</strong></p>
+        
+        <p>Thank you!</p>
+    </div>
+    
+    <div class="footer">
+        Food Truck Fundraiser Platform
+    </div>
+</body>
+</html>"""
                 )
         
         flash(f'Transfer request sent to {len(pending_pledges)} pledgers. You will be notified once they respond.', 'success')
