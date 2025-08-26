@@ -7,13 +7,14 @@ from flask_mail import Message
 from app import mail
 from datetime import datetime
 
-def send_email(recipient, subject, body):
+def send_email(recipient, subject, body, html=None):
     """Send email using Flask-Mail with Gmail SMTP"""
     try:
         msg = Message(
             subject=subject,
             recipients=[recipient],
-            body=body
+            body=body if not html else None,
+            html=html if html else body
         )
         mail.send(msg)
         logging.info(f"Email sent to {recipient}: {subject}")

@@ -1272,10 +1272,29 @@ def transfer_pledges(event_id):
                                     token=consent_request.consent_token, 
                                     _external=True)
                 
-                send_email(
-                    pledge.email,
-                    f"Transfer Request: Your {source_event.name} Pledge",
-                    f"""<!DOCTYPE html>
+                # Create a simple text version for fallback
+                text_body = f"""Transfer Request: Your {source_event.name} Pledge
+
+Your event organizer has requested to transfer your pledge from "{source_event.name}" to "{target_event.name}".
+
+Original Event: {source_event.name}
+Date: {source_event.date.strftime('%B %d, %Y at %I:%M %p')}
+Your Pledge: ${pledge.amount:.2f}
+
+New Event: {target_event.name}
+Date: {target_event.date.strftime('%B %d, %Y at %I:%M %p')}
+Location: {target_event.location}
+
+Your pledge amount will remain the same (${pledge.amount:.2f}).
+
+To respond, click one of these links:
+APPROVE: {consent_url}?response=approve
+DECLINE: {consent_url}?response=decline
+
+You have 7 days to respond to this request.
+Thank you!"""
+
+                html_body = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -1338,6 +1357,12 @@ def transfer_pledges(event_id):
     </div>
 </body>
 </html>"""
+
+                send_email(
+                    pledge.email,
+                    f"Transfer Request: Your {source_event.name} Pledge",
+                    text_body,
+                    html=html_body
                 )
         
         flash(f'Transfer request sent to {len(pending_pledges)} pledgers. You will be notified once they respond.', 'success')
