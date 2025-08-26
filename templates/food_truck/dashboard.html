@@ -89,12 +89,10 @@
                                             <span class="badge bg-danger">Payment Required</span>
                                             <small class="text-muted d-block">$25 registration fee</small>
                                         {% else %}
-                                            <span class="badge bg-{{ 'success' if truck.status == 'approved' else 'warning' }}">
-                                                {{ truck.status.title() }}
+                                            <span class="badge bg-success">
+                                                Approved
                                             </span>
-                                            {% if truck.registration_fee_charged %}
-                                                <small class="text-success d-block">✅ Registration fee paid</small>
-                                            {% endif %}
+                                            <small class="text-success d-block">✅ Registration fee paid - Ready for events!</small>
                                         {% endif %}
                                     </div>
                                     <div class="col-md-4 text-end">

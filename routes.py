@@ -1660,8 +1660,10 @@ def confirm_food_truck_registration_fee_payment(truck_id):
         payment_intent = stripe.PaymentIntent.retrieve(truck.registration_fee_payment_intent)
         
         if payment_intent.status == 'succeeded':
-            # Mark fee as paid
+            # Mark fee as paid and automatically approve truck
             truck.registration_fee_charged = True
+            truck.status = 'approved'  # Auto-approve after payment
+            truck.approved_at = datetime.utcnow()
             db.session.commit()
             
             # Send notification email to admin about new truck registration
@@ -1670,7 +1672,7 @@ def confirm_food_truck_registration_fee_payment(truck_id):
             send_email(
                 'truckstopsla@gmail.com',
                 f"Food Truck Registration Fee Paid: {truck.name}",
-                f"A food truck registration fee has been paid and is ready for review:\n\nTruck: {truck.name}\nOwner: {owner_name}\nCuisine: {truck.cuisine_type}\nGoal: ${truck.sales_goal:.2f}\n\nPlease review and approve the truck in the admin panel so it can participate in events."
+                f"A food truck registration fee has been paid and automatically approved:\n\nTruck: {truck.name}\nOwner: {owner_name}\nCuisine: {truck.cuisine_type}\nGoal: ${truck.sales_goal:.2f}\n\nThe truck is now approved and can participate in events immediately."
             )
             
             return jsonify({'success': True, 'redirect': url_for('food_truck_dashboard')})
