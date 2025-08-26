@@ -2468,3 +2468,4 @@ def food_truck_edit_truck(truck_id):
             flash('Error updating food truck. Please try again.', 'error')
     
     return render_template('food_truck/edit_truck.html', truck=truck, owner=owner)
+
