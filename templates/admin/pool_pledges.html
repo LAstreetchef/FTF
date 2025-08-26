@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Pool Pledges - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i data-feather="layers" class="me-2"></i>
+            Pool Pledges
+        </h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+            <i data-feather="arrow-left" class="me-2"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Source Event Info -->
+    <div class="card mb-4 border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i data-feather="upload" class="me-2"></i>
+                Source Event (Pledges to Transfer)
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <h4>{{ source_event.name }}</h4>
+                    <p class="text-muted">{{ source_event.description }}</p>
+                    <p><strong>Date:</strong> {{ source_event.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                    <p><strong>Location:</strong> {{ source_event.location }}</p>
+                    <p><strong>Food Truck:</strong> {{ source_event.food_truck.name }}</p>
+                    <p><strong>Organizer:</strong> {{ source_event.organizer.name }}</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <h3 class="text-warning">${{ "%.2f"|format(source_event.current_pledges) }}</h3>
+                        <p class="text-muted">{{ source_pledges|length }} pledges to transfer</p>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-warning" role="progressbar" 
+                                 style="width: {{ source_event.get_progress_percentage() }}%">
+                                {{ "%.0f"|format(source_event.get_progress_percentage()) }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">of ${{ "%.2f"|format(source_event.pledge_goal) }} goal</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Target Event Selection -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i data-feather="download" class="me-2"></i>
+                Select Target Event (Where to Pool Pledges)
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('admin_execute_pool_pledges') }}">
+                <input type="hidden" name="source_event_id" value="{{ source_event.id }}">
+                
+                {% if target_events %}
+                <div class="row">
+                    {% for event in target_events %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-success">
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="target_event_id" 
+                                           value="{{ event.id }}" id="event{{ event.id }}" required>
+                                    <label class="form-check-label w-100" for="event{{ event.id }}">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">{{ event.name }}</h6>
+                                                <small class="text-muted d-block">{{ event.food_truck.name }}</small>
+                                                <small class="text-muted d-block">{{ event.date.strftime('%m/%d/%Y') }}</small>
+                                                <small class="text-muted d-block">{{ event.location }}</small>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="text-success font-weight-bold">
+                                                    ${{ "%.2f"|format(event.current_pledges) }}
+                                                </div>
+                                                <small class="text-muted">
+                                                    of ${{ "%.2f"|format(event.pledge_goal) }}
+                                                </small>
+                                                <div class="progress mt-1" style="width: 80px; height: 6px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {{ event.get_progress_percentage() }}%">
+                                                    </div>
+                                                </div>
+                                                <small class="text-success">
+                                                    +${{ "%.2f"|format(source_event.current_pledges) }} = 
+                                                    ${{ "%.2f"|format(event.current_pledges + source_event.current_pledges) }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Confirmation and Submit -->
+                <div class="alert alert-info mt-4">
+                    <h6><i data-feather="info" class="me-2"></i>What will happen when you pool:</h6>
+                    <ul class="mb-0">
+                        <li>All {{ source_pledges|length }} pledges from "{{ source_event.name }}" will be transferred to the selected target event</li>
+                        <li>The source event will be marked as cancelled and pledgers will be notified</li>
+                        <li>Pledgers will receive emails about the event change with new details</li>
+                        <li>Combined pledges may reach the target event's funding goal</li>
+                        <li>No charges will be processed until the target event is approved</li>
+                    </ul>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-success btn-lg" 
+                            onclick="return confirm('Are you sure you want to pool all pledges from {{ source_event.name }} into the selected event? This cannot be undone.')">
+                        <i data-feather="layers" class="me-2"></i>
+                        Pool {{ source_pledges|length }} Pledges
+                    </button>
+                </div>
+                
+                {% else %}
+                <div class="alert alert-warning">
+                    <h6><i data-feather="alert-triangle" class="me-2"></i>No Target Events Available</h6>
+                    <p class="mb-0">There are no other pending events available to pool pledges into. Target events must be in "pending" status and cannot be the same as the source event.</p>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto-select the first option if only one target event
+    document.addEventListener('DOMContentLoaded', function() {
+        const radios = document.querySelectorAll('input[name="target_event_id"]');
+        if (radios.length === 1) {
+            radios[0].checked = true;
+        }
+    });
+</script>
+{% endblock %}

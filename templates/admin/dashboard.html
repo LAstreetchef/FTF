@@ -196,12 +196,10 @@
                                 </button>
                             </form>
                             {% elif event.status == 'pending' and event.current_pledges > 0 %}
-                            <form method="POST" action="{{ url_for('admin_pool_partial_event', event_id=event.id) }}" class="d-inline">
-                                <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('This will reserve the pledges but not charge cards yet. Cards will only be charged when you decide to approve the event.')">
-                                    <i data-feather="layers" class="me-1"></i>
-                                    Pool (Don\'t Charge)
-                                </button>
-                            </form>
+                            <a href="{{ url_for('admin_pool_pledges', source_event_id=event.id) }}" class="btn btn-warning btn-sm">
+                                <i data-feather="layers" class="me-1"></i>
+                                Pool Into Event
+                            </a>
                             {% elif event.status == 'pooled' %}
                             <form method="POST" action="{{ url_for('admin_charge_pooled_event', event_id=event.id) }}" class="d-inline">
                                 <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('This will charge all pooled pledges and approve the event.')">

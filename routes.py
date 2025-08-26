@@ -1264,6 +1264,125 @@ def admin_charge_pooled_event(event_id):
     
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/pool-pledges/<int:source_event_id>')
+def admin_pool_pledges(source_event_id):
+    """Show interface to select target event for pooling pledges"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    source_event = Event.query.get_or_404(source_event_id)
+    
+    if source_event.status not in ['pending']:
+        flash('Can only pool pledges from pending events', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    if source_event.current_pledges == 0:
+        flash('No pledges to pool for this event', 'warning')
+        return redirect(url_for('admin_dashboard'))
+    
+    # Get source pledges
+    source_pledges = Pledge.query.filter_by(event_id=source_event_id, status='pending').all()
+    
+    # Get potential target events (pending events, different from source, with same food truck preferred)
+    target_events = Event.query.filter(
+        Event.id != source_event_id,
+        Event.status == 'pending'
+    ).order_by(
+        # Prefer same food truck
+        (Event.food_truck_id == source_event.food_truck_id).desc(),
+        Event.created_at.desc()
+    ).all()
+    
+    return render_template('admin/pool_pledges.html', 
+                         source_event=source_event,
+                         source_pledges=source_pledges,
+                         target_events=target_events)
+
+@app.route('/admin/execute-pool-pledges', methods=['POST'])
+def admin_execute_pool_pledges():
+    """Execute the pledge pooling transfer"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    source_event_id = int(request.form['source_event_id'])
+    target_event_id = int(request.form['target_event_id'])
+    
+    source_event = Event.query.get_or_404(source_event_id)
+    target_event = Event.query.get_or_404(target_event_id)
+    
+    # Validation
+    if source_event.status != 'pending' or target_event.status != 'pending':
+        flash('Both events must be in pending status', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    if source_event_id == target_event_id:
+        flash('Cannot pool event into itself', 'error')
+        return redirect(url_for('admin_dashboard'))
+    
+    try:
+        # Get all pledges from source event
+        pledges_to_transfer = Pledge.query.filter_by(event_id=source_event_id, status='pending').all()
+        
+        if not pledges_to_transfer:
+            flash('No pledges found to transfer', 'warning')
+            return redirect(url_for('admin_dashboard'))
+        
+        # Transfer pledges to target event
+        transferred_count = 0
+        for pledge in pledges_to_transfer:
+            pledge.event_id = target_event_id
+            transferred_count += 1
+            
+            # Send notification to pledger about event change
+            send_email(
+                pledge.email,
+                f"Event Update: Your Pledge Moved to {target_event.name}",
+                f"Hello!\n\nYour pledge of ${pledge.amount:.2f} has been moved to a new event due to scheduling changes.\n\nNEW EVENT DETAILS:\nEvent: {target_event.name}\nDate: {target_event.date.strftime('%B %d, %Y at %I:%M %p')}\nLocation: {target_event.location}\nFood Truck: {target_event.food_truck.name}\n\nYour pledge amount and payment information remain the same. No action is required on your part.\n\nORIGINAL EVENT:\nEvent: {source_event.name} (cancelled)\n\nThank you for your understanding!"
+            )
+        
+        # Update pledge totals
+        source_event.update_pledge_total()
+        target_event.update_pledge_total()
+        
+        # Mark source event as cancelled since pledges moved
+        source_event.status = 'cancelled'
+        
+        # Check if target event now meets goal
+        if target_event.is_goal_met():
+            target_event.status = 'funded'
+            
+            # Send notification to admin
+            send_email(
+                'truckstopsla@gmail.com',
+                f"Event Goal Met After Pooling: {target_event.name}",
+                f"Great news! After pooling {transferred_count} pledges from '{source_event.name}', the event '{target_event.name}' has reached its funding goal!\n\nNew Total: ${target_event.current_pledges:.2f} of ${target_event.pledge_goal:.2f}\nPledges Transferred: {transferred_count}\n\nYou can now approve and charge all pledges for this event."
+            )
+        
+        db.session.commit()
+        
+        # Send notifications to organizers
+        send_email(
+            source_event.organizer.email,
+            f"Event Cancelled: {source_event.name}",
+            f"Your event '{source_event.name}' has been cancelled and all {transferred_count} pledges have been transferred to another compatible event.\n\nPledges moved to: {target_event.name}\nDate: {target_event.date.strftime('%B %d, %Y at %I:%M %p')}\nLocation: {target_event.location}\n\nPledgers have been notified of the change. If you have questions, please contact support."
+        )
+        
+        send_email(
+            target_event.organizer.email,
+            f"Pledges Added to Your Event: {target_event.name}",
+            f"Great news! Your event '{target_event.name}' has received {transferred_count} additional pledges from another event.\n\nAdditional funding: ${source_event.current_pledges:.2f}\nNew total: ${target_event.current_pledges:.2f} of ${target_event.pledge_goal:.2f}\n\n" + ("Your event has now reached its funding goal! 🎉" if target_event.is_goal_met() else "Keep promoting to reach your goal!")
+        )
+        
+        flash(f'Successfully pooled {transferred_count} pledges from "{source_event.name}" into "{target_event.name}"!', 'success')
+        if target_event.status == 'funded':
+            flash(f'"{target_event.name}" has reached its funding goal and is ready for approval!', 'success')
+        
+    except Exception as e:
+        logging.error(f"Error pooling pledges: {str(e)}")
+        flash('Error transferring pledges', 'error')
+    
+    return redirect(url_for('admin_dashboard'))
+
 @app.route('/admin/events/<int:event_id>/delete', methods=['POST'])
 def admin_delete_event(event_id):
     """Delete an event with proper handling of associated pledges"""
