@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Food Truck Dashboard{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="display-5 mb-3 text-gradient">🚚 {{ owner.business_name }}</h1>
+                <p class="lead">Welcome back, {{ owner.name }}!</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <span class="badge bg-{{ 'success' if owner.status == 'approved' else 'warning' }} fs-6">
+                        {% if owner.status == 'approved' %}✅ Approved{% else %}⏳ Pending Approval{% endif %}
+                    </span>
+                    <a href="{{ url_for('food_truck_logout') }}" class="btn btn-outline-secondary btn-sm">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if owner.status != 'approved' %}
+        <div class="alert alert-warning" role="alert">
+            <h5 class="alert-heading">⏳ Account Pending Approval</h5>
+            <p>Your food truck registration is currently under review by our admin team. You'll receive an email once your account is approved and you can start participating in events.</p>
+            <p class="mb-0"><strong>Registered:</strong> {{ owner.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        </div>
+    {% endif %}
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">{{ food_trucks|length }}</h5>
+                    <p class="card-text">Food Trucks</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-success">{{ recent_events|length }}</h5>
+                    <p class="card-text">Recent Events</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-info">${{ "%.2f"|format(payouts|sum(attribute='payout_amount') or 0) }}</h5>
+                    <p class="card-text">Total Payouts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">{{ payouts|selectattr('status', 'equalto', 'pending')|list|length }}</h5>
+                    <p class="card-text">Pending Payouts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Food Trucks Section -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">🚚 Your Food Trucks</h5>
+                    {% if owner.status == 'approved' %}
+                        <a href="{{ url_for('food_truck_add_truck') }}" class="btn btn-primary btn-sm">+ Add New Truck</a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if food_trucks %}
+                        {% for truck in food_trucks %}
+                            <div class="border rounded p-3 mb-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h6 class="mb-1">{{ truck.name }}</h6>
+                                        <p class="text-muted mb-1">{{ truck.cuisine_type or 'Cuisine not specified' }}</p>
+                                        <p class="mb-1">{{ truck.description or 'No description' }}</p>
+                                        <span class="badge bg-{{ 'success' if truck.status == 'approved' else 'warning' }}">
+                                            {{ truck.status.title() }}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        {% if truck.status == 'approved' %}
+                                            <a href="{{ url_for('food_truck_edit_truck', truck_id=truck.id) }}" class="btn btn-outline-primary btn-sm">Edit</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if truck.get_menu_items() %}
+                                    <div class="mt-2">
+                                        <small class="text-muted">Menu Items: {{ truck.get_menu_items()|length }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p class="text-muted">No food trucks registered yet.</p>
+                            {% if owner.status == 'approved' %}
+                                <a href="{{ url_for('food_truck_add_truck') }}" class="btn btn-primary">Add Your First Truck</a>
+                            {% else %}
+                                <p class="small">You can add food trucks once your account is approved.</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">📈 Recent Events</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_events %}
+                        {% for event in recent_events %}
+                            <div class="border-bottom pb-2 mb-2">
+                                <h6 class="mb-1">{{ event.name }}</h6>
+                                <small class="text-muted">{{ event.date.strftime('%b %d, %Y') }}</small>
+                                <div>
+                                    <span class="badge bg-{{ 'success' if event.status == 'approved' else 'primary' if event.status == 'funded' else 'secondary' }}">
+                                        {{ event.status.title() }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No recent events found.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if payouts %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">💰 Recent Payouts</h5>
+                </div>
+                <div class="card-body">
+                    {% for payout in payouts %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>${{ "%.2f"|format(payout.payout_amount) }}</span>
+                                <span class="badge bg-{{ 'success' if payout.status == 'completed' else 'warning' }}">
+                                    {{ payout.status.title() }}
+                                </span>
+                            </div>
+                            <small class="text-muted">{{ payout.event.name }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

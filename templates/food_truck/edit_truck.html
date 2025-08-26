@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Edit {{ truck.name }}{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="display-5 mb-3 text-gradient">🚚 {{ truck.name }}</h1>
+                <p class="lead">Manage your food truck profile and menu</p>
+                <span class="badge bg-{{ 'success' if truck.status == 'approved' else 'warning' }} fs-6">
+                    {{ truck.status.title() }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <!-- Profile Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">🏪 Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_profile">
+                        
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Food Truck Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ truck.name }}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cuisine_type" class="form-label">Cuisine Type</label>
+                            <input type="text" class="form-control" id="cuisine_type" name="cuisine_type" 
+                                   value="{{ truck.cuisine_type or '' }}" placeholder="e.g., Mexican, Asian Fusion">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required>{{ truck.description }}</textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="contact_email" class="form-label">Contact Email</label>
+                                <input type="email" class="form-control" id="contact_email" name="contact_email" 
+                                       value="{{ truck.contact_email or '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="contact_phone" class="form-label">Contact Phone</label>
+                                <input type="tel" class="form-control" id="contact_phone" name="contact_phone" 
+                                       value="{{ truck.contact_phone or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="website" class="form-label">Website</label>
+                                <input type="url" class="form-control" id="website" name="website" 
+                                       value="{{ truck.website or '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="instagram" class="form-label">Instagram</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@</span>
+                                    <input type="text" class="form-control" id="instagram" name="instagram" 
+                                           value="{{ truck.instagram or '' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sales_goal" class="form-label">Minimum Sales Goal *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="sales_goal" name="sales_goal" 
+                                       step="0.01" min="1" value="{{ truck.sales_goal }}" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Section -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">🍽️ Menu Items</h5>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addMenuItem()">
+                        + Add Item
+                    </button>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="menuForm">
+                        <input type="hidden" name="action" value="update_menu">
+                        
+                        <div id="menuItems">
+                            {% set menu_items = truck.get_menu_items() %}
+                            {% if menu_items %}
+                                {% for item in menu_items %}
+                                    <div class="menu-item border rounded p-3 mb-3">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Item Name</label>
+                                                <input type="text" class="form-control" name="item_name_{{ loop.index0 }}" 
+                                                       value="{{ item.name }}" required>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Price ($)</label>
+                                                <input type="number" class="form-control" name="item_price_{{ loop.index0 }}" 
+                                                       step="0.01" min="0.01" value="{{ item.price }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Description</label>
+                                            <textarea class="form-control" name="item_description_{{ loop.index0 }}" 
+                                                      rows="2">{{ item.description or '' }}</textarea>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeMenuItem(this)">
+                                            Remove
+                                        </button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Update Menu</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('food_truck_dashboard') }}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+
+<script>
+let menuItemCounter = {{ truck.get_menu_items()|length or 0 }};
+
+function addMenuItem() {
+    const container = document.getElementById('menuItems');
+    const menuItem = document.createElement('div');
+    menuItem.className = 'menu-item border rounded p-3 mb-3';
+    menuItem.innerHTML = `
+        <div class="row">
+            <div class="col-md-6 mb-2">
+                <label class="form-label">Item Name</label>
+                <input type="text" class="form-control" name="item_name_${menuItemCounter}" required>
+            </div>
+            <div class="col-md-6 mb-2">
+                <label class="form-label">Price ($)</label>
+                <input type="number" class="form-control" name="item_price_${menuItemCounter}" 
+                       step="0.01" min="0.01" required>
+            </div>
+        </div>
+        <div class="mb-2">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="item_description_${menuItemCounter}" rows="2"></textarea>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeMenuItem(this)">
+            Remove
+        </button>
+    `;
+    container.appendChild(menuItem);
+    menuItemCounter++;
+}
+
+function removeMenuItem(button) {
+    button.closest('.menu-item').remove();
+}
+</script>
+{% endblock %}

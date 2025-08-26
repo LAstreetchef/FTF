@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
-from models import Admin, Organizer, FoodTruck, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent
+from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout
 from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
 import stripe
 import os
@@ -224,6 +224,338 @@ def admin_logout():
     flash('Logged out successfully', 'success')
     return redirect(url_for('index'))
 
+@app.route('/admin/food-truck-owners')
+def admin_food_truck_owners():
+    """Admin page to manage food truck owner registrations"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    # Get all food truck owners with their trucks
+    pending_owners = FoodTruckOwner.query.filter_by(status='pending').order_by(FoodTruckOwner.created_at.desc()).all()
+    approved_owners = FoodTruckOwner.query.filter_by(status='approved').order_by(FoodTruckOwner.approved_at.desc()).all()
+    rejected_owners = FoodTruckOwner.query.filter_by(status='rejected').order_by(FoodTruckOwner.created_at.desc()).all()
+    
+    return render_template('admin/food_truck_owners.html',
+                         pending_owners=pending_owners,
+                         approved_owners=approved_owners,
+                         rejected_owners=rejected_owners)
+
+@app.route('/admin/food-truck-owners/<int:owner_id>/approve', methods=['POST'])
+def admin_approve_truck_owner(owner_id):
+    """Approve food truck owner registration"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    owner = FoodTruckOwner.query.get_or_404(owner_id)
+    admin = Admin.query.get(session['admin_id'])
+    
+    if owner.status == 'pending':
+        owner.status = 'approved'
+        owner.approved_at = datetime.utcnow()
+        owner.approved_by = admin.id
+        
+        db.session.commit()
+        
+        # Send approval email
+        send_email(
+            owner.email,
+            'Food Truck Registration Approved!',
+            f"""Congratulations {owner.name}!
+
+Your food truck owner registration has been approved by our admin team.
+
+Business: {owner.business_name}
+Approval Date: {owner.approved_at.strftime('%B %d, %Y at %I:%M %p')}
+
+You can now:
+1. Login to your food truck dashboard
+2. Add your food truck profiles
+3. Create menus and set pricing
+4. Start participating in fundraising events
+
+Login here: {url_for('food_truck_login', _external=True)}
+
+Welcome to the Food Truck Fundraiser platform!
+
+Best regards,
+The Food Truck Fundraiser Team"""
+        )
+        
+        flash(f'Successfully approved {owner.business_name}. Approval email sent.', 'success')
+    else:
+        flash('Food truck owner is not in pending status.', 'error')
+    
+    return redirect(url_for('admin_food_truck_owners'))
+
+@app.route('/admin/food-truck-owners/<int:owner_id>/reject', methods=['POST'])
+def admin_reject_truck_owner(owner_id):
+    """Reject food truck owner registration"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    owner = FoodTruckOwner.query.get_or_404(owner_id)
+    rejection_reason = request.form.get('reason', 'No reason provided')
+    
+    if owner.status == 'pending':
+        owner.status = 'rejected'
+        
+        db.session.commit()
+        
+        # Send rejection email
+        send_email(
+            owner.email,
+            'Food Truck Registration Update',
+            f"""Hello {owner.name},
+
+Thank you for your interest in joining our Food Truck Fundraiser platform.
+
+Unfortunately, we are unable to approve your registration for {owner.business_name} at this time.
+
+Reason: {rejection_reason}
+
+If you have questions or would like to reapply in the future, please feel free to contact us.
+
+Best regards,
+The Food Truck Fundraiser Team"""
+        )
+        
+        flash(f'Rejected {owner.business_name}. Rejection email sent.', 'success')
+    else:
+        flash('Food truck owner is not in pending status.', 'error')
+    
+    return redirect(url_for('admin_food_truck_owners'))
+
+@app.route('/admin/food-trucks')
+def admin_food_trucks():
+    """Admin page to manage food truck profiles"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    # Get all food trucks with their owners
+    pending_trucks = FoodTruck.query.filter_by(status='pending').order_by(FoodTruck.created_at.desc()).all()
+    approved_trucks = FoodTruck.query.filter_by(status='approved').order_by(FoodTruck.approved_at.desc()).all()
+    rejected_trucks = FoodTruck.query.filter_by(status='rejected').order_by(FoodTruck.created_at.desc()).all()
+    
+    return render_template('admin/food_trucks.html',
+                         pending_trucks=pending_trucks,
+                         approved_trucks=approved_trucks,
+                         rejected_trucks=rejected_trucks)
+
+@app.route('/admin/food-trucks/<int:truck_id>/approve', methods=['POST'])
+def admin_approve_food_truck(truck_id):
+    """Approve food truck profile"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    truck = FoodTruck.query.get_or_404(truck_id)
+    admin = Admin.query.get(session['admin_id'])
+    
+    if truck.status == 'pending':
+        truck.status = 'approved'
+        truck.approved_at = datetime.utcnow()
+        truck.approved_by = admin.id
+        
+        db.session.commit()
+        
+        # Send approval email to truck owner
+        if truck.owner:
+            send_email(
+                truck.owner.email,
+                f'Food Truck "{truck.name}" Approved!',
+                f"""Great news {truck.owner.name}!
+
+Your food truck "{truck.name}" has been approved and is now available for organizers to select for their events.
+
+Truck Details:
+- Name: {truck.name}
+- Cuisine: {truck.cuisine_type or 'Not specified'}
+- Description: {truck.description}
+- Minimum Sales Goal: ${truck.sales_goal:.2f}
+- Menu Items: {len(truck.get_menu_items())} items
+
+Your truck will now appear in the organizer dashboard when they create new events.
+
+Login to manage your truck: {url_for('food_truck_login', _external=True)}
+
+Best regards,
+The Food Truck Fundraiser Team"""
+            )
+        
+        flash(f'Successfully approved food truck "{truck.name}". Approval email sent.', 'success')
+    else:
+        flash('Food truck is not in pending status.', 'error')
+    
+    return redirect(url_for('admin_food_trucks'))
+
+@app.route('/admin/food-trucks/<int:truck_id>/reject', methods=['POST'])
+def admin_reject_food_truck(truck_id):
+    """Reject food truck profile"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    truck = FoodTruck.query.get_or_404(truck_id)
+    rejection_reason = request.form.get('reason', 'No reason provided')
+    
+    if truck.status == 'pending':
+        truck.status = 'rejected'
+        
+        db.session.commit()
+        
+        # Send rejection email to truck owner
+        if truck.owner:
+            send_email(
+                truck.owner.email,
+                f'Food Truck "{truck.name}" Update',
+                f"""Hello {truck.owner.name},
+
+Thank you for submitting your food truck "{truck.name}" for approval.
+
+Unfortunately, we are unable to approve this truck profile at this time.
+
+Reason: {rejection_reason}
+
+You can edit your truck profile and resubmit for approval through your dashboard.
+
+Login here: {url_for('food_truck_login', _external=True)}
+
+Best regards,
+The Food Truck Fundraiser Team"""
+            )
+        
+        flash(f'Rejected food truck "{truck.name}". Rejection email sent.', 'success')
+    else:
+        flash('Food truck is not in pending status.', 'error')
+    
+    return redirect(url_for('admin_food_trucks'))
+
+@app.route('/admin/payouts')
+def admin_payouts():
+    """Admin page to manage food truck payouts"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    # Get events that are charged and may need payouts
+    completed_events = Event.query.filter_by(status='charged').order_by(Event.date.desc()).all()
+    
+    # Get existing payouts
+    pending_payouts = Payout.query.filter_by(status='pending').order_by(Payout.created_at.desc()).all()
+    completed_payouts = Payout.query.filter_by(status='completed').order_by(Payout.paid_at.desc()).limit(20).all()
+    
+    return render_template('admin/payouts.html',
+                         completed_events=completed_events,
+                         pending_payouts=pending_payouts,
+                         completed_payouts=completed_payouts)
+
+@app.route('/admin/payouts/<int:event_id>/create', methods=['POST'])
+def admin_create_payout(event_id):
+    """Create payout for completed event"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    event = Event.query.get_or_404(event_id)
+    admin = Admin.query.get(session['admin_id'])
+    
+    # Verify event is charged and doesn't already have a payout
+    if event.status != 'charged':
+        flash('Event must be charged before creating payout.', 'error')
+        return redirect(url_for('admin_payouts'))
+    
+    existing_payout = Payout.query.filter_by(event_id=event_id).first()
+    if existing_payout:
+        flash(f'Payout already exists for event {event.name}.', 'error')
+        return redirect(url_for('admin_payouts'))
+    
+    # Calculate payout amount (total pledges minus platform fee)
+    total_collected = event.current_pledges
+    platform_fee_percent = 5.0  # 5% platform fee
+    platform_fee = total_collected * (platform_fee_percent / 100)
+    payout_amount = total_collected - platform_fee
+    
+    # Create payout record
+    payout = Payout(
+        event_id=event_id,
+        food_truck_id=event.food_truck_id,
+        amount=payout_amount,
+        platform_fee=platform_fee,
+        created_by=admin.id,
+        status='pending'
+    )
+    
+    db.session.add(payout)
+    db.session.commit()
+    
+    # Send notification email to food truck owner
+    if event.food_truck and event.food_truck.owner:
+        send_email(
+            event.food_truck.owner.email,
+            f'Payout Initiated for {event.name}',
+            f"""Hello {event.food_truck.owner.name},
+
+Great news! A payout has been initiated for your food truck "{event.food_truck.name}" from the successful event "{event.name}".
+
+Event Details:
+- Event: {event.name}
+- Date: {event.date.strftime('%B %d, %Y')}
+- Total Collected: ${total_collected:.2f}
+- Platform Fee (5%): ${platform_fee:.2f}
+- Your Payout: ${payout_amount:.2f}
+
+The payout will be processed and sent to your registered bank account within 3-5 business days.
+
+Login to view details: {url_for('food_truck_login', _external=True)}
+
+Thank you for participating in Food Truck Fundraiser!
+
+Best regards,
+The Food Truck Fundraiser Team"""
+        )
+    
+    flash(f'Payout created for ${payout_amount:.2f}. Notification sent to food truck owner.', 'success')
+    return redirect(url_for('admin_payouts'))
+
+@app.route('/admin/payouts/<int:payout_id>/complete', methods=['POST'])
+def admin_complete_payout(payout_id):
+    """Mark payout as completed"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    payout = Payout.query.get_or_404(payout_id)
+    
+    if payout.status == 'pending':
+        payout.status = 'completed'
+        payout.paid_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        # Send completion notification to food truck owner
+        if payout.food_truck and payout.food_truck.owner:
+            send_email(
+                payout.food_truck.owner.email,
+                f'Payout Completed - ${payout.amount:.2f}',
+                f"""Hello {payout.food_truck.owner.name},
+
+Your payout has been successfully completed!
+
+Payment Details:
+- Food Truck: {payout.food_truck.name}
+- Event: {payout.event.name}
+- Amount Paid: ${payout.amount:.2f}
+- Payment Date: {payout.paid_at.strftime('%B %d, %Y at %I:%M %p')}
+
+The funds should appear in your bank account within 1-2 business days.
+
+Thank you for being part of the Food Truck Fundraiser platform!
+
+Best regards,
+The Food Truck Fundraiser Team"""
+            )
+        
+        flash(f'Payout marked as completed. Confirmation sent to food truck owner.', 'success')
+    else:
+        flash('Payout is not in pending status.', 'error')
+    
+    return redirect(url_for('admin_payouts'))
+
 @app.route('/admin/dashboard')
 def admin_dashboard():
     if not session.get('admin_id'):
@@ -237,12 +569,18 @@ def admin_dashboard():
     
     recent_events = Event.query.order_by(Event.created_at.desc()).limit(5).all()
     
+    # Get food truck registration statistics
+    pending_truck_owners = FoodTruckOwner.query.filter_by(status='pending').count()
+    pending_food_trucks = FoodTruck.query.filter_by(status='pending').count()
+    
     return render_template('admin/dashboard.html', 
                          total_trucks=total_trucks,
                          total_events=total_events,
                          pending_events=pending_events,
                          funded_events=funded_events,
-                         recent_events=recent_events)
+                         recent_events=recent_events,
+                         pending_truck_owners=pending_truck_owners,
+                         pending_food_trucks=pending_food_trucks)
 
 @app.route('/debug-database-xyz123')
 def debug_database():
@@ -1173,7 +1511,8 @@ def organizer_create_event():
         return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}')
     
     # GET request - show form
-    trucks = FoodTruck.query.all()
+    # Only show approved food trucks to organizers
+    trucks = FoodTruck.query.filter_by(status='approved').all()
     # Pass auth token to template for form submission consistency  
     return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
 
@@ -1764,3 +2103,245 @@ def test_organizer_registration():
         <p>Traceback:</p>
         <pre>{traceback.format_exc()}</pre>
         """
+
+# Food Truck Registration Routes
+@app.route('/food-truck/register', methods=['GET', 'POST'])
+def food_truck_register():
+    """Food truck owner registration"""
+    if request.method == 'POST':
+        try:
+            # Get form data
+            email = request.form.get('email')
+            name = request.form.get('name')
+            phone = request.form.get('phone')
+            business_name = request.form.get('business_name')
+            business_license = request.form.get('business_license')
+            password = request.form.get('password')
+            
+            # Validate required fields
+            if not all([email, name, business_name, password]):
+                flash('Please fill in all required fields.', 'error')
+                return render_template('food_truck/register.html')
+            
+            # Check if email already exists
+            existing_owner = FoodTruckOwner.query.filter_by(email=email).first()
+            if existing_owner:
+                flash('An account with this email already exists.', 'error')
+                return render_template('food_truck/register.html')
+            
+            # Create new food truck owner
+            owner = FoodTruckOwner(
+                email=email,
+                name=name,
+                phone=phone,
+                business_name=business_name,
+                business_license=business_license,
+                password_hash=generate_password_hash(password)
+            )
+            
+            db.session.add(owner)
+            db.session.commit()
+            
+            # Send notification to admin
+            admin_emails = [admin.username for admin in Admin.query.all()]
+            for admin_email in admin_emails:
+                send_email(
+                    admin_email,
+                    'New Food Truck Registration',
+                    f'A new food truck owner has registered:\n\nBusiness: {business_name}\nOwner: {name}\nEmail: {email}\n\nPlease review and approve their application in the admin dashboard.'
+                )
+            
+            flash('Registration successful! Your application is pending approval. You will receive an email once reviewed.', 'success')
+            return redirect(url_for('food_truck_login'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error in food truck registration: {str(e)}")
+            flash('Error during registration. Please try again.', 'error')
+    
+    return render_template('food_truck/register.html')
+
+@app.route('/food-truck/login', methods=['GET', 'POST'])
+def food_truck_login():
+    """Food truck owner login"""
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        owner = FoodTruckOwner.query.filter_by(email=email).first()
+        
+        if owner and check_password_hash(owner.password_hash, password):
+            if owner.status != 'approved':
+                flash('Your account is pending approval. Please wait for admin review.', 'warning')
+                return render_template('food_truck/login.html')
+            
+            # Set session
+            session['food_truck_owner_id'] = owner.id
+            session['user_type'] = 'food_truck_owner'
+            session['authenticated'] = True
+            
+            return redirect(url_for('food_truck_dashboard'))
+        else:
+            flash('Invalid email or password.', 'error')
+    
+    return render_template('food_truck/login.html')
+
+@app.route('/food-truck/dashboard')
+def food_truck_dashboard():
+    """Food truck owner dashboard"""
+    if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
+        return redirect(url_for('food_truck_login'))
+    
+    owner = FoodTruckOwner.query.get(session['food_truck_owner_id'])
+    if not owner:
+        session.clear()
+        return redirect(url_for('food_truck_login'))
+    
+    # Get owner's food trucks
+    food_trucks = FoodTruck.query.filter_by(owner_id=owner.id).all()
+    
+    # Get recent events for their trucks
+    truck_ids = [truck.id for truck in food_trucks]
+    recent_events = []
+    if truck_ids:
+        recent_events = Event.query.filter(Event.food_truck_id.in_(truck_ids)).order_by(Event.created_at.desc()).limit(5).all()
+    
+    # Get payouts
+    payouts = []
+    if truck_ids:
+        payouts = Payout.query.filter(Payout.food_truck_id.in_(truck_ids)).order_by(Payout.created_at.desc()).limit(5).all()
+    
+    return render_template('food_truck/dashboard.html', 
+                         owner=owner, 
+                         food_trucks=food_trucks, 
+                         recent_events=recent_events,
+                         payouts=payouts)
+
+@app.route('/food-truck/logout')
+def food_truck_logout():
+    """Food truck owner logout"""
+    session.clear()
+    flash('You have been logged out successfully.', 'success')
+    return redirect(url_for('index'))
+
+@app.route('/food-truck/add-truck', methods=['GET', 'POST'])
+def food_truck_add_truck():
+    """Add new food truck"""
+    if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
+        return redirect(url_for('food_truck_login'))
+    
+    owner = FoodTruckOwner.query.get(session['food_truck_owner_id'])
+    if not owner or owner.status != 'approved':
+        flash('Your account must be approved before adding food trucks.', 'error')
+        return redirect(url_for('food_truck_dashboard'))
+    
+    if request.method == 'POST':
+        try:
+            # Get form data
+            name = request.form.get('name')
+            description = request.form.get('description')
+            cuisine_type = request.form.get('cuisine_type')
+            contact_email = request.form.get('contact_email')
+            contact_phone = request.form.get('contact_phone')
+            website = request.form.get('website')
+            instagram = request.form.get('instagram')
+            sales_goal = float(request.form.get('sales_goal', 0))
+            
+            # Validate required fields
+            if not all([name, description, sales_goal > 0]):
+                flash('Please fill in all required fields.', 'error')
+                return render_template('food_truck/add_truck.html')
+            
+            # Create new food truck
+            truck = FoodTruck(
+                name=name,
+                description=description,
+                owner_id=owner.id,
+                cuisine_type=cuisine_type,
+                contact_email=contact_email or owner.email,
+                contact_phone=contact_phone or owner.phone,
+                website=website,
+                instagram=instagram,
+                sales_goal=sales_goal,
+                status='pending'
+            )
+            
+            db.session.add(truck)
+            db.session.commit()
+            
+            flash('Food truck added successfully! It will be reviewed by admin before appearing in events.', 'success')
+            return redirect(url_for('food_truck_dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error adding food truck: {str(e)}")
+            flash('Error adding food truck. Please try again.', 'error')
+    
+    return render_template('food_truck/add_truck.html', owner=owner)
+
+@app.route('/food-truck/edit/<int:truck_id>', methods=['GET', 'POST'])
+def food_truck_edit_truck(truck_id):
+    """Edit food truck profile and menu"""
+    if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
+        return redirect(url_for('food_truck_login'))
+    
+    owner = FoodTruckOwner.query.get(session['food_truck_owner_id'])
+    truck = FoodTruck.query.get_or_404(truck_id)
+    
+    # Verify ownership
+    if truck.owner_id != owner.id:
+        flash('You can only edit your own food trucks.', 'error')
+        return redirect(url_for('food_truck_dashboard'))
+    
+    if request.method == 'POST':
+        try:
+            action = request.form.get('action')
+            
+            if action == 'update_profile':
+                # Update basic profile
+                truck.name = request.form.get('name')
+                truck.description = request.form.get('description')
+                truck.cuisine_type = request.form.get('cuisine_type')
+                truck.contact_email = request.form.get('contact_email')
+                truck.contact_phone = request.form.get('contact_phone')
+                truck.website = request.form.get('website')
+                truck.instagram = request.form.get('instagram')
+                truck.sales_goal = float(request.form.get('sales_goal', 0))
+                
+                db.session.commit()
+                flash('Food truck profile updated successfully!', 'success')
+                
+            elif action == 'update_menu':
+                # Handle menu update
+                menu_items = []
+                item_count = 0
+                
+                # Parse menu items from form
+                while f'item_name_{item_count}' in request.form:
+                    item_name = request.form.get(f'item_name_{item_count}')
+                    item_price = request.form.get(f'item_price_{item_count}')
+                    item_description = request.form.get(f'item_description_{item_count}')
+                    
+                    if item_name and item_price:
+                        try:
+                            menu_items.append({
+                                'name': item_name,
+                                'price': float(item_price),
+                                'description': item_description or ''
+                            })
+                        except ValueError:
+                            flash(f'Invalid price for item: {item_name}', 'error')
+                            return render_template('food_truck/edit_truck.html', truck=truck, owner=owner)
+                    
+                    item_count += 1
+                
+                truck.set_menu_items(menu_items)
+                db.session.commit()
+                flash('Menu updated successfully!', 'success')
+                
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error updating food truck: {str(e)}")
+            flash('Error updating food truck. Please try again.', 'error')
+    
+    return render_template('food_truck/edit_truck.html', truck=truck, owner=owner)

@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Food Trucks{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-4">
+    <div class="container">
+        <h1 class="display-5 mb-3 text-gradient">🍽️ Food Truck Profile Management</h1>
+        <p class="lead">Review and approve food truck profiles and menus</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                ⏳ Pending ({{ pending_trucks|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved" type="button" role="tab">
+                ✅ Approved ({{ approved_trucks|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="rejected-tab" data-bs-toggle="tab" data-bs-target="#rejected" type="button" role="tab">
+                ❌ Rejected ({{ rejected_trucks|length }})
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        <!-- Pending Trucks -->
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            <div class="mt-4">
+                {% if pending_trucks %}
+                    {% for truck in pending_trucks %}
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ truck.name }}</h5>
+                                <span class="badge bg-warning">Pending Review</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p><strong>Owner:</strong> 
+                                           {% if truck.owner %}{{ truck.owner.name }} ({{ truck.owner.business_name }}){% else %}Legacy Truck{% endif %}
+                                        </p>
+                                        <p><strong>Cuisine Type:</strong> {{ truck.cuisine_type or 'Not specified' }}</p>
+                                        <p><strong>Description:</strong> {{ truck.description }}</p>
+                                        <p><strong>Sales Goal:</strong> ${{ "%.2f"|format(truck.sales_goal) }}</p>
+                                        <p><strong>Contact:</strong> {{ truck.contact_email or 'Not provided' }}</p>
+                                        {% if truck.website %}
+                                            <p><strong>Website:</strong> <a href="{{ truck.website }}" target="_blank">{{ truck.website }}</a></p>
+                                        {% endif %}
+                                        {% if truck.instagram %}
+                                            <p><strong>Instagram:</strong> @{{ truck.instagram }}</p>
+                                        {% endif %}
+                                        <p><strong>Submitted:</strong> {{ truck.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                                        
+                                        <!-- Show menu items -->
+                                        {% set menu_items = truck.get_menu_items() %}
+                                        {% if menu_items %}
+                                            <div class="mt-3">
+                                                <h6>Menu Items ({{ menu_items|length }}):</h6>
+                                                <div class="row">
+                                                    {% for item in menu_items %}
+                                                        <div class="col-md-6 mb-2">
+                                                            <div class="border rounded p-2">
+                                                                <strong>{{ item.name }}</strong> - ${{ "%.2f"|format(item.price) }}
+                                                                {% if item.description %}
+                                                                    <br><small class="text-muted">{{ item.description }}</small>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-warning mt-3">
+                                                <small>⚠️ No menu items uploaded yet</small>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-grid gap-2">
+                                            <form method="POST" action="{{ url_for('admin_approve_food_truck', truck_id=truck.id) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-success w-100" 
+                                                        onclick="return confirm('Approve {{ truck.name }}?')">
+                                                    ✅ Approve Truck
+                                                </button>
+                                            </form>
+                                            <button type="button" class="btn btn-danger w-100" 
+                                                    data-bs-toggle="modal" data-bs-target="#rejectModal{{ truck.id }}">
+                                                ❌ Reject Truck
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reject Modal -->
+                        <div class="modal fade" id="rejectModal{{ truck.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Reject {{ truck.name }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="{{ url_for('admin_reject_food_truck', truck_id=truck.id) }}">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="reason{{ truck.id }}" class="form-label">Rejection Reason</label>
+                                                <textarea class="form-control" id="reason{{ truck.id }}" name="reason" rows="3" 
+                                                          placeholder="Explain why this truck profile is being rejected..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-danger">Reject Truck</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <p class="text-muted">No pending food truck profiles.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Approved Trucks -->
+        <div class="tab-pane fade" id="approved" role="tabpanel">
+            <div class="mt-4">
+                {% if approved_trucks %}
+                    {% for truck in approved_trucks %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h6 class="mb-1">{{ truck.name }}</h6>
+                                        <p class="mb-1">
+                                            Owner: {% if truck.owner %}{{ truck.owner.name }}{% else %}Legacy{% endif %} | 
+                                            Cuisine: {{ truck.cuisine_type or 'Not specified' }} | 
+                                            Goal: ${{ "%.2f"|format(truck.sales_goal) }}
+                                        </p>
+                                        <p class="mb-1">{{ truck.description }}</p>
+                                        <small class="text-muted">
+                                            Approved: {{ truck.approved_at.strftime('%B %d, %Y') if truck.approved_at }} | 
+                                            Menu Items: {{ truck.get_menu_items()|length }}
+                                        </small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <span class="badge bg-success">✅ Approved</span>
+                                        <br><small class="text-muted">Available to organizers</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <p class="text-muted">No approved food trucks yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Rejected Trucks -->
+        <div class="tab-pane fade" id="rejected" role="tabpanel">
+            <div class="mt-4">
+                {% if rejected_trucks %}
+                    {% for truck in rejected_trucks %}
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h6 class="mb-1">{{ truck.name }}</h6>
+                                        <p class="mb-1">
+                                            Owner: {% if truck.owner %}{{ truck.owner.name }}{% else %}Legacy{% endif %} | 
+                                            Cuisine: {{ truck.cuisine_type or 'Not specified' }}
+                                        </p>
+                                        <small class="text-muted">Submitted: {{ truck.created_at.strftime('%B %d, %Y') }}</small>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <span class="badge bg-danger">❌ Rejected</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <p class="text-muted">No rejected food trucks.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

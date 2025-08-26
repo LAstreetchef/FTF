@@ -19,12 +19,45 @@ class Organizer(db.Model):
     # Relationships
     events = db.relationship('Event', backref='organizer', lazy=True)
 
+class FoodTruckOwner(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20))
+    business_name = db.Column(db.String(100), nullable=False)
+    business_license = db.Column(db.String(100))
+    password_hash = db.Column(db.String(256), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Approval status
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    approved_at = db.Column(db.DateTime)
+    approved_by = db.Column(db.Integer, db.ForeignKey('admin.id'))
+    
+    # Relationships
+    food_trucks = db.relationship('FoodTruck', backref='owner', lazy=True)
+
 class FoodTruck(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     menu_items = db.Column(db.Text)  # JSON string of menu items
     sales_goal = db.Column(db.Float, nullable=False)  # Minimum pledges required
+    
+    # New fields for food truck registration system
+    owner_id = db.Column(db.Integer, db.ForeignKey('food_truck_owner.id'))
+    cuisine_type = db.Column(db.String(100))
+    logo_url = db.Column(db.String(200))
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    approved_at = db.Column(db.DateTime)
+    approved_by = db.Column(db.Integer, db.ForeignKey('admin.id'))
+    
+    # Contact and business info
+    contact_email = db.Column(db.String(120))
+    contact_phone = db.Column(db.String(20))
+    website = db.Column(db.String(200))
+    instagram = db.Column(db.String(100))
+    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -40,6 +73,10 @@ class FoodTruck(db.Model):
     def set_menu_items(self, items):
         """Set menu items as JSON string"""
         self.menu_items = json.dumps(items)
+    
+    def is_approved(self):
+        """Check if food truck is approved for events"""
+        return self.status == 'approved'
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -189,3 +226,31 @@ class PledgeTransferConsent(db.Model):
     # Relationships
     transfer = db.relationship('PledgeTransfer', backref='consent_requests')
     pledge = db.relationship('Pledge', backref='transfer_consents')
+
+class Payout(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Event and truck association
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    food_truck_id = db.Column(db.Integer, db.ForeignKey('food_truck.id'), nullable=False)
+    
+    # Payout details
+    total_sales = db.Column(db.Float, nullable=False)  # Total sales from the event
+    platform_fee = db.Column(db.Float, default=0.0)  # Our commission/fee
+    payout_amount = db.Column(db.Float, nullable=False)  # Amount paid to food truck
+    
+    # Status tracking
+    status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
+    initiated_by = db.Column(db.Integer, db.ForeignKey('admin.id'))
+    processed_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Payment details
+    payment_method = db.Column(db.String(50))  # bank_transfer, check, etc.
+    transaction_id = db.Column(db.String(100))  # External payment processor ID
+    notes = db.Column(db.Text)
+    
+    # Relationships
+    event = db.relationship('Event', backref='payouts')
+    food_truck = db.relationship('FoodTruck', backref='payouts')
+    admin = db.relationship('Admin', backref='processed_payouts')

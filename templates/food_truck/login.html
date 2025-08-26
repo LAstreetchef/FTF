@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Food Truck Login{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 mb-4 text-gradient">🚚 Food Truck Portal</h1>
+                <p class="lead">Access your food truck dashboard and manage your business</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-gradient text-white text-center py-4">
+                    <h3 class="mb-0">🔐 Food Truck Login</h3>
+                </div>
+                <div class="card-body p-5">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                🚚 Login to Dashboard
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-0">New food truck owner? 
+                                <a href="{{ url_for('food_truck_register') }}" class="text-decoration-none">Register here</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h4 class="mb-3">🎯 Food Truck Benefits</h4>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <p><strong>✅ Guaranteed Sales:</strong> Events only happen when funding goals are met</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p><strong>💰 Easy Payouts:</strong> Automatic payment processing after events</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p><strong>📊 Performance Tracking:</strong> Dashboard with sales analytics</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <p><strong>🤝 Community Support:</strong> Build relationships with local organizations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
