@@ -189,17 +189,24 @@
                         </td>
                         <td>
                             {% if event.status == 'funded' %}
-                            <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline">
+                            <form method="POST" action="{{ url_for('admin_charge_pooled_event', event_id=event.id) }}" class="d-inline">
                                 <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to approve this event and charge all pledges?')">
-                                    <i data-feather="check" class="me-1"></i>
-                                    Approve & Pool
+                                    <i data-feather="credit-card" class="me-1"></i>
+                                    Charge & Approve
                                 </button>
                             </form>
                             {% elif event.status == 'pending' and event.current_pledges > 0 %}
                             <form method="POST" action="{{ url_for('admin_pool_partial_event', event_id=event.id) }}" class="d-inline">
-                                <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('This event has not reached its goal yet. Are you sure you want to pool the pledges anyway? This will charge all pledgers.')">
-                                    <i data-feather="dollar-sign" class="me-1"></i>
-                                    Pool Pledges
+                                <button type="submit" class="btn btn-warning btn-sm" onclick="return confirm('This will reserve the pledges but not charge cards yet. Cards will only be charged when you decide to approve the event.')">
+                                    <i data-feather="layers" class="me-1"></i>
+                                    Pool (Don\'t Charge)
+                                </button>
+                            </form>
+                            {% elif event.status == 'pooled' %}
+                            <form method="POST" action="{{ url_for('admin_charge_pooled_event', event_id=event.id) }}" class="d-inline">
+                                <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('This will charge all pooled pledges and approve the event.')">
+                                    <i data-feather="credit-card" class="me-1"></i>
+                                    Charge Pooled
                                 </button>
                             </form>
                             {% endif %}
