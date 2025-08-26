@@ -97,9 +97,19 @@
                             <small class="text-muted">{{ event.date.strftime('%I:%M %p') }}</small>
                         </td>
                         <td>
-                            <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' if event.status == 'pending' else 'primary' if event.status == 'approved' else 'secondary' }}">
-                                {{ event.status.title() }}
-                            </span>
+                            {% if not event.organizer_fee_charged %}
+                                <span class="badge bg-danger">Payment Required</span>
+                                <br><small class="text-muted">$5 organizer fee</small>
+                            {% else %}
+                                <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' if event.status == 'pending' else 'primary' if event.status == 'approved' else 'secondary' }}">
+                                    {{ event.status.title() }}
+                                </span>
+                                {% if event.organizer_fee_charged and not event.organizer_entree_claimed %}
+                                    <br><small class="text-success">🎁 Free entree when funded!</small>
+                                {% elif event.organizer_entree_claimed %}
+                                    <br><small class="text-success">✅ Free entree earned!</small>
+                                {% endif %}
+                            {% endif %}
                         </td>
                         <td>
                             <div class="progress mb-1" style="width: 120px;">
@@ -112,15 +122,22 @@
                             </small>
                         </td>
                         <td>
-                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary btn-sm">
-                                <i data-feather="eye" class="me-1"></i>
-                                View
-                            </a>
-                            {% if event.status in ['pending', 'funded'] %}
-                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-success btn-sm">
-                                <i data-feather="share-2" class="me-1"></i>
-                                Share
-                            </a>
+                            {% if not event.organizer_fee_charged %}
+                                <a href="{{ url_for('organizer_pay_fee', event_id=event.id) }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-warning btn-sm">
+                                    <i data-feather="credit-card" class="me-1"></i>
+                                    Pay $5 Fee
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i data-feather="eye" class="me-1"></i>
+                                    View
+                                </a>
+                                {% if event.status in ['pending', 'funded'] %}
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-success btn-sm">
+                                    <i data-feather="share-2" class="me-1"></i>
+                                    Share
+                                </a>
+                                {% endif %}
                             {% endif %}
                             {% if event.status == 'pending' and event.pledges|length > 0 %}
                             <button type="button" class="btn btn-outline-warning btn-sm" onclick="showTransferModal({{ event.id }}, '{{ event.name }}', {{ event.current_pledges }}, {{ event.pledges|length }})">
@@ -167,8 +184,8 @@
                         <p class="small">Select food trucks with appealing menus and good reputations to attract more pledges.</p>
                     </div>
                     <div class="col-md-4">
-                        <h6>Set Reasonable Markup</h6>
-                        <p class="small">Keep markup reasonable (10-25%) to encourage pledging while still generating profit for your event.</p>
+                        <h6>Organizer Benefits</h6>
+                        <p class="small">Pay the $5 organizer fee to publish your event and get a FREE entree when it's successfully funded!</p>
                     </div>
                 </div>
             </div>

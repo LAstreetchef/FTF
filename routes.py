@@ -1108,13 +1108,25 @@ def admin_approve_event(event_id):
         
         event.status = 'approved'
         event.approved_at = datetime.utcnow()
+        
+        # Generate organizer entree ticket if they paid the organizer fee
+        organizer_entree_ticket = None
+        if event.organizer_fee_charged and not event.organizer_entree_claimed:
+            organizer_entree_ticket = generate_ticket_code()
+            event.organizer_entree_claimed = True
+        
         db.session.commit()
         
-        # Send notification to organizer
+        # Send notification to organizer with their free entree ticket
+        organizer_email_content = f"Great news! Your event '{event.name}' has been approved and all pledges have been charged. The food truck will attend your event."
+        
+        if organizer_entree_ticket:
+            organizer_email_content += f"\n\n🎁 YOUR FREE ENTREE TICKET: {organizer_entree_ticket}\n\nAs the event organizer, you get any menu item FREE! Show this code to the food truck at your event to redeem your complimentary meal."
+        
         send_email(
             event.organizer.email,
-            f"Event Approved: {event.name}",
-            f"Great news! Your event '{event.name}' has been approved and all pledges have been charged. The food truck will attend your event."
+            f"Event Approved: {event.name}" + (" + Your Free Entree!" if organizer_entree_ticket else ""),
+            organizer_email_content
         )
         
         flash('Event approved and pledges charged successfully', 'success')
@@ -1498,23 +1510,134 @@ def organizer_create_event():
         db.session.add(event)
         db.session.commit()
         
-        # Send notification email to admin
-        organizer = Organizer.query.get(organizer_id)
-        organizer_name = organizer.name if organizer else "Unknown Organizer"
-        send_email(
-            'truckstopsla@gmail.com',
-            f"New Event Created: {event.name}",
-            f"A new event has been created:\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}"
-        )
-        
-        flash('Event created successfully', 'success')
-        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}')
+        # Redirect to payment step for $5 organizer fee
+        flash('Event details saved! Please complete the $5 organizer fee to publish your event.', 'info')
+        return redirect(url_for('organizer_pay_fee', event_id=event.id) + f'?auth_token={auth_token}' if auth_token else url_for('organizer_pay_fee', event_id=event.id))
     
     # GET request - show form
     # Only show approved food trucks to organizers
     trucks = FoodTruck.query.filter_by(status='approved').all()
     # Pass auth token to template for form submission consistency  
     return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
+
+@app.route('/organizer/pay-fee/<int:event_id>', methods=['GET', 'POST'])
+def organizer_pay_fee(event_id):
+    """Handle $5 organizer fee payment"""
+    # Authentication check (same pattern as other organizer routes)
+    organizer_id = None
+    auth_token = request.args.get('auth_token')
+    
+    if auth_token:
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+    
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+    
+    if not organizer_id:
+        flash('Authentication required', 'error')
+        return redirect(url_for('organizer_login'))
+    
+    # Get event and verify ownership
+    event = Event.query.get_or_404(event_id)
+    if event.organizer_id != organizer_id:
+        flash('Access denied', 'error')
+        return redirect(url_for('organizer_dashboard'))
+    
+    # Check if fee already paid
+    if event.organizer_fee_charged:
+        flash('Organizer fee already paid for this event', 'info')
+        return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
+    
+    if request.method == 'POST':
+        try:
+            # Create Stripe payment intent for $5 organizer fee
+            payment_intent = stripe.PaymentIntent.create(
+                amount=500,  # $5.00 in cents
+                currency='usd',
+                metadata={
+                    'type': 'organizer_fee',
+                    'event_id': event.id,
+                    'organizer_id': organizer_id
+                }
+            )
+            
+            # Store payment intent ID
+            event.organizer_fee_payment_intent = payment_intent.id
+            db.session.commit()
+            
+            return jsonify({
+                'client_secret': payment_intent.client_secret
+            })
+            
+        except Exception as e:
+            logging.error(f"Error creating payment intent for organizer fee: {str(e)}")
+            return jsonify({'error': 'Payment initialization failed'}), 400
+    
+    # GET request - show payment form
+    organizer = Organizer.query.get(organizer_id)
+    return render_template('organizer/pay_fee.html', event=event, organizer=organizer, auth_token=auth_token)
+
+@app.route('/organizer/confirm-fee-payment/<int:event_id>', methods=['POST'])
+def confirm_organizer_fee_payment(event_id):
+    """Confirm organizer fee payment and publish event"""
+    # Authentication check
+    organizer_id = None
+    auth_token = request.args.get('auth_token')
+    
+    if auth_token:
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+    
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+    
+    if not organizer_id:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    # Get event and verify ownership
+    event = Event.query.get_or_404(event_id)
+    if event.organizer_id != organizer_id:
+        return jsonify({'error': 'Access denied'}), 403
+    
+    try:
+        # Verify the payment intent was successful
+        if not event.organizer_fee_payment_intent:
+            return jsonify({'error': 'No payment intent found'}), 400
+        
+        payment_intent = stripe.PaymentIntent.retrieve(event.organizer_fee_payment_intent)
+        
+        if payment_intent.status == 'succeeded':
+            # Mark fee as paid and publish event
+            event.organizer_fee_charged = True
+            db.session.commit()
+            
+            # Send notification email to admin about new event
+            organizer = Organizer.query.get(organizer_id)
+            organizer_name = organizer.name if organizer else "Unknown Organizer"
+            send_email(
+                'truckstopsla@gmail.com',
+                f"New Event Published: {event.name}",
+                f"A new event has been published (organizer fee paid):\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {event.food_truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}\n\nOrganizer will receive a free entree when the event is successfully funded."
+            )
+            
+            return jsonify({'success': True, 'redirect': url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard')})
+        else:
+            return jsonify({'error': 'Payment not completed'}), 400
+            
+    except Exception as e:
+        logging.error(f"Error confirming organizer fee payment: {str(e)}")
+        return jsonify({'error': 'Payment confirmation failed'}), 500
 
 @app.route('/organizer/events/<int:event_id>/transfer-pledges', methods=['POST'])
 def transfer_pledges(event_id):
