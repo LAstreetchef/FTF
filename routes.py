@@ -2370,10 +2370,10 @@ def food_truck_register():
                 send_email(
                     admin_email,
                     'New Food Truck Registration',
-                    f'A new food truck owner has registered:\n\nBusiness: {business_name}\nOwner: {name}\nEmail: {email}\n\nPlease review and approve their application in the admin dashboard.'
+                    f'A new food truck owner has registered:\n\nBusiness: {business_name}\nOwner: {name}\nEmail: {email}\n\nThey can now add trucks and pay the $25 registration fee to participate in events.'
                 )
             
-            flash('Registration successful! Your application is pending approval. You will receive an email once reviewed.', 'success')
+            flash('Registration successful! You can now add food trucks and start participating in events.', 'success')
             return redirect(url_for('food_truck_login'))
             
         except Exception as e:
@@ -2393,9 +2393,7 @@ def food_truck_login():
         owner = FoodTruckOwner.query.filter_by(email=email).first()
         
         if owner and check_password_hash(owner.password_hash, password):
-            if owner.status != 'approved':
-                flash('Your account is pending approval. Please wait for admin review.', 'warning')
-                return render_template('food_truck/login.html')
+            # Food truck owners are auto-approved upon registration
             
             # Set session
             session['food_truck_owner_id'] = owner.id
