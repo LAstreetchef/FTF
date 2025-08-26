@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Support Conversation - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="d-flex flex-column p-3">
+                <h5>Admin Panel</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                            <i data-feather="home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_food_trucks') }}" class="nav-link">
+                            <i data-feather="truck"></i> Food Trucks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_events') }}" class="nav-link">
+                            <i data-feather="calendar"></i> Events
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_support_dashboard') }}" class="nav-link active">
+                            <i data-feather="message-circle"></i> Support
+                        </a>
+                    </li>
+                </ul>
+                <hr>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-secondary">
+                    <i data-feather="log-out"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Support Conversation</h1>
+                <div class="btn-toolbar">
+                    <a href="{{ url_for('admin_support_dashboard') }}" class="btn btn-outline-secondary me-2">
+                        <i data-feather="arrow-left"></i> Back to Dashboard
+                    </a>
+                    {% if conversation.status != 'resolved' %}
+                    <form method="post" action="{{ url_for('admin_support_resolve', conversation_id=conversation.id) }}" class="d-inline">
+                        <button type="submit" class="btn btn-success" onclick="return confirm('Mark this conversation as resolved?')">
+                            <i data-feather="check"></i> Mark as Resolved
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Conversation Info -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i data-feather="info"></i> Conversation Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Session ID:</strong> <code>{{ conversation.session_id }}</code></p>
+                                    <p><strong>Status:</strong> 
+                                        {% if conversation.status == 'active' %}
+                                        <span class="badge bg-info">Active</span>
+                                        {% elif conversation.status == 'escalated' %}
+                                        <span class="badge bg-warning">Escalated</span>
+                                        {% elif conversation.status == 'resolved' %}
+                                        <span class="badge bg-success">Resolved</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ conversation.status|title }}</span>
+                                        {% endif %}
+                                    </p>
+                                    <p><strong>Created:</strong> {{ conversation.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                    <p><strong>Last Activity:</strong> {{ conversation.last_activity.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    {% if conversation.visitor_email %}
+                                    <p><strong>Email:</strong> {{ conversation.visitor_email }}</p>
+                                    {% endif %}
+                                    {% if conversation.visitor_name %}
+                                    <p><strong>Name:</strong> {{ conversation.visitor_name }}</p>
+                                    {% endif %}
+                                    {% if conversation.escalated_to_human %}
+                                    <p><strong>Escalated:</strong> {{ conversation.escalated_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                                    {% endif %}
+                                    <p><strong>Assigned To:</strong> 
+                                        {% if conversation.assigned_admin %}
+                                        {{ conversation.assigned_admin.username }}
+                                        {% else %}
+                                        <span class="text-muted">Unassigned</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i data-feather="activity"></i> Quick Stats</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <p><strong>{{ messages|length }}</strong><br><small>Total Messages</small></p>
+                            <hr>
+                            <p><strong>{{ messages|selectattr('sender_type', 'equalto', 'user')|list|length }}</strong><br><small>User Messages</small></p>
+                            <p><strong>{{ messages|selectattr('sender_type', 'equalto', 'ai')|list|length }}</strong><br><small>AI Responses</small></p>
+                            <p><strong>{{ messages|selectattr('sender_type', 'equalto', 'admin')|list|length }}</strong><br><small>Admin Replies</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversation Messages -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i data-feather="message-square"></i> Conversation History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="conversation-messages" style="height: 400px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 0.5rem; padding: 1rem;">
+                        {% for message in messages %}
+                        <div class="message-item mb-3 {% if message.sender_type == 'user' %}user-message{% elif message.sender_type == 'ai' %}ai-message{% elif message.sender_type == 'admin' %}admin-message{% else %}system-message{% endif %}">
+                            <div class="message-meta mb-1">
+                                <strong>
+                                    {% if message.sender_type == 'user' %}
+                                    👤 User
+                                    {% elif message.sender_type == 'ai' %}
+                                    🤖 AI Assistant
+                                    {% elif message.sender_type == 'admin' %}
+                                    👨‍💼 {{ message.sender_name or 'Admin' }}
+                                    {% else %}
+                                    🔧 System
+                                    {% endif %}
+                                </strong>
+                                <small class="text-muted float-end">{{ message.created_at.strftime('%m/%d %H:%M:%S') }}</small>
+                                {% if message.confidence_score %}
+                                <small class="text-muted ms-2">(Confidence: {{ "%.1f"|format(message.confidence_score * 100) }}%)</small>
+                                {% endif %}
+                            </div>
+                            <div class="message-content p-3 rounded">
+                                {{ message.content|e|replace('\n', '<br>')|safe }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if conversation.status != 'resolved' %}
+                    <!-- Reply Form -->
+                    <form method="post" action="{{ url_for('admin_support_reply', conversation_id=conversation.id) }}" class="mt-4">
+                        <div class="mb-3">
+                            <label for="message" class="form-label">
+                                <i data-feather="edit"></i> Send Reply as {{ admin.username }}
+                            </label>
+                            <textarea name="message" id="message" class="form-control" rows="4" placeholder="Type your response to the user..." required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="send"></i> Send Reply
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('message').value = ''">
+                                <i data-feather="x"></i> Clear
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-success mt-4">
+                        <i data-feather="check-circle"></i> This conversation has been resolved and is now read-only.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    min-height: 100vh;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar .nav-link {
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.25rem;
+    border-radius: 0.375rem;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar .nav-link.active {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.card {
+    box-shadow: var(--shadow-soft);
+    border: none;
+    border-radius: var(--border-radius-lg);
+}
+
+.user-message .message-content {
+    background: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+.ai-message .message-content {
+    background: #f3e5f5;
+    border-left: 4px solid #9c27b0;
+}
+
+.admin-message .message-content {
+    background: #e8f5e8;
+    border-left: 4px solid #4caf50;
+}
+
+.system-message .message-content {
+    background: #fff3e0;
+    border-left: 4px solid #ff9800;
+    font-style: italic;
+}
+
+.conversation-messages {
+    background: #fafafa;
+}
+
+.message-meta {
+    font-size: 0.875rem;
+}
+</style>
+
+<script>
+// Auto-scroll to bottom of conversation
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.querySelector('.conversation-messages');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+});
+
+// Auto-refresh for new messages every 10 seconds
+setInterval(function() {
+    if ({{ 'true' if conversation.status == 'escalated' else 'false' }}) {
+        location.reload();
+    }
+}, 10000);
+</script>
+{% endblock %}

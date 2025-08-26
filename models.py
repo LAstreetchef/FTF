@@ -263,3 +263,55 @@ class Payout(db.Model):
     event = db.relationship('Event', backref='payouts')
     food_truck = db.relationship('FoodTruck', backref='payouts')
     admin = db.relationship('Admin', backref='processed_payouts')
+
+class SupportConversation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Session tracking
+    session_id = db.Column(db.String(64), unique=True, nullable=False)
+    visitor_email = db.Column(db.String(120))  # Optional if user provides email
+    visitor_name = db.Column(db.String(100))   # Optional if user provides name
+    
+    # Conversation status
+    status = db.Column(db.String(20), default='active')  # active, escalated, resolved, abandoned
+    escalated_to_human = db.Column(db.Boolean, default=False)
+    escalated_at = db.Column(db.DateTime)
+    
+    # Assignment
+    assigned_admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))
+    assigned_at = db.Column(db.DateTime)
+    
+    # Metadata
+    user_agent = db.Column(db.String(500))
+    ip_address = db.Column(db.String(45))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_activity = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Summary for admin
+    conversation_summary = db.Column(db.Text)  # AI-generated summary of conversation
+    
+    # Relationships
+    messages = db.relationship('SupportMessage', backref='conversation', lazy=True, order_by='SupportMessage.created_at')
+    assigned_admin = db.relationship('Admin', backref='support_conversations')
+
+class SupportMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('support_conversation.id'), nullable=False)
+    
+    # Message content
+    content = db.Column(db.Text, nullable=False)
+    sender_type = db.Column(db.String(20), nullable=False)  # user, ai, admin
+    sender_name = db.Column(db.String(100))  # For admin messages
+    
+    # Message metadata
+    message_type = db.Column(db.String(20), default='text')  # text, system, escalation
+    confidence_score = db.Column(db.Float)  # AI confidence in response (0.0-1.0)
+    processing_time = db.Column(db.Float)   # How long AI took to respond
+    
+    # Status
+    is_helpful = db.Column(db.Boolean)  # User feedback on AI responses
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # AI metadata
+    ai_model_used = db.Column(db.String(50))  # Track which AI model was used
+    tokens_used = db.Column(db.Integer)  # Track API usage

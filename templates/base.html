@@ -188,6 +188,55 @@
         feather.replace();
     </script>
     
+    <!-- Support Chat Widget -->
+    <div id="support-chat-widget" class="support-chat-widget">
+        <div id="chat-toggle" class="chat-toggle">
+            <i data-feather="message-circle"></i>
+            <span class="chat-badge" id="chat-badge" style="display: none;">1</span>
+        </div>
+        
+        <div id="chat-window" class="chat-window" style="display: none;">
+            <div class="chat-header">
+                <h6>Customer Support</h6>
+                <div class="chat-controls">
+                    <button id="chat-minimize" class="btn-chat-control">
+                        <i data-feather="minus"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-body">
+                <div id="chat-messages" class="chat-messages">
+                    <div class="chat-message ai-message">
+                        <div class="message-content">
+                            👋 Hi! I'm your AI assistant. I can help with questions about food truck registration, creating events, payments, and more. How can I help you today?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="escalation-banner" id="escalation-banner" style="display: none;">
+                        <div class="escalation-text">
+                            <i data-feather="user"></i>
+                            Would you like to speak with a human representative?
+                        </div>
+                        <button id="request-human" class="btn btn-sm btn-outline-primary">Yes, get human help</button>
+                    </div>
+                    
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Type your message..." maxlength="500">
+                        <button id="chat-send" class="btn btn-primary">
+                            <i data-feather="send"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     {% block scripts %}{% endblock %}
+    
+    <!-- Chat Widget Scripts -->
+    <script src="{{ url_for('static', filename='js/chat-widget.js') }}"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
-from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout
+from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout, SupportConversation, SupportMessage
 from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
 import stripe
 import os
@@ -2108,6 +2108,300 @@ def get_truck_menu(truck_id):
     """API endpoint to get truck menu items"""
     truck = FoodTruck.query.get_or_404(truck_id)
     return jsonify(truck.get_menu_items())
+
+# ===== SUPPORT CHAT API ROUTES =====
+
+@app.route('/api/chat/message', methods=['POST'])
+def chat_message():
+    """Handle chat messages from users"""
+    try:
+        from ai_support import get_ai_response
+        
+        data = request.get_json()
+        session_id = data.get('session_id')
+        user_message = data.get('message', '').strip()
+        
+        if not session_id or not user_message:
+            return jsonify({'success': False, 'error': 'Missing session_id or message'}), 400
+        
+        # Get or create conversation
+        conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        if not conversation:
+            conversation = SupportConversation(
+                session_id=session_id,
+                user_agent=request.headers.get('User-Agent', ''),
+                ip_address=request.remote_addr
+            )
+            db.session.add(conversation)
+            db.session.commit()
+        
+        # Update last activity
+        conversation.last_activity = datetime.utcnow()
+        
+        # Save user message
+        user_msg = SupportMessage(
+            conversation_id=conversation.id,
+            content=user_message,
+            sender_type='user'
+        )
+        db.session.add(user_msg)
+        db.session.commit()
+        
+        # Get conversation history for context
+        history = conversation.messages.filter(SupportMessage.created_at < user_msg.created_at).all()
+        
+        # Check if already escalated to human
+        if conversation.escalated_to_human:
+            return jsonify({
+                'success': True,
+                'response': 'Your message has been sent to our support team. They will respond shortly.',
+                'escalated': True,
+                'should_escalate': False
+            })
+        
+        # Get AI response
+        ai_result = get_ai_response(conversation.id, user_message, history)
+        
+        # Save AI response
+        ai_msg = SupportMessage(
+            conversation_id=conversation.id,
+            content=ai_result['response'],
+            sender_type='ai',
+            confidence_score=ai_result['confidence'],
+            processing_time=ai_result['processing_time'],
+            tokens_used=ai_result['tokens_used'],
+            ai_model_used=ai_result['model']
+        )
+        db.session.add(ai_msg)
+        
+        # Check if should escalate
+        if ai_result['should_escalate']:
+            conversation.escalated_to_human = True
+            conversation.escalated_at = datetime.utcnow()
+            conversation.status = 'escalated'
+            
+            # Send notification to admin
+            send_email(
+                'truckstopsla@gmail.com',
+                f'Support Chat Escalated - {session_id}',
+                f'A support conversation has been escalated to human support.\n\nSession: {session_id}\nUser Message: {user_message}\nAI Response: {ai_result["response"]}\n\nView conversation: /admin/support/{conversation.id}'
+            )
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'response': ai_result['response'],
+            'confidence': ai_result['confidence'],
+            'should_escalate': ai_result['should_escalate'],
+            'escalated': conversation.escalated_to_human
+        })
+        
+    except Exception as e:
+        logging.error(f"Chat message error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'Internal server error',
+            'response': 'I\'m having trouble right now. Let me get a human to help you.'
+        }), 500
+
+@app.route('/api/chat/escalate', methods=['POST'])
+def chat_escalate():
+    """Escalate conversation to human support"""
+    try:
+        data = request.get_json()
+        session_id = data.get('session_id')
+        
+        if not session_id:
+            return jsonify({'success': False, 'error': 'Missing session_id'}), 400
+        
+        conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        if not conversation:
+            return jsonify({'success': False, 'error': 'Conversation not found'}), 404
+        
+        # Mark as escalated
+        conversation.escalated_to_human = True
+        conversation.escalated_at = datetime.utcnow()
+        conversation.status = 'escalated'
+        
+        # Add escalation message
+        escalation_msg = SupportMessage(
+            conversation_id=conversation.id,
+            content='User requested human support escalation',
+            sender_type='system',
+            message_type='escalation'
+        )
+        db.session.add(escalation_msg)
+        
+        # Send notification to admin
+        recent_messages = conversation.messages.order_by(SupportMessage.created_at.desc()).limit(5).all()
+        conversation_preview = '\n'.join([f"{msg.sender_type}: {msg.content}" for msg in reversed(recent_messages)])
+        
+        send_email(
+            'truckstopsla@gmail.com',
+            f'Support Chat Manual Escalation - {session_id}',
+            f'A user manually requested human support.\n\nSession: {session_id}\n\nRecent conversation:\n{conversation_preview}\n\nView full conversation: /admin/support/{conversation.id}'
+        )
+        
+        db.session.commit()
+        
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        logging.error(f"Chat escalation error: {str(e)}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+@app.route('/api/chat/poll')
+def chat_poll():
+    """Poll for new messages in escalated conversations"""
+    try:
+        session_id = request.args.get('session_id')
+        last_message_id = request.args.get('last_message_id', 0, type=int)
+        
+        if not session_id:
+            return jsonify({'success': False, 'error': 'Missing session_id'}), 400
+        
+        conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        if not conversation:
+            return jsonify({'success': False, 'error': 'Conversation not found'}), 404
+        
+        # Get new messages from admin
+        new_messages = conversation.messages.filter(
+            SupportMessage.id > last_message_id,
+            SupportMessage.sender_type == 'admin'
+        ).all()
+        
+        messages_data = []
+        for msg in new_messages:
+            messages_data.append({
+                'id': msg.id,
+                'content': msg.content,
+                'sender_type': msg.sender_type,
+                'sender_name': msg.sender_name,
+                'created_at': msg.created_at.isoformat()
+            })
+        
+        return jsonify({
+            'success': True,
+            'messages': messages_data,
+            'admin_connected': conversation.assigned_admin_id is not None
+        })
+        
+    except Exception as e:
+        logging.error(f"Chat polling error: {str(e)}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+# ===== ADMIN SUPPORT MANAGEMENT ROUTES =====
+
+@app.route('/admin/support')
+def admin_support_dashboard():
+    """Admin dashboard for managing support conversations"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    # Get conversation statistics
+    total_conversations = SupportConversation.query.count()
+    active_conversations = SupportConversation.query.filter_by(status='active').count()
+    escalated_conversations = SupportConversation.query.filter_by(status='escalated').count()
+    resolved_conversations = SupportConversation.query.filter_by(status='resolved').count()
+    
+    # Get recent conversations
+    recent_conversations = SupportConversation.query.order_by(SupportConversation.last_activity.desc()).limit(20).all()
+    
+    # Get unassigned escalated conversations
+    unassigned_escalated = SupportConversation.query.filter_by(
+        status='escalated',
+        assigned_admin_id=None
+    ).order_by(SupportConversation.escalated_at.desc()).all()
+    
+    return render_template('admin/support_dashboard.html',
+                         total_conversations=total_conversations,
+                         active_conversations=active_conversations,
+                         escalated_conversations=escalated_conversations,
+                         resolved_conversations=resolved_conversations,
+                         recent_conversations=recent_conversations,
+                         unassigned_escalated=unassigned_escalated)
+
+@app.route('/admin/support/<int:conversation_id>')
+def admin_support_conversation(conversation_id):
+    """View and manage specific support conversation"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    conversation = SupportConversation.query.get_or_404(conversation_id)
+    admin = Admin.query.get(session['admin_id'])
+    
+    # Auto-assign if not assigned
+    if not conversation.assigned_admin_id:
+        conversation.assigned_admin_id = admin.id
+        conversation.assigned_at = datetime.utcnow()
+        db.session.commit()
+    
+    # Get all messages
+    messages = conversation.messages.order_by(SupportMessage.created_at.asc()).all()
+    
+    return render_template('admin/support_conversation.html',
+                         conversation=conversation,
+                         messages=messages,
+                         admin=admin)
+
+@app.route('/admin/support/<int:conversation_id>/reply', methods=['POST'])
+def admin_support_reply(conversation_id):
+    """Send reply to support conversation"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    conversation = SupportConversation.query.get_or_404(conversation_id)
+    admin = Admin.query.get(session['admin_id'])
+    
+    message_content = request.form.get('message', '').strip()
+    if not message_content:
+        flash('Message cannot be empty', 'error')
+        return redirect(url_for('admin_support_conversation', conversation_id=conversation_id))
+    
+    # Create admin message
+    admin_message = SupportMessage(
+        conversation_id=conversation.id,
+        content=message_content,
+        sender_type='admin',
+        sender_name=admin.username
+    )
+    db.session.add(admin_message)
+    
+    # Update conversation status and activity
+    conversation.last_activity = datetime.utcnow()
+    if not conversation.assigned_admin_id:
+        conversation.assigned_admin_id = admin.id
+        conversation.assigned_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    flash('Reply sent successfully', 'success')
+    return redirect(url_for('admin_support_conversation', conversation_id=conversation_id))
+
+@app.route('/admin/support/<int:conversation_id>/resolve', methods=['POST'])
+def admin_support_resolve(conversation_id):
+    """Mark support conversation as resolved"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    conversation = SupportConversation.query.get_or_404(conversation_id)
+    
+    conversation.status = 'resolved'
+    conversation.last_activity = datetime.utcnow()
+    
+    # Add system message
+    resolution_msg = SupportMessage(
+        conversation_id=conversation.id,
+        content='Conversation marked as resolved by admin',
+        sender_type='system',
+        message_type='system'
+    )
+    db.session.add(resolution_msg)
+    db.session.commit()
+    
+    flash('Conversation marked as resolved', 'success')
+    return redirect(url_for('admin_support_dashboard'))
 
 # Error handlers
 @app.errorhandler(404)
