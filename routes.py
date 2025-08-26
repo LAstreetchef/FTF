@@ -2452,9 +2452,7 @@ def food_truck_add_truck():
         return redirect(url_for('food_truck_login'))
     
     owner = FoodTruckOwner.query.get(session['food_truck_owner_id'])
-    if not owner or owner.status != 'approved':
-        flash('Your account must be approved before adding food trucks.', 'error')
-        return redirect(url_for('food_truck_dashboard'))
+    # Allow food truck creation regardless of approval status - payment happens after creation
     
     if request.method == 'POST':
         try:

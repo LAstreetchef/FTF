@@ -82,9 +82,7 @@
             <div class="card shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">🚚 Your Food Trucks</h5>
-                    {% if owner.status == 'approved' %}
-                        <a href="{{ url_for('food_truck_add_truck') }}" class="btn btn-primary btn-sm">+ Add New Truck</a>
-                    {% endif %}
+                    <a href="{{ url_for('food_truck_add_truck') }}" class="btn btn-primary btn-sm">+ Add New Truck</a>
                 </div>
                 <div class="card-body">
                     {% if food_trucks %}
@@ -127,11 +125,8 @@
                     {% else %}
                         <div class="text-center py-4">
                             <p class="text-muted">No food trucks registered yet.</p>
-                            {% if owner.status == 'approved' %}
-                                <a href="{{ url_for('food_truck_add_truck') }}" class="btn btn-primary">Add Your First Truck</a>
-                            {% else %}
-                                <p class="small">You can add food trucks once your account is approved.</p>
-                            {% endif %}
+                            <a href="{{ url_for('food_truck_add_truck') }}" class="btn btn-primary">Add Your First Truck</a>
+                            <p class="small text-muted mt-2">You'll pay the $25 registration fee after creating your truck profile.</p>
                         </div>
                     {% endif %}
                 </div>
