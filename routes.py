@@ -2342,7 +2342,7 @@ def admin_support_conversation(conversation_id):
         db.session.commit()
     
     # Get all messages
-    messages = conversation.messages.order_by(SupportMessage.created_at.asc()).all()
+    messages = SupportMessage.query.filter_by(conversation_id=conversation.id).order_by(SupportMessage.created_at.asc()).all()
     
     return render_template('admin/support_conversation.html',
                          conversation=conversation,
