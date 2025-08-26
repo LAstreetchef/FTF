@@ -152,7 +152,7 @@ def get_ai_response(conversation_id, user_message, conversation_history=None):
         
         # Get AI response
         response = openai_client.chat.completions.create(
-            model="gpt-5",  # the newest OpenAI model is "gpt-5" which was released August 7, 2025
+            model="gpt-4o",  # Using reliable GPT-4o model for consistent responses
             messages=messages,
             max_tokens=500,
             temperature=0.7
@@ -169,7 +169,7 @@ def get_ai_response(conversation_id, user_message, conversation_history=None):
             'confidence': confidence,
             'processing_time': processing_time,
             'tokens_used': response.usage.total_tokens,
-            'model': "gpt-5",
+            'model': "gpt-4o",
             'should_escalate': should_escalate_to_human(ai_response, user_message, confidence)
         }
         
