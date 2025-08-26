@@ -23,6 +23,21 @@ class SupportChatWidget {
         this.escalationBanner = document.getElementById('escalation-banner');
         this.requestHuman = document.getElementById('request-human');
         this.chatBadge = document.getElementById('chat-badge');
+        
+        // Ensure chat icon is visible
+        this.ensureChatIconVisible();
+    }
+    
+    ensureChatIconVisible() {
+        // Check if feather icon is loaded, if not use fallback
+        setTimeout(() => {
+            const svg = this.chatToggle.querySelector('svg');
+            if (svg && svg.innerHTML) {
+                this.chatToggle.classList.add('has-icon');
+            } else {
+                this.chatToggle.classList.remove('has-icon');
+            }
+        }, 100);
     }
     
     bindEvents() {

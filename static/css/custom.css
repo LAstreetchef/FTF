@@ -148,6 +148,24 @@
 .chat-toggle svg {
     width: 24px;
     height: 24px;
+    stroke: white;
+    fill: none;
+    stroke-width: 2;
+}
+
+.chat-toggle::after {
+    content: "💬";
+    position: absolute;
+    font-size: 24px;
+    display: none;
+}
+
+.chat-toggle:not(.has-icon)::after {
+    display: block;
+}
+
+.chat-toggle:not(.has-icon) svg {
+    display: none;
 }
 
 .chat-badge {
