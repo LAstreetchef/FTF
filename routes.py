@@ -1291,8 +1291,8 @@ Your pledge amount will remain the same (${pledge.amount:.2f}), and your payment
 
 Please click one of the links below to respond:
 
-APPROVE TRANSFER: {consent_url}&response=approve
-DECLINE TRANSFER: {consent_url}&response=decline
+APPROVE TRANSFER: {consent_url}?response=approve
+DECLINE TRANSFER: {consent_url}?response=decline
 
 If you decline, your original pledge will be cancelled and no payment will be processed.
 
