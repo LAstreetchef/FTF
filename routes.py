@@ -2148,7 +2148,10 @@ def chat_message():
         db.session.commit()
         
         # Get conversation history for context
-        history = conversation.messages.filter(SupportMessage.created_at < user_msg.created_at).all()
+        history = SupportMessage.query.filter(
+            SupportMessage.conversation_id == conversation.id,
+            SupportMessage.created_at < user_msg.created_at
+        ).order_by(SupportMessage.created_at.desc()).limit(10).all()
         
         # Check if already escalated to human
         if conversation.escalated_to_human:
