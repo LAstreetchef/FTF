@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Pay Registration Fee - {{ truck.name }}{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-4">
+    <div class="container">
+        <h1 class="display-5 mb-3 text-gradient">💳 Complete Food Truck Registration</h1>
+        <p class="lead">Pay the $25 registration fee to participate in events</p>
+    </div>
+</div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Truck Summary -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">🚚 Food Truck Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Truck Name:</strong> {{ truck.name }}</p>
+                            <p><strong>Cuisine Type:</strong> {{ truck.cuisine_type }}</p>
+                            <p><strong>Sales Goal:</strong> ${{ "%.2f"|format(truck.sales_goal) }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Owner:</strong> {{ owner.name }}</p>
+                            <p><strong>Contact:</strong> {{ truck.contact_email or owner.email }}</p>
+                            <p><strong>Business:</strong> {{ owner.business_name }}</p>
+                        </div>
+                    </div>
+                    {% if truck.description %}
+                    <div class="mt-3">
+                        <p><strong>Description:</strong> {{ truck.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">💰 Registration Fee Payment</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h6 class="mb-2">🎁 What You Get For Your $25:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Platform Access</strong> - Your truck becomes available for event selection</li>
+                            <li><strong>Event Participation</strong> - Organizers can choose your truck for fundraising events</li>
+                            <li><strong>Payment Processing</strong> - We handle all payments and customer interactions</li>
+                            <li><strong>Admin Review</strong> - Your truck will be reviewed and approved for participation</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="payment-summary p-3 bg-light rounded mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Registration Fee:</h5>
+                            <h5 class="mb-0 text-success">$25.00</h5>
+                        </div>
+                        <small class="text-muted">One-time fee per food truck</small>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form id="payment-form">
+                        <div class="form-group mb-3">
+                            <label for="card-element" class="form-label">Card Information</label>
+                            <div id="card-element" class="form-control" style="height: 40px; padding: 10px;">
+                                <!-- Stripe Elements will create form elements here -->
+                            </div>
+                            <div id="card-errors" role="alert" class="text-danger mt-2"></div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" id="submit-payment" class="btn btn-success btn-lg">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" id="payment-spinner" style="display: none;"></span>
+                                💳 Pay $25.00 & Submit for Approval
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <small class="text-muted">
+                        🔒 Payments are securely processed by Stripe. We never store your card information.
+                    </small>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('food_truck_dashboard') }}" class="btn btn-outline-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+// Initialize Stripe
+const stripe = Stripe('{{ config.STRIPE_PUBLISHABLE_KEY }}');
+const elements = stripe.elements();
+
+// Create card element
+const cardElement = elements.create('card', {
+    style: {
+        base: {
+            fontSize: '16px',
+            color: '#424770',
+            '::placeholder': {
+                color: '#aab7c4',
+            },
+        },
+    },
+});
+
+cardElement.mount('#card-element');
+
+// Handle real-time validation errors from the card Element
+cardElement.on('change', function(event) {
+    const displayError = document.getElementById('card-errors');
+    if (event.error) {
+        displayError.textContent = event.error.message;
+    } else {
+        displayError.textContent = '';
+    }
+});
+
+// Handle form submission
+const form = document.getElementById('payment-form');
+const submitButton = document.getElementById('submit-payment');
+const spinner = document.getElementById('payment-spinner');
+
+form.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    // Disable submit button and show spinner
+    submitButton.disabled = true;
+    spinner.style.display = 'inline-block';
+    
+    try {
+        // Create payment intent on server
+        const response = await fetch('{{ url_for("food_truck_pay_registration_fee", truck_id=truck.id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        
+        const { client_secret, error } = await response.json();
+        
+        if (error) {
+            throw new Error(error);
+        }
+        
+        // Confirm payment with Stripe
+        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
+            payment_method: {
+                card: cardElement,
+            },
+        });
+        
+        if (stripeError) {
+            throw new Error(stripeError.message);
+        }
+        
+        if (paymentIntent.status === 'succeeded') {
+            // Confirm payment on server
+            const confirmResponse = await fetch('{{ url_for("confirm_food_truck_registration_fee_payment", truck_id=truck.id) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            const confirmResult = await confirmResponse.json();
+            
+            if (confirmResult.success) {
+                // Redirect to dashboard with success message
+                window.location.href = confirmResult.redirect + '?success=registration_fee_paid';
+            } else {
+                throw new Error(confirmResult.error || 'Payment confirmation failed');
+            }
+        }
+        
+    } catch (error) {
+        console.error('Payment error:', error);
+        document.getElementById('card-errors').textContent = error.message || 'Payment failed. Please try again.';
+        
+        // Re-enable submit button and hide spinner
+        submitButton.disabled = false;
+        spinner.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

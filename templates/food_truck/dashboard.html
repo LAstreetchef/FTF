@@ -95,12 +95,24 @@
                                         <h6 class="mb-1">{{ truck.name }}</h6>
                                         <p class="text-muted mb-1">{{ truck.cuisine_type or 'Cuisine not specified' }}</p>
                                         <p class="mb-1">{{ truck.description or 'No description' }}</p>
-                                        <span class="badge bg-{{ 'success' if truck.status == 'approved' else 'warning' }}">
-                                            {{ truck.status.title() }}
-                                        </span>
+                                        {% if not truck.registration_fee_charged %}
+                                            <span class="badge bg-danger">Payment Required</span>
+                                            <small class="text-muted d-block">$25 registration fee</small>
+                                        {% else %}
+                                            <span class="badge bg-{{ 'success' if truck.status == 'approved' else 'warning' }}">
+                                                {{ truck.status.title() }}
+                                            </span>
+                                            {% if truck.registration_fee_charged %}
+                                                <small class="text-success d-block">✅ Registration fee paid</small>
+                                            {% endif %}
+                                        {% endif %}
                                     </div>
                                     <div class="col-md-4 text-end">
-                                        {% if truck.status == 'approved' %}
+                                        {% if not truck.registration_fee_charged %}
+                                            <a href="{{ url_for('food_truck_pay_registration_fee', truck_id=truck.id) }}" class="btn btn-warning btn-sm">
+                                                Pay $25 Fee
+                                            </a>
+                                        {% elif truck.status == 'approved' %}
                                             <a href="{{ url_for('food_truck_edit_truck', truck_id=truck.id) }}" class="btn btn-outline-primary btn-sm">Edit</a>
                                         {% endif %}
                                     </div>

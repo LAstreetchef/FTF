@@ -60,6 +60,10 @@ class FoodTruck(db.Model):
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Registration fee tracking ($25 charge for creating profile)
+    registration_fee_charged = db.Column(db.Boolean, default=False)
+    registration_fee_payment_intent = db.Column(db.String(255))  # Stripe payment intent ID
+    
     # Relationships
     events = db.relationship('Event', backref='food_truck', lazy=True)
     

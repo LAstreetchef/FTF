@@ -331,10 +331,10 @@ def admin_food_trucks():
     if not session.get('admin_id'):
         return redirect(url_for('admin_login'))
     
-    # Get all food trucks with their owners
-    pending_trucks = FoodTruck.query.filter_by(status='pending').order_by(FoodTruck.created_at.desc()).all()
-    approved_trucks = FoodTruck.query.filter_by(status='approved').order_by(FoodTruck.approved_at.desc()).all()
-    rejected_trucks = FoodTruck.query.filter_by(status='rejected').order_by(FoodTruck.created_at.desc()).all()
+    # Get all food trucks with their owners (only show paid trucks for approval)
+    pending_trucks = FoodTruck.query.filter_by(status='pending', registration_fee_charged=True).order_by(FoodTruck.created_at.desc()).all()
+    approved_trucks = FoodTruck.query.filter_by(status='approved', registration_fee_charged=True).order_by(FoodTruck.approved_at.desc()).all()
+    rejected_trucks = FoodTruck.query.filter_by(status='rejected', registration_fee_charged=True).order_by(FoodTruck.created_at.desc()).all()
     
     return render_template('admin/food_trucks.html',
                          pending_trucks=pending_trucks,
@@ -1515,8 +1515,8 @@ def organizer_create_event():
         return redirect(url_for('organizer_pay_fee', event_id=event.id) + f'?auth_token={auth_token}' if auth_token else url_for('organizer_pay_fee', event_id=event.id))
     
     # GET request - show form
-    # Only show approved food trucks to organizers
-    trucks = FoodTruck.query.filter_by(status='approved').all()
+    # Only show approved food trucks that have paid registration fee to organizers
+    trucks = FoodTruck.query.filter_by(status='approved', registration_fee_charged=True).all()
     # Pass auth token to template for form submission consistency  
     return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
 
@@ -1582,6 +1582,104 @@ def organizer_pay_fee(event_id):
     # GET request - show payment form
     organizer = Organizer.query.get(organizer_id)
     return render_template('organizer/pay_fee.html', event=event, organizer=organizer, auth_token=auth_token)
+
+@app.route('/food-truck/pay-registration-fee/<int:truck_id>', methods=['GET', 'POST'])
+def food_truck_pay_registration_fee(truck_id):
+    """Handle $25 food truck registration fee payment"""
+    # Authentication check
+    if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
+        flash('Authentication required', 'error')
+        return redirect(url_for('food_truck_login'))
+    
+    owner_id = session.get('food_truck_owner_id')
+    if not owner_id:
+        flash('Authentication required', 'error')
+        return redirect(url_for('food_truck_login'))
+    
+    # Get truck and verify ownership
+    truck = FoodTruck.query.get_or_404(truck_id)
+    if truck.owner_id != owner_id:
+        flash('Access denied', 'error')
+        return redirect(url_for('food_truck_dashboard'))
+    
+    # Check if fee already paid
+    if truck.registration_fee_charged:
+        flash('Registration fee already paid for this truck', 'info')
+        return redirect(url_for('food_truck_dashboard'))
+    
+    if request.method == 'POST':
+        try:
+            # Create Stripe payment intent for $25 registration fee
+            payment_intent = stripe.PaymentIntent.create(
+                amount=2500,  # $25.00 in cents
+                currency='usd',
+                metadata={
+                    'type': 'food_truck_registration_fee',
+                    'truck_id': truck.id,
+                    'owner_id': owner_id
+                }
+            )
+            
+            # Store payment intent ID
+            truck.registration_fee_payment_intent = payment_intent.id
+            db.session.commit()
+            
+            return jsonify({
+                'client_secret': payment_intent.client_secret
+            })
+            
+        except Exception as e:
+            logging.error(f"Error creating payment intent for food truck registration fee: {str(e)}")
+            return jsonify({'error': 'Payment initialization failed'}), 400
+    
+    # GET request - show payment form
+    owner = FoodTruckOwner.query.get(owner_id)
+    return render_template('food_truck/pay_registration_fee.html', truck=truck, owner=owner)
+
+@app.route('/food-truck/confirm-registration-fee-payment/<int:truck_id>', methods=['POST'])
+def confirm_food_truck_registration_fee_payment(truck_id):
+    """Confirm food truck registration fee payment and mark truck as paid"""
+    # Authentication check
+    if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    owner_id = session.get('food_truck_owner_id')
+    if not owner_id:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    # Get truck and verify ownership
+    truck = FoodTruck.query.get_or_404(truck_id)
+    if truck.owner_id != owner_id:
+        return jsonify({'error': 'Access denied'}), 403
+    
+    try:
+        # Verify the payment intent was successful
+        if not truck.registration_fee_payment_intent:
+            return jsonify({'error': 'No payment intent found'}), 400
+        
+        payment_intent = stripe.PaymentIntent.retrieve(truck.registration_fee_payment_intent)
+        
+        if payment_intent.status == 'succeeded':
+            # Mark fee as paid
+            truck.registration_fee_charged = True
+            db.session.commit()
+            
+            # Send notification email to admin about new truck registration
+            owner = FoodTruckOwner.query.get(owner_id)
+            owner_name = owner.name if owner else "Unknown Owner"
+            send_email(
+                'truckstopsla@gmail.com',
+                f"Food Truck Registration Fee Paid: {truck.name}",
+                f"A food truck registration fee has been paid and is ready for review:\n\nTruck: {truck.name}\nOwner: {owner_name}\nCuisine: {truck.cuisine_type}\nGoal: ${truck.sales_goal:.2f}\n\nPlease review and approve the truck in the admin panel so it can participate in events."
+            )
+            
+            return jsonify({'success': True, 'redirect': url_for('food_truck_dashboard')})
+        else:
+            return jsonify({'error': 'Payment not completed'}), 400
+            
+    except Exception as e:
+        logging.error(f"Error confirming food truck registration fee payment: {str(e)}")
+        return jsonify({'error': 'Payment confirmation failed'}), 500
 
 @app.route('/organizer/confirm-fee-payment/<int:event_id>', methods=['POST'])
 def confirm_organizer_fee_payment(event_id):
@@ -2392,8 +2490,8 @@ def food_truck_add_truck():
             db.session.add(truck)
             db.session.commit()
             
-            flash('Food truck added successfully! It will be reviewed by admin before appearing in events.', 'success')
-            return redirect(url_for('food_truck_dashboard'))
+            flash('Food truck profile created! Please complete the $25 registration fee to submit for approval.', 'info')
+            return redirect(url_for('food_truck_pay_registration_fee', truck_id=truck.id))
             
         except Exception as e:
             db.session.rollback()
