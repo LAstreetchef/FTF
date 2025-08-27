@@ -22,7 +22,7 @@ translations = {
         
         # Homepage
         'site_title': 'Food Truck Fundraiser',
-        'hero_title': 'Bring Food Trucks to Your Community',
+        'hero_title': 'Food Truck Fundraiser',
         'hero_subtitle': 'Create fundraising events and rally your community to reach the goal',
         'how_it_works': 'How It Works',
         'recent_events': 'Recent Events',
@@ -166,7 +166,7 @@ translations = {
         
         # Homepage
         'site_title': 'Recaudación de Fondos Food Truck',
-        'hero_title': 'Trae Food Trucks a Tu Comunidad',
+        'hero_title': 'Recaudación de Fondos Food Truck',
         'hero_subtitle': 'Crea eventos de recaudación de fondos y reúne a tu comunidad para alcanzar la meta',
         'how_it_works': 'Cómo Funciona',
         'recent_events': 'Eventos Recientes',
