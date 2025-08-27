@@ -172,20 +172,20 @@
             <div class="card-body">
                 <h5 class="card-title">
                     <i data-feather="lightbulb" class="me-2"></i>
-                    Tips for Successful Events
+                    {{ get_text('tips_for_successful_events', get_language_from_request()) }}
                 </h5>
                 <div class="row">
                     <div class="col-md-4">
-                        <h6>Share Widely</h6>
-                        <p class="small">Share your event on social media, with friends, and in your community to reach your funding goal faster.</p>
+                        <h6>{{ get_text('share_widely', get_language_from_request()) }}</h6>
+                        <p class="small">{{ get_text('share_widely_desc', get_language_from_request()) }}</p>
                     </div>
                     <div class="col-md-4">
-                        <h6>Choose Popular Trucks</h6>
-                        <p class="small">Select food trucks with appealing menus and good reputations to attract more pledges.</p>
+                        <h6>{{ get_text('choose_popular_trucks', get_language_from_request()) }}</h6>
+                        <p class="small">{{ get_text('choose_popular_trucks_desc', get_language_from_request()) }}</p>
                     </div>
                     <div class="col-md-4">
-                        <h6>Organizer Benefits</h6>
-                        <p class="small">Pay the $5 organizer fee to publish your event and get a FREE entree when it's successfully funded!</p>
+                        <h6>{{ get_text('organizer_benefits', get_language_from_request()) }}</h6>
+                        <p class="small">{{ get_text('organizer_benefits_desc', get_language_from_request()) }}</p>
                     </div>
                 </div>
             </div>

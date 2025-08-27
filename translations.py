@@ -89,6 +89,15 @@ translations = {
         'performance_tracking_desc': 'Dashboard with sales analytics',
         'community_support': 'Community Support:',
         'community_support_desc': 'Build relationships with local organizations',
+
+        # Organizer Dashboard Tips
+        'tips_for_successful_events': 'Tips for Successful Events',
+        'share_widely': 'Share Widely',
+        'share_widely_desc': 'Share your event on social media, with friends, and in your community to reach your funding goal faster.',
+        'choose_popular_trucks': 'Choose Popular Trucks',
+        'choose_popular_trucks_desc': 'Select food trucks with appealing menus and good reputations to attract more pledges.',
+        'organizer_benefits': 'Organizer Benefits',
+        'organizer_benefits_desc': 'Pay the $5 organizer fee to publish your event and get a FREE entree when it\'s successfully funded!',
         
         # Admin
         'admin_dashboard': 'Admin Dashboard',
@@ -250,6 +259,15 @@ translations = {
         'performance_tracking_desc': 'Panel con análisis de ventas',
         'community_support': 'Apoyo Comunitario:',
         'community_support_desc': 'Construye relaciones con organizaciones locales',
+
+        # Organizer Dashboard Tips
+        'tips_for_successful_events': 'Consejos para Eventos Exitosos',
+        'share_widely': 'Comparte Ampliamente',
+        'share_widely_desc': 'Comparte tu evento en redes sociales, con amigos y en tu comunidad para alcanzar tu meta de financiamiento más rápido.',
+        'choose_popular_trucks': 'Elige Food Trucks Populares',
+        'choose_popular_trucks_desc': 'Selecciona food trucks con menús atractivos y buenas reputaciones para atraer más promesas.',
+        'organizer_benefits': 'Beneficios del Organizador',
+        'organizer_benefits_desc': '¡Paga la tarifa de $5 del organizador para publicar tu evento y obtén un plato principal GRATIS cuando se financie exitosamente!',
         
         # Admin
         'admin_dashboard': 'Panel de Administración',
