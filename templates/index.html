@@ -187,9 +187,45 @@
 
                 <div id="tutorialStep2" class="tutorial-step">
                     <div class="text-center mb-4">
-                        <div class="tutorial-icon-large">💖</div>
+                        <div class="tutorial-icon-large">💵</div>
                         <h4 class="mt-3">{{ get_text('tutorial_step_2_title', get_language_from_request()) }}</h4>
                         <p class="lead">{{ get_text('tutorial_step_2_desc', get_language_from_request()) }}</p>
+                    </div>
+                    <div class="tutorial-markup-demo">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="tutorial-highlight bg-light">
+                                    <h6>🌮 Original Menu Item</h6>
+                                    <div class="price-display">
+                                        <span class="item-name">Deluxe Taco Combo</span>
+                                        <br><span class="original-price">$12.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="tutorial-highlight bg-success text-white">
+                                    <h6>💰 With Your 25% Markup</h6>
+                                    <div class="price-display">
+                                        <span class="item-name">Deluxe Taco Combo</span>
+                                        <br><span class="marked-price">$15.00</span>
+                                        <br><small><strong>You earn: $3.00!</strong></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <div class="alert alert-info">
+                                <strong>💡 Pro Tip:</strong> Higher markup = more money for your cause, but keep it reasonable so people still want to pledge!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tutorialStep3" class="tutorial-step">
+                    <div class="text-center mb-4">
+                        <div class="tutorial-icon-large">💖</div>
+                        <h4 class="mt-3">{{ get_text('tutorial_step_3_title', get_language_from_request()) }}</h4>
+                        <p class="lead">{{ get_text('tutorial_step_3_desc', get_language_from_request()) }}</p>
                     </div>
                     <div class="row text-center">
                         <div class="col-4">
@@ -213,11 +249,11 @@
                     </div>
                 </div>
 
-                <div id="tutorialStep3" class="tutorial-step">
+                <div id="tutorialStep4" class="tutorial-step">
                     <div class="text-center mb-4">
                         <div class="tutorial-icon-large">💰</div>
-                        <h4 class="mt-3">{{ get_text('tutorial_step_3_title', get_language_from_request()) }}</h4>
-                        <p class="lead">{{ get_text('tutorial_step_3_desc', get_language_from_request()) }}</p>
+                        <h4 class="mt-3">{{ get_text('tutorial_step_4_title', get_language_from_request()) }}</h4>
+                        <p class="lead">{{ get_text('tutorial_step_4_desc', get_language_from_request()) }}</p>
                     </div>
                     <div class="tutorial-progress-demo">
                         <div class="progress mb-3" style="height: 25px;">
@@ -233,11 +269,11 @@
                     </div>
                 </div>
 
-                <div id="tutorialStep4" class="tutorial-step">
+                <div id="tutorialStep5" class="tutorial-step">
                     <div class="text-center mb-4">
                         <div class="tutorial-icon-large">🎉</div>
-                        <h4 class="mt-3">{{ get_text('tutorial_step_4_title', get_language_from_request()) }}</h4>
-                        <p class="lead">{{ get_text('tutorial_step_4_desc', get_language_from_request()) }}</p>
+                        <h4 class="mt-3">{{ get_text('tutorial_step_5_title', get_language_from_request()) }}</h4>
+                        <p class="lead">{{ get_text('tutorial_step_5_desc', get_language_from_request()) }}</p>
                     </div>
                     <div class="row text-center">
                         <div class="col-md-4">
@@ -268,9 +304,10 @@
                         <span class="dot" data-step="2"></span>
                         <span class="dot" data-step="3"></span>
                         <span class="dot" data-step="4"></span>
+                        <span class="dot" data-step="5"></span>
                     </div>
                     <p class="text-muted mt-2">
-                        <span id="currentStep">1</span> of 4
+                        <span id="currentStep">1</span> of 5
                     </p>
                 </div>
             </div>
@@ -348,6 +385,27 @@
     transition: width 2s ease-in-out;
 }
 
+.tutorial-markup-demo .price-display {
+    font-size: 1.1rem;
+    padding: 10px;
+}
+
+.tutorial-markup-demo .original-price {
+    color: #6c757d;
+    text-decoration: line-through;
+    font-size: 0.9rem;
+}
+
+.tutorial-markup-demo .marked-price {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.tutorial-markup-demo .item-name {
+    font-weight: 600;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -356,7 +414,7 @@
 
 <script>
 let currentTutorialStep = 1;
-const totalSteps = 4;
+const totalSteps = 5;
 
 function changeStep(direction) {
     const currentStepElement = document.getElementById(`tutorialStep${currentTutorialStep}`);
