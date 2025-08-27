@@ -3200,3 +3200,61 @@ def sync_production_trucks():
         logging.error(f"Error syncing production trucks: {str(e)}")
         return f"Error syncing trucks: {str(e)}"
 
+@app.route('/sync-production-events-xyz456')
+def sync_production_events():
+    """Sync production database events status and visibility"""
+    try:
+        # Get all events and ensure they have proper status
+        events = Event.query.all()
+        updated_count = 0
+        
+        for event in events:
+            # Update any missing or invalid statuses
+            if not event.status or event.status not in ['pending', 'funded', 'approved', 'cancelled']:
+                event.status = 'pending'
+                updated_count += 1
+                logging.info(f"Updated event: {event.name} - Status set to pending")
+            
+            # Ensure events have proper pledge goals if missing
+            if not event.pledge_goal or event.pledge_goal <= 0:
+                # Set default based on food truck goal or 1000
+                if event.food_truck and event.food_truck.sales_goal:
+                    event.pledge_goal = event.food_truck.sales_goal
+                else:
+                    event.pledge_goal = 1000.0
+                updated_count += 1
+                logging.info(f"Updated event: {event.name} - Pledge goal set to {event.pledge_goal}")
+        
+        db.session.commit()
+        
+        # Get summary of all events
+        event_summary = []
+        for event in Event.query.order_by(Event.created_at.desc()).all():
+            event_summary.append({
+                'name': event.name,
+                'status': event.status,
+                'goal': event.pledge_goal,
+                'current': event.current_pledges,
+                'truck': event.food_truck.name if event.food_truck else 'None',
+                'organizer': event.organizer.email if event.organizer else 'None'
+            })
+        
+        return f"""
+        <h2>Production Events Sync Complete ✅</h2>
+        <p><strong>Updated {updated_count} events</strong></p>
+        <p>All events now have proper status and pledge goals set.</p>
+        
+        <h3>Current Events Summary:</h3>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <tr><th>Event Name</th><th>Status</th><th>Goal</th><th>Current</th><th>Food Truck</th><th>Organizer</th></tr>
+            {''.join([f'<tr><td>{e["name"]}</td><td>{e["status"]}</td><td>${e["goal"]}</td><td>${e["current"]}</td><td>{e["truck"]}</td><td>{e["organizer"]}</td></tr>' for e in event_summary])}
+        </table>
+        
+        <p><a href="/">← Back to Home</a></p>
+        """
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error syncing production events: {str(e)}")
+        return f"Error syncing events: {str(e)}"
+
