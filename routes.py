@@ -3069,5 +3069,92 @@ def admin_home():
     else:
         return redirect(url_for('admin_login'))
 
-# Temporary admin access route removed for production security
+# Database sync route for production deployment
+@app.route('/sync-production-database-xyz789')
+def sync_production_database():
+    """Sync production database to match development state"""
+    try:
+        updates_made = []
+        
+        # 1. Ensure Acai Truck is properly approved and fee marked as paid
+        acai_truck = FoodTruck.query.filter(FoodTruck.name.ilike('%acai%')).first()
+        if acai_truck:
+            if acai_truck.status != 'approved' or not acai_truck.registration_fee_charged:
+                acai_truck.status = 'approved'
+                acai_truck.registration_fee_charged = True
+                acai_truck.approved_at = datetime.utcnow()
+                updates_made.append(f"✅ Updated Acai Truck: approved and registration fee marked as paid")
+        
+        # 2. Ensure the Acai Bowl Fundraiser event exists and organizer fee is paid
+        organizer = Organizer.query.filter_by(email='kammiceli@gmail.com').first()
+        if organizer:
+            acai_event = Event.query.filter_by(
+                organizer_id=organizer.id,
+                name='Acai Bowl Fundraiser'
+            ).first()
+            
+            if not acai_event and acai_truck:
+                # Create the event if it doesn't exist
+                acai_event = Event(
+                    name='Acai Bowl Fundraiser',
+                    description='Fresh and healthy acai bowls for a great cause',
+                    organizer_id=organizer.id,
+                    food_truck_id=acai_truck.id,
+                    date=datetime(2025, 9, 2, 4, 30),  # Sep 2, 2025 4:30 AM
+                    location='Community Center',
+                    pledge_goal=1750.0,
+                    current_pledges=15.0,
+                    status='pending',
+                    organizer_fee_charged=True,
+                    created_at=datetime.utcnow()
+                )
+                db.session.add(acai_event)
+                updates_made.append(f"✅ Created Acai Bowl Fundraiser event")
+            
+            elif acai_event:
+                # Update existing event to ensure proper state
+                if not acai_event.organizer_fee_charged:
+                    acai_event.organizer_fee_charged = True
+                    updates_made.append(f"✅ Updated Acai Bowl Fundraiser: organizer fee marked as paid")
+        
+        # 3. Ensure all approved food trucks have registration fees marked
+        approved_trucks = ['Green Truck', 'Tasty Tacos', 'Ho-Lee Chow']
+        for truck_name in approved_trucks:
+            truck = FoodTruck.query.filter(FoodTruck.name.ilike(f'%{truck_name}%')).first()
+            if truck and not truck.registration_fee_charged:
+                truck.registration_fee_charged = True
+                truck.status = 'approved'
+                updates_made.append(f"✅ Updated {truck.name}: marked registration fee as paid")
+        
+        db.session.commit()
+        
+        return f"""
+        <h2>🔄 Production Database Sync Complete</h2>
+        <div style="background: #d4edda; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <h3>✅ Updates Applied:</h3>
+            <ul>
+                {''.join([f'<li>{update}</li>' for update in updates_made])}
+            </ul>
+            {f'<p><strong>Total updates: {len(updates_made)}</strong></p>' if updates_made else '<p><strong>No updates needed - database already in sync</strong></p>'}
+        </div>
+        
+        <h3>🎯 Expected Results:</h3>
+        <ul>
+            <li>✅ Admin dashboard at /admin should work properly</li>
+            <li>✅ kammiceli@gmail.com should see 1 event: "Acai Bowl Fundraiser"</li>
+            <li>✅ All approved food trucks should show registration fees paid</li>
+            <li>✅ Event creation should work with all approved trucks</li>
+        </ul>
+        
+        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <strong>🔒 Security Note:</strong> This sync route will be removed after production deployment.
+        </div>
+        
+        <p><a href="/" style="color: #007bff;">← Back to Home</a></p>
+        """
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Database sync error: {str(e)}")
+        return f"❌ Database sync failed: {str(e)}"
 
