@@ -3117,14 +3117,38 @@ def sync_production_database():
                     acai_event.organizer_fee_charged = True
                     updates_made.append(f"✅ Updated Acai Bowl Fundraiser: organizer fee marked as paid")
         
-        # 3. Ensure all approved food trucks have registration fees marked
-        approved_trucks = ['Green Truck', 'Tasty Tacos', 'Ho-Lee Chow']
-        for truck_name in approved_trucks:
+        # 3. Fix all food truck statuses for event creation dropdown
+        trucks_to_approve = [
+            'Green Truck',
+            'Tasty Tacos', 
+            'Ho-Lee Chow',
+            'All In Cafe Truck',
+            'Bad Ass Food Truck',
+            'Hawaiian Food Truck Co.'
+        ]
+        
+        # Remove duplicate Green Truck entries, keep the first one
+        duplicate_green = FoodTruck.query.filter(FoodTruck.name.ilike('%green truck%')).all()
+        if len(duplicate_green) > 1:
+            # Keep the first one, delete duplicates
+            for truck in duplicate_green[1:]:
+                db.session.delete(truck)
+                updates_made.append(f"✅ Removed duplicate truck: {truck.name} (ID: {truck.id})")
+        
+        # Update all trucks to be approved with registration fees paid
+        for truck_name in trucks_to_approve:
             truck = FoodTruck.query.filter(FoodTruck.name.ilike(f'%{truck_name}%')).first()
-            if truck and not truck.registration_fee_charged:
-                truck.registration_fee_charged = True
-                truck.status = 'approved'
-                updates_made.append(f"✅ Updated {truck.name}: marked registration fee as paid")
+            if truck:
+                needs_update = False
+                if truck.status != 'approved':
+                    truck.status = 'approved'
+                    truck.approved_at = datetime.utcnow()
+                    needs_update = True
+                if not truck.registration_fee_charged:
+                    truck.registration_fee_charged = True
+                    needs_update = True
+                if needs_update:
+                    updates_made.append(f"✅ Updated {truck.name}: approved and registration fee marked as paid")
         
         db.session.commit()
         
