@@ -169,6 +169,12 @@ translations = {
         # Language
         'language_updated': 'Language updated successfully',
         
+        # Call to Action Section
+        'ready_to_start': 'Ready to Get Started?',
+        'ready_subtitle': 'Join thousands of organizers already raising funds for their communities.',
+        'become_organizer': 'Become an Organizer',
+        'find_events': 'Find Events',
+
         # How It Works Cards
         'step_1_title': '1. Create an Event',
         'step_1_desc': 'Event organizers select a food truck, choose delicious menu items with markup pricing, and launch their community fundraising campaign.',
@@ -354,6 +360,12 @@ translations = {
         
         # Language
         'language_updated': 'Idioma actualizado exitosamente',
+        
+        # Call to Action Section
+        'ready_to_start': '¿Listo para Comenzar?',
+        'ready_subtitle': 'Únete a miles de organizadores que ya están recaudando fondos para sus comunidades.',
+        'become_organizer': 'Convertirse en Organizador',
+        'find_events': 'Encontrar Eventos',
         
         # How It Works Cards
         'step_1_title': '1. Crear un Evento',
