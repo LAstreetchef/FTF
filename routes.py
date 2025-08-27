@@ -3069,15 +3069,5 @@ def admin_home():
     else:
         return redirect(url_for('admin_login'))
 
-@app.route('/temp-admin-access-xyz123')
-def temp_admin_access():
-    """Temporary route to help access admin dashboard"""
-    # Set admin session
-    session['admin_id'] = 1
-    session['authenticated'] = True
-    session['user_type'] = 'admin'
-    session.permanent = True
-    
-    flash('Admin access granted (temporary)', 'success')
-    return redirect(url_for('admin_dashboard'))
+# Temporary admin access route removed for production security
 
