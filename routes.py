@@ -14,6 +14,27 @@ from translations import get_text, get_language_from_request
 # Configure Stripe
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for deployment readiness"""
+    try:
+        # Test database connection
+        db.session.execute(db.text('SELECT 1'))
+        
+        # Return simple health status
+        return jsonify({
+            'status': 'healthy',
+            'timestamp': datetime.utcnow().isoformat(),
+            'database': 'connected'
+        }), 200
+    except Exception as e:
+        logging.error(f"Health check failed: {str(e)}")
+        return jsonify({
+            'status': 'unhealthy',
+            'timestamp': datetime.utcnow().isoformat(),
+            'error': str(e)
+        }), 503
+
 @app.route('/set-language/<lang>')
 def set_language(lang):
     """Set user's language preference"""

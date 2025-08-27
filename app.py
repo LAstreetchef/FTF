@@ -8,8 +8,15 @@ from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from translations import get_text, get_language_from_request
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG)
+# Configure logging for production
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s: %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('app.log') if os.environ.get('LOG_TO_FILE') else logging.NullHandler()
+    ]
+)
 
 class Base(DeclarativeBase):
     pass
@@ -88,25 +95,80 @@ def after_request(response):
     
     return response
 
+# Global error handlers for production
+@app.errorhandler(404)
+def not_found_error(error):
+    logging.warning(f"404 error: {request.url}")
+    try:
+        return render_template('404.html'), 404
+    except Exception:
+        return '<h1>Page Not Found</h1><p>The requested page could not be found.</p>', 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    try:
+        db.session.rollback()
+    except Exception:
+        pass
+    logging.error(f"500 error: {str(error)}", exc_info=True)
+    try:
+        return render_template('500.html'), 500
+    except Exception:
+        return '<h1>Internal Server Error</h1><p>An internal error has occurred.</p>', 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Log the error
+    logging.error(f"Unhandled exception: {str(e)}", exc_info=True)
+    
+    # If it's an HTTP exception, return it
+    if hasattr(e, 'code'):
+        return e
+    
+    # Otherwise, return a generic 500 error
+    try:
+        db.session.rollback()
+    except Exception:
+        pass
+    try:
+        return render_template('500.html'), 500
+    except Exception:
+        return '<h1>Internal Server Error</h1><p>An unexpected error has occurred.</p>', 500
+
 with app.app_context():
-    # Make translation functions available in templates
-    app.jinja_env.globals.update(get_text=get_text)
-    app.jinja_env.globals.update(get_language_from_request=get_language_from_request)
-    
-    import models
-    import routes
-    db.create_all()
-    
-    # Create default admin if not exists
-    from models import Admin
-    from werkzeug.security import generate_password_hash
-    
-    admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
-    if not admin:
-        admin = Admin(
-            username='truckstopsla@gmail.com',
-            password_hash=generate_password_hash('password')
-        )
-        db.session.add(admin)
-        db.session.commit()
-        logging.info("Default admin created")
+    try:
+        # Make translation functions available in templates
+        app.jinja_env.globals.update(get_text=get_text)
+        app.jinja_env.globals.update(get_language_from_request=get_language_from_request)
+        
+        import models
+        import routes
+        
+        # Test database connection before proceeding
+        logging.info("Testing database connection...")
+        db.session.execute(db.text('SELECT 1'))
+        logging.info("Database connection successful")
+        
+        # Create tables
+        db.create_all()
+        logging.info("Database tables created/verified")
+        
+        # Create default admin if not exists
+        from models import Admin
+        from werkzeug.security import generate_password_hash
+        
+        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        if not admin:
+            admin = Admin(
+                username='truckstopsla@gmail.com',
+                password_hash=generate_password_hash('password')
+            )
+            db.session.add(admin)
+            db.session.commit()
+            logging.info("Default admin created")
+        
+        logging.info("Application initialization completed successfully")
+        
+    except Exception as e:
+        logging.error(f"Application initialization failed: {str(e)}", exc_info=True)
+        raise
