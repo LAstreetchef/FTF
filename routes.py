@@ -3157,3 +3157,46 @@ def food_truck_edit_truck(truck_id):
     
     return render_template('food_truck/edit_truck.html', truck=truck, owner=owner)
 
+@app.route('/sync-production-trucks-abc789')
+def sync_production_trucks():
+    """Sync production database food trucks to match development approved trucks"""
+    try:
+        # List of food trucks that should be approved and have registration fee charged
+        production_trucks_to_approve = [
+            'Green Truck',
+            'Tasty Tacos', 
+            'Acai Truck',
+            'Ho-Lee Chow'
+        ]
+        
+        updated_count = 0
+        
+        for truck_name in production_trucks_to_approve:
+            # Find truck by name (case insensitive)
+            truck = FoodTruck.query.filter(FoodTruck.name.ilike(f'%{truck_name}%')).first()
+            
+            if truck:
+                # Update status and registration fee
+                truck.status = 'approved'
+                truck.registration_fee_charged = True
+                truck.approved_at = datetime.utcnow()
+                updated_count += 1
+                logging.info(f"Updated truck: {truck.name} - Status: approved, Fee charged: True")
+        
+        db.session.commit()
+        
+        return f"""
+        <h2>Production Food Truck Sync Complete ✅</h2>
+        <p><strong>Updated {updated_count} food trucks:</strong></p>
+        <ul>
+            {''.join([f'<li>{name} - Now approved with registration fee charged</li>' for name in production_trucks_to_approve])}
+        </ul>
+        <p>These trucks will now appear in the event creation dropdown on production.</p>
+        <p><a href="/">← Back to Home</a></p>
+        """
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error syncing production trucks: {str(e)}")
+        return f"Error syncing trucks: {str(e)}"
+
