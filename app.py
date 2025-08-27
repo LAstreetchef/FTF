@@ -1,7 +1,7 @@
 import os
 import logging
 import stripe
-from flask import Flask
+from flask import Flask, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from sqlalchemy.orm import DeclarativeBase
@@ -14,7 +14,6 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s: %(message)s',
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler('app.log') if os.environ.get('LOG_TO_FILE') else logging.NullHandler()
     ]
 )
 
@@ -159,10 +158,9 @@ with app.app_context():
         
         admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
         if not admin:
-            admin = Admin(
-                username='truckstopsla@gmail.com',
-                password_hash=generate_password_hash('password')
-            )
+            admin = Admin()
+            admin.username = 'truckstopsla@gmail.com'
+            admin.password_hash = generate_password_hash('password')
             db.session.add(admin)
             db.session.commit()
             logging.info("Default admin created")

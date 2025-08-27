@@ -19,8 +19,9 @@ def health_check():
     """Health check endpoint for deployment readiness"""
     try:
         # Test database connection
-        db.session.execute(db.text('SELECT 1'))
-        
+        with db.engine.connect() as connection:
+            result = connection.execute(db.text('SELECT 1'))
+            
         # Return simple health status
         return jsonify({
             'status': 'healthy',
@@ -32,6 +33,7 @@ def health_check():
         return jsonify({
             'status': 'unhealthy',
             'timestamp': datetime.utcnow().isoformat(),
+            'database': 'disconnected',
             'error': str(e)
         }), 503
 
