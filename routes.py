@@ -818,6 +818,33 @@ def fix_menu_items():
             'message': f'Error fixing menu items: {str(e)}'
         })
 
+@app.route('/debug-trucks-xyz123')
+def debug_trucks():
+    """Debug route to see what trucks exist in production database"""
+    try:
+        all_trucks = FoodTruck.query.all()
+        approved_trucks = FoodTruck.query.filter_by(status='approved', registration_fee_charged=True).all()
+        
+        truck_data = []
+        for truck in all_trucks:
+            truck_data.append({
+                'id': truck.id,
+                'name': truck.name,
+                'status': getattr(truck, 'status', 'NO STATUS FIELD'),
+                'registration_fee_charged': getattr(truck, 'registration_fee_charged', 'NO FEE FIELD'),
+                'description': truck.description,
+                'has_menu': bool(truck.menu_items)
+            })
+        
+        return jsonify({
+            'total_trucks': len(all_trucks),
+            'approved_paid_trucks': len(approved_trucks),
+            'all_trucks': truck_data,
+            'database_url_set': bool(os.environ.get('DATABASE_URL'))
+        })
+    except Exception as e:
+        return jsonify({'error': str(e), 'type': str(type(e))})
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
