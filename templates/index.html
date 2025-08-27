@@ -96,7 +96,7 @@
                                 {{ "%.0f"|format(event.get_progress_percentage()) }}%
                             </div>
                         </div>
-                        <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} of ${{ "%.2f"|format(event.pledge_goal) }} goal</small>
+                        <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} {{ get_text('of_text', get_language_from_request()) }} ${{ "%.2f"|format(event.pledge_goal) }} {{ get_text('goal_text', get_language_from_request()) }}</small>
                         
                         <div class="mt-3">
                             <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary btn-sm">
@@ -130,16 +130,16 @@
     <div class="col-12">
         <div class="card bg-dark text-white">
             <div class="card-body text-center p-5">
-                <h3>Ready to Get Started?</h3>
-                <p class="lead">Whether you're organizing an event or looking to support your community, we're here to help!</p>
+                <h3>{{ get_text('ready_to_start', get_language_from_request()) }}</h3>
+                <p class="lead">{{ get_text('ready_subtitle', get_language_from_request()) }}</p>
                 <div class="d-flex justify-content-center gap-3 flex-wrap">
                     <a href="{{ url_for('organizer_login') }}" class="btn btn-primary btn-lg">
                         <i data-feather="user-plus" class="me-2"></i>
-                        Become an Organizer
+                        {{ get_text('become_organizer', get_language_from_request()) }}
                     </a>
                     <a href="{{ url_for('events_list') }}" class="btn btn-outline-light btn-lg">
                         <i data-feather="search" class="me-2"></i>
-                        Find Events to Support
+                        {{ get_text('find_events', get_language_from_request()) }}
                     </a>
                 </div>
             </div>

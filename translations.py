@@ -134,7 +134,15 @@ translations = {
         'step_2_desc': 'Food lovers pledge for meal e-tickets that support their community. Payments are secure and only charged when goals are met.',
         'step_3_title': '3. Food Truck Arrives!',
         'step_3_desc': 'Goals achieved means delicious food served! E-tickets are delivered, and the community celebrates together with amazing meals.',
-        'view_details': 'View Details'
+        'view_details': 'View Details',
+        
+        # Call to Action Section
+        'ready_to_start': 'Ready to Get Started?',
+        'ready_subtitle': 'Whether you\'re organizing an event or looking to support your community, we\'re here to help!',
+        'become_organizer': 'Become an Organizer',
+        'find_events': 'Find Events to Support',
+        'goal_text': 'goal',
+        'of_text': 'of'
     },
     'es': {
         # Navigation
@@ -270,7 +278,15 @@ translations = {
         'step_2_desc': 'Los amantes de la comida prometen boletos electrónicos de comida que apoyan a su comunidad. Los pagos son seguros y solo se cobran cuando se alcanzan las metas.',
         'step_3_title': '3. ¡Llega el Food Truck!',
         'step_3_desc': '¡Metas alcanzadas significa comida deliciosa servida! Se entregan los boletos electrónicos, y la comunidad celebra junta con comidas increíbles.',
-        'view_details': 'Ver Detalles'
+        'view_details': 'Ver Detalles',
+        
+        # Call to Action Section
+        'ready_to_start': '¿Listo para Comenzar?',
+        'ready_subtitle': '¡Ya sea que estés organizando un evento o buscando apoyar a tu comunidad, estamos aquí para ayudar!',
+        'become_organizer': 'Convertirse en Organizador',
+        'find_events': 'Encontrar Eventos para Apoyar',
+        'goal_text': 'meta',
+        'of_text': 'de'
     }
 }
 
