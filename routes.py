@@ -3090,10 +3090,10 @@ def migrate_dev_to_prod():
         ]
 
         # Clear existing data
-        db.session.execute(text("DELETE FROM pledge"))
-        db.session.execute(text("DELETE FROM event"))
-        db.session.execute(text("DELETE FROM food_truck WHERE id NOT IN (1, 3, 7, 8)"))
-        db.session.execute(text("DELETE FROM organizer WHERE id NOT IN (1, 2, 3, 6)"))
+        Pledge.query.delete()
+        Event.query.delete()
+        FoodTruck.query.filter(~FoodTruck.id.in_([1, 3, 7, 8])).delete()
+        Organizer.query.filter(~Organizer.id.in_([1, 2, 3, 6])).delete()
 
         # Insert/update organizers
         for org in organizers_data:
