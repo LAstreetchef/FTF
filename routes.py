@@ -3061,6 +3061,14 @@ def sync_production_events():
 
 # Migration route removed - data sync completed successfully
 
+@app.route('/admin')
+def admin_home():
+    """Admin home route - redirects to dashboard if logged in, otherwise to login"""
+    if session.get('admin_id'):
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return redirect(url_for('admin_login'))
+
 @app.route('/temp-admin-access-xyz123')
 def temp_admin_access():
     """Temporary route to help access admin dashboard"""
