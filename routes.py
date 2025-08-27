@@ -3059,3 +3059,119 @@ def sync_production_events():
         logging.error(f"Error syncing production events: {str(e)}")
         return f"Error syncing events: {str(e)}"
 
+@app.route('/migrate-dev-to-prod-xyz789')
+def migrate_dev_to_prod():
+    """
+    Migration route: Sync development data to production
+    Visit this URL in production to run the migration
+    """
+    try:
+        # Organizers data from development
+        organizers_data = [
+            (1, 'kammiceli@gmail.com', 'keith miceli', 'scrypt:32768:8:1$yRpBhZ0bfnjkHI8k$382d065f8bc4b4d8043e0c578f86d7768315ebda9af69dbc2d794767e10aa43e99551fd8185ba961c71b7ff347eaad60e5a7ee419251a76615538284e9c52293'),
+            (2, 'organizer@test.com', 'John Smith', 'scrypt:32768:8:1$yRpBhZ0bfnjkHI8k$382d065f8bc4b4d8043e0c578f86d7768315ebda9af69dbc2d794767e10aa43e99551fd8185ba961c71b7ff347eaad60e5a7ee419251a76615538284e9c52293'),
+            (3, 'ripplingbrook1920@gmail.com', 'Rippling Brook Clean Water Fund', 'scrypt:32768:8:1$m7wAm9EeIEjx1dxw$6a6d246be0bb251e341993a306d41b55a9beb83004495170b87ec562edea32c22c3598783dffd61d7f1f81730659535f9d4a87dd52dc4ce248afcaa44f3ac088'),
+            (6, 'marcsonson@gmail.com', 'Marc Sonson', 'scrypt:32768:8:1$LMD8zTfHbmaHUfOV$8c7c8f75ee228b1ff5be9b2b6614851022ad82a7137992263fae9c55d38278033d778cbead3a7e0af2c629687d90ce9bdfc84d26f0d89d891a39eaf4e17b917b')
+        ]
+
+        # Food trucks data from development  
+        food_trucks_data = [
+            (1, 'Tasty Tacos', 'LA\'s premiere healthy food truck', '[{"name": "Carnitas Taco", "price": 4.5}, {"name": "Chicken Taco", "price": 4.0}, {"name": "Veggie Taco", "price": 3.75}, {"name": "Combo Meal", "price": 12.0}]', 1500),
+            (3, 'Acai Truck', 'Fresh and healthy acai bowls made with organic ingredients', '[{"name": "Classic Acai Bowl", "price": 12.5}, {"name": "Berry Blast Bowl", "price": 14.0}, {"name": "Green Goddess Bowl", "price": 13.25}, {"name": "Protein Power Bowl", "price": 15.5}, {"name": "Mini Acai Bowl", "price": 8.75}, {"name": "Acai Smoothie", "price": 7.5}]', 1750),
+            (7, 'All In Cafe Truck', 'LA\'s original Cafe Truck', '[]', 1200),
+            (8, 'Bad Ass Food Truck', 'Classic American Cuisine', '[{"name": "Grass-Fed Burger", "price": 17.5, "description": "1/3 lbs Grass-Fed Beef Patty, Aged Cheddar, Grilled Onions, Tomato"}]', 1000)
+        ]
+
+        # Key events data from development
+        events_data = [
+            (5, 'Acai Bowl Fundraiser', 'Fresh and healthy acai bowls for a great cause', '2025-09-02 04:30:00', 'Community Center', 1, 3, '[{"name": "Classic Acai Bowl", "price": 12.50, "original_price": 12.50, "marked_up_price": 15.00}, {"name": "Berry Blast Bowl", "price": 14.00, "original_price": 14.00, "marked_up_price": 16.80}, {"name": "Green Goddess Bowl", "price": 13.25, "original_price": 13.25, "marked_up_price": 15.90}, {"name": "Protein Power Bowl", "price": 15.50, "original_price": 15.50, "marked_up_price": 18.60}, {"name": "Mini Acai Bowl", "price": 8.75, "original_price": 8.75, "marked_up_price": 10.50}, {"name": "Acai Smoothie", "price": 7.50, "original_price": 7.50, "marked_up_price": 9.00}]', 20, 1750),
+            (21, 'USTA Junior Tournament Fundraiser', 'Fundraiser for USTA Juniors', '2025-08-30 11:30:00', '4212 CLUBHOUSE DR, LAKEWOOD, CA, 90712', 6, 8, '[{"name": "Grass-Fed Burger", "price": 17.5, "description": "1/3 lbs Grass-Fed Beef Patty, Aged Cheddar, Grilled Onions, Tomato", "original_price": 17.5, "marked_up_price": 20.12}]', 15, 1000),
+            (20, 'Lakewood Tennis Center - Level 3 Open', 'USTA Junior Tournament', '2025-09-06 11:00:00', '4212 CLUBHOUSE DR, LAKEWOOD, CA, 90712', 6, 7, '[]', 15, 1200)
+        ]
+
+        # Clear existing data
+        db.session.execute(text("DELETE FROM pledge"))
+        db.session.execute(text("DELETE FROM event"))
+        db.session.execute(text("DELETE FROM food_truck WHERE id NOT IN (1, 3, 7, 8)"))
+        db.session.execute(text("DELETE FROM organizer WHERE id NOT IN (1, 2, 3, 6)"))
+
+        # Insert/update organizers
+        for org in organizers_data:
+            existing = Organizer.query.get(org[0])
+            if existing:
+                existing.email = org[1]
+                existing.name = org[2]
+                existing.password_hash = org[3]
+            else:
+                new_org = Organizer(id=org[0], email=org[1], name=org[2], password_hash=org[3])
+                db.session.add(new_org)
+
+        # Insert/update food trucks
+        for truck in food_trucks_data:
+            existing = FoodTruck.query.get(truck[0])
+            if existing:
+                existing.name = truck[1]
+                existing.description = truck[2]
+                existing.menu_items = truck[3]
+                existing.sales_goal = truck[4]
+                existing.status = 'pending'
+            else:
+                new_truck = FoodTruck(
+                    id=truck[0], 
+                    name=truck[1], 
+                    description=truck[2], 
+                    menu_items=truck[3], 
+                    sales_goal=truck[4],
+                    status='pending'
+                )
+                db.session.add(new_truck)
+
+        # Insert events  
+        for event in events_data:
+            new_event = Event(
+                id=event[0],
+                name=event[1],
+                description=event[2],
+                date=datetime.strptime(event[3], '%Y-%m-%d %H:%M:%S'),
+                location=event[4],
+                organizer_id=event[5],
+                food_truck_id=event[6],
+                selected_menu_items=event[7],
+                markup_percentage=event[8],
+                pledge_goal=event[9],
+                status='pending',
+                current_pledges=15 if event[0] == 5 else 0,
+                created_at=datetime.utcnow(),
+                organizer_fee_charged=True,
+                organizer_entree_claimed=False
+            )
+            db.session.add(new_event)
+
+        db.session.commit()
+
+        return """
+        <h2>🎉 Migration Complete!</h2>
+        <p><strong>Successfully migrated development data to production:</strong></p>
+        <ul>
+            <li>✅ Organizers synced (4 accounts)</li>
+            <li>✅ Food trucks synced (4 trucks)</li>
+            <li>✅ Key events migrated (3 events)</li>
+            <li>✅ Old "Amazon Gate" events removed</li>
+        </ul>
+        
+        <h3>📅 Events Now Available:</h3>
+        <ul>
+            <li><strong>Acai Bowl Fundraiser</strong> - September 2nd</li>
+            <li><strong>USTA Junior Tournament Fundraiser</strong> - August 30th</li>
+            <li><strong>Lakewood Tennis Center - Level 3 Open</strong> - September 6th</li>
+        </ul>
+        
+        <p><a href="/events">→ View Events Page</a> | <a href="/">← Back to Home</a></p>
+        <p><em>⚠️ This route will be removed after migration is confirmed successful.</em></p>
+        """
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Migration error: {str(e)}")
+        return f"<h2>❌ Migration Failed</h2><p>Error: {str(e)}</p><p><a href='/'>← Back to Home</a></p>"
+
