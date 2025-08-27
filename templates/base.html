@@ -98,7 +98,7 @@
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
                 <i data-feather="truck" class="me-2"></i>
-                Food Truck Fundraiser
+                {{ get_text('site_title', get_language_from_request()) }}
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -108,20 +108,36 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('index') }}">{{ get_text('home', get_language_from_request()) }}</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('events_list') }}">Events</a>
+                        <a class="nav-link" href="{{ url_for('events_list') }}">{{ get_text('events', get_language_from_request()) }}</a>
                     </li>
                 </ul>
                 
                 <ul class="navbar-nav">
+                    <!-- Language Toggle -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
+                            {% set current_lang = get_language_from_request() %}
+                            {% if current_lang == 'es' %}
+                                🇪🇸 Español
+                            {% else %}
+                                🇺🇸 English
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('set_language', lang='en') }}">🇺🇸 English</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('set_language', lang='es') }}">🇪🇸 Español</a></li>
+                        </ul>
+                    </li>
+                    
                     {% if session.get('organizer_id') %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('organizer_dashboard') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}">Dashboard</a>
+                            <a class="nav-link" href="{{ url_for('organizer_dashboard') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}">{{ get_text('dashboard', get_language_from_request()) }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('organizer_logout') }}">Logout</a>
+                            <a class="nav-link" href="{{ url_for('organizer_logout') }}">{{ get_text('logout', get_language_from_request()) }}</a>
                         </li>
                     {% elif session.get('food_truck_owner_id') %}
                         <li class="nav-item">

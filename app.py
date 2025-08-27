@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
+from translations import get_text, get_language_from_request
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -88,6 +89,10 @@ def after_request(response):
     return response
 
 with app.app_context():
+    # Make translation functions available in templates
+    app.jinja_env.globals.update(get_text=get_text)
+    app.jinja_env.globals.update(get_language_from_request=get_language_from_request)
+    
     import models
     import routes
     db.create_all()

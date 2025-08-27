@@ -9,15 +9,25 @@ import json
 import logging
 import secrets
 from datetime import datetime
+from translations import get_text, get_language_from_request
 
 # Configure Stripe
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
+
+@app.route('/set-language/<lang>')
+def set_language(lang):
+    """Set user's language preference"""
+    if lang in ['en', 'es']:
+        session['language'] = lang
+        flash(get_text('language_updated', lang), 'success')
+    return redirect(request.referrer or url_for('index'))
 
 @app.route('/')
 def index():
     """Homepage with overview and navigation"""
     recent_events = Event.query.filter(Event.status.in_(['pending', 'funded'])).order_by(Event.created_at.desc()).limit(3).all()
-    return render_template('index.html', recent_events=recent_events)
+    current_lang = get_language_from_request()
+    return render_template('index.html', recent_events=recent_events, current_lang=current_lang)
 
 @app.route('/test-credentials')
 def test_credentials():
