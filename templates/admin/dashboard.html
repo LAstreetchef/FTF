@@ -189,24 +189,14 @@
                         </td>
                         <td>
                             {% if event.status == 'funded' %}
-                            <form method="POST" action="{{ url_for('admin_charge_pooled_event', event_id=event.id) }}" class="d-inline">
+                            <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline">
                                 <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to approve this event and charge all pledges?')">
                                     <i data-feather="credit-card" class="me-1"></i>
                                     Charge & Approve
                                 </button>
                             </form>
                             {% elif event.status == 'pending' and event.current_pledges > 0 %}
-                            <a href="{{ url_for('admin_pool_pledges', source_event_id=event.id) }}" class="btn btn-warning btn-sm">
-                                <i data-feather="layers" class="me-1"></i>
-                                Pool Into Event
-                            </a>
-                            {% elif event.status == 'pooled' %}
-                            <form method="POST" action="{{ url_for('admin_charge_pooled_event', event_id=event.id) }}" class="d-inline">
-                                <button type="submit" class="btn btn-info btn-sm" onclick="return confirm('This will charge all pooled pledges and approve the event.')">
-                                    <i data-feather="credit-card" class="me-1"></i>
-                                    Charge Pooled
-                                </button>
-                            </form>
+                            <span class="badge bg-warning">Awaiting funding goal</span>
                             {% endif %}
                         </td>
                     </tr>
