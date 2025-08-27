@@ -99,7 +99,7 @@ class Event(db.Model):
     pledge_goal = db.Column(db.Float, nullable=False)
     
     # Status tracking
-    status = db.Column(db.String(20), default='pending')  # pending, pooled, funded, approved, completed, cancelled
+    status = db.Column(db.String(20), default='pending')  # pending, funded, approved, completed, cancelled
     current_pledges = db.Column(db.Float, default=0.0)
     approved_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -171,9 +171,8 @@ class Pledge(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     
     # Status tracking
-    status = db.Column(db.String(20), default='pending')  # pending, pooled, charged, cancelled
+    status = db.Column(db.String(20), default='pending')  # pending, charged, cancelled
     charged_at = db.Column(db.DateTime)
-    pooled_at = db.Column(db.DateTime)  # When pledge was pooled but not yet charged
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # E-ticket details
