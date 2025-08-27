@@ -41,8 +41,8 @@
                     <div class="icon">
                         <i data-feather="user-plus"></i>
                     </div>
-                    <h5 class="card-title">1. Create an Event</h5>
-                    <p class="card-text">Event organizers select a food truck, choose delicious menu items with markup pricing, and launch their community fundraising campaign.</p>
+                    <h5 class="card-title">{{ get_text('step_1_title', get_language_from_request()) }}</h5>
+                    <p class="card-text">{{ get_text('step_1_desc', get_language_from_request()) }}</p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -50,8 +50,8 @@
                     <div class="icon">
                         <i data-feather="heart"></i>
                     </div>
-                    <h5 class="card-title">2. Community Rallies</h5>
-                    <p class="card-text">Food lovers pledge for meal e-tickets that support their community. Payments are secure and only charged when goals are met.</p>
+                    <h5 class="card-title">{{ get_text('step_2_title', get_language_from_request()) }}</h5>
+                    <p class="card-text">{{ get_text('step_2_desc', get_language_from_request()) }}</p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -59,8 +59,8 @@
                     <div class="icon">
                         <i data-feather="check-circle"></i>
                     </div>
-                    <h5 class="card-title">3. Food Truck Arrives!</h5>
-                    <p class="card-text">Goals achieved means delicious food served! E-tickets are delivered, and the community celebrates together with amazing meals.</p>
+                    <h5 class="card-title">{{ get_text('step_3_title', get_language_from_request()) }}</h5>
+                    <p class="card-text">{{ get_text('step_3_desc', get_language_from_request()) }}</p>
                 </div>
             </div>
         </div>
@@ -101,7 +101,7 @@
                         <div class="mt-3">
                             <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary btn-sm">
                                 <i data-feather="eye" class="me-1"></i>
-                                View Details
+                                {{ get_text('view_details', get_language_from_request()) }}
                             </a>
                             {% if event.status == 'pending' or event.status == 'funded' %}
                             <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' }}">

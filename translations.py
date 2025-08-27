@@ -125,7 +125,16 @@ translations = {
         'support_agent': 'Support Agent',
         
         # Language
-        'language_updated': 'Language updated successfully'
+        'language_updated': 'Language updated successfully',
+        
+        # How It Works Cards
+        'step_1_title': '1. Create an Event',
+        'step_1_desc': 'Event organizers select a food truck, choose delicious menu items with markup pricing, and launch their community fundraising campaign.',
+        'step_2_title': '2. Community Rallies',
+        'step_2_desc': 'Food lovers pledge for meal e-tickets that support their community. Payments are secure and only charged when goals are met.',
+        'step_3_title': '3. Food Truck Arrives!',
+        'step_3_desc': 'Goals achieved means delicious food served! E-tickets are delivered, and the community celebrates together with amazing meals.',
+        'view_details': 'View Details'
     },
     'es': {
         # Navigation
@@ -252,7 +261,16 @@ translations = {
         'support_agent': 'Agente de Soporte',
         
         # Language
-        'language_updated': 'Idioma actualizado exitosamente'
+        'language_updated': 'Idioma actualizado exitosamente',
+        
+        # How It Works Cards
+        'step_1_title': '1. Crear un Evento',
+        'step_1_desc': 'Los organizadores de eventos seleccionan un food truck, eligen deliciosos elementos del menú con precios de margen, y lanzan su campaña de recaudación de fondos comunitaria.',
+        'step_2_title': '2. La Comunidad se Reúne',
+        'step_2_desc': 'Los amantes de la comida prometen boletos electrónicos de comida que apoyan a su comunidad. Los pagos son seguros y solo se cobran cuando se alcanzan las metas.',
+        'step_3_title': '3. ¡Llega el Food Truck!',
+        'step_3_desc': '¡Metas alcanzadas significa comida deliciosa servida! Se entregan los boletos electrónicos, y la comunidad celebra junta con comidas increíbles.',
+        'view_details': 'Ver Detalles'
     }
 }
 
