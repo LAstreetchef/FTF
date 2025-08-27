@@ -3089,11 +3089,16 @@ def migrate_dev_to_prod():
             (20, 'Lakewood Tennis Center - Level 3 Open', 'USTA Junior Tournament', '2025-09-06 11:00:00', '4212 CLUBHOUSE DR, LAKEWOOD, CA, 90712', 6, 7, '[]', 15, 1200)
         ]
 
-        # Clear existing data
-        Pledge.query.delete()
-        Event.query.delete()
-        FoodTruck.query.filter(~FoodTruck.id.in_([1, 3, 7, 8])).delete()
-        Organizer.query.filter(~Organizer.id.in_([1, 2, 3, 6])).delete()
+        # Clear existing data in the correct order to handle foreign keys
+        PledgeTransferConsent.query.delete()  # Delete consent requests first
+        PledgeTransfer.query.delete()  # Delete transfers second
+        Pledge.query.delete()  # Now delete pledges
+        Event.query.delete()  # Delete events
+        # Keep essential food trucks and organizers
+        for truck in FoodTruck.query.filter(~FoodTruck.id.in_([1, 3, 7, 8])).all():
+            db.session.delete(truck)
+        for org in Organizer.query.filter(~Organizer.id.in_([1, 2, 3, 6])).all():
+            db.session.delete(org)
 
         # Insert/update organizers
         for org in organizers_data:
