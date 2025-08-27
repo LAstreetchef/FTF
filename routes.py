@@ -707,6 +707,9 @@ def sync_data():
                 existing_truck.description = truck_data['description']
                 existing_truck.menu_items = json.dumps(truck_data['menu_items'])
                 existing_truck.sales_goal = truck_data['sales_goal']
+                # Ensure status is approved for production use
+                existing_truck.status = 'approved'
+                existing_truck.registration_fee_charged = True
                 results.append(f"Updated: {truck_data['name']}")
             else:
                 # Create new truck
@@ -714,7 +717,9 @@ def sync_data():
                     name=truck_data['name'],
                     description=truck_data['description'],
                     menu_items=json.dumps(truck_data['menu_items']),
-                    sales_goal=truck_data['sales_goal']
+                    sales_goal=truck_data['sales_goal'],
+                    status='approved',  # Auto-approve for production
+                    registration_fee_charged=True  # Mark as paid for production
                 )
                 db.session.add(new_truck)
                 results.append(f"Created: {truck_data['name']}")
@@ -886,13 +891,18 @@ def auto_fix_all_menus():
                 existing_truck.description = truck_data['description']
                 existing_truck.menu_items = json.dumps(truck_data['menu_items'])
                 existing_truck.sales_goal = truck_data['sales_goal']
+                # Ensure status is approved for production use
+                existing_truck.status = 'approved'
+                existing_truck.registration_fee_charged = True
                 sync_results.append(f"Updated: {truck_data['name']}")
             else:
                 new_truck = FoodTruck(
                     name=truck_data['name'],
                     description=truck_data['description'],
                     menu_items=json.dumps(truck_data['menu_items']),
-                    sales_goal=truck_data['sales_goal']
+                    sales_goal=truck_data['sales_goal'],
+                    status='approved',  # Auto-approve for production
+                    registration_fee_charged=True  # Mark as paid for production
                 )
                 db.session.add(new_truck)
                 sync_results.append(f"Created: {truck_data['name']}")
