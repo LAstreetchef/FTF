@@ -3462,17 +3462,9 @@ def api_truck_menu(truck_id):
     
     try:
         menu_items = truck.get_menu_items()
-        return jsonify({
-            'success': True,
-            'items': menu_items,
-            'truck_name': truck.name
-        })
+        return jsonify(menu_items)
     except Exception as e:
         logging.error(f"Error fetching menu for truck {truck_id}: {str(e)}")
-        return jsonify({
-            'success': False,
-            'error': str(e),
-            'items': []
-        }), 500
+        return jsonify([]), 500
 
 

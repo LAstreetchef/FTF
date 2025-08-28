@@ -220,17 +220,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Fetch menu items via AJAX
         fetch(`/api/truck/${truckId}/menu`)
             .then(response => response.json())
-            .then(data => {
-                console.log('Menu data received:', data);
+            .then(items => {
+                console.log('Menu data received:', items);
                 
                 menuItemsList.innerHTML = '';
                 
-                if (!data.items || data.items.length === 0) {
+                if (!items || items.length === 0) {
                     menuItemsList.innerHTML = '<div class="alert alert-info">No menu items available for this truck yet.</div>';
                     return;
                 }
                 
-                data.items.forEach((item, index) => {
+                items.forEach((item, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'form-check mb-2 p-3 border rounded';
                     itemDiv.innerHTML = `
