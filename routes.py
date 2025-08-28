@@ -3293,38 +3293,104 @@ def sync_production_database():
         if duplicates_removed > 0:
             updates_made.append(f"✅ Removed {duplicates_removed} duplicate event(s)")
         
-        # 3. Fix all food truck statuses for event creation dropdown
-        trucks_to_approve = [
-            'Green Truck',
-            'Tasty Tacos', 
-            'Ho-Lee Chow',
-            'All In Cafe Truck',
-            'Bad Ass Food Truck',
-            'Hawaiian Food Truck Co.'
+        # 3. Sync food trucks to match development database exactly
+        
+        # Define the correct food trucks that should exist in production
+        correct_trucks = [
+            {'name': 'Tasty Tacos', 'description': "LA's premiere healthy mexican food truck"},
+            {'name': 'Acai Truck', 'description': 'Fresh and healthy acai bowls'},
+            {'name': 'All In Cafe Truck', 'description': "LA's original Cafe Truck"},
+            {'name': 'Bad Ass Food Truck', 'description': 'Classic American Cuisine'},
+            {'name': 'Green Truck', 'description': 'Classic Organic American cuisine'},
+            {'name': 'Hawaiian Food Truck Co.', 'description': 'Classic Organic Hawaiian cuisine'}
         ]
         
-        # Remove duplicate Green Truck entries, keep the first one
-        duplicate_green = FoodTruck.query.filter(FoodTruck.name.ilike('%green truck%')).all()
-        if len(duplicate_green) > 1:
-            # Keep the first one, delete duplicates
-            for truck in duplicate_green[1:]:
-                db.session.delete(truck)
-                updates_made.append(f"✅ Removed duplicate truck: {truck.name} (ID: {truck.id})")
+        # Remove unwanted food trucks (ones not in our correct list)
+        correct_truck_names = [truck['name'] for truck in correct_trucks]
+        all_trucks = FoodTruck.query.all()
         
-        # Update all trucks to be approved with registration fees paid
-        for truck_name in trucks_to_approve:
-            truck = FoodTruck.query.filter(FoodTruck.name.ilike(f'%{truck_name}%')).first()
-            if truck:
+        for truck in all_trucks:
+            if not any(truck.name.lower() == correct_name.lower() for correct_name in correct_truck_names):
+                # This truck shouldn't exist - remove it
+                # First, update any events that reference this truck to use a valid truck
+                events_using_truck = Event.query.filter_by(food_truck_id=truck.id).all()
+                if events_using_truck:
+                    # Try to reassign to a similar truck or the first valid truck
+                    replacement_truck = FoodTruck.query.filter(
+                        FoodTruck.name.in_(correct_truck_names)
+                    ).first()
+                    if replacement_truck:
+                        for event in events_using_truck:
+                            event.food_truck_id = replacement_truck.id
+                            updates_made.append(f"✅ Reassigned event '{event.name}' from {truck.name} to {replacement_truck.name}")
+                
+                db.session.delete(truck)
+                updates_made.append(f"✅ Removed unwanted truck: {truck.name} (ID: {truck.id})")
+        
+        # Remove duplicate trucks (same name)
+        truck_names_seen = set()
+        duplicate_trucks = []
+        
+        remaining_trucks = FoodTruck.query.all()
+        for truck in remaining_trucks:
+            truck_name_lower = truck.name.lower()
+            if truck_name_lower in truck_names_seen:
+                duplicate_trucks.append(truck)
+            else:
+                truck_names_seen.add(truck_name_lower)
+        
+        for duplicate_truck in duplicate_trucks:
+            # Reassign any events using this duplicate to the original
+            original_truck = FoodTruck.query.filter(
+                FoodTruck.name.ilike(f'%{duplicate_truck.name}%'),
+                FoodTruck.id != duplicate_truck.id
+            ).first()
+            
+            if original_truck:
+                events_using_duplicate = Event.query.filter_by(food_truck_id=duplicate_truck.id).all()
+                for event in events_using_duplicate:
+                    event.food_truck_id = original_truck.id
+                    updates_made.append(f"✅ Reassigned event '{event.name}' from duplicate to original {original_truck.name}")
+            
+            db.session.delete(duplicate_truck)
+            updates_made.append(f"✅ Removed duplicate truck: {duplicate_truck.name} (ID: {duplicate_truck.id})")
+        
+        # Ensure all correct trucks exist and are properly configured
+        for truck_data in correct_trucks:
+            existing_truck = FoodTruck.query.filter(
+                FoodTruck.name.ilike(f'%{truck_data["name"]}%')
+            ).first()
+            
+            if existing_truck:
+                # Update existing truck to correct settings
                 needs_update = False
-                if truck.status != 'approved':
-                    truck.status = 'approved'
-                    truck.approved_at = datetime.utcnow()
+                if existing_truck.status != 'approved':
+                    existing_truck.status = 'approved'
+                    existing_truck.approved_at = datetime.utcnow()
                     needs_update = True
-                if not truck.registration_fee_charged:
-                    truck.registration_fee_charged = True
+                if not existing_truck.registration_fee_charged:
+                    existing_truck.registration_fee_charged = True
                     needs_update = True
+                if existing_truck.description != truck_data['description']:
+                    existing_truck.description = truck_data['description']
+                    needs_update = True
+                
                 if needs_update:
-                    updates_made.append(f"✅ Updated {truck.name}: approved and registration fee marked as paid")
+                    updates_made.append(f"✅ Updated {existing_truck.name}: approved and registration fee marked as paid")
+            
+            else:
+                # Create missing truck
+                new_truck = FoodTruck(
+                    name=truck_data['name'],
+                    description=truck_data['description'],
+                    status='approved',
+                    registration_fee_charged=True,
+                    approved_at=datetime.utcnow(),
+                    created_at=datetime.utcnow(),
+                    menu_items='[]'  # Empty menu initially
+                )
+                db.session.add(new_truck)
+                updates_made.append(f"✅ Created missing truck: {truck_data['name']}")
         
         db.session.commit()
         
