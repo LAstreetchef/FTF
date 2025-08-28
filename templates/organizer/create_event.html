@@ -61,7 +61,7 @@
                                 <option value="{{ truck.id }}" 
                                         data-goal="{{ truck.sales_goal }}"
                                         data-description="{{ truck.description }}"
-                                        data-menu="{{ truck.menu_items|tojson|e }}">
+                                        data-menu="{{ truck.get_menu_items()|tojson|e }}">
                                     {{ truck.name }} (Goal: ${{ "%.2f"|format(truck.sales_goal) }})
                                 </option>
                                 {% endfor %}
