@@ -3070,6 +3070,61 @@ def admin_home():
         return redirect(url_for('admin_login'))
 
 # Database sync route for production deployment
+@app.route('/fix-duplicate-events-abc123')
+def fix_duplicate_events():
+    """Remove duplicate events in production - one-time cleanup"""
+    try:
+        updates_made = []
+        
+        # Find and remove duplicate Acai Bowl Fundraiser events
+        acai_events = Event.query.filter(Event.name.ilike('%acai bowl%')).all()
+        if len(acai_events) > 1:
+            # Keep the first one (lowest ID), delete others
+            for event in acai_events[1:]:
+                # First delete any pledges associated with this duplicate
+                pledges_to_delete = Pledge.query.filter_by(event_id=event.id).all()
+                for pledge in pledges_to_delete:
+                    db.session.delete(pledge)
+                
+                db.session.delete(event)
+                updates_made.append(f"✅ Removed duplicate: {event.name} (ID: {event.id})")
+        
+        # General duplicate cleanup for all events
+        all_events = Event.query.all()
+        seen_events = {}
+        
+        for event in all_events:
+            key = (event.name, event.organizer_id)
+            if key in seen_events:
+                # This is a duplicate - delete it
+                pledges_to_delete = Pledge.query.filter_by(event_id=event.id).all()
+                for pledge in pledges_to_delete:
+                    db.session.delete(pledge)
+                
+                db.session.delete(event)
+                updates_made.append(f"✅ Removed duplicate: {event.name} (ID: {event.id})")
+            else:
+                seen_events[key] = event
+        
+        db.session.commit()
+        
+        return f"""
+        <h2>🧹 Duplicate Events Cleanup Complete</h2>
+        <div style="background: #d4edda; padding: 20px; border-radius: 5px; margin: 20px 0;">
+            <h3>✅ Updates Applied:</h3>
+            <ul>
+                {''.join([f'<li>{update}</li>' for update in updates_made])}
+            </ul>
+            {f'<p><strong>Total updates: {len(updates_made)}</strong></p>' if updates_made else '<p><strong>No duplicates found - database is clean</strong></p>'}
+        </div>
+        <p><a href="/" style="color: #007bff;">← Back to Home</a></p>
+        """
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Duplicate cleanup error: {str(e)}")
+        return f"❌ Cleanup failed: {str(e)}"
+
 @app.route('/sync-production-database-xyz789')
 def sync_production_database():
     """Sync production database to match development state"""
@@ -3182,18 +3237,21 @@ def sync_production_database():
             db.session.delete(pledge)
             updates_made.append(f"✅ Removed orphaned pledge: {pledge.email} - ${pledge.amount}")
         
-        # Create/update correct events
+        # Create/update correct events - check by name AND organizer to avoid duplicates
         for event_data in correct_events:
             organizer = Organizer.query.filter_by(email=event_data['organizer_email']).first()
             food_truck = FoodTruck.query.filter(FoodTruck.name.ilike(f"%{event_data['food_truck_name']}%")).first()
             
             if organizer and food_truck:
-                existing_event = Event.query.filter_by(id=event_data['id']).first()
+                # Check for existing event by name and organizer (not just ID)
+                existing_event = Event.query.filter_by(
+                    name=event_data['name'],
+                    organizer_id=organizer.id
+                ).first()
                 
                 if not existing_event:
                     # Create the event
                     new_event = Event(
-                        id=event_data['id'],
                         name=event_data['name'],
                         description=event_data['description'],
                         organizer_id=organizer.id,
@@ -3213,7 +3271,27 @@ def sync_production_database():
                     # Update existing event to ensure correct data
                     existing_event.organizer_fee_charged = event_data['organizer_fee_charged']
                     existing_event.status = event_data['status']
+                    existing_event.description = event_data['description']
+                    existing_event.location = event_data['location']
+                    existing_event.pledge_goal = event_data['pledge_goal']
                     updates_made.append(f"✅ Updated event: {event_data['name']}")
+        
+        # Remove any duplicate events (same name and organizer)
+        all_events = Event.query.all()
+        seen_events = {}
+        duplicates_removed = 0
+        
+        for event in all_events:
+            key = (event.name, event.organizer_id)
+            if key in seen_events:
+                # This is a duplicate - delete it
+                db.session.delete(event)
+                duplicates_removed += 1
+            else:
+                seen_events[key] = event
+        
+        if duplicates_removed > 0:
+            updates_made.append(f"✅ Removed {duplicates_removed} duplicate event(s)")
         
         # 3. Fix all food truck statuses for event creation dropdown
         trucks_to_approve = [
