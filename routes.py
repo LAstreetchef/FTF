@@ -3302,7 +3302,8 @@ def sync_production_database():
             {'name': 'All In Cafe Truck', 'description': "LA's original Cafe Truck"},
             {'name': 'Bad Ass Food Truck', 'description': 'Classic American Cuisine'},
             {'name': 'Green Truck', 'description': 'Classic Organic American cuisine'},
-            {'name': 'Hawaiian Food Truck Co.', 'description': 'Classic Organic Hawaiian cuisine'}
+            {'name': 'Hawaiian Food Truck Co.', 'description': 'Classic Organic Hawaiian cuisine'},
+            {'name': 'LA Quickie Wrapped Hot Dogs', 'description': 'Quick and delicious wrapped hot dogs'}
         ]
         
         # Remove unwanted food trucks (ones not in our correct list)
