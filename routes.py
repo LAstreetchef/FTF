@@ -3379,7 +3379,7 @@ def sync_production_database():
                     updates_made.append(f"✅ Updated {existing_truck.name}: approved and registration fee marked as paid")
             
             else:
-                # Create missing truck
+                # Create missing truck with required fields
                 new_truck = FoodTruck(
                     name=truck_data['name'],
                     description=truck_data['description'],
@@ -3387,7 +3387,8 @@ def sync_production_database():
                     registration_fee_charged=True,
                     approved_at=datetime.utcnow(),
                     created_at=datetime.utcnow(),
-                    menu_items='[]'  # Empty menu initially
+                    menu_items='[]',  # Empty menu initially
+                    sales_goal=1000.0  # Default sales goal
                 )
                 db.session.add(new_truck)
                 updates_made.append(f"✅ Created missing truck: {truck_data['name']}")
