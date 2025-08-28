@@ -3085,37 +3085,123 @@ def sync_production_database():
                 acai_truck.approved_at = datetime.utcnow()
                 updates_made.append(f"✅ Updated Acai Truck: approved and registration fee marked as paid")
         
-        # 2. Ensure the Acai Bowl Fundraiser event exists and organizer fee is paid
-        organizer = Organizer.query.filter_by(email='kammiceli@gmail.com').first()
-        if organizer:
-            acai_event = Event.query.filter_by(
-                organizer_id=organizer.id,
-                name='Acai Bowl Fundraiser'
-            ).first()
-            
-            if not acai_event and acai_truck:
-                # Create the event if it doesn't exist
-                acai_event = Event(
-                    name='Acai Bowl Fundraiser',
-                    description='Fresh and healthy acai bowls for a great cause',
-                    organizer_id=organizer.id,
-                    food_truck_id=acai_truck.id,
-                    date=datetime(2025, 9, 2, 4, 30),  # Sep 2, 2025 4:30 AM
-                    location='Community Center',
-                    pledge_goal=1750.0,
-                    current_pledges=15.0,
-                    status='pending',
-                    organizer_fee_charged=True,
+        # 2. Sync events to match development database exactly
+        
+        # Define the correct events that should exist in production
+        correct_events = [
+            {
+                'id': 5,
+                'name': 'Acai Bowl Fundraiser',
+                'description': 'Fresh and healthy acai bowls for a great cause',
+                'organizer_email': 'kammiceli@gmail.com',
+                'food_truck_name': 'Acai Truck',
+                'date': datetime(2025, 9, 2, 4, 30),
+                'location': 'Community Center',
+                'pledge_goal': 1750.0,
+                'current_pledges': 15.0,
+                'status': 'pending',
+                'organizer_fee_charged': True
+            },
+            {
+                'id': 20,
+                'name': 'Lakewood Tennis Center - Level 3 Open',
+                'description': 'USTA Junior Tournament',
+                'organizer_email': 'marcsonson@gmail.com',
+                'food_truck_name': 'All In Cafe Truck',
+                'date': datetime(2025, 9, 6, 11, 0),
+                'location': '4210 Roe Ave',
+                'pledge_goal': 800.0,
+                'current_pledges': 0.0,
+                'status': 'pending',
+                'organizer_fee_charged': True
+            },
+            {
+                'id': 21,
+                'name': 'USTA Junior Tournament Fundraiser',
+                'description': 'Fundraiser for USTA Junior Tournament',
+                'organizer_email': 'marcsonson@gmail.com',
+                'food_truck_name': 'Bad Ass Food Truck',
+                'date': datetime(2025, 8, 30, 11, 30),
+                'location': '4210 Roe Ave',
+                'pledge_goal': 800.0,
+                'current_pledges': 0.0,
+                'status': 'pending',
+                'organizer_fee_charged': True
+            },
+            {
+                'id': 22,
+                'name': 'Food Truck Friday',
+                'description': 'The Collins & Katz Family YMCA is thrilled to host Food Truck Friday on Friday September 5, 2025',
+                'organizer_email': 'marcsonson@gmail.com', 
+                'food_truck_name': 'Green Truck',
+                'date': datetime(2025, 9, 5, 11, 0),
+                'location': 'Collins & Katz Family YMCA',
+                'pledge_goal': 1200.0,
+                'current_pledges': 0.0,
+                'status': 'pending',
+                'organizer_fee_charged': True
+            }
+        ]
+        
+        # First, ensure all necessary organizers exist
+        organizers_needed = {
+            'kammiceli@gmail.com': {'id': 1, 'name': 'Kammi Celi'},
+            'marcsonson@gmail.com': {'id': 6, 'name': 'Marc Sonson'}
+        }
+        
+        for email, org_data in organizers_needed.items():
+            organizer = Organizer.query.filter_by(email=email).first()
+            if not organizer:
+                # Create organizer if missing
+                organizer = Organizer(
+                    id=org_data['id'],
+                    email=email,
+                    name=org_data['name'],
+                    password_hash='default_hash',  # They can reset later
+                    verified=True,
                     created_at=datetime.utcnow()
                 )
-                db.session.add(acai_event)
-                updates_made.append(f"✅ Created Acai Bowl Fundraiser event")
+                db.session.add(organizer)
+                updates_made.append(f"✅ Created organizer: {email}")
+        
+        # Remove unwanted events (Amazon gate events that don't belong)
+        unwanted_events = Event.query.filter(Event.name.like('%Amazon%')).all()
+        for event in unwanted_events:
+            db.session.delete(event)
+            updates_made.append(f"✅ Removed unwanted event: {event.name}")
+        
+        # Create/update correct events
+        for event_data in correct_events:
+            organizer = Organizer.query.filter_by(email=event_data['organizer_email']).first()
+            food_truck = FoodTruck.query.filter(FoodTruck.name.ilike(f"%{event_data['food_truck_name']}%")).first()
             
-            elif acai_event:
-                # Update existing event to ensure proper state
-                if not acai_event.organizer_fee_charged:
-                    acai_event.organizer_fee_charged = True
-                    updates_made.append(f"✅ Updated Acai Bowl Fundraiser: organizer fee marked as paid")
+            if organizer and food_truck:
+                existing_event = Event.query.filter_by(id=event_data['id']).first()
+                
+                if not existing_event:
+                    # Create the event
+                    new_event = Event(
+                        id=event_data['id'],
+                        name=event_data['name'],
+                        description=event_data['description'],
+                        organizer_id=organizer.id,
+                        food_truck_id=food_truck.id,
+                        date=event_data['date'],
+                        location=event_data['location'],
+                        pledge_goal=event_data['pledge_goal'],
+                        current_pledges=event_data['current_pledges'],
+                        status=event_data['status'],
+                        organizer_fee_charged=event_data['organizer_fee_charged'],
+                        created_at=datetime.utcnow()
+                    )
+                    db.session.add(new_event)
+                    updates_made.append(f"✅ Created event: {event_data['name']}")
+                
+                else:
+                    # Update existing event to ensure correct data
+                    existing_event.organizer_fee_charged = event_data['organizer_fee_charged']
+                    existing_event.status = event_data['status']
+                    updates_made.append(f"✅ Updated event: {event_data['name']}")
         
         # 3. Fix all food truck statuses for event creation dropdown
         trucks_to_approve = [
