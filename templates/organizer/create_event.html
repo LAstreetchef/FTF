@@ -218,18 +218,26 @@ document.addEventListener('DOMContentLoaded', function() {
         menuSelection.classList.remove('d-none');
         
         // Fetch menu items via AJAX
+        console.log(`Fetching menu for truck ID: ${truckId}`);
         fetch(`/api/truck/${truckId}/menu`)
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(items => {
                 console.log('Menu data received:', items);
+                console.log('Items type:', typeof items);
+                console.log('Items length:', items ? items.length : 'null/undefined');
                 
                 menuItemsList.innerHTML = '';
                 
                 if (!items || items.length === 0) {
+                    console.log('No items found, showing message');
                     menuItemsList.innerHTML = '<div class="alert alert-info">No menu items available for this truck yet.</div>';
                     return;
                 }
                 
+                console.log('Processing', items.length, 'menu items');
                 items.forEach((item, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'form-check mb-2 p-3 border rounded';
