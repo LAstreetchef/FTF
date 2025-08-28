@@ -384,6 +384,12 @@ def admin_approve_food_truck(truck_id):
     admin = Admin.query.get(session['admin_id'])
     
     if truck.status == 'pending':
+        # Validate that truck has at least one menu item
+        menu_items = truck.get_menu_items()
+        if not menu_items or len(menu_items) == 0:
+            flash(f'Cannot approve "{truck.name}" - food truck must have at least one menu item. Please ask the owner to add menu items first.', 'error')
+            return redirect(url_for('admin_food_trucks'))
+        
         truck.status = 'approved'
         truck.approved_at = datetime.utcnow()
         truck.approved_by = admin.id
@@ -1584,12 +1590,10 @@ def organizer_create_event():
             except:
                 truck_menu = []
             
-            # If truck has no menu items, create a basic menu to prevent errors
+            # If truck has no menu items, this should not happen since approval requires menu items
             if not truck_menu:
-                logging.warning(f"Truck {truck.name} has no menu items, creating basic menu")
-                truck_menu = [
-                    {'name': 'Food Item', 'price': 10.0, 'description': 'Delicious food from this truck'}
-                ]
+                flash(f'Error: Food truck "{truck.name}" has no menu items. Please contact an administrator.', 'error')
+                return redirect(url_for('organizer_create_event') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_create_event'))
             
             # Process selected menu items
             for item_id in selected_item_ids:
