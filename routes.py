@@ -3164,11 +3164,23 @@ def sync_production_database():
                 db.session.add(organizer)
                 updates_made.append(f"✅ Created organizer: {email}")
         
-        # Remove unwanted events (Amazon gate events that don't belong)
+        # Remove unwanted events and handle pledges safely
         unwanted_events = Event.query.filter(Event.name.like('%Amazon%')).all()
         for event in unwanted_events:
+            # First, delete any pledges associated with this event
+            pledges_to_delete = Pledge.query.filter_by(event_id=event.id).all()
+            for pledge in pledges_to_delete:
+                db.session.delete(pledge)
+            
+            # Then delete the event
             db.session.delete(event)
-            updates_made.append(f"✅ Removed unwanted event: {event.name}")
+            updates_made.append(f"✅ Removed unwanted event: {event.name} (and {len(pledges_to_delete)} associated pledges)")
+        
+        # Fix any orphaned pledges (with null event_id)
+        orphaned_pledges = Pledge.query.filter(Pledge.event_id.is_(None)).all()
+        for pledge in orphaned_pledges:
+            db.session.delete(pledge)
+            updates_made.append(f"✅ Removed orphaned pledge: {pledge.email} - ${pledge.amount}")
         
         # Create/update correct events
         for event_data in correct_events:
