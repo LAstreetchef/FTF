@@ -219,7 +219,12 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Menu data from option:', menuData);
         
         try {
-            const items = menuData ? JSON.parse(menuData) : [];
+            let items = [];
+            if (menuData && menuData.trim()) {
+                // Clean the menu data in case there are extra characters
+                const cleanedData = menuData.trim();
+                items = JSON.parse(cleanedData);
+            }
             menuItemsList.innerHTML = '';
             
             if (!items || items.length === 0) {
@@ -251,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updatePricing();
         } catch (error) {
             console.error('Error parsing menu data:', error, menuData);
-            menuItemsList.innerHTML = '<div class="alert alert-danger">Error loading menu items: ' + error.message + '</div>';
+            menuItemsList.innerHTML = '<div class="alert alert-danger">Error loading menu items: ' + error.message + '<br><small>Raw data: ' + (menuData || 'null') + '</small></div>';
             menuSelection.classList.remove('d-none');
         }
     }
