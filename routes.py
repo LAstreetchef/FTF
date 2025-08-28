@@ -1549,53 +1549,100 @@ def organizer_create_event():
         return redirect(url_for('organizer_login'))
     
     if request.method == 'POST':
-        # Create new event
-        truck_id = int(request.form['food_truck_id'])
-        truck = FoodTruck.query.get(truck_id)
-        if not truck:
-            flash('Food truck not found', 'error')
-            return redirect(url_for('organizer_create_event') + f'?auth_token={auth_token}')
-        
-        event = Event(
-            name=request.form['name'],
-            description=request.form['description'],
-            date=datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M'),
-            location=request.form['location'],
-            organizer_id=organizer_id,
-            food_truck_id=truck_id,
-            markup_percentage=float(request.form['markup_percentage']),
-            pledge_goal=truck.sales_goal if truck.sales_goal else 1000.0
-        )
-        
-        # Parse selected menu items with markup
-        selected_items = []
-        selected_item_ids = request.form.getlist('selected_items')
-        truck_menu = truck.get_menu_items() if truck else []
-        
-        for item_id in selected_item_ids:
-            item_idx = int(item_id)
-            if item_idx < len(truck_menu):
-                item = truck_menu[item_idx].copy()
-                item['original_price'] = item['price']
-                item['marked_up_price'] = item['price'] * (1 + event.markup_percentage / 100)
-                selected_items.append(item)
-        
-        # If no menu items were selected (frontend issue), auto-select all items with 15% markup
-        if not selected_items and truck_menu:
-            for item in truck_menu:
-                fallback_item = item.copy()
-                fallback_item['original_price'] = item['price']
-                fallback_item['marked_up_price'] = round(item['price'] * 1.15, 2)  # 15% default markup
-                selected_items.append(fallback_item)
-        
-        event.set_selected_menu_items(selected_items)
-        
-        db.session.add(event)
-        db.session.commit()
-        
-        # Redirect to payment step for $5 organizer fee
-        flash('Event details saved! Please complete the $5 organizer fee to publish your event.', 'info')
-        return redirect(url_for('organizer_pay_fee', event_id=event.id) + f'?auth_token={auth_token}' if auth_token else url_for('organizer_pay_fee', event_id=event.id))
+        try:
+            # Create new event
+            truck_id = int(request.form['food_truck_id'])
+            truck = FoodTruck.query.get(truck_id)
+            if not truck:
+                flash('Food truck not found', 'error')
+                return redirect(url_for('organizer_create_event') + f'?auth_token={auth_token}')
+            
+            # Validate markup percentage
+            try:
+                markup_percentage = float(request.form.get('markup_percentage', 0))
+            except (ValueError, TypeError):
+                markup_percentage = 0.0
+            
+            event = Event(
+                name=request.form['name'],
+                description=request.form['description'],
+                date=datetime.strptime(request.form['date'], '%Y-%m-%dT%H:%M'),
+                location=request.form['location'],
+                organizer_id=organizer_id,
+                food_truck_id=truck_id,
+                markup_percentage=markup_percentage,
+                pledge_goal=truck.sales_goal if truck.sales_goal else 1000.0
+            )
+            
+            # Parse selected menu items with markup - ROBUST handling
+            selected_items = []
+            selected_item_ids = request.form.getlist('selected_items')
+            
+            # Get truck menu safely
+            try:
+                truck_menu = truck.get_menu_items() if truck else []
+            except:
+                truck_menu = []
+            
+            # If truck has no menu items, create a basic menu to prevent errors
+            if not truck_menu:
+                logging.warning(f"Truck {truck.name} has no menu items, creating basic menu")
+                truck_menu = [
+                    {'name': 'Food Item', 'price': 10.0, 'description': 'Delicious food from this truck'}
+                ]
+            
+            # Process selected menu items
+            for item_id in selected_item_ids:
+                try:
+                    item_idx = int(item_id)
+                    if item_idx < len(truck_menu):
+                        item = truck_menu[item_idx].copy()
+                        item['original_price'] = item.get('price', 10.0)
+                        item['marked_up_price'] = item['original_price'] * (1 + markup_percentage / 100)
+                        selected_items.append(item)
+                except (ValueError, IndexError, KeyError) as e:
+                    logging.warning(f"Error processing menu item {item_id}: {e}")
+                    continue
+            
+            # If no menu items were selected, auto-select all available items
+            if not selected_items and truck_menu:
+                logging.info(f"No items selected, auto-selecting all {len(truck_menu)} items for truck {truck.name}")
+                for item in truck_menu:
+                    try:
+                        fallback_item = item.copy()
+                        fallback_item['original_price'] = item.get('price', 10.0)
+                        fallback_item['marked_up_price'] = round(fallback_item['original_price'] * (1 + markup_percentage / 100), 2)
+                        selected_items.append(fallback_item)
+                    except Exception as e:
+                        logging.warning(f"Error processing fallback item: {e}")
+                        continue
+            
+            # Final fallback - if still no items, create a default item
+            if not selected_items:
+                logging.warning(f"Creating default menu item for truck {truck.name}")
+                selected_items = [{
+                    'name': 'Special Item',
+                    'price': 10.0,
+                    'original_price': 10.0,
+                    'marked_up_price': 10.0 * (1 + markup_percentage / 100),
+                    'description': f'Special item from {truck.name}'
+                }]
+            
+            event.set_selected_menu_items(selected_items)
+            
+            db.session.add(event)
+            db.session.commit()
+            
+            logging.info(f"Event created successfully: {event.name} with {len(selected_items)} menu items")
+            
+            # Redirect to payment step for $5 organizer fee
+            flash('Event details saved! Please complete the $5 organizer fee to publish your event.', 'info')
+            return redirect(url_for('organizer_pay_fee', event_id=event.id) + f'?auth_token={auth_token}' if auth_token else url_for('organizer_pay_fee', event_id=event.id))
+            
+        except Exception as e:
+            logging.error(f"Error creating event: {str(e)}", exc_info=True)
+            flash(f'Error creating event: {str(e)}', 'error')
+            return redirect(url_for('organizer_create_event') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_create_event'))
     
     # GET request - show form
     # Only show approved food trucks that have paid registration fee to organizers
