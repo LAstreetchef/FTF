@@ -3455,3 +3455,24 @@ def sync_production_database():
         return f"❌ Database sync failed: {str(e)}"
 
 
+@app.route('/api/truck/<int:truck_id>/menu')
+def api_truck_menu(truck_id):
+    """API endpoint to get food truck menu items"""
+    truck = FoodTruck.query.get_or_404(truck_id)
+    
+    try:
+        menu_items = truck.get_menu_items()
+        return jsonify({
+            'success': True,
+            'items': menu_items,
+            'truck_name': truck.name
+        })
+    except Exception as e:
+        logging.error(f"Error fetching menu for truck {truck_id}: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'items': []
+        }), 500
+
+
