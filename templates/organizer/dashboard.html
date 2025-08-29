@@ -77,7 +77,8 @@
                             💰 Your Potential Earnings
                         </h5>
                         <p class="mb-2">Money you'll make when your events reach their goals</p>
-                        <h2 class="mb-0">${{ "%.2f"|format(total_potential_earnings) }}</h2>
+                        <h2 class="mb-0">${{ "%.2f"|format(total_potential_earnings if total_potential_earnings else 0) }}</h2>
+                        <!-- Debug: {{ total_potential_earnings }} -->
                     </div>
                     <div>
                         <i data-feather="trending-up" style="width: 48px; height: 48px;"></i>

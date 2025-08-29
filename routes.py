@@ -1525,7 +1525,11 @@ def organizer_dashboard():
     total_potential_earnings = 0.0
     for event in events:
         if event.status in ['pending', 'funded']:
-            total_potential_earnings += event.calculate_organizer_profit_if_goal_met()
+            profit = event.calculate_organizer_profit_if_goal_met()
+            logging.info(f"Event {event.name}: status={event.status}, markup={event.markup_percentage}%, goal=${event.pledge_goal}, profit=${profit}")
+            total_potential_earnings += profit
+    
+    logging.info(f"Total potential earnings for organizer {organizer.name}: ${total_potential_earnings}")
     
     # Pass auth token to template for iframe navigation
     current_auth_token = session.get('auth_token', '')
