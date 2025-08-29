@@ -139,6 +139,19 @@ class Event(db.Model):
         self.current_pledges = total
         db.session.commit()
     
+    def calculate_organizer_profit_if_goal_met(self):
+        """Calculate how much money the organizer will make if the event reaches its goal"""
+        if self.pledge_goal <= 0 or self.markup_percentage <= 0:
+            return 0.0
+        
+        # Calculate profit based on markup percentage applied to the goal amount
+        # The profit is the markup percentage of the total sales needed to reach the goal
+        markup_ratio = self.markup_percentage / 100.0
+        base_amount_needed = self.pledge_goal / (1 + markup_ratio)
+        profit_amount = self.pledge_goal - base_amount_needed
+        
+        return round(profit_amount, 2)
+    
     def can_be_deleted(self):
         """Check if event can be safely deleted"""
         charged_pledges = [p for p in self.pledges.all() if p.status == 'charged']
