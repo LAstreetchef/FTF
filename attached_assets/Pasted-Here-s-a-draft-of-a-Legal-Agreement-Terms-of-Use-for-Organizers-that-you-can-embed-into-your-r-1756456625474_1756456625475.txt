@@ -1,0 +1,49 @@
+Here’s a draft of a **Legal Agreement / Terms of Use for Organizers** that you can embed into your registration form for **[www.foodtruckfundraiser.com](http://www.foodtruckfundraiser.com)**. It’s written in plain but enforceable language — strong enough to cover liability, truthfulness, and rules against abuse — while keeping it user-friendly.
+
+---
+
+# Organizer Agreement & Terms of Use
+
+By registering as an Organizer on **[www.foodtruckfundraiser.com](http://www.foodtruckfundraiser.com)** (“the Platform”), you (“Organizer”) agree to the following terms and conditions:
+
+### 1. Nature of the Platform
+
+* **[www.foodtruckfundraiser.com](http://www.foodtruckfundraiser.com)** is a technology platform that connects food trucks with individuals, groups, and organizations seeking to host fundraising events.
+* The Platform does not operate, manage, endorse, or assume responsibility for any events, transactions, or activities organized by users.
+
+### 2. Organizer Responsibility
+
+* Organizer is solely and fully responsible for all fundraising activities, events, communications, and representations made through or in connection with the Platform.
+* Organizer agrees to comply with all applicable local, state, and federal laws, regulations, and permitting requirements for their events.
+* Organizer assumes all liability for the safety, legality, and success of their fundraising events.
+
+### 3. Accuracy of Information
+
+* Organizer attests that all information provided during registration and in the use of the Platform is complete, accurate, and truthful.
+* Providing false, misleading, or incomplete information is grounds for immediate suspension or termination of access to the Platform.
+
+### 4. Prohibited Conduct
+
+* Organizer agrees not to manipulate, interfere with, or otherwise “game” the Platform, including but not limited to:
+
+  * creating false events or accounts,
+  * misrepresenting participation, donations, or financial commitments,
+  * attempting to circumvent payment or contractual obligations.
+* Any such conduct may result in immediate removal from the Platform and potential legal action.
+
+### 5. Limitation of Liability
+
+* The Platform and its owners, operators, and affiliates are not responsible for any damages, losses, claims, or disputes arising out of or related to Organizer’s events or activities.
+* Organizer agrees to indemnify, defend, and hold harmless the Platform, its owners, and affiliates from any claims, demands, or liabilities connected with Organizer’s use of the Platform.
+
+### 6. Agreement to Terms
+
+By checking the box and submitting registration, Organizer confirms that they have read, understood, and agree to these Terms of Use and acknowledge that **Organizer holds all legal responsibility for their fundraising activities**.
+
+---
+
+✅ I Agree to the Organizer Agreement & Terms of Use
+
+---
+
+Would you like me to format this in **shorter, plain-English bullet points** (good for quick sign-up pages), or keep it in this more **formal legal style** (better for enforceability)?
