@@ -1521,9 +1521,19 @@ def organizer_dashboard():
         return redirect(url_for('organizer_login'))
     events = Event.query.filter_by(organizer_id=organizer.id).order_by(Event.created_at.desc()).all()
     
+    # Calculate total potential earnings
+    total_potential_earnings = 0.0
+    for event in events:
+        if event.status in ['pending', 'funded']:
+            total_potential_earnings += event.calculate_organizer_profit_if_goal_met()
+    
     # Pass auth token to template for iframe navigation
     current_auth_token = session.get('auth_token', '')
-    return render_template('organizer/dashboard.html', organizer=organizer, events=events, auth_token=current_auth_token)
+    return render_template('organizer/dashboard.html', 
+                          organizer=organizer, 
+                          events=events, 
+                          total_potential_earnings=total_potential_earnings,
+                          auth_token=current_auth_token)
 
 @app.route('/organizer/create-event', methods=['GET', 'POST'])
 def organizer_create_event():
