@@ -1425,6 +1425,7 @@ def organizer_register():
             email = request.form.get('email', '').strip()
             name = request.form.get('name', '').strip()
             password = request.form.get('password', '').strip()
+            terms_agreement = request.form.get('terms_agreement')
             
             # Debug logging
             logging.debug(f"Organizer registration attempt - Email: {email}, Name: {name}")
@@ -1433,6 +1434,11 @@ def organizer_register():
             if not email or not name or not password:
                 flash('All fields are required', 'error')
                 logging.debug("Registration failed: Missing fields")
+                return render_template('organizer/login.html', register_mode=True)
+            
+            if not terms_agreement:
+                flash('You must agree to the terms and conditions to create an account', 'error')
+                logging.debug("Registration failed: Terms not accepted")
                 return render_template('organizer/login.html', register_mode=True)
             
             if len(password) < 6:

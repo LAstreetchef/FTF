@@ -34,6 +34,20 @@
                         {% endif %}
                     </div>
                     
+                    {% if register_mode %}
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="termsAgreement" name="terms_agreement" required>
+                            <label class="form-check-label" for="termsAgreement">
+                                <strong>Legal Agreement</strong><br>
+                                <small class="text-muted">
+                                    I agree to the terms and conditions of this platform. I confirm that all information provided is true and accurate. I understand and assume all risks associated with organizing fundraising events through this platform, including but not limited to financial liability, event execution, and food safety compliance. I acknowledge that I am solely responsible for the success and legal compliance of my events.
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
                     <button type="submit" class="btn btn-primary w-100">
                         <i data-feather="{{ 'user-plus' if register_mode else 'log-in' }}" class="me-2"></i>
                         {{ 'Create Account' if register_mode else 'Login' }}
