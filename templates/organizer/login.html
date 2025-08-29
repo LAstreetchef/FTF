@@ -41,7 +41,7 @@
                             <label class="form-check-label" for="termsAgreement">
                                 <strong>Legal Agreement</strong><br>
                                 <small class="text-muted">
-                                    I agree to the terms and conditions of this platform. I confirm that all information provided is true and accurate. I understand and assume all risks associated with organizing fundraising events through this platform, including but not limited to financial liability, event execution, and all local, state, and federal tax and fiduciary compliance. I acknowledge that I am solely responsible for the success and legal compliance of my events.
+                                    I have read and agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-primary">Organizer Agreement & Terms of Use</a>. I confirm that all information provided is true and accurate. I understand and assume all risks associated with organizing fundraising events through this platform, including but not limited to financial liability, event execution, and all local, state, and federal tax and fiduciary compliance. I acknowledge that I am solely responsible for the success and legal compliance of my events.
                                 </small>
                             </label>
                         </div>
@@ -102,4 +102,73 @@
         </div>
     </div>
 </div>
+
+<!-- Terms and Conditions Modal -->
+{% if register_mode %}
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Organizer Agreement & Terms of Use</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>By registering as an Organizer on <strong>www.foodtruckfundraiser.com</strong> ("the Platform"), you ("Organizer") agree to the following terms and conditions:</p>
+                
+                <h6>1. Nature of the Platform</h6>
+                <ul>
+                    <li><strong>www.foodtruckfundraiser.com</strong> is a technology platform that connects food trucks with individuals, groups, and organizations seeking to host fundraising events.</li>
+                    <li>The Platform does not operate, manage, endorse, or assume responsibility for any events, transactions, or activities organized by users.</li>
+                </ul>
+                
+                <h6>2. Organizer Responsibility</h6>
+                <ul>
+                    <li>Organizer is solely and fully responsible for all fundraising activities, events, communications, and representations made through or in connection with the Platform.</li>
+                    <li>Organizer agrees to comply with all applicable local, state, and federal laws, regulations, and permitting requirements for their events.</li>
+                    <li>Organizer assumes all liability for the safety, legality, and success of their fundraising events.</li>
+                </ul>
+                
+                <h6>3. Accuracy of Information</h6>
+                <ul>
+                    <li>Organizer attests that all information provided during registration and in the use of the Platform is complete, accurate, and truthful.</li>
+                    <li>Providing false, misleading, or incomplete information is grounds for immediate suspension or termination of access to the Platform.</li>
+                </ul>
+                
+                <h6>4. Prohibited Conduct</h6>
+                <ul>
+                    <li>Organizer agrees not to manipulate, interfere with, or otherwise "game" the Platform, including but not limited to:
+                        <ul>
+                            <li>creating false events or accounts,</li>
+                            <li>misrepresenting participation, donations, or financial commitments,</li>
+                            <li>attempting to circumvent payment or contractual obligations.</li>
+                        </ul>
+                    </li>
+                    <li>Any such conduct may result in immediate removal from the Platform and potential legal action.</li>
+                </ul>
+                
+                <h6>5. Taxes & Financial Responsibility</h6>
+                <ul>
+                    <li>Organizer is solely responsible for reporting, collecting, and remitting any and all applicable taxes, fees, or other financial obligations arising from fundraising activities conducted through the Platform.</li>
+                    <li>The Platform does not provide tax, accounting, or legal advice and is not responsible for any Organizer's tax reporting or compliance.</li>
+                    <li>Organizer agrees to indemnify the Platform from any claims or liabilities related to Organizer's tax or financial obligations.</li>
+                </ul>
+                
+                <h6>6. Limitation of Liability</h6>
+                <ul>
+                    <li>The Platform and its owners, operators, and affiliates are not responsible for any damages, losses, claims, or disputes arising out of or related to Organizer's events or activities.</li>
+                    <li>Organizer agrees to indemnify, defend, and hold harmless the Platform, its owners, and affiliates from any claims, demands, or liabilities connected with Organizer's use of the Platform.</li>
+                </ul>
+                
+                <h6>7. Agreement to Terms</h6>
+                <p>By checking the box and submitting registration, Organizer confirms that they have read, understood, and agree to these Terms of Use and acknowledge that <strong>Organizer holds all legal and financial responsibility for their fundraising activities</strong>.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="document.getElementById('termsAgreement').checked = true;">I Agree</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}
