@@ -69,15 +69,15 @@
 <div class="row g-4 mb-5">
     <div class="col-12">
         <div class="card bg-gradient" style="background: linear-gradient(135deg, #ff8c00, #ffa500);">
-            <div class="card-body text-white">
+            <div class="card-body text-white" style="color: white !important;">
                 <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h5 class="card-title mb-1">
+                        <h5 class="card-title mb-1" style="color: white !important;">
                             <i data-feather="dollar-sign" class="me-2"></i>
                             💰 Your Potential Earnings
                         </h5>
-                        <p class="mb-2">Money you'll make when your events reach their goals</p>
-                        <h2 class="mb-0">
+                        <p class="mb-2" style="color: white !important;">Money you'll make when your events reach their goals</p>
+                        <h2 class="mb-0" style="color: white !important; font-weight: bold;">
                             {% if total_potential_earnings %}
                                 ${{ "%.2f"|format(total_potential_earnings) }}
                             {% else %}
