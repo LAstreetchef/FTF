@@ -38,8 +38,13 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=86400 # 24 hours
 )
 
-# Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///foodtruckfundraiser.db")
+# Configure the database - force production database usage
+database_url = os.environ.get("DATABASE_URL")
+if not database_url:
+    raise Exception("DATABASE_URL environment variable is required for production")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+logging.info(f"Database configured: {database_url.split('@')[1] if '@' in database_url else 'local'}")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
@@ -143,10 +148,24 @@ with app.app_context():
         import models
         import routes
         
-        # Test database connection before proceeding
+        # Test database connection and verify environment
         logging.info("Testing database connection...")
         db.session.execute(db.text('SELECT 1'))
         logging.info("Database connection successful")
+        
+        # Verify we're using the correct database
+        try:
+            result = db.session.execute(db.text("SELECT current_database()")).fetchone()
+            db_name = result[0] if result else "unknown"
+            logging.info(f"Connected to database: {db_name}")
+            
+            # Log table counts to verify data consistency
+            event_count = db.session.execute(db.text("SELECT COUNT(*) FROM event")).fetchone()[0]
+            pledge_count = db.session.execute(db.text("SELECT COUNT(*) FROM pledge")).fetchone()[0]
+            logging.info(f"Database contains: {event_count} events, {pledge_count} pledges")
+            
+        except Exception as e:
+            logging.warning(f"Database verification failed: {str(e)}")
         
         # Create tables
         db.create_all()
