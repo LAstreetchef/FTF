@@ -1347,6 +1347,60 @@ def fix_database_integrity():
         <p><a href="/admin/dashboard">← Back to Admin Dashboard</a></p>
         """
 
+@app.route('/admin/transfers')
+def admin_transfers():
+    """Admin page to view and manage all active pledge transfers"""
+    if 'admin_logged_in' not in session:
+        return redirect(url_for('admin_login'))
+    
+    try:
+        # Get all pledges with active transfer tokens
+        active_transfers = db.session.query(Pledge).filter(
+            Pledge.transfer_token.isnot(None)
+        ).all()
+        
+        # Organize transfer data with source and target event details
+        transfer_data = []
+        for pledge in active_transfers:
+            source_event = Event.query.get(pledge.event_id)
+            target_event = Event.query.get(pledge.transfer_target_event_id) if pledge.transfer_target_event_id else None
+            
+            # Get organizer details
+            source_organizer = Organizer.query.get(source_event.organizer_id) if source_event else None
+            target_organizer = Organizer.query.get(target_event.organizer_id) if target_event else None
+            
+            transfer_info = {
+                'pledge_id': pledge.id,
+                'pledge_amount': pledge.amount,
+                'pledger_email': pledge.email,
+                'pledger_name': pledge.name,
+                'transfer_token': pledge.transfer_token,
+                'transfer_initiated': pledge.transfer_initiated_at,
+                'source_event': source_event,
+                'target_event': target_event,
+                'source_organizer': source_organizer,
+                'target_organizer': target_organizer,
+                'status': 'pending_confirmation'
+            }
+            transfer_data.append(transfer_info)
+        
+        # Sort by transfer initiation date (newest first)
+        transfer_data.sort(key=lambda x: x['transfer_initiated'] or datetime.min, reverse=True)
+        
+        # Get summary statistics
+        total_transfers = len(transfer_data)
+        total_amount = sum(t['pledge_amount'] for t in transfer_data)
+        
+        return render_template('admin/transfers.html', 
+                             transfers=transfer_data,
+                             total_transfers=total_transfers,
+                             total_amount=total_amount)
+                             
+    except Exception as e:
+        logging.error(f"Error loading transfer management page: {str(e)}")
+        flash(f'Error loading transfers: {str(e)}', 'error')
+        return redirect(url_for('admin_dashboard'))
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}Transfer Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">🔄 Transfer Management</h1>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                    <i data-feather="arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="card-title">Active Transfers</h5>
+                                    <h2 class="mb-0">{{ total_transfers }}</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i data-feather="repeat" size="32"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="card-title">Total Amount</h5>
+                                    <h2 class="mb-0">${{ "%.2f"|format(total_amount) }}</h2>
+                                </div>
+                                <div class="align-self-center">
+                                    <i data-feather="dollar-sign" size="32"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <h5 class="card-title">Pending Confirmations</h5>
+                                    <h2 class="mb-0">{{ total_transfers }}</h2>
+                                    <small>Awaiting pledger consent</small>
+                                </div>
+                                <div class="align-self-center">
+                                    <i data-feather="clock" size="32"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if transfers %}
+            <!-- Transfers Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">All Active Transfers</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Pledge Details</th>
+                                    <th>Source Event</th>
+                                    <th>Target Event</th>
+                                    <th>Initiated</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transfer in transfers %}
+                                <tr>
+                                    <!-- Pledge Details -->
+                                    <td>
+                                        <div class="fw-bold">${{ "%.2f"|format(transfer.pledge_amount) }}</div>
+                                        <div class="text-muted small">
+                                            {{ transfer.pledger_name or 'Anonymous' }}<br>
+                                            {{ transfer.pledger_email }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            Pledge ID: {{ transfer.pledge_id }}
+                                        </div>
+                                    </td>
+                                    
+                                    <!-- Source Event -->
+                                    <td>
+                                        {% if transfer.source_event %}
+                                        <div class="fw-bold">{{ transfer.source_event.name }}</div>
+                                        <div class="text-muted small">
+                                            {{ transfer.source_event.date.strftime('%Y-%m-%d %I:%M %p') }}<br>
+                                            Organizer: {{ transfer.source_organizer.email if transfer.source_organizer else 'Unknown' }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            Event ID: {{ transfer.source_event.id }}
+                                        </div>
+                                        {% else %}
+                                        <span class="text-danger">Event Not Found</span>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <!-- Target Event -->
+                                    <td>
+                                        {% if transfer.target_event %}
+                                        <div class="fw-bold">{{ transfer.target_event.name }}</div>
+                                        <div class="text-muted small">
+                                            {{ transfer.target_event.date.strftime('%Y-%m-%d %I:%M %p') }}<br>
+                                            Organizer: {{ transfer.target_organizer.email if transfer.target_organizer else 'Unknown' }}
+                                        </div>
+                                        <div class="text-muted small">
+                                            Event ID: {{ transfer.target_event.id }}
+                                        </div>
+                                        {% else %}
+                                        <span class="text-danger">Target Not Set</span>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <!-- Initiated Time -->
+                                    <td>
+                                        {% if transfer.transfer_initiated %}
+                                        <div class="small">
+                                            {{ transfer.transfer_initiated.strftime('%Y-%m-%d') }}<br>
+                                            {{ transfer.transfer_initiated.strftime('%I:%M %p') }}
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    
+                                    <!-- Status -->
+                                    <td>
+                                        <span class="badge bg-warning text-dark">
+                                            <i data-feather="clock" size="14"></i>
+                                            Pending Confirmation
+                                        </span>
+                                    </td>
+                                    
+                                    <!-- Actions -->
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            {% if transfer.transfer_token %}
+                                            <a href="/debug-transfer-token-xyz890/{{ transfer.transfer_token }}" 
+                                               class="btn btn-outline-info" 
+                                               title="Debug Transfer">
+                                                <i data-feather="search" size="14"></i>
+                                            </a>
+                                            {% endif %}
+                                            
+                                            <button class="btn btn-outline-secondary" 
+                                                    onclick="copyToClipboard('{{ transfer.transfer_token }}')"
+                                                    title="Copy Token">
+                                                <i data-feather="copy" size="14"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        {% if transfer.transfer_token %}
+                                        <div class="mt-1">
+                                            <small class="text-muted font-monospace">
+                                                {{ transfer.transfer_token[:12] }}...
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <!-- No Transfers Message -->
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i data-feather="repeat" size="64" class="text-muted mb-3"></i>
+                    <h4 class="text-muted">No Active Transfers</h4>
+                    <p class="text-muted">There are currently no pending pledge transfers in the system.</p>
+                    <a href="{{ url_for('admin_events') }}" class="btn btn-primary">
+                        <i data-feather="calendar"></i> Manage Events
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // Show success feedback
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="check" size="14"></i>';
+        feather.replace();
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            feather.replace();
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+// Auto-refresh every 30 seconds to show updated transfer status
+setInterval(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}
