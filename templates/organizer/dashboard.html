@@ -190,10 +190,8 @@
                                 Transfer
                             </button>
                             {% endif %}
-                            
-                            <!-- View Supporters Button -->
                             {% if event.pledges|length > 0 %}
-                            <button class="btn btn-outline-info btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#supportersModal-{{ event.id }}">
+                            <button type="button" class="btn btn-outline-info btn-sm ms-1" onclick="showSupportersModal({{ event.id }})">
                                 <i data-feather="users" class="me-1"></i>
                                 Supporters ({{ event.pledges|length }})
                             </button>
