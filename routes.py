@@ -1160,6 +1160,102 @@ def admin_events():
         flash('Error loading events. Please try again.', 'error')
         return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/events/<int:event_id>/transfer', methods=['GET', 'POST'])
+def admin_transfer_pledges(event_id):
+    """Admin pledge transfer - view and process"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    event = Event.query.get_or_404(event_id)
+    
+    if request.method == 'GET':
+        # Show transfer form
+        available_events = Event.query.filter(
+            Event.organizer_id == event.organizer_id,
+            Event.id != event.id,
+            Event.status.in_(['pending', 'funded'])
+        ).order_by(Event.date.desc()).all()
+        
+        return render_template('admin/transfer_pledges.html', 
+                             event=event, 
+                             available_events=available_events)
+    
+    # POST request - process transfer
+    target_event_id = int(request.form['target_event_id'])
+    target_event = Event.query.get_or_404(target_event_id)
+    
+    # Verify both events belong to the same organizer
+    if event.organizer_id != target_event.organizer_id:
+        flash('Can only transfer pledges between events from the same organizer', 'error')
+        return redirect(url_for('admin_events'))
+    
+    # Validation checks
+    if event.status not in ['pending', 'funded']:
+        flash('Can only transfer pledges from pending or funded events', 'error')
+        return redirect(url_for('admin_events'))
+    
+    if target_event.status not in ['pending', 'funded']:
+        flash('Can only transfer pledges to events that are still accepting pledges', 'error')
+        return redirect(url_for('admin_events'))
+    
+    if event.id == target_event.id:
+        flash('Cannot transfer pledges to the same event', 'error')
+        return redirect(url_for('admin_events'))
+    
+    # Get pending pledges from source event
+    pending_pledges = [p for p in event.pledges if p.status == 'pending']
+    
+    if not pending_pledges:
+        flash('No pending pledges found to transfer', 'error')
+        return redirect(url_for('admin_events'))
+    
+    try:
+        # Send email confirmation to each pledger
+        from flask_mail import Mail, Message
+        mail = Mail(app)
+        confirmation_sent = 0
+        
+        for pledge in pending_pledges:
+            confirmation_token = secrets.token_urlsafe(32)
+            pledge.transfer_token = confirmation_token
+            pledge.transfer_target_event_id = target_event.id
+            pledge.transfer_initiated_at = datetime.utcnow()
+            
+            # Create confirmation URLs
+            confirm_url = url_for('confirm_transfer', token=confirmation_token, _external=True)
+            decline_url = url_for('decline_transfer', token=confirmation_token, _external=True)
+            
+            # Send confirmation email
+            try:
+                msg = Message(
+                    subject=f'Confirm Pledge Transfer - {event.name}',
+                    recipients=[pledge.email],
+                    html=render_template('emails/transfer_confirmation.html',
+                                       pledge=pledge,
+                                       source_event=event,
+                                       target_event=target_event,
+                                       confirm_url=confirm_url,
+                                       decline_url=decline_url)
+                )
+                mail.send(msg)
+                confirmation_sent += 1
+                logging.info(f"Transfer confirmation email sent to {pledge.email}")
+            except Exception as email_error:
+                logging.error(f"Failed to send transfer confirmation to {pledge.email}: {str(email_error)}")
+                continue
+        
+        db.session.commit()
+        
+        flash(f'Transfer process initiated! Confirmation emails sent to {confirmation_sent} pledgers. '
+              f'Pledges will be transferred once pledgers confirm via email.', 'success')
+              
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Transfer initiation error: {str(e)}")
+        flash('Error initiating transfer process. Please try again.', 'error')
+    
+    return redirect(url_for('admin_events'))
+
 @app.route('/admin/events/<int:event_id>/approve', methods=['POST'])
 def admin_approve_event(event_id):
     """
@@ -1292,38 +1388,6 @@ def admin_delete_event(event_id):
     flash(f'Event "{event_name}" deleted successfully. {len(pledges)} associated pledges were also removed.', 'success')
     return redirect(url_for('admin_events'))
 
-@app.route('/admin/events/<int:event_id>/transfer', methods=['GET', 'POST'])
-def admin_transfer_pledges(event_id):
-    """Admin interface for managing pledge transfers"""
-    if not session.get('admin_id'):
-        return redirect(url_for('admin_login'))
-    
-    event = Event.query.get_or_404(event_id)
-    
-    # Only show events with pending pledges in transferable status
-    if event.status not in ['pending', 'funded'] or not event.pledges:
-        flash('This event has no transferable pledges', 'error')
-        return redirect(url_for('admin_events'))
-    
-    # Get other events from the same organizer that can receive transfers
-    available_events = Event.query.filter(
-        Event.organizer_id == event.organizer_id,
-        Event.id != event.id,
-        Event.status.in_(['pending', 'funded'])
-    ).all()
-    
-    if request.method == 'POST':
-        target_event_id = request.form.get('target_event_id')
-        if target_event_id:
-            # Redirect to the organizer transfer system with proper authentication
-            flash('Redirecting to transfer system. Organizers must authorize all transfers via email.', 'info')
-            return redirect(url_for('transfer_pledges', event_id=event_id, _external=True) + f'?target_event_id={target_event_id}')
-        else:
-            flash('Please select a target event', 'error')
-    
-    return render_template('admin/transfer_pledges.html', 
-                         event=event, 
-                         available_events=available_events)
 
 # Organizer Routes
 @app.route('/organizer/login', methods=['GET', 'POST'])
@@ -2632,36 +2696,6 @@ def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
 
-# Debug route for admin events access
-@app.route('/debug-admin-events-xyz789')
-def debug_admin_events():
-    """Debug route to test admin events access"""
-    try:
-        session_info = dict(session)
-        admin_id = session.get('admin_id')
-        
-        # Test database query
-        events_count = Event.query.count()
-        
-        # Test template rendering
-        template_test = "Template accessible"
-        try:
-            render_template('admin/events.html', events=[])
-        except Exception as template_error:
-            template_test = f"Template error: {str(template_error)}"
-        
-        return f"""
-        <h3>Admin Events Debug Info</h3>
-        <p><strong>Session Data:</strong> {session_info}</p>
-        <p><strong>Admin ID:</strong> {admin_id}</p>
-        <p><strong>Events Count:</strong> {events_count}</p>
-        <p><strong>Template Test:</strong> {template_test}</p>
-        <hr>
-        <p><a href="/admin/events">Try Admin Events</a></p>
-        <p><a href="/admin/login">Admin Login</a></p>
-        """
-    except Exception as e:
-        return f"❌ Debug Error: {str(e)}"
 
 # Debug route to test admin login
 @app.route('/debug-admin-login')
