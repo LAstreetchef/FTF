@@ -1373,7 +1373,7 @@ def admin_transfers():
                 'pledge_id': pledge.id,
                 'pledge_amount': pledge.amount,
                 'pledger_email': pledge.email,
-                'pledger_name': pledge.name,
+                'pledger_name': pledge.email.split('@')[0] if pledge.email else 'Anonymous',  # Use email prefix as name
                 'transfer_token': pledge.transfer_token,
                 'transfer_initiated': pledge.transfer_initiated_at,
                 'source_event': source_event,
