@@ -57,6 +57,7 @@ def test_credentials():
     """Simple credential testing page"""
     return render_template('test_credentials.html')
 
+
 # Admin Routes
 @app.route('/iframe-debug')
 def iframe_debug():
