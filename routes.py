@@ -2687,6 +2687,58 @@ def debug_admin_login():
         return f"❌ Error: {str(e)}"
 
 # Setup route for production deployment
+@app.route('/admin-direct-access-prod-fix', methods=['GET', 'POST'])
+def admin_direct_access():
+    """Direct admin access for production environment"""
+    if request.method == 'POST':
+        # Direct admin login
+        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        if admin and check_password_hash(admin.password_hash, 'password'):
+            # Clear and set session
+            session.clear()
+            session['admin_id'] = admin.id
+            session['user_type'] = 'admin'
+            session.permanent = True
+            session.modified = True
+            
+            # Immediately redirect to events management
+            return redirect(url_for('admin_events'))
+        else:
+            return "<h3>❌ Login failed</h3><p>Admin credentials incorrect</p>"
+    
+    # Show direct access form
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Production Admin Access</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 50px; background: #f8f9fa; }}
+            .container {{ max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }}
+            button {{ background: #28a745; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }}
+            .status {{ background: #e9ecef; padding: 15px; margin: 20px 0; border-radius: 5px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>🚀 Production Admin Access</h2>
+            
+            <div class="status">
+                <h4>Current Session:</h4>
+                <p><strong>Admin ID:</strong> {session.get('admin_id', 'Not set')}</p>
+                <p><strong>User Type:</strong> {session.get('user_type', 'Not set')}</p>
+            </div>
+            
+            <form method="POST">
+                <button type="submit">Login & Go to Manage Events</button>
+            </form>
+            
+            <p><a href="/admin/login">Regular Login</a> | <a href="/admin/dashboard">Dashboard</a></p>
+        </div>
+    </body>
+    </html>
+    """
+
 @app.route('/login-admin-direct-xyz123', methods=['GET', 'POST'])
 def login_admin_direct():
     """Direct admin login for troubleshooting"""
