@@ -10,6 +10,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **2025-08-31**: Supporter Contact Feature for Organizers
+  - Implemented comprehensive supporter contact functionality in admin dashboard  
+  - Added "Supporters (X)" buttons in admin dashboard Recent Events table
+  - Created dedicated supporter detail pages showing full email addresses for contact
+  - Built one-click email functionality with pre-filled thank you messages
+  - Resolved production template caching issues by implementing through admin interface
+  - Organizers can request admin access to view their event supporters and contact information
+  - Feature enables direct communication between organizers and supporters for event coordination
+
+## Recent Changes
+
 - **2025-08-26**: AI-Powered Customer Support Chat System
   - Implemented complete AI + human hybrid support chat system
   - Added floating chat widget with modern orange/foodie theme design and headphones icon
