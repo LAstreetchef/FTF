@@ -1928,7 +1928,7 @@ def confirm_transfer(token):
         
         return render_template('transfer_consent_approved.html', 
                              pledge=pledge, 
-                             target_event=target_event,
+                             new_event=target_event,
                              old_event_name=old_event_name)
         
     except Exception as e:
