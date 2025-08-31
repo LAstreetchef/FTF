@@ -1143,11 +1143,22 @@ def admin_delete_truck(truck_id):
 
 @app.route('/admin/events')
 def admin_events():
-    if not session.get('admin_id'):
-        return redirect(url_for('admin_login'))
-    
-    events = Event.query.order_by(Event.created_at.desc()).all()
-    return render_template('admin/events.html', events=events)
+    try:
+        logging.info(f"Admin events access attempt - Session: {dict(session)}")
+        
+        if not session.get('admin_id'):
+            logging.warning("Admin events access denied - no admin_id in session")
+            return redirect(url_for('admin_login'))
+        
+        logging.info(f"Admin {session.get('admin_id')} accessing events management")
+        events = Event.query.order_by(Event.created_at.desc()).all()
+        logging.info(f"Found {len(events)} events to display")
+        
+        return render_template('admin/events.html', events=events)
+    except Exception as e:
+        logging.error(f"Admin events error: {str(e)}", exc_info=True)
+        flash('Error loading events. Please try again.', 'error')
+        return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/events/<int:event_id>/approve', methods=['POST'])
 def admin_approve_event(event_id):
@@ -2620,6 +2631,37 @@ def not_found(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+# Debug route for admin events access
+@app.route('/debug-admin-events-xyz789')
+def debug_admin_events():
+    """Debug route to test admin events access"""
+    try:
+        session_info = dict(session)
+        admin_id = session.get('admin_id')
+        
+        # Test database query
+        events_count = Event.query.count()
+        
+        # Test template rendering
+        template_test = "Template accessible"
+        try:
+            render_template('admin/events.html', events=[])
+        except Exception as template_error:
+            template_test = f"Template error: {str(template_error)}"
+        
+        return f"""
+        <h3>Admin Events Debug Info</h3>
+        <p><strong>Session Data:</strong> {session_info}</p>
+        <p><strong>Admin ID:</strong> {admin_id}</p>
+        <p><strong>Events Count:</strong> {events_count}</p>
+        <p><strong>Template Test:</strong> {template_test}</p>
+        <hr>
+        <p><a href="/admin/events">Try Admin Events</a></p>
+        <p><a href="/admin/login">Admin Login</a></p>
+        """
+    except Exception as e:
+        return f"❌ Debug Error: {str(e)}"
 
 # Debug route to test admin login
 @app.route('/debug-admin-login')
