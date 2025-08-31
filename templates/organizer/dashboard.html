@@ -103,7 +103,7 @@
 {% if events %}
 <div class="row">
     <div class="col-12">
-        <h3 style="color: red; font-size: 40px;">🔴 TESTING - Your Events with SUPPORTERS Column 🔴</h3>
+        <h3>Your Events</h3>
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -113,7 +113,6 @@
                         <th>Date</th>
                         <th>Status</th>
                         <th>Progress</th>
-                        <th style="background-color: #ff6b6b; color: white;">SUPPORTERS</th>
                         <th>Your Profit</th>
                         <th>Actions</th>
                     </tr>
@@ -158,35 +157,6 @@
                             </small>
                         </td>
                         <td>
-                            {% if event.pledges %}
-                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#supporters-{{ event.id }}" aria-expanded="false">
-                                <i data-feather="users" class="me-1"></i>
-                                {{ event.pledges|length }} Supporter{{ 's' if event.pledges|length != 1 else '' }}
-                            </button>
-                            <div class="collapse mt-2" id="supporters-{{ event.id }}">
-                                <div class="card card-body p-2" style="max-width: 300px;">
-                                    <small class="text-muted mb-2"><strong>Contact Your Supporters:</strong></small>
-                                    {% for pledge in event.pledges %}
-                                    {% if pledge.status == 'pending' %}
-                                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
-                                        <div>
-                                            <small class="text-primary fw-bold">{{ pledge.email }}</small>
-                                            <br><small class="text-muted">{{ pledge.created_at.strftime('%m/%d/%Y') }}</small>
-                                        </div>
-                                        <small class="text-success fw-bold">${{ "%.2f"|format(pledge.amount) }}</small>
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
-                                    {% if event.pledges|length == 0 %}
-                                    <small class="text-muted">No supporters yet</small>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% else %}
-                            <small class="text-muted">No supporters</small>
-                            {% endif %}
-                        </td>
-                        <td>
                             {% set profit = event.calculate_organizer_profit_if_goal_met() %}
                             {% if profit > 0 %}
                                 <span class="text-success fw-bold">${{ "%.2f"|format(profit) }}</span>
@@ -220,6 +190,14 @@
                                 Transfer
                             </button>
                             {% endif %}
+                            
+                            <!-- View Supporters Button -->
+                            {% if event.pledges|length > 0 %}
+                            <button class="btn btn-outline-info btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#supportersModal-{{ event.id }}">
+                                <i data-feather="users" class="me-1"></i>
+                                Supporters ({{ event.pledges|length }})
+                            </button>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -228,6 +206,81 @@
         </div>
     </div>
 </div>
+
+<!-- Supporters Modals -->
+{% for event in events %}
+{% if event.pledges|length > 0 %}
+<div class="modal fade" id="supportersModal-{{ event.id }}" tabindex="-1" aria-labelledby="supportersModalLabel-{{ event.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="supportersModalLabel-{{ event.id }}">
+                    <i data-feather="users" class="me-2"></i>
+                    Supporters for "{{ event.name }}"
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">Contact information for your event supporters:</p>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Email Address</th>
+                                <th>Pledge Amount</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pledge in event.pledges %}
+                            {% if pledge.status == 'pending' %}
+                            <tr>
+                                <td>
+                                    <strong>{{ pledge.email }}</strong>
+                                    <br><small class="text-muted">Supporter since {{ pledge.created_at.strftime('%B %d, %Y') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">${{ "%.2f"|format(pledge.amount) }}</span>
+                                </td>
+                                <td>{{ pledge.created_at.strftime('%m/%d/%Y %I:%M %p') }}</td>
+                                <td>
+                                    <span class="badge bg-warning">Pending</span>
+                                </td>
+                                <td>
+                                    <a href="mailto:{{ pledge.email }}?subject=Thank you for supporting {{ event.name }}&body=Hi,\n\nThank you for supporting our {{ event.name }} event! We appreciate your pledge of ${{ "%.2f"|format(pledge.amount) }}.\n\nBest regards,\n{{ organizer.name }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i data-feather="mail" class="me-1"></i>
+                                        Email
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if event.pledges|length == 0 %}
+                <div class="text-center py-4">
+                    <i data-feather="users" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+                    <h5 class="text-muted">No supporters yet</h5>
+                    <p class="text-muted">Share your event to get supporters!</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary">
+                    <i data-feather="share-2" class="me-1"></i>
+                    Share Event
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
 {% else %}
 <div class="text-center py-5">
     <i data-feather="calendar" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
