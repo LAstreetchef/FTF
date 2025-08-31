@@ -1405,6 +1405,60 @@ def admin_transfers():
         flash(f'Error loading transfers: {str(e)}', 'error')
         return redirect(url_for('admin_dashboard'))
 
+@app.route('/admin/resend-transfer-confirmation/<int:pledge_id>', methods=['POST'])
+def resend_transfer_confirmation(pledge_id):
+    """Resend transfer confirmation email to pledger"""
+    if 'admin_id' not in session:
+        return jsonify({'success': False, 'error': 'Authentication required'}), 401
+    
+    try:
+        # Find the pledge with transfer token
+        pledge = Pledge.query.get(pledge_id)
+        if not pledge:
+            return jsonify({'success': False, 'error': 'Pledge not found'}), 404
+        
+        if not pledge.transfer_token or not pledge.transfer_target_event_id:
+            return jsonify({'success': False, 'error': 'No active transfer found for this pledge'}), 400
+        
+        # Get source and target events
+        source_event = Event.query.get(pledge.event_id)
+        target_event = Event.query.get(pledge.transfer_target_event_id)
+        
+        if not source_event or not target_event:
+            return jsonify({'success': False, 'error': 'Source or target event not found'}), 400
+        
+        # Send confirmation email
+        from flask_mail import Mail, Message
+        mail = Mail(app)
+        
+        # Create confirmation URLs
+        confirm_url = url_for('confirm_transfer', token=pledge.transfer_token, _external=True)
+        decline_url = url_for('decline_transfer', token=pledge.transfer_token, _external=True)
+        
+        try:
+            msg = Message(
+                subject=f'RESENT: Confirm Pledge Transfer - {source_event.name}',
+                recipients=[pledge.email],
+                html=render_template('emails/transfer_confirmation.html',
+                                   pledge=pledge,
+                                   source_event=source_event,
+                                   target_event=target_event,
+                                   confirm_url=confirm_url,
+                                   decline_url=decline_url)
+            )
+            mail.send(msg)
+            
+            logging.info(f"Transfer confirmation email resent to {pledge.email} for pledge {pledge_id}")
+            return jsonify({'success': True, 'message': 'Confirmation email sent successfully'})
+            
+        except Exception as email_error:
+            logging.error(f"Failed to resend transfer confirmation email: {str(email_error)}")
+            return jsonify({'success': False, 'error': f'Failed to send email: {str(email_error)}'}), 500
+            
+    except Exception as e:
+        logging.error(f"Error resending transfer confirmation: {str(e)}")
+        return jsonify({'success': False, 'error': f'Server error: {str(e)}'}), 500
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
