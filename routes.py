@@ -1905,6 +1905,67 @@ def decline_transfer(token):
         flash('Error processing transfer decline', 'error')
         return redirect(url_for('index'))
 
+@app.route('/debug-transfer-production-xyz098/<email>')
+def debug_transfer_production(email):
+    """Debug transfer tokens for specific email in production"""
+    try:
+        # Find all pledges for this email with transfer tokens
+        pledges_with_tokens = Pledge.query.filter(
+            Pledge.email.like(f'%{email}%'),
+            Pledge.transfer_token.isnot(None)
+        ).all()
+        
+        # Find all pledges for this email (with or without tokens)
+        all_pledges = Pledge.query.filter(
+            Pledge.email.like(f'%{email}%')
+        ).all()
+        
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Transfer Debug for {email}</title></head>
+        <body style="font-family: Arial; margin: 20px;">
+            <h1>🔍 Transfer Debug for {email}</h1>
+            
+            <h2>Pledges with Transfer Tokens ({len(pledges_with_tokens)})</h2>
+            {
+                ''.join([f'''
+                <div style="border: 1px solid #ddd; padding: 10px; margin: 10px 0;">
+                    <strong>Pledge ID:</strong> {p.id}<br>
+                    <strong>Amount:</strong> ${p.amount}<br>
+                    <strong>Event ID:</strong> {p.event_id}<br>
+                    <strong>Transfer Token:</strong> {p.transfer_token}<br>
+                    <strong>Target Event ID:</strong> {p.transfer_target_event_id}<br>
+                    <strong>Initiated:</strong> {p.transfer_initiated_at}<br>
+                    <strong>Status:</strong> {p.status}<br>
+                    <hr>
+                    <strong>Confirmation Link:</strong><br>
+                    <a href="/transfer/confirm/{p.transfer_token}">/transfer/confirm/{p.transfer_token}</a>
+                </div>
+                ''' for p in pledges_with_tokens]) if pledges_with_tokens else '<p>No active transfer tokens found</p>'
+            }
+            
+            <h2>All Pledges for {email} ({len(all_pledges)})</h2>
+            {
+                ''.join([f'''
+                <div style="border: 1px solid #ccc; padding: 8px; margin: 5px 0;">
+                    ID: {p.id} | Amount: ${p.amount} | Event: {p.event_id} | Status: {p.status} | Token: {p.transfer_token or 'None'}
+                </div>
+                ''' for p in all_pledges]) if all_pledges else '<p>No pledges found</p>'
+            }
+            
+            <p><a href="/admin/transfers">← Back to Transfer Management</a></p>
+        </body>
+        </html>
+        """
+        
+    except Exception as e:
+        return f"""
+        <h1>❌ Debug Error</h1>
+        <p>Error: {str(e)}</p>
+        <p><a href="/admin/transfers">← Back to Transfer Management</a></p>
+        """
+
 @app.route('/admin/events/<int:event_id>/approve', methods=['POST'])
 def admin_approve_event(event_id):
     """
