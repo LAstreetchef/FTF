@@ -185,10 +185,16 @@
                                 {% endif %}
                             {% endif %}
                             {% if event.status == 'pending' and event.pledges|length > 0 %}
-                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="showTransferModal({{ event.id }}, '{{ event.name }}', {{ event.current_pledges }}, {{ event.pledges|length }})">
+                            <button type="button" class="btn btn-outline-warning btn-sm me-1" onclick="showTransferModal({{ event.id }}, '{{ event.name }}', {{ event.current_pledges }}, {{ event.pledges|length }})">
                                 <i data-feather="arrow-right" class="me-1"></i>
                                 Transfer
                             </button>
+                            {% endif %}
+                            {% if event.pledges|length > 0 %}
+                            <a href="{{ url_for('view_supporters_page', event_id=event.id) }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-outline-info btn-sm">
+                                <i data-feather="users" class="me-1"></i>
+                                Supporters ({{ event.pledges|length }})
+                            </a>
                             {% endif %}
                         </td>
                     </tr>
@@ -199,80 +205,6 @@
     </div>
 </div>
 
-<!-- Supporters Modals -->
-{% for event in events %}
-{% if event.pledges|length > 0 %}
-<div class="modal fade" id="supportersModal-{{ event.id }}" tabindex="-1" aria-labelledby="supportersModalLabel-{{ event.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="supportersModalLabel-{{ event.id }}">
-                    <i data-feather="users" class="me-2"></i>
-                    Supporters for "{{ event.name }}"
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted mb-3">Contact information for your event supporters:</p>
-                <div class="table-responsive">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Email Address</th>
-                                <th>Pledge Amount</th>
-                                <th>Date</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pledge in event.pledges %}
-                            {% if pledge.status == 'pending' %}
-                            <tr>
-                                <td>
-                                    <strong>{{ pledge.email }}</strong>
-                                    <br><small class="text-muted">Supporter since {{ pledge.created_at.strftime('%B %d, %Y') }}</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">${{ "%.2f"|format(pledge.amount) }}</span>
-                                </td>
-                                <td>{{ pledge.created_at.strftime('%m/%d/%Y %I:%M %p') }}</td>
-                                <td>
-                                    <span class="badge bg-warning">Pending</span>
-                                </td>
-                                <td>
-                                    <a href="mailto:{{ pledge.email }}?subject=Thank you for supporting {{ event.name }}&body=Hi,\n\nThank you for supporting our {{ event.name }} event! We appreciate your pledge of ${{ "%.2f"|format(pledge.amount) }}.\n\nBest regards,\n{{ organizer.name }}" 
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i data-feather="mail" class="me-1"></i>
-                                        Email
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% if event.pledges|length == 0 %}
-                <div class="text-center py-4">
-                    <i data-feather="users" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
-                    <h5 class="text-muted">No supporters yet</h5>
-                    <p class="text-muted">Share your event to get supporters!</p>
-                </div>
-                {% endif %}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary">
-                    <i data-feather="share-2" class="me-1"></i>
-                    Share Event
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-{% endfor %}
 {% else %}
 <div class="text-center py-5">
     <i data-feather="calendar" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
@@ -400,69 +332,6 @@ function showTransferModal(eventId, eventName, currentPledges, pledgeCount) {
     modal.show();
 }
 
-// Add supporters buttons dynamically after page loads - with enhanced debugging
-function addSupportersButtons() {
-    console.log('Adding supporters buttons...');
-    
-    // Find all event rows in the table
-    const tableRows = document.querySelectorAll('tbody tr');
-    console.log('Found table rows:', tableRows.length);
-    
-    tableRows.forEach(function(row, index) {
-        console.log('Processing row:', index);
-        
-        // Extract event ID from Transfer button if it exists
-        const transferBtn = row.querySelector('button[onclick*="showTransferModal"]');
-        if (transferBtn) {
-            console.log('Found transfer button in row:', index);
-            const onclickAttr = transferBtn.getAttribute('onclick');
-            const eventIdMatch = onclickAttr.match(/showTransferModal\((\d+),/);
-            if (eventIdMatch) {
-                const eventId = eventIdMatch[1];
-                console.log('Extracted event ID:', eventId);
-                
-                // Check if supporters button already exists
-                const existingBtn = row.querySelector('button[onclick*="showSupportersModal"]');
-                if (existingBtn) {
-                    console.log('Supporters button already exists for event:', eventId);
-                    return;
-                }
-                
-                // Add Supporters button to Actions column
-                const actionsCell = row.querySelector('td:last-child');
-                if (actionsCell) {
-                    console.log('Adding supporters button for event:', eventId);
-                    const supportersBtn = document.createElement('button');
-                    supportersBtn.className = 'btn btn-outline-info btn-sm ms-1';
-                    supportersBtn.innerHTML = '<i data-feather="users"></i> Supporters';
-                    supportersBtn.onclick = function() { showSupportersModal(eventId); };
-                    
-                    actionsCell.appendChild(supportersBtn);
-                    
-                    // Refresh feather icons if available
-                    if (typeof feather !== 'undefined') {
-                        feather.replace();
-                    }
-                } else {
-                    console.log('No actions cell found in row:', index);
-                }
-            } else {
-                console.log('No event ID match in transfer button onclick');
-            }
-        } else {
-            console.log('No transfer button found in row:', index);
-        }
-    });
-}
-
-// Try multiple ways to ensure the function runs
-document.addEventListener('DOMContentLoaded', addSupportersButtons);
-
-// Also try after a short delay in case DOM is still loading
-setTimeout(addSupportersButtons, 500);
-
-// And try when window loads completely
-window.addEventListener('load', addSupportersButtons);
 
 // Show supporters modal
 function showSupportersModal(eventId) {
