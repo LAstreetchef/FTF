@@ -1358,14 +1358,14 @@ def admin_transfers():
         return redirect(url_for('admin_login'))
     
     try:
-        # Get all pledges with active transfer tokens
-        active_transfers = db.session.query(Pledge).filter(
+        transfer_data = []
+        
+        # Get all pledges with active transfer tokens (OLD SYSTEM)
+        old_system_transfers = db.session.query(Pledge).filter(
             Pledge.transfer_token.isnot(None)
         ).all()
         
-        # Organize transfer data with source and target event details
-        transfer_data = []
-        for pledge in active_transfers:
+        for pledge in old_system_transfers:
             source_event = Event.query.get(pledge.event_id)
             target_event = Event.query.get(pledge.transfer_target_event_id) if pledge.transfer_target_event_id else None
             
@@ -1377,14 +1377,45 @@ def admin_transfers():
                 'pledge_id': pledge.id,
                 'pledge_amount': pledge.amount,
                 'pledger_email': pledge.email,
-                'pledger_name': pledge.email.split('@')[0] if pledge.email else 'Anonymous',  # Use email prefix as name
+                'pledger_name': pledge.email.split('@')[0] if pledge.email else 'Anonymous',
                 'transfer_token': pledge.transfer_token,
                 'transfer_initiated': pledge.transfer_initiated_at,
                 'source_event': source_event,
                 'target_event': target_event,
                 'source_organizer': source_organizer,
                 'target_organizer': target_organizer,
-                'status': 'pending_confirmation'
+                'status': 'pending_confirmation',
+                'system': 'old'
+            }
+            transfer_data.append(transfer_info)
+        
+        # Get pending consent requests (NEW SYSTEM)
+        pending_consent_requests = PledgeTransferConsent.query.filter_by(status='pending').all()
+        
+        for consent_request in pending_consent_requests:
+            pledge = consent_request.pledge
+            transfer = consent_request.transfer
+            source_event = transfer.source_event
+            target_event = transfer.target_event
+            
+            # Get organizer details
+            source_organizer = Organizer.query.get(source_event.organizer_id) if source_event else None
+            target_organizer = Organizer.query.get(target_event.organizer_id) if target_event else None
+            
+            transfer_info = {
+                'pledge_id': pledge.id,
+                'pledge_amount': pledge.amount,
+                'pledger_email': pledge.email,
+                'pledger_name': pledge.email.split('@')[0] if pledge.email else 'Anonymous',
+                'transfer_token': consent_request.consent_token,
+                'transfer_initiated': consent_request.created_at,
+                'source_event': source_event,
+                'target_event': target_event,
+                'source_organizer': source_organizer,
+                'target_organizer': target_organizer,
+                'status': 'pending_confirmation',
+                'system': 'new',
+                'consent_request_id': consent_request.id
             }
             transfer_data.append(transfer_info)
         
@@ -1407,53 +1438,143 @@ def admin_transfers():
 
 @app.route('/admin/resend-transfer-confirmation/<int:pledge_id>', methods=['POST'])
 def resend_transfer_confirmation(pledge_id):
-    """Resend transfer confirmation email to pledger"""
+    """Resend transfer confirmation email to pledger (supports both old and new systems)"""
     if 'admin_id' not in session:
         return jsonify({'success': False, 'error': 'Authentication required'}), 401
     
     try:
-        # Find the pledge with transfer token
         pledge = Pledge.query.get(pledge_id)
         if not pledge:
             return jsonify({'success': False, 'error': 'Pledge not found'}), 404
         
-        if not pledge.transfer_token or not pledge.transfer_target_event_id:
-            return jsonify({'success': False, 'error': 'No active transfer found for this pledge'}), 400
-        
-        # Get source and target events
-        source_event = Event.query.get(pledge.event_id)
-        target_event = Event.query.get(pledge.transfer_target_event_id)
-        
-        if not source_event or not target_event:
-            return jsonify({'success': False, 'error': 'Source or target event not found'}), 400
-        
-        # Send confirmation email
-        from flask_mail import Mail, Message
-        mail = Mail(app)
-        
-        # Create confirmation URLs
-        confirm_url = url_for('confirm_transfer', token=pledge.transfer_token, _external=True)
-        decline_url = url_for('decline_transfer', token=pledge.transfer_token, _external=True)
-        
-        try:
-            msg = Message(
-                subject=f'RESENT: Confirm Pledge Transfer - {source_event.name}',
-                recipients=[pledge.email],
-                html=render_template('emails/transfer_confirmation.html',
-                                   pledge=pledge,
-                                   source_event=source_event,
-                                   target_event=target_event,
-                                   confirm_url=confirm_url,
-                                   decline_url=decline_url)
-            )
-            mail.send(msg)
+        # Check if this is OLD SYSTEM (transfer_token on pledge)
+        if pledge.transfer_token and pledge.transfer_target_event_id:
+            # OLD SYSTEM
+            source_event = Event.query.get(pledge.event_id)
+            target_event = Event.query.get(pledge.transfer_target_event_id)
             
-            logging.info(f"Transfer confirmation email resent to {pledge.email} for pledge {pledge_id}")
-            return jsonify({'success': True, 'message': 'Confirmation email sent successfully'})
+            if not source_event or not target_event:
+                return jsonify({'success': False, 'error': 'Source or target event not found'}), 400
             
-        except Exception as email_error:
-            logging.error(f"Failed to resend transfer confirmation email: {str(email_error)}")
-            return jsonify({'success': False, 'error': f'Failed to send email: {str(email_error)}'}), 500
+            # Send old system confirmation email
+            from flask_mail import Mail, Message
+            mail = Mail(app)
+            
+            confirm_url = url_for('confirm_transfer', token=pledge.transfer_token, _external=True)
+            decline_url = url_for('decline_transfer', token=pledge.transfer_token, _external=True)
+            
+            try:
+                msg = Message(
+                    subject=f'RESENT: Confirm Pledge Transfer - {source_event.name}',
+                    recipients=[pledge.email],
+                    html=render_template('emails/transfer_confirmation.html',
+                                       pledge=pledge,
+                                       source_event=source_event,
+                                       target_event=target_event,
+                                       confirm_url=confirm_url,
+                                       decline_url=decline_url)
+                )
+                mail.send(msg)
+                
+                logging.info(f"Old system transfer confirmation email resent to {pledge.email} for pledge {pledge_id}")
+                return jsonify({'success': True, 'message': 'Confirmation email sent successfully'})
+                
+            except Exception as email_error:
+                logging.error(f"Failed to resend old system transfer confirmation email: {str(email_error)}")
+                return jsonify({'success': False, 'error': f'Failed to send email: {str(email_error)}'}), 500
+        
+        # Check if this is NEW SYSTEM (PledgeTransferConsent)
+        consent_request = PledgeTransferConsent.query.filter_by(
+            pledge_id=pledge_id, 
+            status='pending'
+        ).first()
+        
+        if consent_request:
+            # NEW SYSTEM
+            transfer = consent_request.transfer
+            source_event = transfer.source_event
+            target_event = transfer.target_event
+            
+            consent_url = url_for('pledge_transfer_consent', 
+                                token=consent_request.consent_token, 
+                                _external=True)
+            
+            # Resend new system email
+            from flask_mail import Mail, Message
+            mail = Mail(app)
+            
+            html_body = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Request</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #ff8a00, #e52e71); color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px; }}
+        .content {{ background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; }}
+        .event-box {{ background: white; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #ff8a00; }}
+        .buttons {{ text-align: center; margin: 30px 0; }}
+        .btn {{ display: inline-block; padding: 15px 30px; margin: 10px; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 16px; transition: all 0.3s; }}
+        .btn-approve {{ background: #28a745; color: white; }}
+        .btn-approve:hover {{ background: #218838; }}
+        .btn-decline {{ background: #dc3545; color: white; }}
+        .btn-decline:hover {{ background: #c82333; }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🍴 RESENT: Pledge Transfer Request</h1>
+    </div>
+    
+    <div class="content">
+        <p><strong>Hello!</strong></p>
+        
+        <p>Your event organizer has requested to transfer your pledge from <strong>"{source_event.name}"</strong> to <strong>"{target_event.name}"</strong>.</p>
+        
+        <div class="event-box">
+            <h3>📅 Original Event</h3>
+            <strong>{source_event.name}</strong><br>
+            <strong>Date:</strong> {source_event.date.strftime('%B %d, %Y at %I:%M %p')}<br>
+            <strong>Your Pledge:</strong> ${pledge.amount:.2f}
+        </div>
+        
+        <div class="event-box">
+            <h3>📅 New Event</h3>
+            <strong>{target_event.name}</strong><br>
+            <strong>Date:</strong> {target_event.date.strftime('%B %d, %Y at %I:%M %p')}<br>
+            <strong>Location:</strong> {target_event.location}
+        </div>
+        
+        <p><strong>💰 Your pledge amount will remain the same (${pledge.amount:.2f})</strong></p>
+        
+        <div class="buttons">
+            <a href="{consent_url}?response=approve" class="btn btn-approve">✅ APPROVE TRANSFER</a>
+            <a href="{consent_url}?response=decline" class="btn btn-decline">❌ DECLINE TRANSFER</a>
+        </div>
+        
+        <p>Thank you!</p>
+    </div>
+</body>
+</html>"""
+            
+            try:
+                msg = Message(
+                    subject=f'RESENT: Pledge Transfer Request - {source_event.name}',
+                    recipients=[pledge.email],
+                    html=html_body
+                )
+                mail.send(msg)
+                
+                logging.info(f"New system transfer confirmation email resent to {pledge.email} for pledge {pledge_id}")
+                return jsonify({'success': True, 'message': 'Confirmation email sent successfully'})
+                
+            except Exception as email_error:
+                logging.error(f"Failed to resend new system transfer confirmation email: {str(email_error)}")
+                return jsonify({'success': False, 'error': f'Failed to send email: {str(email_error)}'}), 500
+        
+        # No active transfer found in either system
+        return jsonify({'success': False, 'error': 'No active transfer found for this pledge'}), 400
             
     except Exception as e:
         logging.error(f"Error resending transfer confirmation: {str(e)}")
@@ -3043,7 +3164,7 @@ def pledge_transfer_consent(token):
         return render_template('transfer_consent_approved.html', 
                              transfer=transfer, 
                              pledge=pledge,
-                             old_event=old_event,
+                             old_event_name=old_event.name,
                              new_event=new_event)
         
     elif response == 'decline':
