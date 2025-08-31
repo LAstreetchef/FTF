@@ -1642,12 +1642,14 @@ def admin_transfer_pledges(event_id):
     event = Event.query.get_or_404(event_id)
     
     if request.method == 'GET':
-        # Show transfer form
+        # Show transfer form - include events from all organizers that can accept transfers
+        # Changed: Remove organizer restriction to allow cross-organizer transfers
+        # Changed: Include events with future dates and current/active status
         available_events = Event.query.filter(
-            Event.organizer_id == event.organizer_id,
-            Event.id != event.id,
-            Event.status.in_(['pending', 'funded'])
-        ).order_by(Event.date.desc()).all()
+            Event.id != event.id,  # Don't include the source event itself
+            Event.status.in_(['pending', 'funded']),  # Only active events
+            Event.date >= datetime.utcnow().date()  # Only future or current events
+        ).order_by(Event.date.asc()).all()  # Sort by date ascending (soonest first)
         
         return render_template('admin/transfer_pledges.html', 
                              event=event, 
