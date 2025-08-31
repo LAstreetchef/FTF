@@ -1580,6 +1580,7 @@ def resend_transfer_confirmation(pledge_id):
         logging.error(f"Error resending transfer confirmation: {str(e)}")
         return jsonify({'success': False, 'error': f'Server error: {str(e)}'}), 500
 
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
