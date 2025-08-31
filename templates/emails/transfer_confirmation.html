@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Confirm Pledge Transfer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #ff8c00;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border: 1px solid #ddd;
+        }
+        .event-details {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff8c00;
+        }
+        .buttons {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 0 10px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+        .btn-decline {
+            background: #dc3545;
+            color: white;
+        }
+        .footer {
+            background: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+            font-size: 14px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚚 Food Truck Fundraiser</h1>
+        <h2>Pledge Transfer Confirmation Required</h2>
+    </div>
+    
+    <div class="content">
+        <p>Dear {{ pledge.name or 'Valued Supporter' }},</p>
+        
+        <p>We're writing to inform you about a requested transfer of your pledge and to ask for your consent.</p>
+        
+        <div class="highlight">
+            <strong>Your Consent is Required:</strong> We respect your choice and will only process this transfer if you approve it. 
+            Your pledge will remain with the original event if you decline or don't respond.
+        </div>
+        
+        <div class="event-details">
+            <h3>📍 Current Event</h3>
+            <p><strong>{{ source_event.name }}</strong></p>
+            <p>📅 {{ source_event.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            <p>📍 {{ source_event.location }}</p>
+            <p>🍽️ {{ source_event.food_truck.name }}</p>
+            <p><strong>Your Pledge:</strong> ${{ "%.2f"|format(pledge.amount) }}</p>
+        </div>
+        
+        <div class="event-details">
+            <h3>🎯 Proposed New Event</h3>
+            <p><strong>{{ target_event.name }}</strong></p>
+            <p>📅 {{ target_event.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            <p>📍 {{ target_event.location }}</p>
+            <p>🍽️ {{ target_event.food_truck.name }}</p>
+        </div>
+        
+        <p><strong>What happens if you approve:</strong></p>
+        <ul>
+            <li>Your ${{ "%.2f"|format(pledge.amount) }} pledge will be transferred to the new event</li>
+            <li>You'll receive the same meal ticket value for the new event</li>
+            <li>All original terms and conditions remain the same</li>
+            <li>You'll receive confirmation once the transfer is complete</li>
+        </ul>
+        
+        <p><strong>What happens if you decline:</strong></p>
+        <ul>
+            <li>Your pledge stays with the original event</li>
+            <li>No changes will be made to your pledge</li>
+            <li>You can still request a refund if the original event is cancelled</li>
+        </ul>
+        
+        <div class="buttons">
+            <a href="{{ confirm_url }}" class="btn btn-approve">
+                ✅ APPROVE TRANSFER
+            </a>
+            <a href="{{ decline_url }}" class="btn btn-decline">
+                ❌ DECLINE TRANSFER
+            </a>
+        </div>
+        
+        <div class="highlight">
+            <strong>⏰ Response Required:</strong> Please respond within 7 days. If we don't hear from you, 
+            your pledge will remain with the original event to protect your interests.
+        </div>
+        
+        <p>If you have any questions about this transfer, please contact the event organizer or our support team.</p>
+        
+        <p>Thank you for supporting local food trucks and community events!</p>
+        
+        <p>Best regards,<br>
+        The Food Truck Fundraiser Team</p>
+    </div>
+    
+    <div class="footer">
+        <p>Food Truck Fundraiser | Supporting Local Communities</p>
+        <p>This email was sent regarding your pledge for event: {{ source_event.name }}</p>
+    </div>
+</body>
+</html>

@@ -110,7 +110,7 @@ class Event(db.Model):
     organizer_entree_claimed = db.Column(db.Boolean, default=False)  # Whether organizer got their free entree
     
     # Relationships
-    pledges = db.relationship('Pledge', backref='event', lazy=True)
+    pledges = db.relationship('Pledge', foreign_keys='Pledge.event_id', backref='event', lazy=True)
     
     def get_selected_menu_items(self):
         """Parse selected menu items from JSON string"""
@@ -192,6 +192,11 @@ class Pledge(db.Model):
     # E-ticket details
     ticket_code = db.Column(db.String(50), unique=True)
     ticket_sent = db.Column(db.Boolean, default=False)
+    
+    # Transfer functionality fields
+    transfer_token = db.Column(db.String(64), unique=True)  # For email confirmation
+    transfer_target_event_id = db.Column(db.Integer, db.ForeignKey('event.id'))  # Target event for transfer
+    transfer_initiated_at = db.Column(db.DateTime)  # When transfer was requested
 
 class EmailLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)

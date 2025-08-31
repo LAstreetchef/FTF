@@ -1256,6 +1256,126 @@ def admin_transfer_pledges(event_id):
     
     return redirect(url_for('admin_events'))
 
+@app.route('/transfer/confirm/<token>')
+def confirm_transfer(token):
+    """Confirm pledge transfer via email link"""
+    # Find pledge by transfer token
+    pledge = Pledge.query.filter_by(transfer_token=token).first()
+    
+    if not pledge:
+        flash('Invalid transfer confirmation link', 'error')
+        return redirect(url_for('index'))
+    
+    if not pledge.transfer_target_event_id:
+        flash('Transfer request has expired or been cancelled', 'error')
+        return redirect(url_for('index'))
+    
+    # Get target event
+    target_event = Event.query.get(pledge.transfer_target_event_id)
+    if not target_event:
+        flash('Target event no longer exists', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        # Update pledge to new event
+        old_event_name = pledge.event.name
+        pledge.event_id = pledge.transfer_target_event_id
+        pledge.transfer_token = None
+        pledge.transfer_target_event_id = None
+        pledge.transfer_initiated_at = None
+        
+        db.session.commit()
+        
+        # Send confirmation email
+        try:
+            from flask_mail import Mail, Message
+            mail = Mail(app)
+            msg = Message(
+                subject='Pledge Transfer Confirmed',
+                recipients=[pledge.email],
+                body=f"""
+                Your pledge transfer has been confirmed!
+                
+                Your ${ pledge.amount:.2f} pledge has been successfully transferred from:
+                "{old_event_name}" 
+                
+                To: "{target_event.name}"
+                Date: {target_event.date.strftime('%B %d, %Y at %I:%M %p')}
+                Location: {target_event.location}
+                
+                You'll receive the same meal value for the new event.
+                
+                Thank you for your flexibility!
+                Food Truck Fundraiser Team
+                """
+            )
+            mail.send(msg)
+        except Exception as e:
+            logging.error(f"Failed to send transfer confirmation email: {str(e)}")
+        
+        return render_template('transfer_consent_approved.html', 
+                             pledge=pledge, 
+                             target_event=target_event,
+                             old_event_name=old_event_name)
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Transfer confirmation error: {str(e)}")
+        flash('Error processing transfer confirmation', 'error')
+        return redirect(url_for('index'))
+
+@app.route('/transfer/decline/<token>')
+def decline_transfer(token):
+    """Decline pledge transfer via email link"""
+    # Find pledge by transfer token
+    pledge = Pledge.query.filter_by(transfer_token=token).first()
+    
+    if not pledge:
+        flash('Invalid transfer link', 'error')
+        return redirect(url_for('index'))
+    
+    try:
+        # Clear transfer data
+        source_event_name = pledge.event.name
+        pledge.transfer_token = None
+        pledge.transfer_target_event_id = None
+        pledge.transfer_initiated_at = None
+        
+        db.session.commit()
+        
+        # Send declined confirmation email
+        try:
+            from flask_mail import Mail, Message
+            mail = Mail(app)
+            msg = Message(
+                subject='Pledge Transfer Declined',
+                recipients=[pledge.email],
+                body=f"""
+                You have successfully declined the pledge transfer.
+                
+                Your ${ pledge.amount:.2f} pledge will remain with the original event:
+                "{source_event_name}"
+                
+                No changes have been made to your pledge.
+                
+                Thank you!
+                Food Truck Fundraiser Team
+                """
+            )
+            mail.send(msg)
+        except Exception as e:
+            logging.error(f"Failed to send transfer decline email: {str(e)}")
+        
+        return render_template('transfer_consent_declined.html', 
+                             pledge=pledge,
+                             source_event_name=source_event_name)
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Transfer decline error: {str(e)}")
+        flash('Error processing transfer decline', 'error')
+        return redirect(url_for('index'))
+
 @app.route('/admin/events/<int:event_id>/approve', methods=['POST'])
 def admin_approve_event(event_id):
     """
@@ -2720,58 +2840,6 @@ def debug_admin_login():
     except Exception as e:
         return f"❌ Error: {str(e)}"
 
-# Setup route for production deployment
-@app.route('/admin-direct-access-prod-fix', methods=['GET', 'POST'])
-def admin_direct_access():
-    """Direct admin access for production environment"""
-    if request.method == 'POST':
-        # Direct admin login
-        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
-        if admin and check_password_hash(admin.password_hash, 'password'):
-            # Clear and set session
-            session.clear()
-            session['admin_id'] = admin.id
-            session['user_type'] = 'admin'
-            session.permanent = True
-            session.modified = True
-            
-            # Immediately redirect to events management
-            return redirect(url_for('admin_events'))
-        else:
-            return "<h3>❌ Login failed</h3><p>Admin credentials incorrect</p>"
-    
-    # Show direct access form
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Production Admin Access</title>
-        <style>
-            body {{ font-family: Arial, sans-serif; margin: 50px; background: #f8f9fa; }}
-            .container {{ max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }}
-            button {{ background: #28a745; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }}
-            .status {{ background: #e9ecef; padding: 15px; margin: 20px 0; border-radius: 5px; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h2>🚀 Production Admin Access</h2>
-            
-            <div class="status">
-                <h4>Current Session:</h4>
-                <p><strong>Admin ID:</strong> {session.get('admin_id', 'Not set')}</p>
-                <p><strong>User Type:</strong> {session.get('user_type', 'Not set')}</p>
-            </div>
-            
-            <form method="POST">
-                <button type="submit">Login & Go to Manage Events</button>
-            </form>
-            
-            <p><a href="/admin/login">Regular Login</a> | <a href="/admin/dashboard">Dashboard</a></p>
-        </div>
-    </body>
-    </html>
-    """
 
 @app.route('/login-admin-direct-xyz123', methods=['GET', 'POST'])
 def login_admin_direct():
