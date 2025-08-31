@@ -874,6 +874,264 @@ def debug_trucks():
     except Exception as e:
         return jsonify({'error': str(e), 'type': str(type(e))})
 
+@app.route('/database-sync-admin-xyz456')
+def database_sync_admin():
+    """Comprehensive database sync and phantom data detection"""
+    try:
+        # Clear any Flask cache or session issues first
+        db.session.rollback()
+        
+        sync_results = {
+            'timestamp': datetime.utcnow().isoformat(),
+            'database_info': {
+                'url_type': 'postgresql' if 'postgresql' in str(db.engine.url) else 'sqlite',
+                'url_partial': str(db.engine.url).split('@')[1] if '@' in str(db.engine.url) else str(db.engine.url)[:50]
+            },
+            'data_integrity_check': {},
+            'phantom_data_check': {},
+            'cache_cleared': True
+        }
+        
+        # 1. Basic counts and integrity
+        try:
+            event_count = Event.query.count()
+            pledge_count = Pledge.query.count()
+            organizer_count = Organizer.query.count()
+            
+            sync_results['data_integrity_check'] = {
+                'events': event_count,
+                'pledges': pledge_count,
+                'organizers': organizer_count,
+                'database_responsive': True
+            }
+        except Exception as e:
+            sync_results['data_integrity_check'] = {
+                'error': str(e),
+                'database_responsive': False
+            }
+        
+        # 2. Check specific event that was showing phantom data
+        try:
+            event_23 = Event.query.get(23)
+            if event_23:
+                pledges_23 = Pledge.query.filter_by(event_id=23).all()
+                organizer_23 = Organizer.query.get(event_23.organizer_id) if event_23.organizer_id else None
+                
+                sync_results['phantom_data_check']['event_23'] = {
+                    'exists': True,
+                    'name': event_23.name,
+                    'current_pledges': float(event_23.current_pledges or 0),
+                    'pledge_goal': float(event_23.pledge_goal or 0),
+                    'status': event_23.status,
+                    'organizer_id': event_23.organizer_id,
+                    'organizer_email': organizer_23.email if organizer_23 else None,
+                    'actual_pledge_count': len(pledges_23),
+                    'actual_pledge_total': sum(p.amount for p in pledges_23),
+                    'pledge_details': [
+                        {
+                            'amount': float(p.amount),
+                            'email': p.email,
+                            'status': p.status,
+                            'created_at': p.created_at.isoformat() if p.created_at else None
+                        } for p in pledges_23
+                    ]
+                }
+            else:
+                sync_results['phantom_data_check']['event_23'] = {
+                    'exists': False,
+                    'message': 'Event 23 not found in database'
+                }
+        except Exception as e:
+            sync_results['phantom_data_check']['event_23'] = {
+                'error': str(e)
+            }
+        
+        # 3. Look for events with mismatched pledge totals
+        try:
+            events_with_issues = []
+            for event in Event.query.all():
+                pledges = Pledge.query.filter_by(event_id=event.id).all()
+                actual_total = sum(p.amount for p in pledges if p.status in ['pending', 'charged'])
+                recorded_total = float(event.current_pledges or 0)
+                
+                if abs(actual_total - recorded_total) > 0.01:  # Allow for minor rounding
+                    events_with_issues.append({
+                        'event_id': event.id,
+                        'event_name': event.name,
+                        'recorded_pledges': recorded_total,
+                        'actual_pledges': actual_total,
+                        'discrepancy': actual_total - recorded_total,
+                        'pledge_count': len(pledges)
+                    })
+            
+            sync_results['phantom_data_check']['mismatched_events'] = events_with_issues
+        except Exception as e:
+            sync_results['phantom_data_check']['mismatched_events'] = {
+                'error': str(e)
+            }
+        
+        # 4. Force refresh specific problematic data
+        try:
+            # Clear SQLAlchemy session and force fresh query
+            db.session.expunge_all()
+            
+            fresh_event_23 = db.session.query(Event).filter_by(id=23).first()
+            if fresh_event_23:
+                sync_results['phantom_data_check']['fresh_query_event_23'] = {
+                    'name': fresh_event_23.name,
+                    'current_pledges': float(fresh_event_23.current_pledges or 0),
+                    'status': fresh_event_23.status
+                }
+        except Exception as e:
+            sync_results['phantom_data_check']['fresh_query_event_23'] = {
+                'error': str(e)
+            }
+        
+        # 5. Recommendations based on findings
+        recommendations = []
+        
+        if sync_results['phantom_data_check'].get('event_23', {}).get('exists'):
+            event_data = sync_results['phantom_data_check']['event_23']
+            if event_data['current_pledges'] != event_data['actual_pledge_total']:
+                recommendations.append("Event 23 has mismatched pledge totals - database corruption detected")
+            
+            if event_data['actual_pledge_count'] == 0 and event_data['current_pledges'] > 0:
+                recommendations.append("Event 23 shows pledges but has no actual pledge records - phantom data confirmed")
+        
+        if sync_results['phantom_data_check'].get('mismatched_events'):
+            recommendations.append(f"Found {len(sync_results['phantom_data_check']['mismatched_events'])} events with mismatched pledge totals")
+        
+        if not recommendations:
+            recommendations.append("No major data integrity issues detected")
+        
+        sync_results['recommendations'] = recommendations
+        
+        # Return formatted HTML for easy reading
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Database Sync Analysis</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .section {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; }}
+                .success {{ background: #d4edda; border-color: #c3e6cb; }}
+                .warning {{ background: #fff3cd; border-color: #ffeaa7; }}
+                .error {{ background: #f8d7da; border-color: #f5c6cb; }}
+                pre {{ background: #f8f9fa; padding: 10px; overflow-x: auto; }}
+                .recommendations {{ background: #e7f3ff; border: 1px solid #bee5eb; padding: 15px; }}
+            </style>
+        </head>
+        <body>
+            <h1>🔄 Database Sync Analysis</h1>
+            <p><strong>Timestamp:</strong> {sync_results['timestamp']}</p>
+            
+            <div class="section {'success' if sync_results['data_integrity_check'].get('database_responsive') else 'error'}">
+                <h2>📊 Database Status</h2>
+                <p><strong>Database Type:</strong> {sync_results['database_info']['url_type']}</p>
+                <p><strong>URL:</strong> {sync_results['database_info']['url_partial']}</p>
+                <p><strong>Events:</strong> {sync_results['data_integrity_check'].get('events', 'Error')}</p>
+                <p><strong>Pledges:</strong> {sync_results['data_integrity_check'].get('pledges', 'Error')}</p>
+                <p><strong>Organizers:</strong> {sync_results['data_integrity_check'].get('organizers', 'Error')}</p>
+            </div>
+            
+            <div class="section {'warning' if sync_results['phantom_data_check'].get('event_23', {}).get('exists') else 'error'}">
+                <h2>🔍 Event 23 Analysis (Phantom Data Check)</h2>
+                <pre>{json.dumps(sync_results['phantom_data_check'].get('event_23', {}), indent=2)}</pre>
+            </div>
+            
+            <div class="section {'warning' if sync_results['phantom_data_check'].get('mismatched_events') else 'success'}">
+                <h2>⚠️ Events with Mismatched Pledge Totals</h2>
+                <pre>{json.dumps(sync_results['phantom_data_check'].get('mismatched_events', []), indent=2)}</pre>
+            </div>
+            
+            <div class="recommendations">
+                <h2>💡 Recommendations</h2>
+                <ul>
+                    {''.join([f'<li>{rec}</li>' for rec in sync_results['recommendations']])}
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>🛠️ Available Actions</h2>
+                <p><a href="/clear-cache-and-refresh-xyz789" style="background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Clear All Cache & Force Refresh</a></p>
+                <p><a href="/admin/dashboard" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Back to Admin Dashboard</a></p>
+            </div>
+            
+            <details style="margin-top: 20px;">
+                <summary>Raw JSON Output</summary>
+                <pre>{json.dumps(sync_results, indent=2)}</pre>
+            </details>
+        </body>
+        </html>
+        """
+        
+    except Exception as e:
+        logging.error(f"Database sync analysis failed: {str(e)}")
+        return f"""
+        <h1>❌ Database Sync Analysis Failed</h1>
+        <p><strong>Error:</strong> {str(e)}</p>
+        <p><a href="/admin/dashboard">← Back to Admin Dashboard</a></p>
+        """
+
+@app.route('/clear-cache-and-refresh-xyz789')
+def clear_cache_and_refresh():
+    """Clear all caches and force fresh database queries"""
+    try:
+        # Clear SQLAlchemy session cache
+        db.session.rollback()
+        db.session.expunge_all()
+        
+        # Force connection pool refresh
+        db.engine.dispose()
+        
+        # Clear Flask session
+        session.clear()
+        
+        # Test fresh connection
+        test_query = db.session.execute(db.text('SELECT COUNT(*) FROM event')).scalar()
+        
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Cache Cleared</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .success {{ background: #d4edda; padding: 20px; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <div class="success">
+                <h1>✅ Cache Clearing Complete</h1>
+                <p><strong>Actions Performed:</strong></p>
+                <ul>
+                    <li>SQLAlchemy session cache cleared</li>
+                    <li>Database connection pool refreshed</li>
+                    <li>Flask session cleared</li>
+                    <li>Fresh database connection tested</li>
+                </ul>
+                <p><strong>Fresh Event Count:</strong> {test_query}</p>
+                <p><strong>Timestamp:</strong> {datetime.utcnow().isoformat()}</p>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <h2>Next Steps</h2>
+                <p><a href="/database-sync-admin-xyz456" style="background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Run Database Sync Analysis Again</a></p>
+                <p><a href="/admin/events/23/transfer" style="background: #ffc107; color: black; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Test Event 23 Transfer Page</a></p>
+                <p><a href="/admin/dashboard" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Back to Admin Dashboard</a></p>
+            </div>
+        </body>
+        </html>
+        """
+        
+    except Exception as e:
+        return f"""
+        <h1>❌ Cache Clear Failed</h1>
+        <p><strong>Error:</strong> {str(e)}</p>
+        <p><a href="/admin/dashboard">← Back to Admin Dashboard</a></p>
+        """
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
