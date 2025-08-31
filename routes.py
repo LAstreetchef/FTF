@@ -1221,6 +1221,132 @@ def debug_transfer_token(token):
         <pre>{json.dumps(str(e), indent=2)}</pre>
         """
 
+@app.route('/fix-database-integrity-xyz999')
+def fix_database_integrity():
+    """Fix database integrity issues - phantom data and mismatched totals"""
+    try:
+        fixes_applied = []
+        
+        # 1. Fix phantom pledge amounts
+        events_with_phantom_data = []
+        for event in Event.query.all():
+            pledges = Pledge.query.filter_by(event_id=event.id).all()
+            actual_total = sum(p.amount for p in pledges if p.status in ['pending', 'charged'])
+            recorded_total = float(event.current_pledges or 0)
+            
+            if abs(actual_total - recorded_total) > 0.01:
+                events_with_phantom_data.append({
+                    'event': event,
+                    'recorded': recorded_total,
+                    'actual': actual_total,
+                    'pledges': pledges
+                })
+        
+        # Fix each phantom data issue
+        for issue in events_with_phantom_data:
+            event = issue['event']
+            actual_total = issue['actual']
+            
+            old_amount = event.current_pledges
+            event.current_pledges = actual_total
+            
+            fixes_applied.append(f"Event {event.id} '{event.name}': Fixed pledge total from ${old_amount} to ${actual_total}")
+        
+        # 2. Remove duplicate events (keep the one with actual pledges)
+        duplicate_groups = {}
+        for event in Event.query.all():
+            key = (event.name, event.organizer_id)
+            if key not in duplicate_groups:
+                duplicate_groups[key] = []
+            duplicate_groups[key].append(event)
+        
+        for key, events in duplicate_groups.items():
+            if len(events) > 1:
+                # Keep the event with the most actual pledges
+                events_with_pledge_count = []
+                for event in events:
+                    pledge_count = Pledge.query.filter_by(event_id=event.id).count()
+                    events_with_pledge_count.append((event, pledge_count))
+                
+                # Sort by pledge count (descending), then by ID (ascending for consistency)
+                events_with_pledge_count.sort(key=lambda x: (-x[1], x[0].id))
+                
+                # Keep the first one, delete the rest
+                to_keep = events_with_pledge_count[0][0]
+                for event, pledge_count in events_with_pledge_count[1:]:
+                    # Delete any pledges for the duplicate event
+                    pledges_to_delete = Pledge.query.filter_by(event_id=event.id).all()
+                    for pledge in pledges_to_delete:
+                        db.session.delete(pledge)
+                    
+                    db.session.delete(event)
+                    fixes_applied.append(f"Removed duplicate event {event.id} '{event.name}' (kept event {to_keep.id})")
+        
+        # 3. Clean up orphaned transfer tokens
+        orphaned_tokens = Pledge.query.filter(
+            Pledge.transfer_token.isnot(None),
+            Pledge.transfer_target_event_id.is_(None)
+        ).all()
+        
+        for pledge in orphaned_tokens:
+            pledge.transfer_token = None
+            pledge.transfer_initiated_at = None
+            fixes_applied.append(f"Cleaned orphaned transfer token for pledge {pledge.id}")
+        
+        # 4. Verify event status consistency
+        for event in Event.query.all():
+            pledges = Pledge.query.filter_by(event_id=event.id).all()
+            total_pledges = sum(p.amount for p in pledges if p.status in ['pending', 'charged'])
+            
+            # Update status based on actual pledge amounts
+            if total_pledges >= event.pledge_goal and event.status == 'pending':
+                event.status = 'funded'
+                fixes_applied.append(f"Event {event.id} status updated to 'funded' (reached goal)")
+        
+        db.session.commit()
+        
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Database Integrity Fix</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .section {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; }}
+                .success {{ background: #d4edda; border-color: #c3e6cb; }}
+                .fix {{ background: #fff3cd; border-color: #ffeaa7; margin: 5px 0; padding: 10px; }}
+            </style>
+        </head>
+        <body>
+            <h1>🔧 Database Integrity Fix Complete</h1>
+            <p><strong>Timestamp:</strong> {datetime.utcnow().isoformat()}</p>
+            
+            <div class="section success">
+                <h2>✅ Fixes Applied</h2>
+                {f'<p><strong>Total fixes: {len(fixes_applied)}</strong></p>' if fixes_applied else '<p><strong>No issues found - database is clean</strong></p>'}
+                
+                {''.join([f'<div class="fix">✓ {fix}</div>' for fix in fixes_applied])}
+            </div>
+            
+            <div class="section">
+                <h2>Next Steps</h2>
+                <p><a href="/database-sync-admin-xyz456" style="background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Run Database Analysis Again</a></p>
+                <p><a href="/clear-cache-and-refresh-xyz789" style="background: #ffc107; color: black; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Clear Cache</a></p>
+                <p><a href="/admin/dashboard" style="background: #28a745; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Back to Admin Dashboard</a></p>
+            </div>
+        </body>
+        </html>
+        """
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Database integrity fix failed: {str(e)}")
+        return f"""
+        <h1>❌ Database Fix Failed</h1>
+        <p><strong>Error:</strong> {str(e)}</p>
+        <p><a href="/admin/dashboard">← Back to Admin Dashboard</a></p>
+        """
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
