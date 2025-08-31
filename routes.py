@@ -1350,7 +1350,7 @@ def fix_database_integrity():
 @app.route('/admin/transfers')
 def admin_transfers():
     """Admin page to view and manage all active pledge transfers"""
-    if 'admin_logged_in' not in session:
+    if 'admin_id' not in session:
         return redirect(url_for('admin_login'))
     
     try:
