@@ -190,8 +190,9 @@
                                 Transfer
                             </button>
                             {% endif %}
+                            <!-- TEMPLATE UPDATE TEST {{ current_time }} -->
                             {% if event.pledges|length > 0 %}
-                            <button type="button" class="btn btn-outline-info btn-sm ms-1" onclick="showSupportersModal({{ event.id }})">
+                            <button type="button" class="btn btn-info btn-sm ms-1" onclick="showSupportersModal({{ event.id }})" style="background-color: #17a2b8 !important; border-color: #17a2b8 !important; color: white !important;">
                                 <i data-feather="users" class="me-1"></i>
                                 Supporters ({{ event.pledges|length }})
                             </button>
