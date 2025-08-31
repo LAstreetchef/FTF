@@ -408,23 +408,38 @@ function showTransferModal(eventId, eventName, currentPledges, pledgeCount) {
     modal.show();
 }
 
-// Add supporters buttons dynamically after page loads
-document.addEventListener('DOMContentLoaded', function() {
+// Add supporters buttons dynamically after page loads - with enhanced debugging
+function addSupportersButtons() {
+    console.log('Adding supporters buttons...');
+    
     // Find all event rows in the table
     const tableRows = document.querySelectorAll('tbody tr');
+    console.log('Found table rows:', tableRows.length);
     
-    tableRows.forEach(function(row) {
+    tableRows.forEach(function(row, index) {
+        console.log('Processing row:', index);
+        
         // Extract event ID from Transfer button if it exists
         const transferBtn = row.querySelector('button[onclick*="showTransferModal"]');
         if (transferBtn) {
+            console.log('Found transfer button in row:', index);
             const onclickAttr = transferBtn.getAttribute('onclick');
             const eventIdMatch = onclickAttr.match(/showTransferModal\((\d+),/);
             if (eventIdMatch) {
                 const eventId = eventIdMatch[1];
+                console.log('Extracted event ID:', eventId);
+                
+                // Check if supporters button already exists
+                const existingBtn = row.querySelector('button[onclick*="showSupportersModal"]');
+                if (existingBtn) {
+                    console.log('Supporters button already exists for event:', eventId);
+                    return;
+                }
                 
                 // Add Supporters button to Actions column
                 const actionsCell = row.querySelector('td:last-child');
                 if (actionsCell) {
+                    console.log('Adding supporters button for event:', eventId);
                     const supportersBtn = document.createElement('button');
                     supportersBtn.className = 'btn btn-outline-info btn-sm ms-1';
                     supportersBtn.innerHTML = '<i data-feather="users"></i> Supporters';
@@ -432,13 +447,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     actionsCell.appendChild(supportersBtn);
                     
-                    // Refresh feather icons
-                    feather.replace();
+                    // Refresh feather icons if available
+                    if (typeof feather !== 'undefined') {
+                        feather.replace();
+                    }
+                } else {
+                    console.log('No actions cell found in row:', index);
                 }
+            } else {
+                console.log('No event ID match in transfer button onclick');
             }
+        } else {
+            console.log('No transfer button found in row:', index);
         }
     });
-});
+}
+
+// Try multiple ways to ensure the function runs
+document.addEventListener('DOMContentLoaded', addSupportersButtons);
+
+// Also try after a short delay in case DOM is still loading
+setTimeout(addSupportersButtons, 500);
+
+// And try when window loads completely
+window.addEventListener('load', addSupportersButtons);
 
 // Show supporters modal
 function showSupportersModal(eventId) {
