@@ -407,6 +407,155 @@ function showTransferModal(eventId, eventName, currentPledges, pledgeCount) {
     const modal = new bootstrap.Modal(document.getElementById('transferModal'));
     modal.show();
 }
+
+// Add supporters buttons dynamically after page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Find all event rows in the table
+    const tableRows = document.querySelectorAll('tbody tr');
+    
+    tableRows.forEach(function(row) {
+        // Extract event ID from Transfer button if it exists
+        const transferBtn = row.querySelector('button[onclick*="showTransferModal"]');
+        if (transferBtn) {
+            const onclickAttr = transferBtn.getAttribute('onclick');
+            const eventIdMatch = onclickAttr.match(/showTransferModal\((\d+),/);
+            if (eventIdMatch) {
+                const eventId = eventIdMatch[1];
+                
+                // Add Supporters button to Actions column
+                const actionsCell = row.querySelector('td:last-child');
+                if (actionsCell) {
+                    const supportersBtn = document.createElement('button');
+                    supportersBtn.className = 'btn btn-outline-info btn-sm ms-1';
+                    supportersBtn.innerHTML = '<i data-feather="users"></i> Supporters';
+                    supportersBtn.onclick = function() { showSupportersModal(eventId); };
+                    
+                    actionsCell.appendChild(supportersBtn);
+                    
+                    // Refresh feather icons
+                    feather.replace();
+                }
+            }
+        }
+    });
+});
+
+// Show supporters modal
+function showSupportersModal(eventId) {
+    fetch(`/get-supporters/${eventId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert('Error: ' + data.error);
+                return;
+            }
+            
+            // Create modal HTML
+            const modalId = 'supportersModal-' + eventId;
+            let modalHTML = `
+                <div class="modal fade" id="${modalId}" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i data-feather="users"></i> Supporters for "${data.event_name}"
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted mb-3">Contact information for your event supporters:</p>
+            `;
+            
+            if (data.supporters.length > 0) {
+                modalHTML += `
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Email Address</th>
+                                    <th>Pledge Amount</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                data.supporters.forEach(supporter => {
+                    const emailSubject = encodeURIComponent(`Thank you for supporting ${data.event_name}`);
+                    const emailBody = encodeURIComponent(`Hi,
+
+Thank you for supporting our ${data.event_name} event! We appreciate your pledge of $${supporter.amount.toFixed(2)}.
+
+Best regards,
+${data.organizer_name}`);
+                    
+                    modalHTML += `
+                        <tr>
+                            <td>
+                                <strong>${supporter.email}</strong>
+                                <br><small class="text-muted">Supporter since ${supporter.date_formatted}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">$${supporter.amount.toFixed(2)}</span>
+                            </td>
+                            <td>${supporter.date}</td>
+                            <td>
+                                <a href="mailto:${supporter.email}?subject=${emailSubject}&body=${emailBody}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i data-feather="mail"></i> Email
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                modalHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                modalHTML += `
+                    <div class="text-center py-4">
+                        <i data-feather="users" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+                        <h5 class="text-muted">No supporters yet</h5>
+                        <p class="text-muted">Share your event to get supporters!</p>
+                    </div>
+                `;
+            }
+            
+            modalHTML += `
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if present
+            const existingModal = document.getElementById(modalId);
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+            
+            // Refresh feather icons
+            feather.replace();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading supporters');
+        });
+}
 </script>
 
 {% endblock %}

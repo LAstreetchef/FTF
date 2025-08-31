@@ -2512,6 +2512,40 @@ def organizer_logout():
     flash('Logged out successfully', 'success')
     return redirect(url_for('index'))
 
+@app.route('/get-supporters/<int:event_id>')
+def get_supporters(event_id):
+    """AJAX endpoint to get supporters for an event"""
+    try:
+        # Check if organizer owns this event
+        organizer_id = session.get('organizer_id')
+        if not organizer_id:
+            return jsonify({'error': 'Not authorized'}), 401
+            
+        event = Event.query.filter_by(id=event_id, organizer_id=organizer_id).first()
+        if not event:
+            return jsonify({'error': 'Event not found'}), 404
+            
+        # Get supporters
+        supporters = []
+        for pledge in event.pledges:
+            if pledge.status == 'pending':
+                supporters.append({
+                    'email': pledge.email,
+                    'amount': float(pledge.amount),
+                    'date': pledge.created_at.strftime('%m/%d/%Y %I:%M %p'),
+                    'date_formatted': pledge.created_at.strftime('%B %d, %Y')
+                })
+        
+        return jsonify({
+            'event_name': event.name,
+            'supporters': supporters,
+            'organizer_name': event.organizer.name
+        })
+        
+    except Exception as e:
+        logging.error(f"Error getting supporters: {str(e)}")
+        return jsonify({'error': 'Server error'}), 500
+
 @app.route('/organizer/dashboard')
 def organizer_dashboard():
     # Enhanced debugging for iframe session issues
