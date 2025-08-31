@@ -1132,6 +1132,95 @@ def clear_cache_and_refresh():
         <p><a href="/admin/dashboard">← Back to Admin Dashboard</a></p>
         """
 
+@app.route('/debug-transfer-token-xyz890/<token>')
+def debug_transfer_token(token):
+    """Debug route to check transfer token and pledge status"""
+    try:
+        # Find pledge by transfer token
+        pledge = Pledge.query.filter_by(transfer_token=token).first()
+        
+        debug_info = {
+            'token': token,
+            'timestamp': datetime.utcnow().isoformat(),
+            'pledge_found': pledge is not None,
+            'database_connection': 'working'
+        }
+        
+        if pledge:
+            target_event = Event.query.get(pledge.transfer_target_event_id) if pledge.transfer_target_event_id else None
+            
+            debug_info.update({
+                'pledge_id': pledge.id,
+                'pledge_email': pledge.email,
+                'pledge_amount': float(pledge.amount),
+                'pledge_status': pledge.status,
+                'current_event_id': pledge.event_id,
+                'current_event_name': pledge.event.name if pledge.event else None,
+                'transfer_target_event_id': pledge.transfer_target_event_id,
+                'target_event_name': target_event.name if target_event else None,
+                'transfer_initiated_at': pledge.transfer_initiated_at.isoformat() if pledge.transfer_initiated_at else None,
+                'target_event_exists': target_event is not None,
+                'target_event_status': target_event.status if target_event else None
+            })
+            
+            # Test if we can access the event relationship
+            try:
+                old_event_name = pledge.event.name
+                debug_info['old_event_accessible'] = True
+                debug_info['old_event_name'] = old_event_name
+            except Exception as e:
+                debug_info['old_event_accessible'] = False
+                debug_info['old_event_error'] = str(e)
+                
+        else:
+            # Check if token exists in other formats or if there are any tokens at all
+            all_tokens = db.session.execute(
+                db.text("SELECT transfer_token FROM pledge WHERE transfer_token IS NOT NULL")
+            ).fetchall()
+            
+            debug_info.update({
+                'total_active_tokens': len(all_tokens),
+                'all_tokens': [t[0] for t in all_tokens] if all_tokens else []
+            })
+        
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Transfer Token Debug</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .section {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; }}
+                .success {{ background: #d4edda; border-color: #c3e6cb; }}
+                .error {{ background: #f8d7da; border-color: #f5c6cb; }}
+                pre {{ background: #f8f9fa; padding: 10px; overflow-x: auto; }}
+            </style>
+        </head>
+        <body>
+            <h1>🔍 Transfer Token Debug</h1>
+            <p><strong>Token:</strong> {token}</p>
+            
+            <div class="section {'success' if debug_info['pledge_found'] else 'error'}">
+                <h2>Token Analysis</h2>
+                <pre>{json.dumps(debug_info, indent=2)}</pre>
+            </div>
+            
+            <div class="section">
+                <h2>Available Actions</h2>
+                <p><a href="/admin/events/23/transfer" style="background: #007bff; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Back to Transfer Page</a></p>
+                <p><a href="/database-sync-admin-xyz456" style="background: #ffc107; color: black; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Database Sync Analysis</a></p>
+            </div>
+        </body>
+        </html>
+        """
+        
+    except Exception as e:
+        return f"""
+        <h1>❌ Debug Failed</h1>
+        <p><strong>Error:</strong> {str(e)}</p>
+        <pre>{json.dumps(str(e), indent=2)}</pre>
+        """
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
