@@ -1791,14 +1791,28 @@ def admin_transfer_pledges(event_id):
 @app.route('/transfer/confirm/<token>')
 def confirm_transfer(token):
     """Confirm pledge transfer via email link"""
+    logging.info(f"Transfer confirmation attempt with token: {token[:8]}...")
+    
+    # Debug: Check what pledges have transfer tokens
+    all_pledges_with_tokens = Pledge.query.filter(Pledge.transfer_token.isnot(None)).all()
+    logging.info(f"Found {len(all_pledges_with_tokens)} pledges with transfer tokens")
+    
     # Find pledge by transfer token
     pledge = Pledge.query.filter_by(transfer_token=token).first()
     
     if not pledge:
-        flash('Invalid transfer confirmation link', 'error')
+        # Enhanced debugging for invalid tokens
+        logging.error(f"No pledge found with transfer token: {token}")
+        all_pledges = Pledge.query.all()
+        logging.error(f"Total pledges in database: {len(all_pledges)}")
+        for p in all_pledges:
+            if p.transfer_token:
+                logging.error(f"Existing token: {p.transfer_token[:8]}... for pledge {p.id}")
+        flash('Invalid transfer confirmation link. The transfer may have already been processed or expired.', 'error')
         return redirect(url_for('index'))
     
     if not pledge.transfer_target_event_id:
+        logging.error(f"Pledge {pledge.id} has transfer token but no target event ID")
         flash('Transfer request has expired or been cancelled', 'error')
         return redirect(url_for('index'))
     
