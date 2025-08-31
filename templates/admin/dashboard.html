@@ -192,6 +192,12 @@
                             <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} / ${{ "%.2f"|format(event.pledge_goal) }}</small>
                         </td>
                         <td>
+                            {% if event.pledges|length > 0 %}
+                            <a href="{{ url_for('admin_view_supporters', event_id=event.id) }}" class="btn btn-info btn-sm me-1">
+                                <i data-feather="users" class="me-1"></i>
+                                Supporters ({{ event.pledges|length }})
+                            </a>
+                            {% endif %}
                             {% if event.status == 'funded' %}
                             <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline">
                                 <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to approve this event and charge all pledges?')">

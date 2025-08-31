@@ -2584,6 +2584,35 @@ def view_supporters_page(event_id):
         flash('Error loading supporters', 'error')
         return redirect(url_for('organizer_dashboard'))
 
+@app.route('/admin/supporters/<int:event_id>')
+def admin_view_supporters(event_id):
+    """Admin page to view supporters for any event"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    try:
+        event = Event.query.get_or_404(event_id)
+        
+        # Get supporters with pending pledges
+        supporters = []
+        for pledge in event.pledges:
+            if pledge.status == 'pending':
+                supporters.append({
+                    'email': pledge.email,
+                    'amount': float(pledge.amount),
+                    'date': pledge.created_at.strftime('%m/%d/%Y %I:%M %p'),
+                    'date_formatted': pledge.created_at.strftime('%B %d, %Y')
+                })
+        
+        return render_template('admin/supporters.html', 
+                             event=event, 
+                             supporters=supporters)
+        
+    except Exception as e:
+        logging.error(f"Error viewing supporters: {str(e)}")
+        flash('Error loading supporters', 'error')
+        return redirect(url_for('admin_dashboard'))
+
 @app.route('/organizer/dashboard')
 def organizer_dashboard():
     # Enhanced debugging for iframe session issues
