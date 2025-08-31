@@ -2206,14 +2206,19 @@ def make_pledge(event_id):
         stripe_token = request.form.get('stripe_token')
         
         try:
-            # Create payment intent with Stripe
-            payment_intent_id = create_stripe_payment_intent(amount, email, f"Pledge for {event.name}")
+            # Calculate processing fee (4.5%)
+            processing_fee = amount * 0.045
+            total_amount = amount + processing_fee
+            
+            # Create payment intent with Stripe (including processing fee)
+            payment_intent_id = create_stripe_payment_intent(total_amount, email, f"Pledge for {event.name} (includes 4.5% processing fee)")
             
             if payment_intent_id:
                 # Create pledge record
                 pledge = Pledge(
                     email=email,
                     amount=amount,
+                    processing_fee=processing_fee,
                     stripe_token=stripe_token,
                     stripe_payment_intent_id=payment_intent_id,
                     event_id=event_id
@@ -2241,14 +2246,14 @@ def make_pledge(event_id):
                     send_email(
                         email,
                         f"Event Funded! - {event.name}",
-                        f"Great news! Your pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
+                        f"Great news! Your pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal Charged: ${total_amount:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
                     )
                 else:
                     # Send regular pledge confirmation
                     send_email(
                         email,
                         f"Pledge Confirmation - {event.name}",
-                        f"Thank you for your ${amount:.2f} pledge for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
+                        f"Thank you for your ${amount:.2f} pledge for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal to be charged: ${total_amount:.2f}\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
                     )
                 
                 flash('Pledge created successfully! You will only be charged if the event reaches its funding goal.', 'success')
