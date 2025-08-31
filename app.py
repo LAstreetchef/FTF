@@ -38,13 +38,13 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=86400 # 24 hours
 )
 
-# Configure the database - force production database usage
-database_url = os.environ.get("DATABASE_URL")
-if not database_url:
-    raise Exception("DATABASE_URL environment variable is required for production")
+# Configure the database - ALWAYS use production database for consistency
+# Force production database URL to prevent development/production sync issues
+PRODUCTION_DATABASE_URL = "postgresql://neondb_owner:npg_3rnURNs4fLvp@ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
-app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-logging.info(f"Database configured: {database_url.split('@')[1] if '@' in database_url else 'local'}")
+# Override any environment database URL with production URL
+app.config["SQLALCHEMY_DATABASE_URI"] = PRODUCTION_DATABASE_URL
+logging.info(f"Database configured (PRODUCTION): ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
