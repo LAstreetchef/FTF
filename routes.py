@@ -1799,10 +1799,17 @@ def confirm_transfer(token):
         flash('Transfer request has expired or been cancelled', 'error')
         return redirect(url_for('index'))
     
-    # Get target event
+    # Get target event with enhanced debugging
     target_event = Event.query.get(pledge.transfer_target_event_id)
+    logging.error(f"Transfer confirmation debug - Target event ID: {pledge.transfer_target_event_id}, Found: {target_event is not None}")
+    
     if not target_event:
-        flash('Target event no longer exists', 'error')
+        logging.error(f"Target event {pledge.transfer_target_event_id} not found in database")
+        # Check if source event exists
+        source_event = Event.query.get(pledge.event_id)
+        logging.error(f"Source event ID: {pledge.event_id}, Found: {source_event is not None}")
+        
+        flash(f'Target event (ID: {pledge.transfer_target_event_id}) no longer exists. This may be a database sync issue.', 'error')
         return redirect(url_for('index'))
     
     try:
