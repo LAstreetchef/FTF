@@ -177,6 +177,7 @@ class Pledge(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False)
     amount = db.Column(db.Float, nullable=False)
+    processing_fee = db.Column(db.Float, default=0.0)  # 4.5% processing fee
     stripe_token = db.Column(db.String(200))  # Stripe payment method ID
     stripe_payment_intent_id = db.Column(db.String(200))  # For tracking charges
     

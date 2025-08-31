@@ -1171,21 +1171,25 @@ def admin_approve_event(event_id):
         
         for pledge in pledges:
             if pledge.stripe_payment_intent_id:
-                success = charge_stripe_payment(pledge.stripe_payment_intent_id, pledge.amount, f"Food Truck Event: {event.name}")
-                if success:
+                charge_result = charge_stripe_payment(pledge.stripe_payment_intent_id, pledge.amount, f"Food Truck Event: {event.name}")
+                if charge_result['success']:
                     pledge.status = 'charged'
                     pledge.charged_at = datetime.utcnow()
+                    pledge.processing_fee = charge_result['processing_fee']
                     
-                    # Generate and send e-ticket
+                    # Generate and send e-ticket with fee breakdown
                     pledge.ticket_code = generate_ticket_code()
+                    total_charged = charge_result['total_charged']
+                    processing_fee = charge_result['processing_fee']
+                    
                     send_email(
                         pledge.email,
                         f"Your E-Ticket for {event.name}",
-                        f"Thank you for your pledge! Your e-ticket code is: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\nLocation: {event.location}\n\nShow this code at the food truck to redeem your meal."
+                        f"Thank you for your pledge! Your payment has been processed.\n\nPAYMENT BREAKDOWN:\nPledge Amount: ${pledge.amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal Charged: ${total_charged:.2f}\n\nE-TICKET CODE: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\nLocation: {event.location}\n\nShow this code at the food truck to redeem your meal."
                     )
                     pledge.ticket_sent = True
                 else:
-                    flash(f'Failed to charge pledge from {pledge.email}', 'error')
+                    flash(f'Failed to charge pledge from {pledge.email}: {charge_result.get("error", "Unknown error")}', 'error')
         
         event.status = 'approved'
         event.approved_at = datetime.utcnow()

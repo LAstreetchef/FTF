@@ -54,24 +54,37 @@ def create_stripe_payment_intent(amount, customer_email, description):
         logging.error(f"Error creating PaymentIntent: {str(e)}")
         return None
 
-def charge_stripe_payment(payment_intent_id, amount, description):
-    """Charge a previously created PaymentIntent"""
+def charge_stripe_payment(payment_intent_id, original_amount, description):
+    """Charge a previously created PaymentIntent with 4.5% processing fee"""
     try:
-        # Retrieve and confirm the PaymentIntent
+        # Calculate total amount including processing fee
+        total_amount_with_fee = calculate_total_with_processing_fee(original_amount)
+        processing_fee = calculate_processing_fee(original_amount)
+        
+        # Retrieve the PaymentIntent
         intent = stripe.PaymentIntent.retrieve(payment_intent_id)
         
         if intent.status == 'requires_capture':
-            # Capture the payment
+            # Update the PaymentIntent amount to include processing fee
+            total_amount_cents = int(total_amount_with_fee * 100)
+            
+            stripe.PaymentIntent.modify(
+                payment_intent_id,
+                amount=total_amount_cents,
+                description=f"{description} (includes $%.2f processing fee)" % processing_fee
+            )
+            
+            # Capture the updated payment
             intent = stripe.PaymentIntent.capture(payment_intent_id)
-            logging.info(f"Successfully charged PaymentIntent {payment_intent_id}")
-            return True
+            logging.info(f"Successfully charged PaymentIntent {payment_intent_id} - Original: ${original_amount:.2f}, Fee: ${processing_fee:.2f}, Total: ${total_amount_with_fee:.2f}")
+            return {'success': True, 'processing_fee': processing_fee, 'total_charged': total_amount_with_fee}
         else:
             logging.error(f"PaymentIntent {payment_intent_id} not in capturable state: {intent.status}")
-            return False
+            return {'success': False, 'error': f'Payment not capturable: {intent.status}'}
             
     except Exception as e:
         logging.error(f"Error charging PaymentIntent {payment_intent_id}: {str(e)}")
-        return False
+        return {'success': False, 'error': str(e)}
 
 def format_currency(amount):
     """Format amount as currency"""
@@ -80,3 +93,12 @@ def format_currency(amount):
 def calculate_marked_up_price(original_price, markup_percentage):
     """Calculate price with markup"""
     return original_price * (1 + markup_percentage / 100)
+
+def calculate_processing_fee(amount):
+    """Calculate 4.5% credit card processing fee"""
+    return amount * 0.045
+
+def calculate_total_with_processing_fee(amount):
+    """Calculate total amount including 4.5% processing fee"""
+    processing_fee = calculate_processing_fee(amount)
+    return amount + processing_fee
