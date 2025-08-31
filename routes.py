@@ -1831,13 +1831,18 @@ def confirm_transfer(token):
     
     try:
         # Update pledge to new event
+        logging.info(f"Processing transfer for pledge {pledge.id} from event {pledge.event_id} to event {pledge.transfer_target_event_id}")
         old_event_name = pledge.event.name
+        logging.info(f"Source event name: {old_event_name}")
+        
         pledge.event_id = pledge.transfer_target_event_id
         pledge.transfer_token = None
         pledge.transfer_target_event_id = None
         pledge.transfer_initiated_at = None
         
+        logging.info(f"Committing transfer changes to database...")
         db.session.commit()
+        logging.info(f"Transfer committed successfully")
         
         # Send confirmation email
         try:
