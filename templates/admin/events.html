@@ -77,6 +77,13 @@
                             View Public
                         </a>
                         
+                        {% if event.pledges|length > 0 and event.status in ['pending', 'funded'] %}
+                        <a href="{{ url_for('admin_transfer_pledges', event_id=event.id) }}" class="btn btn-outline-info btn-sm mb-1">
+                            <i data-feather="refresh-cw" class="me-1"></i>
+                            Transfer
+                        </a>
+                        {% endif %}
+                        
                         {% if event.status != 'approved' %}
                         <form method="POST" action="{{ url_for('admin_delete_event', event_id=event.id) }}" class="d-inline">
                             <button type="submit" class="btn btn-outline-danger btn-sm" 
