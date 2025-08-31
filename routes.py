@@ -1281,6 +1281,39 @@ def admin_delete_event(event_id):
     flash(f'Event "{event_name}" deleted successfully. {len(pledges)} associated pledges were also removed.', 'success')
     return redirect(url_for('admin_events'))
 
+@app.route('/admin/events/<int:event_id>/transfer', methods=['GET', 'POST'])
+def admin_transfer_pledges(event_id):
+    """Admin interface for managing pledge transfers"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    event = Event.query.get_or_404(event_id)
+    
+    # Only show events with pending pledges in transferable status
+    if event.status not in ['pending', 'funded'] or not event.pledges:
+        flash('This event has no transferable pledges', 'error')
+        return redirect(url_for('admin_events'))
+    
+    # Get other events from the same organizer that can receive transfers
+    available_events = Event.query.filter(
+        Event.organizer_id == event.organizer_id,
+        Event.id != event.id,
+        Event.status.in_(['pending', 'funded'])
+    ).all()
+    
+    if request.method == 'POST':
+        target_event_id = request.form.get('target_event_id')
+        if target_event_id:
+            # Redirect to the organizer transfer system with proper authentication
+            flash('Redirecting to transfer system. Organizers must authorize all transfers via email.', 'info')
+            return redirect(url_for('transfer_pledges', event_id=event_id, _external=True) + f'?target_event_id={target_event_id}')
+        else:
+            flash('Please select a target event', 'error')
+    
+    return render_template('admin/transfer_pledges.html', 
+                         event=event, 
+                         available_events=available_events)
+
 # Organizer Routes
 @app.route('/organizer/login', methods=['GET', 'POST'])
 def organizer_login():
