@@ -2546,6 +2546,44 @@ def get_supporters(event_id):
         logging.error(f"Error getting supporters: {str(e)}")
         return jsonify({'error': 'Server error'}), 500
 
+@app.route('/organizer/supporters/<int:event_id>')
+def view_supporters_page(event_id):
+    """Direct page to view supporters for an event"""
+    try:
+        # Check if organizer owns this event
+        organizer_id = session.get('organizer_id')
+        if not organizer_id:
+            flash('Please log in to view supporters', 'error')
+            return redirect(url_for('organizer_login'))
+            
+        event = Event.query.filter_by(id=event_id, organizer_id=organizer_id).first()
+        if not event:
+            flash('Event not found', 'error')
+            return redirect(url_for('organizer_dashboard'))
+            
+        # Get supporters with pending pledges
+        supporters = []
+        for pledge in event.pledges:
+            if pledge.status == 'pending':
+                supporters.append({
+                    'email': pledge.email,
+                    'amount': float(pledge.amount),
+                    'date': pledge.created_at.strftime('%m/%d/%Y %I:%M %p'),
+                    'date_formatted': pledge.created_at.strftime('%B %d, %Y')
+                })
+        
+        organizer = Organizer.query.get(organizer_id)
+        
+        return render_template('organizer/supporters.html', 
+                             event=event, 
+                             supporters=supporters,
+                             organizer=organizer)
+        
+    except Exception as e:
+        logging.error(f"Error viewing supporters: {str(e)}")
+        flash('Error loading supporters', 'error')
+        return redirect(url_for('organizer_dashboard'))
+
 @app.route('/organizer/dashboard')
 def organizer_dashboard():
     # Enhanced debugging for iframe session issues

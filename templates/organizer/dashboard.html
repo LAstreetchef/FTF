@@ -191,9 +191,9 @@
                             </button>
                             {% endif %}
                             {% if event.pledges|length > 0 %}
-                            <button type="button" onclick="showSupportersModal({{ event.id }})" style="display: inline-block !important; visibility: visible !important; opacity: 1 !important; background: #dc3545 !important; color: white !important; border: 2px solid #dc3545 !important; padding: 4px 8px !important; margin-left: 4px !important; border-radius: 4px !important; font-size: 12px !important; cursor: pointer !important; z-index: 9999 !important; position: relative !important;">
+                            <a href="{{ url_for('view_supporters_page', event_id=event.id) }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" style="display: inline-block !important; visibility: visible !important; opacity: 1 !important; background: #dc3545 !important; color: white !important; border: 2px solid #dc3545 !important; padding: 4px 8px !important; margin-left: 4px !important; border-radius: 4px !important; font-size: 12px !important; text-decoration: none !important; z-index: 9999 !important; position: relative !important;">
                                 👥 SUPPORTERS ({{ event.pledges|length }})
-                            </button>
+                            </a>
                             {% endif %}
                         </td>
                     </tr>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Supporters - {{ event.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i data-feather="users" class="me-2"></i>
+                        Supporters for "{{ event.name }}"
+                    </h2>
+                    <p class="text-muted">Contact information for your event supporters</p>
+                </div>
+                <a href="{{ url_for('organizer_dashboard') }}{% if request.args.get('auth_token') %}?auth_token={{ request.args.get('auth_token') }}{% endif %}" class="btn btn-outline-primary">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+
+            {% if supporters %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i data-feather="mail" class="me-2"></i>
+                        {{ supporters|length }} Supporter{{ 's' if supporters|length != 1 else '' }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Email Address</th>
+                                    <th>Pledge Amount</th>
+                                    <th>Date Pledged</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for supporter in supporters %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ supporter.email }}</strong>
+                                        <br><small class="text-muted">Supporter since {{ supporter.date_formatted }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success fs-6">${{ "%.2f"|format(supporter.amount) }}</span>
+                                    </td>
+                                    <td>{{ supporter.date }}</td>
+                                    <td>
+                                        {% set email_subject = "Thank you for supporting " + event.name %}
+                                        {% set email_body = "Hi,\n\nThank you for supporting our " + event.name + " event! We appreciate your pledge of $" + "%.2f"|format(supporter.amount) + ".\n\nBest regards,\n" + organizer.name %}
+                                        <a href="mailto:{{ supporter.email }}?subject={{ email_subject|urlencode }}&body={{ email_body|urlencode }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i data-feather="mail" class="me-1"></i>
+                                            Send Thank You
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6><i data-feather="info" class="me-1"></i> Communication Tips</h6>
+                            <ul class="small mb-0">
+                                <li>Thank supporters regularly for their pledge</li>
+                                <li>Keep them updated on event progress</li>
+                                <li>Share behind-the-scenes preparation details</li>
+                                <li>Remind them of the event date and location</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6><i data-feather="share-2" class="me-1"></i> Grow Your Support</h6>
+                            <p class="small mb-2">Encourage supporters to share your event:</p>
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-sm btn-outline-success" target="_blank">
+                                <i data-feather="external-link" class="me-1"></i>
+                                View Public Event Page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i data-feather="users" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
+                    <h4 class="text-muted">No supporters yet</h4>
+                    <p class="text-muted mb-4">Share your event to start getting supporters!</p>
+                    <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary" target="_blank">
+                        <i data-feather="share-2" class="me-1"></i>
+                        View & Share Event
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize feather icons
+feather.replace();
+</script>
+{% endblock %}
