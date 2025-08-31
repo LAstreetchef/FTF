@@ -102,32 +102,6 @@
                             </div>
                             
                             <small class="text-muted">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }}</small>
-                            
-                            <!-- Supporters List -->
-                            {% if event.pledges %}
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#supporters-{{ event.id }}" aria-expanded="false">
-                                    <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
-                                    View Supporters
-                                </button>
-                                <div class="collapse mt-2" id="supporters-{{ event.id }}">
-                                    <div class="card card-body p-2">
-                                        <small class="text-muted mb-2"><strong>Our Amazing Supporters:</strong></small>
-                                        {% for pledge in event.pledges %}
-                                        {% if pledge.status == 'pending' %}
-                                        <div class="d-flex justify-content-between align-items-center py-1">
-                                            <small class="text-primary">
-                                                <i data-feather="heart" class="me-1" style="width: 12px; height: 12px;"></i>
-                                                {{ pledge.email[:3] }}***@{{ pledge.email.split('@')[1] if '@' in pledge.email }}
-                                            </small>
-                                            <small class="text-success fw-bold">${{ "%.2f"|format(pledge.amount) }}</small>
-                                        </div>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
                         </div>
                         
                         <!-- Actions -->
@@ -203,32 +177,6 @@
                             </div>
                             
                             <small class="text-muted">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }}</small>
-                            
-                            <!-- Supporters List -->
-                            {% if event.pledges %}
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#supporters-active-{{ event.id }}" aria-expanded="false">
-                                    <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
-                                    View Supporters
-                                </button>
-                                <div class="collapse mt-2" id="supporters-active-{{ event.id }}">
-                                    <div class="card card-body p-2">
-                                        <small class="text-muted mb-2"><strong>Our Amazing Supporters:</strong></small>
-                                        {% for pledge in event.pledges %}
-                                        {% if pledge.status == 'pending' %}
-                                        <div class="d-flex justify-content-between align-items-center py-1">
-                                            <small class="text-primary">
-                                                <i data-feather="heart" class="me-1" style="width: 12px; height: 12px;"></i>
-                                                {{ pledge.email[:3] }}***@{{ pledge.email.split('@')[1] if '@' in pledge.email }}
-                                            </small>
-                                            <small class="text-success fw-bold">${{ "%.2f"|format(pledge.amount) }}</small>
-                                        </div>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
                         </div>
                         
                         <div class="mt-auto">
@@ -299,32 +247,6 @@
                             </div>
                             
                             <small class="text-success">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }} - Event successful!</small>
-                            
-                            <!-- Supporters List -->
-                            {% if event.pledges %}
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#supporters-completed-{{ event.id }}" aria-expanded="false">
-                                    <i data-feather="users" class="me-1" style="width: 14px; height: 14px;"></i>
-                                    View Supporters
-                                </button>
-                                <div class="collapse mt-2" id="supporters-completed-{{ event.id }}">
-                                    <div class="card card-body p-2">
-                                        <small class="text-muted mb-2"><strong>Thank You to Our Supporters:</strong></small>
-                                        {% for pledge in event.pledges %}
-                                        {% if pledge.status in ['pending', 'charged'] %}
-                                        <div class="d-flex justify-content-between align-items-center py-1">
-                                            <small class="text-success">
-                                                <i data-feather="check-circle" class="me-1" style="width: 12px; height: 12px;"></i>
-                                                {{ pledge.email[:3] }}***@{{ pledge.email.split('@')[1] if '@' in pledge.email }}
-                                            </small>
-                                            <small class="text-success fw-bold">${{ "%.2f"|format(pledge.amount) }}</small>
-                                        </div>
-                                        {% endif %}
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            </div>
-                            {% endif %}
                         </div>
                         
                         <div class="mt-auto">
