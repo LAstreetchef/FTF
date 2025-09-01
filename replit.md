@@ -8,6 +8,14 @@ A Flask-based web application that enables community crowdfunding for food truck
 
 Preferred communication style: Simple, everyday language.
 
+## Development Environment Notes
+
+**Replit Deployment Behavior (Important):**
+- **Development Environment**: Template and code changes are visible immediately with auto-reload
+- **Production Environment**: ALL code changes (templates, routes, logic) require redeployment to be visible
+- **Deployments are immutable snapshots**: Deployed apps freeze the code state at deployment time
+- **Never assume production will auto-update**: Always redeploy for any code changes to go live
+
 ## Recent Changes
 
 - **2025-08-31**: Supporter Contact Feature for Organizers
