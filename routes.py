@@ -612,18 +612,12 @@ def admin_dashboard():
     
     recent_events = Event.query.order_by(Event.created_at.desc()).limit(5).all()
     
-    # Get food truck registration statistics
-    pending_truck_owners = FoodTruckOwner.query.filter_by(status='pending').count()
-    pending_food_trucks = FoodTruck.query.filter_by(status='pending').count()
-    
     return render_template('admin/dashboard.html', 
                          total_trucks=total_trucks,
                          total_events=total_events,
                          pending_events=pending_events,
                          funded_events=funded_events,
-                         recent_events=recent_events,
-                         pending_truck_owners=pending_truck_owners,
-                         pending_food_trucks=pending_food_trucks)
+                         recent_events=recent_events)
 
 @app.route('/debug-database-xyz123')
 def debug_database():
