@@ -148,22 +148,16 @@ with app.app_context():
         import models
         import routes
         
-        # Test database connection and verify environment
+        # Test database connection quickly for startup
         logging.info("Testing database connection...")
         db.session.execute(db.text('SELECT 1'))
         logging.info("Database connection successful")
         
-        # Verify we're using the correct database
+        # Quick database info (minimal queries for faster startup)
         try:
             result = db.session.execute(db.text("SELECT current_database()")).fetchone()
             db_name = result[0] if result else "unknown"
             logging.info(f"Connected to database: {db_name}")
-            
-            # Log table counts to verify data consistency
-            event_count = db.session.execute(db.text("SELECT COUNT(*) FROM event")).fetchone()[0]
-            pledge_count = db.session.execute(db.text("SELECT COUNT(*) FROM pledge")).fetchone()[0]
-            logging.info(f"Database contains: {event_count} events, {pledge_count} pledges")
-            
         except Exception as e:
             logging.warning(f"Database verification failed: {str(e)}")
         

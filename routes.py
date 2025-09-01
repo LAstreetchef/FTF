@@ -18,7 +18,7 @@ stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
 def health_check():
     """Health check endpoint for deployment readiness"""
     try:
-        # Test database connection
+        # Quick database connection test with timeout
         with db.engine.connect() as connection:
             result = connection.execute(db.text('SELECT 1'))
             
@@ -36,6 +36,16 @@ def health_check():
             'database': 'disconnected',
             'error': str(e)
         }), 503
+
+@app.route('/readiness')
+def readiness_check():
+    """Alternative readiness endpoint for deployment"""
+    return health_check()
+
+@app.route('/liveness')
+def liveness_check():
+    """Alternative liveness endpoint for deployment"""
+    return health_check()
 
 @app.route('/set-language/<lang>')
 def set_language(lang):
