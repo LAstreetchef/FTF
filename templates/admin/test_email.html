@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Test Email Configuration{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">📧 Test Email Configuration</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Send a test email to verify your Gmail SMTP settings are working correctly before going live.</p>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Test Email Address</label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   name="email" 
+                                   placeholder="Enter your email to receive test message"
+                                   required>
+                            <div class="form-text">We'll send a test email to this address to verify email delivery works.</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i data-feather="send"></i> Send Test Email
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>✅ What This Tests:</h6>
+                            <ul class="list-unstyled">
+                                <li>• Gmail SMTP connection</li>
+                                <li>• App password validity</li>
+                                <li>• Email delivery</li>
+                                <li>• Anti-spam compliance</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>📋 Current Configuration:</h6>
+                            <ul class="list-unstyled text-muted">
+                                <li><strong>SMTP Server:</strong> smtp.gmail.com</li>
+                                <li><strong>Port:</strong> 587 (TLS)</li>
+                                <li><strong>From Address:</strong> {{ config.MAIL_USERNAME }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                            <i data-feather="arrow-left"></i> Back to Dashboard
+                        </a>
+                        <small class="text-muted">Production Email Test</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
