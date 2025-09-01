@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" id="viewport-meta">
     <title>{% block title %}Food Truck Fundraiser{% endblock %}</title>
     
+    <!-- App Icons and Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/app-icon-512.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ url_for('static', filename='icons/app-icon-512.png') }}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{{ url_for('static', filename='icons/app-icon-512.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Food Truck">
+    <meta name="theme-color" content="#FF8C00">
+    <meta name="description" content="Community crowdfunding for food truck events">
+    
     <!-- Iframe compatibility -->
     <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com https://*.squarespace.com https://*.sqsp.com *.squarespace-cdn.com https://static1.squarespace.com">
     
