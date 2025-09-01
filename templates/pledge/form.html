@@ -152,11 +152,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Stripe
-    {% if config.STRIPE_PUBLISHABLE_KEY %}
-    const stripe = Stripe('{{ config.STRIPE_PUBLISHABLE_KEY }}');
+    {% if stripe_publishable_key %}
+    const stripe = Stripe('{{ stripe_publishable_key }}');
     {% else %}
     // Stripe not properly configured - show error
-    document.getElementById('payment-errors').innerHTML = '<div class="alert alert-danger">Stripe not configured properly</div>';
+    document.getElementById('payment-errors').innerHTML = '<div class="alert alert-danger">Payment system not available</div>';
     return;
     {% endif %}
     let elements;

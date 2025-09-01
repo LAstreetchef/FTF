@@ -3400,7 +3400,9 @@ def make_pledge(event_id):
             logging.error(f"Error creating pledge: {str(e)}")
             flash('Error processing pledge. Please try again.', 'error')
     
-    return render_template('pledge/form.html', event=event)
+    return render_template('pledge/form.html', 
+                          event=event, 
+                          stripe_publishable_key=app.config.get('STRIPE_PUBLISHABLE_KEY'))
 
 @app.route('/pledge/<int:pledge_id>/success')
 def pledge_success(pledge_id):
