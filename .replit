@@ -34,4 +34,3 @@ localPort = 5000
 externalPort = 80
 
 [agent]
-integrations = ["flask_stripe==1.0.0"]
