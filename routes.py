@@ -311,44 +311,6 @@ def admin_logout():
     flash('Logged out successfully', 'success')
     return redirect(url_for('index'))
 
-@app.route('/admin/test-email', methods=['GET', 'POST'])
-def admin_test_email():
-    """Test email functionality before going live"""
-    if not session.get('admin_id'):
-        return redirect(url_for('admin_login'))
-    
-    if request.method == 'POST':
-        test_email = request.form.get('email', '').strip()
-        
-        if not test_email:
-            flash('Please enter an email address', 'error')
-            return render_template('admin/test_email.html')
-        
-        # Send test email
-        success = send_email(
-            test_email,
-            'Food Truck Fundraiser - Email Test',
-            f"""This is a test email from your Food Truck Fundraiser platform.
-
-If you received this email, your email configuration is working correctly!
-
-Test Details:
-- Sent from: {app.config['MAIL_USERNAME']}
-- Platform: Food Truck Fundraiser
-- Test Date: {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
-
-You're ready to go live with real email notifications!
-
-Best regards,
-Food Truck Fundraiser System"""
-        )
-        
-        if success:
-            flash(f'✅ Test email sent successfully to {test_email}! Check your inbox.', 'success')
-        else:
-            flash('❌ Failed to send test email. Check your Gmail SMTP configuration.', 'error')
-    
-    return render_template('admin/test_email.html')
 
 @app.route('/admin/food-truck-owners')
 def admin_food_truck_owners():
