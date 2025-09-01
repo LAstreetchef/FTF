@@ -619,6 +619,12 @@ def admin_dashboard():
                          funded_events=funded_events,
                          recent_events=recent_events)
 
+@app.route('/force-template-refresh-xyz123')
+def force_template_refresh():
+    """Force template refresh by clearing Flask template cache"""
+    app.jinja_env.cache.clear()
+    return "Template cache cleared for production environment"
+
 @app.route('/debug-database-xyz123')
 def debug_database():
     """Debug route to check database contents for troubleshooting"""
