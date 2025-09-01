@@ -62,6 +62,7 @@
                 </td>
                 <td>
                     <div class="btn-group-vertical btn-group-sm">
+                        <!-- DEBUG: {{ event.name }} status={{ event.status }} pledges={{ event.current_pledges }} goal={{ event.pledge_goal }} comparison={{ event.current_pledges >= event.pledge_goal }} -->
                         {% if event.status == 'funded' or (event.status == 'pending' and event.current_pledges >= event.pledge_goal) %}
                         <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline mb-1">
                             <button type="submit" class="btn btn-success btn-sm" 
@@ -70,6 +71,8 @@
                                 Approve & Charge
                             </button>
                         </form>
+                        {% else %}
+                        <!-- NO BUTTON: {{ event.name }} status={{ event.status }} pledges={{ event.current_pledges }} goal={{ event.pledge_goal }} -->
                         {% endif %}
                         
                         <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-primary btn-sm mb-1">
