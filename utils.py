@@ -85,36 +85,10 @@ def charge_stripe_payment(payment_intent_id, original_amount, description):
             return {'success': True, 'processing_fee': processing_fee, 'total_charged': total_amount_with_fee}
             
         elif intent.status == 'requires_payment_method':
-            # For test cards, attach the default test payment method and confirm
-            total_amount_cents = int(total_amount_with_fee * 100)
-            
-            try:
-                # Update amount and attach test payment method
-                stripe.PaymentIntent.modify(
-                    payment_intent_id,
-                    amount=total_amount_cents,
-                    payment_method='pm_card_visa',  # Default test payment method
-                    description=f"{description} (includes $%.2f processing fee)" % processing_fee
-                )
-                
-                # Confirm the payment intent
-                intent = stripe.PaymentIntent.confirm(
-                    payment_intent_id,
-                    return_url='https://foodtruckfundraiser.com/payment/complete'  # Provide return URL for redirects
-                )
-                
-                if intent.status == 'requires_capture':
-                    # Now capture it
-                    intent = stripe.PaymentIntent.capture(payment_intent_id)
-                    logging.info(f"Successfully charged PaymentIntent {payment_intent_id} (fixed from requires_payment_method) - Original: ${original_amount:.2f}, Fee: ${processing_fee:.2f}, Total: ${total_amount_with_fee:.2f}")
-                    return {'success': True, 'processing_fee': processing_fee, 'total_charged': total_amount_with_fee}
-                else:
-                    logging.error(f"PaymentIntent {payment_intent_id} failed to reach capturable state after confirmation: {intent.status}")
-                    return {'success': False, 'error': f'Payment confirmation failed: {intent.status}'}
-                    
-            except Exception as confirm_error:
-                logging.error(f"Error confirming PaymentIntent {payment_intent_id}: {str(confirm_error)}")
-                return {'success': False, 'error': f'Payment confirmation error: {str(confirm_error)}'}
+            # This should not happen in production with proper payment collection
+            # Log the issue and return error - customer needs to complete payment properly
+            logging.error(f"PaymentIntent {payment_intent_id} requires payment method - payment was not properly collected during pledge creation")
+            return {'success': False, 'error': 'Payment method not properly attached - please contact customer to retry their pledge'}
                 
         else:
             logging.error(f"PaymentIntent {payment_intent_id} in unexpected state: {intent.status}")

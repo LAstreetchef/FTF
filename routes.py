@@ -62,18 +62,20 @@ def index():
     current_lang = get_language_from_request()
     return render_template('index.html', recent_events=recent_events, current_lang=current_lang)
 
-@app.route('/test-credentials')
-def test_credentials():
-    """Simple credential testing page"""
-    return render_template('test_credentials.html')
+# PRODUCTION SECURITY: Test credentials route disabled for live deployment
+# @app.route('/test-credentials')
+# def test_credentials():
+#     """Simple credential testing page"""
+#     return render_template('test_credentials.html')
 
 
 
 
 
 # Admin Routes
-@app.route('/iframe-debug')
-def iframe_debug():
+# PRODUCTION SECURITY: Debug route disabled for live deployment
+# @app.route('/iframe-debug')
+# def iframe_debug():
     """Debug endpoint to check iframe functionality"""
     import json
     from flask import request, session
@@ -125,7 +127,8 @@ def iframe_debug():
     </div>
     """
 
-@app.route('/quick-admin-login')
+# PRODUCTION SECURITY: Quick login route disabled for live deployment
+# @app.route('/quick-admin-login')
 def quick_admin_login():
     """Quick login for admin in iframe contexts"""
     try:
@@ -148,7 +151,8 @@ def quick_admin_login():
         flash('Login error occurred', 'error')
         return redirect(url_for('admin_login'))
 
-@app.route('/quick-organizer-login')
+# PRODUCTION SECURITY: Quick login route disabled for live deployment
+# @app.route('/quick-organizer-login')
 def quick_organizer_login():
     """Quick login for organizer in iframe contexts"""
     try:
@@ -263,6 +267,42 @@ def admin_login():
         flash('Invalid credentials', 'error')
     
     return render_template('admin/login.html')
+
+@app.route('/admin/change-password/<int:admin_id>', methods=['GET', 'POST'])
+def admin_change_password(admin_id):
+    """Force admin to change password on first login for security"""
+    if request.method == 'POST':
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not new_password or len(new_password) < 8:
+            flash('Password must be at least 8 characters long', 'error')
+            return render_template('admin/change_password.html', admin_id=admin_id)
+        
+        if new_password != confirm_password:
+            flash('Passwords do not match', 'error')
+            return render_template('admin/change_password.html', admin_id=admin_id)
+        
+        # Update admin password
+        admin = Admin.query.get(admin_id)
+        if admin:
+            admin.password_hash = generate_password_hash(new_password)
+            admin.must_change_password = False
+            db.session.commit()
+            
+            # Now log them in
+            session['admin_id'] = admin.id
+            session['user_type'] = 'admin'
+            session.permanent = True
+            session.modified = True
+            
+            flash('Password changed successfully. You are now logged in.', 'success')
+            return redirect(url_for('admin_dashboard'))
+        else:
+            flash('Admin not found', 'error')
+            return redirect(url_for('admin_login'))
+    
+    return render_template('admin/change_password.html', admin_id=admin_id)
 
 @app.route('/admin/logout')
 def admin_logout():
@@ -635,8 +675,9 @@ def force_template_refresh():
     app.jinja_env.cache.clear()
     return "Template cache cleared for production environment"
 
-@app.route('/debug-database-xyz123')
-def debug_database():
+# PRODUCTION SECURITY: Debug route disabled for live deployment
+# @app.route('/debug-database-xyz123')
+# def debug_database():
     """Debug route to check database contents for troubleshooting"""
     debug_info = {
         'database_type': 'development' if 'dev' in str(db.engine.url) else 'production',
@@ -861,8 +902,9 @@ def fix_menu_items():
             'message': f'Error fixing menu items: {str(e)}'
         })
 
-@app.route('/debug-trucks-xyz123')
-def debug_trucks():
+# PRODUCTION SECURITY: Debug route disabled for live deployment
+# @app.route('/debug-trucks-xyz123')
+# def debug_trucks():
     """Debug route to see what trucks exist in production database"""
     try:
         all_trucks = FoodTruck.query.all()
@@ -1146,8 +1188,9 @@ def clear_cache_and_refresh():
         <p><a href="/admin/dashboard">← Back to Admin Dashboard</a></p>
         """
 
-@app.route('/debug-transfer-token-xyz890/<token>')
-def debug_transfer_token(token):
+# PRODUCTION SECURITY: Debug route disabled for live deployment
+# @app.route('/debug-transfer-token-xyz890/<token>')
+# def debug_transfer_token(token):
     """Debug route to check transfer token and pledge status"""
     try:
         # Find pledge by transfer token
@@ -1730,8 +1773,9 @@ def auto_fix_all_menus():
             'message': f'Error during auto-fix: {str(e)}'
         })
 
-@app.route('/test-admin-login-xyz123', methods=['GET', 'POST'])
-def test_admin_login():
+# PRODUCTION SECURITY: Test route disabled for live deployment
+# @app.route('/test-admin-login-xyz123', methods=['GET', 'POST'])
+# def test_admin_login():
     """Debug route to test admin login credentials"""
     try:
         if request.method == 'POST':
@@ -2121,8 +2165,9 @@ def decline_transfer(token):
         flash('Error processing transfer decline', 'error')
         return redirect(url_for('index'))
 
-@app.route('/debug-transfer-production-xyz098/<email>')
-def debug_transfer_production(email):
+# PRODUCTION SECURITY: Debug route disabled for live deployment
+# @app.route('/debug-transfer-production-xyz098/<email>')
+# def debug_transfer_production(email):
     """Debug transfer tokens for specific email in production"""
     try:
         # Find all pledges for this email with transfer tokens
@@ -3727,8 +3772,9 @@ def internal_error(error):
 
 
 # Debug route to test admin login
-@app.route('/debug-admin-login')
-def debug_admin_login():
+# PRODUCTION SECURITY: Debug route disabled for live deployment
+# @app.route('/debug-admin-login')
+# def debug_admin_login():
     """Debug route to test admin credentials"""
     try:
         admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
@@ -3800,7 +3846,8 @@ def login_admin_direct():
     <p><a href="/admin/dashboard">Try accessing dashboard directly</a></p>
     """
 
-@app.route('/setup-admin-secret-xyz123')
+# PRODUCTION SECURITY: Admin setup route disabled for live deployment
+# @app.route('/setup-admin-secret-xyz123')
 def setup_admin():
     """One-time setup route to create admin user in production"""
     try:
@@ -3872,8 +3919,9 @@ def setup_admin():
         return f"Error creating admin: {str(e)}<br><br>Traceback:<br>{traceback.format_exc().replace(chr(10), '<br>')}"
 
 # Test routes for debugging organizer registration
-@app.route('/test-organizer-reg')
-def test_organizer_registration():
+# PRODUCTION SECURITY: Test route disabled for live deployment
+# @app.route('/test-organizer-reg')
+# def test_organizer_registration():
     """Test endpoint to check organizer registration functionality in production"""
     try:
         from models import Organizer

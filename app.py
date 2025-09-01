@@ -28,14 +28,14 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configure session cookies for iframe compatibility
+# Configure session cookies for production security
 app.config.update(
     SESSION_COOKIE_SECURE=True,      # Require HTTPS
-    SESSION_COOKIE_HTTPONLY=False,   # Allow JS access for debugging
-    SESSION_COOKIE_SAMESITE=None,    # Allow cross-origin iframe embedding
+    SESSION_COOKIE_HTTPONLY=True,    # Prevent XSS attacks
+    SESSION_COOKIE_SAMESITE='Lax',   # CSRF protection while maintaining functionality
     SESSION_COOKIE_DOMAIN=None,      # Don't restrict domain
     SESSION_COOKIE_PATH='/',         # Available on all paths
-    PERMANENT_SESSION_LIFETIME=86400 # 24 hours
+    PERMANENT_SESSION_LIFETIME=3600  # 1 hour for production security
 )
 
 # Configure the database - ALWAYS use production database for consistency
