@@ -62,7 +62,7 @@
                 </td>
                 <td>
                     <div class="btn-group-vertical btn-group-sm">
-                        {% if event.status == 'funded' %}
+                        {% if event.status == 'funded' or (event.status == 'pending' and event.current_pledges >= event.pledge_goal) %}
                         <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline mb-1">
                             <button type="submit" class="btn btn-success btn-sm" 
                                     onclick="return confirm('Are you sure you want to approve this event and charge all pledges?')">
