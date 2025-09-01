@@ -152,7 +152,7 @@
                                 Supporters ({{ event.pledges|length }})
                             </a>
                             {% endif %}
-                            {% if event.status == 'funded' %}
+                            {% if event.status == 'funded' or (event.status == 'pending' and event.is_goal_met()) %}
                             <form method="POST" action="{{ url_for('admin_approve_event', event_id=event.id) }}" class="d-inline">
                                 <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Are you sure you want to approve this event and charge all pledges?')">
                                     <i data-feather="credit-card" class="me-1"></i>
