@@ -213,6 +213,8 @@
                         </div>
                     </div>
                     {% endfor %}
+                    {% else %}
+                    <p class="text-muted"><em>Event has {{ event.pledges|length }} pledges. Debug: Check pledge relationship.</em></p>
                     {% endif %}
                 </div>
             </div>
