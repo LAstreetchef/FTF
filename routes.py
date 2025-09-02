@@ -4782,4 +4782,303 @@ def api_truck_menu(truck_id):
         logging.error(f"Error fetching menu for truck {truck_id}: {str(e)}")
         return jsonify([]), 500
 
+# =============================================================================
+# PAYOUT AND AMBASSADOR SYSTEM ROUTES
+# =============================================================================
+
+@app.route('/organizer/earnings', methods=['GET'])
+def organizer_earnings():
+    """Organizer earnings and payout dashboard"""
+    # Authentication check
+    organizer_id = None
+    auth_token = request.args.get('auth_token')
+    
+    if auth_token:
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+    
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+    
+    if not organizer_id:
+        flash('Authentication required', 'error')
+        return redirect(url_for('organizer_login'))
+    
+    organizer = Organizer.query.get_or_404(organizer_id)
+    
+    # Update tier metrics
+    tier_info = organizer.update_tier_metrics()
+    
+    # Get earnings data
+    completed_events = Event.query.filter(
+        Event.organizer_id == organizer_id,
+        Event.status == 'completed'
+    ).all()
+    
+    pending_payouts = organizer.get_pending_payouts()
+    total_awaiting_payout = organizer.get_total_earnings_awaiting_payout()
+    
+    # Calculate total earnings ever
+    total_lifetime_earnings = sum([
+        event.calculate_organizer_profit_if_goal_met() 
+        for event in completed_events
+    ])
+    
+    # Get payout history
+    payout_history = OrganizerPayout.query.filter(
+        OrganizerPayout.organizer_id == organizer_id
+    ).order_by(OrganizerPayout.created_at.desc()).all()
+    
+    return render_template('organizer/earnings.html',
+                         organizer=organizer,
+                         tier_info=tier_info,
+                         completed_events=completed_events,
+                         pending_payouts=pending_payouts,
+                         total_awaiting_payout=total_awaiting_payout,
+                         total_lifetime_earnings=total_lifetime_earnings,
+                         payout_history=payout_history,
+                         auth_token=auth_token)
+
+@app.route('/organizer/request-payout', methods=['POST'])
+def request_payout():
+    """Request payout for completed events"""
+    # Authentication check
+    organizer_id = None
+    auth_token = request.args.get('auth_token')
+    
+    if auth_token:
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+    
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+    
+    if not organizer_id:
+        return jsonify({'error': 'Authentication required'}), 401
+    
+    organizer = Organizer.query.get_or_404(organizer_id)
+    event_id = request.json.get('event_id')
+    
+    if not event_id:
+        return jsonify({'error': 'Event ID required'}), 400
+    
+    event = Event.query.get_or_404(event_id)
+    
+    # Verify event ownership and status
+    if event.organizer_id != organizer_id:
+        return jsonify({'error': 'Access denied'}), 403
+        
+    if event.status != 'completed':
+        return jsonify({'error': 'Event must be completed for payout'}), 400
+    
+    # Check if payout already exists
+    existing_payout = OrganizerPayout.query.filter(
+        OrganizerPayout.event_id == event_id,
+        OrganizerPayout.organizer_id == organizer_id
+    ).first()
+    
+    if existing_payout:
+        return jsonify({'error': 'Payout already requested for this event'}), 400
+    
+    # Calculate payout amount
+    amount = event.calculate_organizer_profit_if_goal_met()
+    
+    if amount <= 0:
+        return jsonify({'error': 'No earnings to pay out for this event'}), 400
+    
+    # Create payout request
+    payout = OrganizerPayout(
+        organizer_id=organizer_id,
+        event_id=event_id,
+        amount=amount,
+        status='pending'
+    )
+    
+    db.session.add(payout)
+    db.session.commit()
+    
+    # Send notification to admin
+    send_email(
+        'truckstopsla@gmail.com',
+        f'Payout Request: ${amount:.2f} for {organizer.name}',
+        f'Organizer {organizer.name} has requested a payout of ${amount:.2f} for event "{event.name}".\\n\\nEvent Details:\\nDate: {event.date}\\nLocation: {event.location}\\nTotal Raised: ${event.current_pledges:.2f}\\nOrganizer Profit: ${amount:.2f}\\n\\nPlease process this payout in the admin dashboard.'
+    )
+    
+    return jsonify({
+        'success': True, 
+        'message': f'Payout request submitted for ${amount:.2f}',
+        'payout_id': payout.id
+    })
+
+@app.route('/admin/payouts-management', methods=['GET'])
+def admin_payout_management():
+    """Admin dashboard for managing organizer payouts"""
+    if 'admin_id' not in session:
+        flash('Admin access required', 'error')
+        return redirect(url_for('admin_login'))
+    
+    # Get all payouts with their related data
+    payouts = OrganizerPayout.query.join(Organizer).join(Event).order_by(
+        OrganizerPayout.created_at.desc()
+    ).all()
+    
+    # Calculate summary statistics
+    pending_count = len([p for p in payouts if p.status == 'pending'])
+    pending_amount = sum([p.amount for p in payouts if p.status == 'pending'])
+    completed_amount = sum([p.amount for p in payouts if p.status == 'completed'])
+    
+    return render_template('admin/payout_management.html',
+                         payouts=payouts,
+                         pending_count=pending_count,
+                         pending_amount=pending_amount,
+                         completed_amount=completed_amount)
+
+@app.route('/admin/payout/<int:payout_id>/process', methods=['POST'])
+def admin_process_payout(payout_id):
+    """Process a payout request"""
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Admin access required'}), 401
+    
+    payout = OrganizerPayout.query.get_or_404(payout_id)
+    
+    if payout.status != 'pending':
+        return jsonify({'error': 'Payout already processed'}), 400
+    
+    action = request.json.get('action')  # 'approve' or 'reject'
+    
+    if action == 'approve':
+        payout.status = 'processing'
+        payout.processed_at = datetime.utcnow()
+        
+        # In a real implementation, this would integrate with Stripe Connect
+        # For now, we'll simulate the process
+        
+        # Send confirmation email to organizer
+        send_email(
+            payout.organizer.email,
+            f'Payout Approved: ${payout.amount:.2f}',
+            f'Good news! Your payout request for ${payout.amount:.2f} from event "{payout.event.name}" has been approved and is being processed.\\n\\nExpected processing time: 2-3 business days.\\n\\nThank you for being a Food Truck Ambassador!'
+        )
+        
+        # Mark as completed for demo purposes
+        payout.status = 'completed'
+        payout.completed_at = datetime.utcnow()
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Payout of ${payout.amount:.2f} approved and processed'
+        })
+        
+    elif action == 'reject':
+        payout.status = 'failed'
+        payout.processed_at = datetime.utcnow()
+        
+        # Send rejection email
+        reason = request.json.get('reason', 'Administrative review required')
+        send_email(
+            payout.organizer.email,
+            f'Payout Request Under Review: ${payout.amount:.2f}',
+            f'Your payout request for ${payout.amount:.2f} from event "{payout.event.name}" requires additional review.\\n\\nReason: {reason}\\n\\nPlease contact support if you have questions.'
+        )
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Payout request marked for review'
+        })
+    
+    return jsonify({'error': 'Invalid action'}), 400
+
+@app.route('/admin/init-challenges', methods=['POST'])
+def init_challenges():
+    """Initialize default challenges for the ambassador program"""
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Admin access required'}), 401
+    
+    # Check if challenges already exist
+    existing_challenges = AmbassadorChallenge.query.count()
+    
+    if existing_challenges > 0:
+        return jsonify({'error': 'Challenges already initialized'}), 400
+    
+    # Create default challenges
+    challenges = [
+        {
+            'name': 'First Steps',
+            'description': 'Host your first successful food truck event',
+            'challenge_type': 'milestone',
+            'requirement_type': 'events_completed',
+            'requirement_value': 1,
+            'reward_type': 'points',
+            'reward_value': 100,
+            'reward_description': '100 bonus points + Silver tier fast-track'
+        },
+        {
+            'name': 'Community Builder',
+            'description': 'Attract 25 total pledgers across all your events',
+            'challenge_type': 'milestone',
+            'requirement_type': 'pledgers_attracted',
+            'requirement_value': 25,
+            'reward_type': 'cash_bonus',
+            'reward_value': 25.0,
+            'reward_description': '$25 bonus payout'
+        },
+        {
+            'name': 'High Performer',
+            'description': 'Reach 150% of your goal on any event',
+            'challenge_type': 'milestone',
+            'requirement_type': 'events_150_percent',
+            'requirement_value': 1,
+            'reward_type': 'markup_bonus',
+            'reward_value': 2.5,
+            'reward_description': '+2.5% markup bonus for next 3 events'
+        },
+        {
+            'name': 'Ambassador Elite',
+            'description': 'Complete 5 successful events and earn $200+ total',
+            'challenge_type': 'milestone',
+            'requirement_type': 'earnings_reached',
+            'requirement_value': 200,
+            'reward_type': 'tier_boost',
+            'reward_value': 1,
+            'reward_description': 'Instant Gold tier upgrade'
+        },
+        {
+            'name': 'Monthly Champion',
+            'description': 'Host 3 events in a single month',
+            'challenge_type': 'recurring',
+            'requirement_type': 'events_completed',
+            'requirement_value': 3,
+            'time_limit_days': 30,
+            'reward_type': 'cash_bonus',
+            'reward_value': 50.0,
+            'reward_description': '$50 monthly champion bonus'
+        }
+    ]
+    
+    for challenge_data in challenges:
+        challenge = AmbassadorChallenge(**challenge_data)
+        db.session.add(challenge)
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Initialized {len(challenges)} ambassador challenges',
+        'challenges_created': len(challenges)
+    })
+
 

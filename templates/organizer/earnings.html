@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}Earnings Dashboard{% endblock %}
+
+{% block content %}
+<style>
+.earnings-header {
+    background: linear-gradient(135deg, #ff6b35, #ffa500);
+    color: white;
+    padding: 2rem 0;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.tier-badge {
+    font-size: 1.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.2);
+    display: inline-block;
+}
+
+.earnings-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.earnings-card:hover {
+    transform: translateY(-5px);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 10px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff6b35;
+}
+
+.progress-bar-custom {
+    height: 8px;
+    border-radius: 4px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff6b35, #ffa500);
+    transition: width 0.5s ease;
+}
+
+.payout-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.payout-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.payout-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+</style>
+
+<div class="container">
+    <!-- Header Section -->
+    <div class="earnings-header text-center">
+        <h1>🏅 Earnings Dashboard</h1>
+        <p class="mb-3">Track your success as a Food Truck Ambassador</p>
+        
+        {% if tier_info %}
+        <div class="tier-badge">
+            {{ tier_info.get_tier_icon() }} {{ tier_info.current_tier.title() }} Ambassador
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-item">
+            <div class="stat-number">${{ "%.2f"|format(total_lifetime_earnings) }}</div>
+            <div class="text-muted">Total Earnings</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">${{ "%.2f"|format(total_awaiting_payout) }}</div>
+            <div class="text-muted">Awaiting Payout</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ tier_info.successful_events if tier_info else 0 }}</div>
+            <div class="text-muted">Successful Events</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">{{ tier_info.total_pledgers_attracted if tier_info else 0 }}</div>
+            <div class="text-muted">Pledgers Attracted</div>
+        </div>
+    </div>
+
+    <!-- Tier Progress -->
+    {% if tier_info and tier_info.get_next_tier_requirements() %}
+    {% set next_tier = tier_info.get_next_tier_requirements() %}
+    <div class="earnings-card">
+        <h4>🎯 Progress to {{ next_tier.tier.title() }} Tier</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Events:</strong> {{ tier_info.successful_events }} / {{ tier_info.successful_events + next_tier.events_needed }}</p>
+                <div class="progress-bar-custom">
+                    <div class="progress-fill" style="width: {{ (tier_info.successful_events / (tier_info.successful_events + next_tier.events_needed)) * 100 }}%"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Earnings:</strong> ${{ "%.2f"|format(tier_info.total_earnings) }} / ${{ "%.2f"|format(tier_info.total_earnings + next_tier.earnings_needed) }}</p>
+                <div class="progress-bar-custom">
+                    <div class="progress-fill" style="width: {{ (tier_info.total_earnings / (tier_info.total_earnings + next_tier.earnings_needed)) * 100 }}%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Completed Events -->
+    <div class="earnings-card">
+        <h4>💰 Completed Events</h4>
+        {% if completed_events %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Raised</th>
+                        <th>Your Profit</th>
+                        <th>Payout Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in completed_events %}
+                    {% set profit = event.calculate_organizer_profit_if_goal_met() %}
+                    {% set has_payout = event.payout %}
+                    <tr>
+                        <td>{{ event.name }}</td>
+                        <td>{{ event.date.strftime('%m/%d/%Y') if event.date else 'TBD' }}</td>
+                        <td>${{ "%.2f"|format(event.current_pledges) }}</td>
+                        <td>${{ "%.2f"|format(profit) }}</td>
+                        <td>
+                            {% if has_payout %}
+                                <span class="badge badge-{{ 'success' if has_payout.status == 'completed' else 'warning' }}">
+                                    {{ has_payout.status.title() }}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-secondary">Not Requested</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if not has_payout and profit > 0 %}
+                                <button class="btn payout-btn btn-sm" onclick="requestPayout({{ event.id }}, {{ profit }})">
+                                    Request Payout
+                                </button>
+                            {% elif has_payout.status == 'pending' %}
+                                <span class="text-muted">Processing...</span>
+                            {% elif has_payout.status == 'completed' %}
+                                <span class="text-success">✓ Paid</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted">No completed events yet. Keep organizing to start earning!</p>
+            <a href="{{ url_for('organizer_create_event', auth_token=auth_token) }}" class="btn btn-primary">Create Your First Event</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Payout History -->
+    {% if payout_history %}
+    <div class="earnings-card">
+        <h4>📋 Payout History</h4>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date Requested</th>
+                        <th>Event</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payout in payout_history %}
+                    <tr>
+                        <td>{{ payout.created_at.strftime('%m/%d/%Y') }}</td>
+                        <td>{{ payout.event.name }}</td>
+                        <td>${{ "%.2f"|format(payout.amount) }}</td>
+                        <td>
+                            <span class="badge badge-{{ 'success' if payout.status == 'completed' else 'warning' }}">
+                                {{ payout.status.title() }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if payout.completed_at %}
+                                {{ payout.completed_at.strftime('%m/%d/%Y') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ambassador Benefits -->
+    {% if tier_info %}
+    <div class="earnings-card">
+        <h4>🎁 Your Ambassador Benefits</h4>
+        <div class="row">
+            <div class="col-md-4">
+                <strong>Current Tier:</strong> {{ tier_info.get_tier_icon() }} {{ tier_info.current_tier.title() }}
+            </div>
+            <div class="col-md-4">
+                <strong>Markup Bonus:</strong> +{{ tier_info.markup_bonus }}% allowed
+            </div>
+            <div class="col-md-4">
+                <strong>Priority Access:</strong> {{ '✅' if tier_info.priority_food_truck_access else '❌' }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ambassador Challenges -->
+    <div class="earnings-card">
+        <h4>🏆 Ambassador Challenges</h4>
+        <p class="text-muted">Complete challenges to earn rewards and advance your tier!</p>
+        
+        <!-- Sample challenges based on current metrics -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-primary mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">🎯 First Steps</h6>
+                        <p class="card-text small">Host your first successful event</p>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar bg-primary" style="width: {{ (tier_info.successful_events / 1 * 100) if tier_info else 0 }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                            {{ tier_info.successful_events if tier_info else 0 }} / 1 events
+                            {% if tier_info and tier_info.successful_events >= 1 %}
+                                <span class="text-success">✓ Complete!</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-warning mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">👥 Community Builder</h6>
+                        <p class="card-text small">Attract 25 total pledgers</p>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar bg-warning" style="width: {{ ((tier_info.total_pledgers_attracted / 25) * 100) if tier_info else 0 }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                            {{ tier_info.total_pledgers_attracted if tier_info else 0 }} / 25 pledgers
+                            {% if tier_info and tier_info.total_pledgers_attracted >= 25 %}
+                                <span class="text-success">✓ Complete!</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card border-success mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">🚀 High Performer</h6>
+                        <p class="card-text small">Reach 150% of goal on any event</p>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: {{ ((tier_info.events_reaching_150_percent / 1) * 100) if tier_info else 0 }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                            {{ tier_info.events_reaching_150_percent if tier_info else 0 }} / 1 events
+                            {% if tier_info and tier_info.events_reaching_150_percent >= 1 %}
+                                <span class="text-success">✓ Complete!</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-danger mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">👑 Ambassador Elite</h6>
+                        <p class="card-text small">Earn $200+ total across events</p>
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar bg-danger" style="width: {{ ((tier_info.total_earnings / 200) * 100) if tier_info else 0 }}%"></div>
+                        </div>
+                        <small class="text-muted">
+                            ${{ "%.2f"|format(tier_info.total_earnings) if tier_info else "0.00" }} / $200.00
+                            {% if tier_info and tier_info.total_earnings >= 200 %}
+                                <span class="text-success">✓ Complete!</span>
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-3">
+            <small class="text-muted">
+                <i class="fas fa-gift"></i>
+                Rewards include cash bonuses, markup increases, and instant tier upgrades!
+            </small>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('organizer_dashboard', auth_token=auth_token) }}" class="btn btn-secondary">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+function requestPayout(eventId, amount) {
+    if (!confirm(`Request payout of $${amount.toFixed(2)}?`)) {
+        return;
+    }
+    
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = 'Processing...';
+    
+    fetch('/organizer/request-payout{{ '?auth_token=' + auth_token if auth_token else '' }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            event_id: eventId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+            button.disabled = false;
+            button.textContent = 'Request Payout';
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+        button.disabled = false;
+        button.textContent = 'Request Payout';
+    });
+}
+</script>
+{% endblock %}

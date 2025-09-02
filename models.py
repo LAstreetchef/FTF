@@ -18,6 +18,84 @@ class Organizer(db.Model):
     
     # Relationships
     events = db.relationship('Event', backref='organizer', lazy=True)
+    
+    def get_or_create_tier_info(self):
+        """Get or create tier information for this organizer"""
+        tier_info = OrganizerTier.query.filter_by(organizer_id=self.id).first()
+        if not tier_info:
+            tier_info = OrganizerTier(organizer_id=self.id)
+            db.session.add(tier_info)
+            db.session.commit()
+        return tier_info
+    
+    def update_tier_metrics(self):
+        """Update tier metrics based on current performance"""
+        tier_info = self.get_or_create_tier_info()
+        
+        # Calculate successful events (approved/completed events)
+        successful_events = Event.query.filter(
+            Event.organizer_id == self.id,
+            Event.status.in_(['approved', 'completed'])
+        ).count()
+        
+        # Calculate total earnings from all events
+        total_earnings = 0.0
+        total_pledgers = 0
+        events_150_percent = 0
+        
+        for event in self.events.all():
+            if event.status in ['approved', 'completed']:
+                profit = event.calculate_organizer_profit_if_goal_met()
+                total_earnings += profit
+                
+                # Count pledgers (excluding organizer's own pledge)
+                pledgers = len([p for p in event.pledges if p.amount != 5.0])
+                total_pledgers += pledgers
+                
+                # Check if event reached 150% of goal
+                if event.current_pledges >= (event.pledge_goal * 1.5):
+                    events_150_percent += 1
+        
+        # Update tier info
+        tier_info.successful_events = successful_events
+        tier_info.total_earnings = total_earnings
+        tier_info.total_pledgers_attracted = total_pledgers
+        tier_info.events_reaching_150_percent = events_150_percent
+        
+        if successful_events > 0:
+            tier_info.average_pledge_amount = total_earnings / successful_events
+        
+        # Recalculate tier
+        tier_info.calculate_tier()
+        db.session.commit()
+        
+        return tier_info
+    
+    def get_pending_payouts(self):
+        """Get all pending payouts for this organizer"""
+        return OrganizerPayout.query.filter(
+            OrganizerPayout.organizer_id == self.id,
+            OrganizerPayout.status == 'pending'
+        ).all()
+    
+    def get_total_earnings_awaiting_payout(self):
+        """Calculate total earnings waiting to be paid out"""
+        total = 0.0
+        
+        # Check completed events without payouts
+        for event in self.events.all():
+            if event.status == 'completed':
+                # Check if payout already exists
+                existing_payout = OrganizerPayout.query.filter(
+                    OrganizerPayout.event_id == event.id,
+                    OrganizerPayout.organizer_id == self.id
+                ).first()
+                
+                if not existing_payout:
+                    profit = event.calculate_organizer_profit_if_goal_met()
+                    total += profit
+        
+        return total
 
 class FoodTruckOwner(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -338,3 +416,165 @@ class SupportMessage(db.Model):
     # AI metadata
     ai_model_used = db.Column(db.String(50))  # Track which AI model was used
     tokens_used = db.Column(db.Integer)  # Track API usage
+
+# =============================================================================
+# PAYOUT AND AMBASSADOR SYSTEM
+# =============================================================================
+
+class OrganizerPayout(db.Model):
+    """Track payouts to organizers for their event profits"""
+    id = db.Column(db.Integer, primary_key=True)
+    organizer_id = db.Column(db.Integer, db.ForeignKey('organizer.id'), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    
+    # Payout details
+    amount = db.Column(db.Float, nullable=False)  # Amount to be paid out
+    status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
+    payout_method = db.Column(db.String(50), default='stripe')  # stripe, manual, etc.
+    
+    # Stripe integration
+    stripe_transfer_id = db.Column(db.String(255))  # Stripe transfer ID for tracking
+    stripe_account_id = db.Column(db.String(255))  # Organizer's connected Stripe account
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    organizer = db.relationship('Organizer', backref='payouts')
+    event = db.relationship('Event', backref='payout')
+
+class OrganizerTier(db.Model):
+    """Track organizer ambassador tiers and progression"""
+    id = db.Column(db.Integer, primary_key=True)
+    organizer_id = db.Column(db.Integer, db.ForeignKey('organizer.id'), nullable=False)
+    
+    # Tier information
+    current_tier = db.Column(db.String(20), default='bronze')  # bronze, silver, gold
+    tier_points = db.Column(db.Integer, default=0)
+    successful_events = db.Column(db.Integer, default=0)
+    total_earnings = db.Column(db.Float, default=0.0)
+    
+    # Performance metrics
+    average_pledge_amount = db.Column(db.Float, default=0.0)
+    total_pledgers_attracted = db.Column(db.Integer, default=0)
+    events_reaching_150_percent = db.Column(db.Integer, default=0)  # Bonus metric
+    
+    # Tier benefits
+    markup_bonus = db.Column(db.Float, default=0.0)  # Additional markup percentage
+    priority_food_truck_access = db.Column(db.Boolean, default=False)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    tier_achieved_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    organizer = db.relationship('Organizer', backref='tier_info', uselist=False)
+    
+    def calculate_tier(self):
+        """Calculate and update organizer tier based on performance"""
+        old_tier = self.current_tier
+        
+        # Tier requirements
+        if self.successful_events >= 10 and self.total_earnings >= 500:
+            self.current_tier = 'gold'
+            self.markup_bonus = 5.0  # Extra 5% markup allowed
+            self.priority_food_truck_access = True
+        elif self.successful_events >= 3 and self.total_earnings >= 100:
+            self.current_tier = 'silver'  
+            self.markup_bonus = 2.5  # Extra 2.5% markup allowed
+            self.priority_food_truck_access = False
+        else:
+            self.current_tier = 'bronze'
+            self.markup_bonus = 0.0
+            self.priority_food_truck_access = False
+            
+        # Update timestamp if tier changed
+        if old_tier != self.current_tier:
+            self.tier_achieved_at = datetime.utcnow()
+            
+        self.last_updated = datetime.utcnow()
+        
+    def get_tier_color(self):
+        """Get CSS color class for tier display"""
+        tier_colors = {
+            'bronze': 'text-warning',
+            'silver': 'text-secondary', 
+            'gold': 'text-warning'
+        }
+        return tier_colors.get(self.current_tier, 'text-muted')
+        
+    def get_tier_icon(self):
+        """Get icon for tier display"""
+        tier_icons = {
+            'bronze': '🥉',
+            'silver': '🥈',
+            'gold': '🥇'
+        }
+        return tier_icons.get(self.current_tier, '🏅')
+        
+    def get_next_tier_requirements(self):
+        """Get requirements for next tier"""
+        if self.current_tier == 'bronze':
+            return {
+                'tier': 'silver',
+                'events_needed': max(0, 3 - self.successful_events),
+                'earnings_needed': max(0, 100 - self.total_earnings)
+            }
+        elif self.current_tier == 'silver':
+            return {
+                'tier': 'gold', 
+                'events_needed': max(0, 10 - self.successful_events),
+                'earnings_needed': max(0, 500 - self.total_earnings)
+            }
+        else:
+            return None  # Already at highest tier
+
+class AmbassadorChallenge(db.Model):
+    """Track gamification challenges and rewards"""
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Challenge details
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text)
+    challenge_type = db.Column(db.String(50), nullable=False)  # milestone, recurring, special
+    
+    # Requirements
+    requirement_type = db.Column(db.String(50))  # events_completed, earnings_reached, pledgers_attracted
+    requirement_value = db.Column(db.Integer)
+    time_limit_days = db.Column(db.Integer)  # For time-limited challenges
+    
+    # Rewards
+    reward_type = db.Column(db.String(50))  # points, cash_bonus, tier_boost, markup_bonus
+    reward_value = db.Column(db.Float)
+    reward_description = db.Column(db.String(200))
+    
+    # Status
+    is_active = db.Column(db.Boolean, default=True)
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime)
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class OrganizerChallengeProgress(db.Model):
+    """Track individual organizer progress on challenges"""
+    id = db.Column(db.Integer, primary_key=True)
+    organizer_id = db.Column(db.Integer, db.ForeignKey('organizer.id'), nullable=False)
+    challenge_id = db.Column(db.Integer, db.ForeignKey('ambassador_challenge.id'), nullable=False)
+    
+    # Progress tracking
+    current_progress = db.Column(db.Integer, default=0)
+    is_completed = db.Column(db.Boolean, default=False)
+    completion_date = db.Column(db.DateTime)
+    reward_claimed = db.Column(db.Boolean, default=False)
+    
+    # Timestamps
+    started_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_updated = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    organizer = db.relationship('Organizer', backref='challenge_progress')
+    challenge = db.relationship('AmbassadorChallenge', backref='participant_progress')

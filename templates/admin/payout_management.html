@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Payout Management{% endblock %}
+
+{% block content %}
+<style>
+.payout-header {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    color: white;
+    padding: 2rem 0;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.payout-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-processing {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.approve-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-right: 0.5rem;
+}
+
+.reject-btn {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #dc3545;
+}
+</style>
+
+<div class="container">
+    <!-- Header -->
+    <div class="payout-header text-center">
+        <h1>💰 Payout Management</h1>
+        <p class="mb-0">Manage organizer earnings and payouts</p>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stat-number">{{ pending_count }}</div>
+                <div class="text-muted">Pending Requests</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stat-number">${{ "%.2f"|format(pending_amount) }}</div>
+                <div class="text-muted">Pending Amount</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stat-number">${{ "%.2f"|format(completed_amount) }}</div>
+                <div class="text-muted">Total Paid Out</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payouts Table -->
+    <div class="payout-card">
+        <h4>📋 All Payout Requests</h4>
+        {% if payouts %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Organizer</th>
+                        <th>Event</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Processed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payout in payouts %}
+                    <tr id="payout-row-{{ payout.id }}">
+                        <td>{{ payout.created_at.strftime('%m/%d/%Y') }}</td>
+                        <td>
+                            <strong>{{ payout.organizer.name }}</strong><br>
+                            <small class="text-muted">{{ payout.organizer.email }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ payout.event.name }}</strong><br>
+                            <small class="text-muted">{{ payout.event.date.strftime('%m/%d/%Y') if payout.event.date else 'TBD' }}</small>
+                        </td>
+                        <td class="font-weight-bold">${{ "%.2f"|format(payout.amount) }}</td>
+                        <td>
+                            <span class="status-badge status-{{ payout.status }}">
+                                {{ payout.status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if payout.completed_at %}
+                                {{ payout.completed_at.strftime('%m/%d/%Y') }}
+                            {% elif payout.processed_at %}
+                                {{ payout.processed_at.strftime('%m/%d/%Y') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if payout.status == 'pending' %}
+                                <button class="btn approve-btn btn-sm" onclick="processPayout({{ payout.id }}, 'approve')">
+                                    ✓ Approve
+                                </button>
+                                <button class="btn reject-btn btn-sm" onclick="processPayout({{ payout.id }}, 'reject')">
+                                    ✗ Review
+                                </button>
+                            {% elif payout.status == 'processing' %}
+                                <span class="text-primary">Processing...</span>
+                            {% elif payout.status == 'completed' %}
+                                <span class="text-success">✓ Completed</span>
+                            {% elif payout.status == 'failed' %}
+                                <span class="text-danger">⚠ Review Required</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted">No payout requests yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="payout-card">
+        <h5>🚀 Quick Actions</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <button class="btn btn-success btn-block" onclick="approveAllPending()">
+                    Approve All Pending ({{ pending_count }})
+                </button>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary btn-block">
+                    ← Back to Admin Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function processPayout(payoutId, action) {
+    let confirmMessage = action === 'approve' 
+        ? 'Approve this payout? Organizer will be notified via email.'
+        : 'Mark this payout for review? Organizer will be notified.';
+    
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    // Find the button and disable it
+    const row = document.getElementById(`payout-row-${payoutId}`);
+    const buttons = row.querySelectorAll('button');
+    buttons.forEach(btn => btn.disabled = true);
+    
+    let reason = '';
+    if (action === 'reject') {
+        reason = prompt('Optional reason for review (will be sent to organizer):') || 'Administrative review required';
+    }
+    
+    fetch(`/admin/payout/${payoutId}/process`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            action: action,
+            reason: reason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+            buttons.forEach(btn => btn.disabled = false);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+        buttons.forEach(btn => btn.disabled = false);
+    });
+}
+
+function approveAllPending() {
+    const pendingCount = {{ pending_count }};
+    
+    if (pendingCount === 0) {
+        alert('No pending payouts to approve.');
+        return;
+    }
+    
+    if (!confirm(`Approve all ${pendingCount} pending payouts? This will notify all organizers via email.`)) {
+        return;
+    }
+    
+    // Get all pending payout IDs
+    const pendingRows = document.querySelectorAll('[id^="payout-row-"]');
+    const pendingIds = [];
+    
+    pendingRows.forEach(row => {
+        const statusBadge = row.querySelector('.status-pending');
+        if (statusBadge) {
+            const payoutId = row.id.replace('payout-row-', '');
+            pendingIds.push(payoutId);
+        }
+    });
+    
+    // Process each payout
+    let processed = 0;
+    pendingIds.forEach(payoutId => {
+        fetch(`/admin/payout/${payoutId}/process`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'approve'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            processed++;
+            if (processed === pendingIds.length) {
+                alert(`Successfully processed ${processed} payouts!`);
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error processing payout:', error);
+        });
+    });
+}
+</script>
+{% endblock %}

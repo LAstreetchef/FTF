@@ -12,6 +12,10 @@
         <i data-feather="plus" class="me-2"></i>
         Create New Event
     </a>
+    <a href="{{ url_for('organizer_earnings') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-warning ms-2">
+        <i data-feather="dollar-sign" class="me-2"></i>
+        View Earnings
+    </a>
 </div>
 
 <!-- Quick Stats -->
