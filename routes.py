@@ -3432,6 +3432,7 @@ def event_detail(event_id):
         flash('This event is no longer accepting pledges', 'info')
         return redirect(url_for('events_list'))
     
+    
     return render_template('events/detail.html', event=event)
 
 @app.route('/events/<int:event_id>/pledge', methods=['GET', 'POST'])
