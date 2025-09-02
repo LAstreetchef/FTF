@@ -1827,15 +1827,32 @@ def update_pledge_totals():
     
     try:
         events_updated = 0
+        events_details = []
         all_events = Event.query.all()
         
         for event in all_events:
             old_total = event.current_pledges
-            event.update_pledge_total()
-            if event.current_pledges != old_total:
+            
+            # Manual calculation to ensure it works
+            from sqlalchemy import func
+            total = db.session.query(func.sum(Pledge.amount)).filter(
+                Pledge.event_id == event.id,
+                Pledge.status.in_(['pending', 'charged'])
+            ).scalar() or 0
+            
+            event.current_pledges = total
+            
+            if total != old_total:
                 events_updated += 1
+                events_details.append(f"Event '{event.name}': ${old_total:.2f} → ${total:.2f}")
         
-        return f"Updated pledge totals for {events_updated} events. Charged pledges are now included in totals!"
+        db.session.commit()
+        
+        details_str = "<br>".join(events_details[:10])  # Show first 10 for brevity
+        if len(events_details) > 10:
+            details_str += f"<br>... and {len(events_details) - 10} more events"
+        
+        return f"Updated pledge totals for {events_updated} events. Charged pledges are now included!<br><br>Details:<br>{details_str}"
         
     except Exception as e:
         db.session.rollback()
