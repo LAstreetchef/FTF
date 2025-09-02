@@ -181,11 +181,11 @@
         </div>
         
         <!-- Recent Supporters -->
-        {% if event.pledges %}
         <div class="card mb-4">
             <div class="card-body">
                 <h5 class="card-title">Recent Supporters</h5>
                 <div class="space-y-2">
+                    {% if event.pledges %}
                     {% for pledge in event.pledges|reverse %}
                     <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
                         <div class="d-flex align-items-center">
@@ -213,10 +213,10 @@
                         </div>
                     </div>
                     {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
-        {% endif %}
         
         <!-- Social Sharing -->
         <div class="card mb-4">
