@@ -134,7 +134,7 @@
                         <td>
                             {% if not event.organizer_fee_charged %}
                                 <span class="badge bg-danger">Payment Required</span>
-                                <br><small class="text-muted">$5 organizer fee</small>
+                                <br><small class="text-muted">$5 organizer pledge</small>
                             {% else %}
                                 <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' if event.status == 'pending' else 'primary' if event.status == 'approved' else 'secondary' }}">
                                     {{ event.status.title() }}

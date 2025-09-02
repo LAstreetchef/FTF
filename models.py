@@ -104,7 +104,7 @@ class Event(db.Model):
     approved_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Organizer fee tracking ($5 charge for creating event)
+    # Organizer pledge tracking ($5 charge for creating event)
     organizer_fee_charged = db.Column(db.Boolean, default=False)
     organizer_fee_payment_intent = db.Column(db.String(255))  # Stripe payment intent ID
     organizer_entree_claimed = db.Column(db.Boolean, default=False)  # Whether organizer got their free entree

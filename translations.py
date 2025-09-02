@@ -97,7 +97,7 @@ translations = {
         'choose_popular_trucks': 'Choose Popular Trucks',
         'choose_popular_trucks_desc': 'Select food trucks with appealing menus and good reputations to attract more pledges.',
         'organizer_benefits': 'Organizer Benefits',
-        'organizer_benefits_desc': 'Pay the $5 organizer fee to publish your event and get a FREE entree when it\'s successfully funded!',
+        'organizer_benefits_desc': 'Pay the $5 organizer pledge to publish your event and get a FREE entree when it\'s successfully funded!',
 
         # How It Works Tutorial
         'how_it_works_tutorial': 'How It Works - Interactive Tutorial',
@@ -107,7 +107,7 @@ translations = {
         'finish': 'Finish',
         'skip_tutorial': 'Skip Tutorial',
         'tutorial_step_1_title': '🎯 Step 1: Create Your Event',
-        'tutorial_step_1_desc': 'Choose a food truck, select delicious menu items, set your fundraising goal, and pay the $5 organizer fee to publish your event.',
+        'tutorial_step_1_desc': 'Choose a food truck, select delicious menu items, set your fundraising goal, and pay the $5 organizer pledge to publish your event.',
         'tutorial_step_2_title': '💵 Step 2: Add Your Markup & Earn!',
         'tutorial_step_2_desc': 'Here\'s how you make money! Add markup to menu prices - this extra amount goes directly to your cause or yourself. The more markup, the more you earn!',
         'tutorial_step_3_title': '💖 Step 3: Share & Rally Support',
@@ -150,8 +150,8 @@ translations = {
         'passwords_dont_match': 'Passwords do not match',
         
         # Payment
-        'organizer_fee': 'Organizer Fee',
-        'one_time_fee': 'One-time fee per event',
+        'organizer_fee': 'Organizer Pledge',
+        'one_time_fee': 'One-time pledge per event',
         'what_you_get': 'What You Get For Your',
         'event_publishing': 'Event Publishing',
         'free_entree': 'Free Entree',
@@ -344,8 +344,8 @@ translations = {
         'passwords_dont_match': 'Las contraseñas no coinciden',
         
         # Payment
-        'organizer_fee': 'Tarifa de Organizador',
-        'one_time_fee': 'Tarifa única por evento',
+        'organizer_fee': 'Promesa del Organizador',
+        'one_time_fee': 'Promesa única por evento',
         'what_you_get': 'Lo Que Obtienes Por Tu',
         'event_publishing': 'Publicación del Evento',
         'free_entree': 'Plato Principal Gratis',

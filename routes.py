@@ -1781,7 +1781,7 @@ def fix_organizer_pledges():
         return "Access denied", 403
     
     try:
-        # Find events with organizer fee charged but no corresponding pledge
+        # Find events with organizer pledge charged but no corresponding pledge
         events_fixed = 0
         events_with_fee = Event.query.filter_by(organizer_fee_charged=True).all()
         
@@ -2357,7 +2357,7 @@ def admin_approve_event(event_id):
         event.status = 'approved'
         event.approved_at = datetime.utcnow()
         
-        # Generate organizer entree ticket if they paid the organizer fee
+        # Generate organizer entree ticket if they paid the organizer pledge
         organizer_entree_ticket = None
         if event.organizer_fee_charged and not event.organizer_entree_claimed:
             organizer_entree_ticket = generate_ticket_code()
@@ -2925,8 +2925,8 @@ def organizer_create_event():
             
             logging.info(f"Event created successfully: {event.name} with {len(selected_items)} menu items")
             
-            # Redirect to payment step for $5 organizer fee
-            flash('Event details saved! Please complete the $5 organizer fee to publish your event.', 'info')
+            # Redirect to payment step for $5 organizer pledge
+            flash('Event details saved! Please complete your $5 organizer pledge to publish your event.', 'info')
             return redirect(url_for('organizer_pay_fee', event_id=event.id) + f'?auth_token={auth_token}' if auth_token else url_for('organizer_pay_fee', event_id=event.id))
             
         except Exception as e:
@@ -2942,7 +2942,7 @@ def organizer_create_event():
 
 @app.route('/organizer/pay-fee/<int:event_id>', methods=['GET', 'POST'])
 def organizer_pay_fee(event_id):
-    """Handle $5 organizer fee payment"""
+    """Handle $5 organizer pledge payment"""
     # Authentication check (same pattern as other organizer routes)
     organizer_id = None
     auth_token = request.args.get('auth_token')
@@ -2971,17 +2971,17 @@ def organizer_pay_fee(event_id):
     
     # Check if fee already paid
     if event.organizer_fee_charged:
-        flash('Organizer fee already paid for this event', 'info')
+        flash('Organizer pledge already paid for this event', 'info')
         return redirect(url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard'))
     
     if request.method == 'POST':
         try:
-            # Create Stripe payment intent for $5 organizer fee
+            # Create Stripe payment intent for $5 organizer pledge
             payment_intent = stripe.PaymentIntent.create(
                 amount=500,  # $5.00 in cents
                 currency='usd',
                 metadata={
-                    'type': 'organizer_fee',
+                    'type': 'organizer_pledge',
                     'event_id': event.id,
                     'organizer_id': organizer_id
                 }
@@ -2996,7 +2996,7 @@ def organizer_pay_fee(event_id):
             })
             
         except Exception as e:
-            logging.error(f"Error creating payment intent for organizer fee: {str(e)}")
+            logging.error(f"Error creating payment intent for organizer pledge: {str(e)}")
             return jsonify({'error': 'Payment initialization failed'}), 400
     
     # GET request - show payment form
@@ -3105,7 +3105,7 @@ def confirm_food_truck_registration_fee_payment(truck_id):
 
 @app.route('/organizer/confirm-fee-payment/<int:event_id>', methods=['POST'])
 def confirm_organizer_fee_payment(event_id):
-    """Confirm organizer fee payment and publish event"""
+    """Confirm organizer pledge payment and publish event"""
     # Authentication check
     organizer_id = None
     auth_token = request.args.get('auth_token')
@@ -3165,7 +3165,7 @@ def confirm_organizer_fee_payment(event_id):
             send_email(
                 'truckstopsla@gmail.com',
                 f"New Event Published: {event.name}",
-                f"A new event has been published (organizer fee paid):\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {event.food_truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}\n\nOrganizer will receive a free entree when the event is successfully funded."
+                f"A new event has been published (organizer pledge paid):\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {event.food_truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}\n\nOrganizer will receive a free entree when the event is successfully funded."
             )
             
             return jsonify({'success': True, 'redirect': url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard')})
@@ -3173,7 +3173,7 @@ def confirm_organizer_fee_payment(event_id):
             return jsonify({'error': 'Payment not completed'}), 400
             
     except Exception as e:
-        logging.error(f"Error confirming organizer fee payment: {str(e)}")
+        logging.error(f"Error confirming organizer pledge payment: {str(e)}")
         return jsonify({'error': 'Payment confirmation failed'}), 500
 
 # =============================================================================
