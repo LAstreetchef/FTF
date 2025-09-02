@@ -134,11 +134,11 @@ class Event(db.Model):
         return self.current_pledges >= self.pledge_goal
     
     def update_pledge_total(self):
-        """Update current pledges total from active pledges only"""
+        """Update current pledges total from active pledges (pending + charged)"""
         from sqlalchemy import func
-        total = db.session.query(func.sum(Pledge.amount)).filter_by(
-            event_id=self.id, 
-            status='pending'
+        total = db.session.query(func.sum(Pledge.amount)).filter(
+            Pledge.event_id == self.id,
+            Pledge.status.in_(['pending', 'charged'])
         ).scalar() or 0
         self.current_pledges = total
         db.session.commit()

@@ -1819,6 +1819,28 @@ def fix_organizer_pledges():
         db.session.rollback()
         return f"Error: {str(e)}", 500
 
+@app.route('/admin/update-pledge-totals-xyz456')
+def update_pledge_totals():
+    """Update pledge totals for all events to include charged pledges - admin only"""
+    if not session.get('admin_id'):
+        return "Access denied", 403
+    
+    try:
+        events_updated = 0
+        all_events = Event.query.all()
+        
+        for event in all_events:
+            old_total = event.current_pledges
+            event.update_pledge_total()
+            if event.current_pledges != old_total:
+                events_updated += 1
+        
+        return f"Updated pledge totals for {events_updated} events. Charged pledges are now included in totals!"
+        
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}", 500
+
 # PRODUCTION SECURITY: Test route disabled for live deployment
 # @app.route('/test-admin-login-xyz123', methods=['GET', 'POST'])
 # def test_admin_login():
@@ -3426,12 +3448,12 @@ def events_list():
 @app.route('/events/<int:event_id>')
 def event_detail(event_id):
     """Public event detail page for pledging"""
-    event = Event.query.get_or_404(event_id)
+    from sqlalchemy.orm import joinedload
+    event = Event.query.options(joinedload(Event.pledges)).get_or_404(event_id)
     
     if event.status not in ['pending', 'funded']:
         flash('This event is no longer accepting pledges', 'info')
         return redirect(url_for('events_list'))
-    
     
     return render_template('events/detail.html', event=event)
 
