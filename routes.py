@@ -1774,6 +1774,51 @@ def auto_fix_all_menus():
             'message': f'Error during auto-fix: {str(e)}'
         })
 
+@app.route('/admin/fix-organizer-pledges-xyz789')
+def fix_organizer_pledges():
+    """Create missing organizer pledges for existing events - admin only"""
+    if not session.get('admin_id'):
+        return "Access denied", 403
+    
+    try:
+        # Find events with organizer fee charged but no corresponding pledge
+        events_fixed = 0
+        events_with_fee = Event.query.filter_by(organizer_fee_charged=True).all()
+        
+        for event in events_with_fee:
+            # Check if organizer pledge already exists
+            existing_pledge = Pledge.query.filter_by(
+                event_id=event.id,
+                email=event.organizer.email,
+                amount=5.00
+            ).first()
+            
+            if not existing_pledge:
+                # Create organizer's $5 pledge
+                organizer_pledge = Pledge(
+                    email=event.organizer.email,
+                    amount=5.00,
+                    processing_fee=0.0,
+                    stripe_payment_intent_id=event.organizer_fee_payment_intent,
+                    event_id=event.id,
+                    status='charged',
+                    charged_at=event.created_at
+                )
+                
+                db.session.add(organizer_pledge)
+                
+                # Update event pledge totals
+                event.update_pledge_total()
+                events_fixed += 1
+        
+        db.session.commit()
+        
+        return f"Fixed {events_fixed} events with missing organizer pledges. All events now show organizer as first supporter!"
+        
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}", 500
+
 # PRODUCTION SECURITY: Test route disabled for live deployment
 # @app.route('/test-admin-login-xyz123', methods=['GET', 'POST'])
 # def test_admin_login():
@@ -3056,10 +3101,27 @@ def confirm_organizer_fee_payment(event_id):
         if payment_intent.status == 'succeeded':
             # Mark fee as paid and publish event
             event.organizer_fee_charged = True
+            
+            # Create organizer's $5 pledge to show on event page
+            organizer = Organizer.query.get(organizer_id)
+            organizer_pledge = Pledge(
+                email=organizer.email,
+                amount=5.00,
+                processing_fee=0.0,  # No processing fee for organizer
+                stripe_payment_intent_id=event.organizer_fee_payment_intent,
+                event_id=event.id,
+                status='charged',  # Already paid
+                charged_at=datetime.utcnow()
+            )
+            
+            db.session.add(organizer_pledge)
+            
+            # Update event pledge total to include organizer's $5
+            event.update_pledge_total()
+            
             db.session.commit()
             
             # Send notification email to admin about new event
-            organizer = Organizer.query.get(organizer_id)
             organizer_name = organizer.name if organizer else "Unknown Organizer"
             send_email(
                 'truckstopsla@gmail.com',

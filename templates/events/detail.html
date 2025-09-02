@@ -180,6 +180,43 @@
             </div>
         </div>
         
+        <!-- Recent Supporters -->
+        {% if event.pledges %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Recent Supporters</h5>
+                <div class="space-y-2">
+                    {% for pledge in event.pledges|reverse %}
+                    <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 32px; height: 32px;">
+                                <i data-feather="user" class="text-white" style="width: 16px; height: 16px;"></i>
+                            </div>
+                            <div>
+                                {% if pledge.email == event.organizer.email %}
+                                <strong>{{ event.organizer.name }} (Organizer)</strong>
+                                <br><small class="text-muted">Event creator</small>
+                                {% else %}
+                                <strong>{{ pledge.email.split('@')[0] }}***</strong>
+                                <br><small class="text-muted">Supporter</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-primary">${{ "%.2f"|format(pledge.amount) }}</strong>
+                            {% if pledge.status == 'charged' %}
+                            <br><small class="text-success">Paid</small>
+                            {% else %}
+                            <br><small class="text-warning">Pledged</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
         <!-- Social Sharing -->
         <div class="card mb-4">
             <div class="card-body">
