@@ -161,21 +161,62 @@ with app.app_context():
         except Exception as e:
             logging.warning(f"Database verification failed: {str(e)}")
         
-        # Create tables safely - avoid recreating Event table in production
+        # Deployment-safe table creation with proper migration handling
         try:
-            # Check if Event table exists and has data
-            result = db.session.execute(db.text("SELECT COUNT(*) FROM event")).scalar()
-            if result > 0:
-                logging.info(f"Event table exists with {result} events - PRESERVING existing data")
-                # DO NOT call db.create_all() if events exist - this prevents table recreation
-                logging.info("Skipping table creation to preserve existing events")
+            # First, ensure ALL tables exist without recreating existing ones
+            from sqlalchemy import inspect
+            inspector = inspect(db.engine)
+            existing_tables = inspector.get_table_names()
+            
+            logging.info(f"Found {len(existing_tables)} existing tables")
+            
+            # Check if Event table exists
+            if 'event' in existing_tables:
+                # Event table exists - check if it has data
+                try:
+                    event_count = db.session.execute(db.text("SELECT COUNT(*) FROM event")).scalar()
+                    logging.info(f"Event table exists with {event_count} events")
+                    
+                    if event_count > 0:
+                        # CRITICAL: Backup event data before any table operations
+                        logging.info("Backing up event data before deployment operations")
+                        backup_result = db.session.execute(db.text("""
+                            CREATE TABLE IF NOT EXISTS event_backup AS 
+                            SELECT * FROM event
+                        """))
+                        db.session.commit()
+                        logging.info("Event data backed up successfully")
+                    
+                    # Create only missing tables, preserve existing ones
+                    db.create_all()
+                    
+                    # Restore data if table was recreated
+                    if event_count > 0:
+                        current_count = db.session.execute(db.text("SELECT COUNT(*) FROM event")).scalar()
+                        if current_count == 0:
+                            logging.info("Event table was recreated - restoring data from backup")
+                            db.session.execute(db.text("""
+                                INSERT INTO event SELECT * FROM event_backup
+                            """))
+                            db.session.commit()
+                            logging.info(f"Restored {event_count} events from backup")
+                        
+                        # Clean up backup table
+                        db.session.execute(db.text("DROP TABLE IF EXISTS event_backup"))
+                        db.session.commit()
+                        
+                except Exception as backup_error:
+                    logging.error(f"Event backup/restore failed: {backup_error}")
+                    # Still try to create tables
+                    db.create_all()
             else:
-                # Safe to create all tables if Event table is empty
-                logging.info("Event table empty - safe to create all tables")
+                # No Event table - safe to create all
+                logging.info("Event table not found - creating all tables")
                 db.create_all()
+                
         except Exception as e:
-            # Event table doesn't exist - create all tables
-            logging.info(f"Event table not found ({e}) - creating all tables")
+            # Fallback - create all tables
+            logging.error(f"Migration failed ({e}) - falling back to create_all")
             db.create_all()
         
         logging.info("Database tables created/verified")
