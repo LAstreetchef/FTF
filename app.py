@@ -161,65 +161,79 @@ with app.app_context():
         except Exception as e:
             logging.warning(f"Database verification failed: {str(e)}")
         
-        # Deployment-safe table creation with proper migration handling
+        # Advanced deployment-safe system with permanent backup storage
         try:
-            # First, ensure ALL tables exist without recreating existing ones
-            from sqlalchemy import inspect
-            inspector = inspect(db.engine)
-            existing_tables = inspector.get_table_names()
+            # First, create all tables including backup system
+            db.create_all()
+            logging.info("Database tables created/verified")
             
-            logging.info(f"Found {len(existing_tables)} existing tables")
+            # Import models after table creation
+            from models import Event, EventBackup
+            import json
             
-            # Check if Event table exists
-            if 'event' in existing_tables:
-                # Event table exists - check if it has data
-                try:
-                    event_count = db.session.execute(db.text("SELECT COUNT(*) FROM event")).scalar()
-                    logging.info(f"Event table exists with {event_count} events")
-                    
-                    if event_count > 0:
-                        # CRITICAL: Backup event data before any table operations
-                        logging.info("Backing up event data before deployment operations")
-                        backup_result = db.session.execute(db.text("""
-                            CREATE TABLE IF NOT EXISTS event_backup AS 
-                            SELECT * FROM event
-                        """))
-                        db.session.commit()
-                        logging.info("Event data backed up successfully")
-                    
-                    # Create only missing tables, preserve existing ones
-                    db.create_all()
-                    
-                    # Restore data if table was recreated
-                    if event_count > 0:
-                        current_count = db.session.execute(db.text("SELECT COUNT(*) FROM event")).scalar()
-                        if current_count == 0:
-                            logging.info("Event table was recreated - restoring data from backup")
-                            db.session.execute(db.text("""
-                                INSERT INTO event SELECT * FROM event_backup
-                            """))
-                            db.session.commit()
-                            logging.info(f"Restored {event_count} events from backup")
+            # Check if Event table has data
+            event_count = Event.query.count()
+            logging.info(f"Event table has {event_count} events")
+            
+            if event_count == 0:
+                # Check for previous backup and restore
+                latest_backup = EventBackup.query.order_by(EventBackup.created_at.desc()).first()
+                if latest_backup:
+                    logging.info("Found previous backup - attempting restore")
+                    try:
+                        backup_data = json.loads(latest_backup.backup_data)
+                        restored_count = 0
                         
-                        # Clean up backup table
-                        db.session.execute(db.text("DROP TABLE IF EXISTS event_backup"))
-                        db.session.commit()
+                        for event_data in backup_data:
+                            # Create new event from backup data
+                            event = Event()
+                            for key, value in event_data.items():
+                                if key != 'id' and hasattr(event, key):
+                                    if key in ['date', 'created_at', 'approved_at'] and value:
+                                        # Handle datetime fields
+                                        from datetime import datetime
+                                        setattr(event, key, datetime.fromisoformat(value.replace('Z', '+00:00')))
+                                    else:
+                                        setattr(event, key, value)
+                            
+                            db.session.add(event)
+                            restored_count += 1
                         
-                except Exception as backup_error:
-                    logging.error(f"Event backup/restore failed: {backup_error}")
-                    # Still try to create tables
-                    db.create_all()
-            else:
-                # No Event table - safe to create all
-                logging.info("Event table not found - creating all tables")
-                db.create_all()
+                        db.session.commit()
+                        logging.info(f"✅ RESTORED {restored_count} events from backup!")
+                        
+                    except Exception as restore_error:
+                        logging.error(f"Restore failed: {restore_error}")
+                        db.session.rollback()
+            
+            # Always create a fresh backup of current data for next deployment
+            events = Event.query.all()
+            if events:
+                logging.info(f"Creating backup of {len(events)} events for next deployment")
+                
+                backup_data = []
+                for event in events:
+                    event_dict = {}
+                    for column in event.__table__.columns:
+                        value = getattr(event, column.name)
+                        if hasattr(value, 'isoformat'):
+                            value = value.isoformat()
+                        event_dict[column.name] = value
+                    backup_data.append(event_dict)
+                
+                # Store backup in permanent table
+                backup = EventBackup()
+                backup.backup_data = json.dumps(backup_data)
+                backup.backup_type = 'automatic'
+                
+                db.session.add(backup)
+                db.session.commit()
+                logging.info("✅ Event backup created for future deployments")
                 
         except Exception as e:
-            # Fallback - create all tables
-            logging.error(f"Migration failed ({e}) - falling back to create_all")
+            # Fallback - still create tables
+            logging.error(f"Advanced backup system failed ({e}) - creating basic tables")
             db.create_all()
-        
-        logging.info("Database tables created/verified")
         
         # Create default admin if not exists
         from models import Admin

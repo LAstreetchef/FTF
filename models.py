@@ -160,6 +160,14 @@ class FoodTruck(db.Model):
         """Check if food truck is approved for events"""
         return self.status == 'approved'
 
+class EventBackup(db.Model):
+    """Permanent backup storage for Event data that survives deployments"""
+    __tablename__ = 'event_backup_permanent'
+    id = db.Column(db.Integer, primary_key=True)
+    backup_data = db.Column(db.Text, nullable=False)  # JSON data of all events
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    backup_type = db.Column(db.String(50), default='pre_deployment')
+
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
