@@ -1,10 +1,10 @@
 {
-  "timestamp": "2025-09-03T14:41:07.468621",
+  "timestamp": "2025-09-03T15:01:54.271773",
   "backup_type": "automatic",
-  "event_count": 1,
+  "event_count": 2,
   "events": [
     {
-      "id": 2,
+      "id": 1,
       "name": "File Backup Test Event",
       "description": "Testing the new file-based backup system",
       "date": "2025-09-10T14:17:36.074883",
@@ -22,6 +22,26 @@
       "organizer_fee_payment_intent": null,
       "organizer_entree_claimed": false,
       "markup_split_config": null
+    },
+    {
+      "id": 2,
+      "name": "Food Truck Fundraiser",
+      "description": "Food Truck Fundraiser",
+      "date": "2025-10-01T10:54:00",
+      "location": "3515 Hayden, Culver City CA 90232",
+      "organizer_id": 1,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.8}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1000.0,
+      "status": "approved",
+      "current_pledges": 1594.0,
+      "approved_at": "2025-09-03T14:56:24.455286",
+      "created_at": "2025-09-03T14:55:07.285011",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S3I5jBgt3ltA59n1qggYlnw",
+      "organizer_entree_claimed": true,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
   ]
 }

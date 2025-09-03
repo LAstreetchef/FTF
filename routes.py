@@ -5137,15 +5137,12 @@ def admin_process_payout(payout_id):
             f'Good news! Your payout request for ${payout.amount:.2f} from event "{payout.event.name}" has been approved and is being processed.\\n\\nExpected processing time: 2-3 business days.\\n\\nThank you for being a Food Truck Ambassador!'
         )
         
-        # Mark as completed for demo purposes
-        payout.status = 'completed'
-        payout.completed_at = datetime.utcnow()
-        
+        # Keep as processing - admin must manually mark as completed
         db.session.commit()
         
         return jsonify({
             'success': True,
-            'message': f'Payout of ${payout.amount:.2f} approved and processed'
+            'message': f'Payout of ${payout.amount:.2f} approved and is being processed'
         })
         
     elif action == 'reject':
