@@ -79,27 +79,42 @@
                                 <p class="text-muted mb-3">Choose the items you'd like to order. You'll only be charged if the event reaches its funding goal.</p>
                                 <div id="menu-items-container">
                                     {% for item in menu_items %}
-                                    <div class="form-check menu-item-check mb-3" data-price="{{ '%.2f'|format(item.marked_up_price) }}">
-                                        <input class="form-check-input menu-item-checkbox" type="checkbox" 
-                                               value="{{ loop.index0 }}" 
-                                               id="item-{{ loop.index0 }}"
-                                               data-name="{{ item.name }}"
-                                               data-price="{{ '%.2f'|format(item.marked_up_price) }}"
-                                               data-description="{{ item.get('description', '') }}"
-                                               name="selected_items">
-                                        <label class="form-check-label w-100" for="item-{{ loop.index0 }}">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <strong>{{ item.name }}</strong>
+                                    <div class="menu-item-quantity card mb-3" data-price="{{ '%.2f'|format(item.marked_up_price) }}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="card-title mb-1">{{ item.name }}</h6>
                                                     {% if item.get('description') %}
-                                                    <br><small class="text-muted">{{ item.description }}</small>
+                                                    <p class="card-text text-muted small mb-2">{{ item.description }}</p>
                                                     {% endif %}
+                                                    <span class="text-primary fw-bold">${{ "%.2f"|format(item.marked_up_price) }} each</span>
                                                 </div>
-                                                <div class="text-end">
-                                                    <strong class="text-primary">${{ "%.2f"|format(item.marked_up_price) }}</strong>
+                                                <div class="quantity-controls ms-3">
+                                                    <div class="input-group input-group-sm" style="width: 120px;">
+                                                        <button class="btn btn-outline-secondary" type="button" 
+                                                                onclick="adjustQuantity('item-{{ loop.index0 }}', -1)">
+                                                            <i data-feather="minus" style="width: 14px; height: 14px;"></i>
+                                                        </button>
+                                                        <input type="number" class="form-control text-center menu-item-quantity-input" 
+                                                               id="item-{{ loop.index0 }}" 
+                                                               name="menu_items" 
+                                                               value="0" 
+                                                               min="0" 
+                                                               max="20"
+                                                               data-name="{{ item.name }}"
+                                                               data-price="{{ '%.2f'|format(item.marked_up_price) }}"
+                                                               data-description="{{ item.get('description', '') }}"
+                                                               onchange="updateSelectionSummary()"
+                                                               oninput="updateSelectionSummary()">
+                                                        <button class="btn btn-outline-secondary" type="button" 
+                                                                onclick="adjustQuantity('item-{{ loop.index0 }}', 1)">
+                                                            <i data-feather="plus" style="width: 14px; height: 14px;"></i>
+                                                        </button>
+                                                    </div>
+                                                    <small class="text-muted">Quantity</small>
                                                 </div>
                                             </div>
-                                        </label>
+                                        </div>
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -211,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializePaymentForm();
     
     // Menu item selection handling
-    const checkboxes = document.querySelectorAll('.menu-item-checkbox');
+    const quantityInputs = document.querySelectorAll('.menu-item-quantity-input');
     const selectionSummary = document.getElementById('selection-summary');
     const selectedItemsList = document.getElementById('selected-items-list');
     const subtotalElement = document.getElementById('subtotal-amount');
@@ -222,24 +237,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const buttonText = document.getElementById('button-text');
     const hiddenAmountInput = document.getElementById('amount');
     
-    // Add event listeners to all checkboxes
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateSelectionSummary);
+    // Add event listeners to all quantity inputs
+    quantityInputs.forEach(input => {
+        input.addEventListener('change', updateSelectionSummary);
+        input.addEventListener('input', updateSelectionSummary);
     });
     
     function updateSelectionSummary() {
         const selectedItems = [];
         let subtotal = 0;
         
-        checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
+        quantityInputs.forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            if (quantity > 0) {
                 const item = {
-                    name: checkbox.dataset.name,
-                    price: parseFloat(checkbox.dataset.price),
-                    description: checkbox.dataset.description
+                    name: input.dataset.name,
+                    price: parseFloat(input.dataset.price),
+                    description: input.dataset.description,
+                    quantity: quantity
                 };
                 selectedItems.push(item);
-                subtotal += item.price;
+                subtotal += item.price * item.quantity;
             }
         });
         
@@ -258,8 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update selected items list
             selectedItemsList.innerHTML = selectedItems.map(item => 
                 `<div class="d-flex justify-content-between align-items-center mb-1">
-                    <span>${item.name}</span>
-                    <span>$${item.price.toFixed(2)}</span>
+                    <span>${item.name} ${item.quantity > 1 ? '(x' + item.quantity + ')' : ''}</span>
+                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
                 </div>`
             ).join('');
             
@@ -275,12 +293,24 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update submit button
             submitButton.disabled = false;
-            const itemCount = selectedItems.length;
-            const itemText = itemCount === 1 ? 'item' : 'items';
-            buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge ${itemCount} ${itemText} ($${subtotal.toFixed(2)})`;
+            const totalQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
+            const itemText = totalQuantity === 1 ? 'item' : 'items';
+            buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge ${totalQuantity} ${itemText} ($${subtotal.toFixed(2)})`;
             feather.replace();
         }
     }
+    
+    // Quantity adjustment functions
+    window.adjustQuantity = function(inputId, change) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            const currentValue = parseInt(input.value) || 0;
+            const newValue = Math.max(0, Math.min(20, currentValue + change));
+            input.value = newValue;
+            updateSelectionSummary();
+            feather.replace();
+        }
+    };
     
     // Fallback amount input handling for events without menu items
     const fallbackAmountInput = document.querySelector('input[name="amount"]:not([type="hidden"])');
@@ -366,13 +396,17 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Add selected menu items to form (if any)
             const selectedItems = [];
-            const checkboxes = document.querySelectorAll('.menu-item-checkbox:checked');
-            checkboxes.forEach(checkbox => {
-                selectedItems.push({
-                    name: checkbox.dataset.name,
-                    price: parseFloat(checkbox.dataset.price),
-                    description: checkbox.dataset.description
-                });
+            const quantityInputs = document.querySelectorAll('.menu-item-quantity-input');
+            quantityInputs.forEach(input => {
+                const quantity = parseInt(input.value) || 0;
+                if (quantity > 0) {
+                    selectedItems.push({
+                        name: input.dataset.name,
+                        price: parseFloat(input.dataset.price),
+                        description: input.dataset.description,
+                        quantity: quantity
+                    });
+                }
             });
             
             if (selectedItems.length > 0) {

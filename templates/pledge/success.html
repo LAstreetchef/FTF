@@ -69,13 +69,19 @@
                     {% for item in selected_items %}
                     <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
                         <div>
-                            <strong>{{ item.name }}</strong>
+                            <strong>{{ item.name }}{% if item.get('quantity', 1) > 1 %} (x{{ item.quantity }}){% endif %}</strong>
                             {% if item.get('description') %}
                             <br><small class="text-muted">{{ item.description }}</small>
                             {% endif %}
                         </div>
                         <div class="text-end">
-                            <strong class="text-primary">${{ "%.2f"|format(item.price) }}</strong>
+                            {% set item_quantity = item.get('quantity', 1) %}
+                            {% set unit_price = item.price %}
+                            {% set total_price = unit_price * item_quantity %}
+                            {% if item_quantity > 1 %}
+                                <small class="text-muted">${{ "%.2f"|format(unit_price) }} each</small><br>
+                            {% endif %}
+                            <strong class="text-primary">${{ "%.2f"|format(total_price) }}</strong>
                         </div>
                     </div>
                     {% endfor %}
