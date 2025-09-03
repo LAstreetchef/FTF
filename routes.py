@@ -4848,6 +4848,8 @@ def organizer_earnings():
 @app.route('/organizer/request-payout', methods=['POST'])
 def request_payout():
     """Request payout for completed events"""
+    print(f"DEBUG: Payout request received")
+    
     # Authentication check
     organizer_id = None
     auth_token = request.args.get('auth_token')
@@ -4908,12 +4910,16 @@ def request_payout():
     db.session.add(payout)
     db.session.commit()
     
-    # Send notification to admin
-    send_email(
-        'truckstopsla@gmail.com',
-        f'Payout Request: ${amount:.2f} for {organizer.name}',
-        f'Organizer {organizer.name} has requested a payout of ${amount:.2f} for event "{event.name}".\\n\\nEvent Details:\\nDate: {event.date}\\nLocation: {event.location}\\nTotal Raised: ${event.current_pledges:.2f}\\nOrganizer Profit: ${amount:.2f}\\n\\nPlease process this payout in the admin dashboard.'
-    )
+    # Send notification to admin (optional - don't fail if email fails)
+    try:
+        send_email(
+            'truckstopsla@gmail.com',
+            f'Payout Request: ${amount:.2f} for {organizer.name}',
+            f'Organizer {organizer.name} has requested a payout of ${amount:.2f} for event "{event.name}".\\n\\nEvent Details:\\nDate: {event.date}\\nLocation: {event.location}\\nTotal Raised: ${event.current_pledges:.2f}\\nOrganizer Profit: ${amount:.2f}\\n\\nPlease process this payout in the admin dashboard.'
+        )
+        print(f"DEBUG: Email notification sent for payout request")
+    except Exception as e:
+        print(f"DEBUG: Email notification failed, but continuing: {str(e)}")
     
     return jsonify({
         'success': True, 
