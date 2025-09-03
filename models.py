@@ -43,7 +43,7 @@ class Organizer(db.Model):
         total_pledgers = 0
         events_150_percent = 0
         
-        for event in self.events.all():
+        for event in self.events:
             if event.status in ['approved', 'completed']:
                 profit = event.calculate_organizer_profit_if_goal_met()
                 total_earnings += profit
@@ -83,7 +83,7 @@ class Organizer(db.Model):
         total = 0.0
         
         # Check completed events without payouts
-        for event in self.events.all():
+        for event in self.events:
             if event.status == 'completed':
                 # Check if payout already exists
                 existing_payout = OrganizerPayout.query.filter(
