@@ -161,68 +161,22 @@ with app.app_context():
         except Exception as e:
             logging.warning(f"Database verification failed: {str(e)}")
         
-        # File-based backup system that survives deployments
+        # Simplified initialization for deployment testing
         try:
-            # First, create all tables
+            # Create all tables
             db.create_all()
             logging.info("Database tables created/verified")
             
-            # Import models and backup system
+            # Import models
             from models import Event
-            from backup_system import backup_events_to_file, restore_events_from_file
-            from datetime import datetime
             
-            # Check if Event table has data
+            # Simple event count logging
             event_count = Event.query.count()
             logging.info(f"Event table has {event_count} events")
-            
-            if event_count == 0:
-                # Try to restore from file backup
-                logging.info("Event table is empty - checking for file backup...")
-                
-                restored_events = restore_events_from_file()
-                if restored_events:
-                    logging.info(f"Found file backup with {len(restored_events)} events - restoring...")
-                    
-                    try:
-                        restored_count = 0
-                        
-                        for event_data in restored_events:
-                            # Create new event from backup data
-                            event = Event()
-                            for key, value in event_data.items():
-                                if key != 'id' and hasattr(event, key):
-                                    if key in ['date', 'created_at', 'approved_at'] and value:
-                                        # Handle datetime fields
-                                        if isinstance(value, str):
-                                            setattr(event, key, datetime.fromisoformat(value.replace('Z', '+00:00')))
-                                        else:
-                                            setattr(event, key, value)
-                                    else:
-                                        setattr(event, key, value)
-                            
-                            db.session.add(event)
-                            restored_count += 1
-                        
-                        db.session.commit()
-                        logging.info(f"✅ RESTORED {restored_count} events from file backup!")
-                        
-                    except Exception as restore_error:
-                        logging.error(f"File restore failed: {restore_error}")
-                        db.session.rollback()
-                else:
-                    logging.info("No file backup found - starting with empty Event table")
-            
-            # Always create a fresh file backup of current data
-            events = Event.query.all()
-            if events:
-                logging.info(f"Creating file backup of {len(events)} events")
-                backup_events_to_file(events)
-                logging.info("✅ File backup created for future deployments")
                 
         except Exception as e:
             # Fallback - still create tables
-            logging.error(f"File backup system failed ({e}) - creating basic tables")
+            logging.error(f"Initialization failed ({e}) - creating basic tables")
             db.create_all()
         
         # Create default admin if not exists

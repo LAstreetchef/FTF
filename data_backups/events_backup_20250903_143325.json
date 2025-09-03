@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-09-03T14:33:25.942731",
+  "backup_type": "automatic",
+  "event_count": 1,
+  "events": [
+    {
+      "id": 2,
+      "name": "File Backup Test Event",
+      "description": "Testing the new file-based backup system",
+      "date": "2025-09-10T14:17:36.074883",
+      "location": "Test Location",
+      "organizer_id": 2,
+      "food_truck_id": 1,
+      "selected_menu_items": null,
+      "markup_percentage": 20.0,
+      "pledge_goal": 500.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-03T14:17:36.077544",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": null,
+      "organizer_entree_claimed": false,
+      "markup_split_config": null
+    }
+  ]
+}

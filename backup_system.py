@@ -17,7 +17,7 @@ class FileBackupSystem:
             os.makedirs(self.backup_dir)
             logging.info(f"Created backup directory: {self.backup_dir}")
     
-    def create_event_backup(self, events: List[Dict]) -> str:
+    def create_event_backup(self, events: List[Dict]) -> Optional[str]:
         """Create a timestamped backup of events data"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"events_backup_{timestamp}.json"
