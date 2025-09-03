@@ -18,6 +18,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **2025-09-03**: Critical Payment System Modernization and Bug Fixes
+  - Fixed major payment processing bug affecting all pledge charging functionality
+  - Modernized Stripe integration from deprecated tokens to Payment Methods API for reliable processing
+  - Resolved payment intents stuck in 'requires_payment_method' status causing charging failures
+  - Updated frontend to use `stripe.createPaymentMethod()` instead of outdated token system
+  - Enhanced backend to properly attach and confirm payment methods during pledge creation
+  - Fixed double amount modification issue in charging logic for payment intents in 'requires_capture' status
+  - Improved error handling throughout payment flow with clear user messaging
+  - Verified markup splitting functionality works correctly with new payment system
+  - Payment system now fully production-ready with modern Stripe API compliance
+
 - **2025-08-31**: Supporter Contact Feature for Organizers
   - Implemented comprehensive supporter contact functionality in admin dashboard  
   - Added "Supporters (X)" buttons in admin dashboard Recent Events table
