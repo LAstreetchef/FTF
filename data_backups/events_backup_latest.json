@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-03T21:42:33.711556",
+  "timestamp": "2025-09-03T21:47:51.249019",
   "backup_type": "automatic",
   "event_count": 11,
   "events": [
@@ -215,11 +215,11 @@
       "markup_percentage": 20.0,
       "pledge_goal": 1000.0,
       "status": "pending",
-      "current_pledges": 0.0,
+      "current_pledges": 5.0,
       "approved_at": null,
       "created_at": "2025-09-03T21:42:33.586638",
-      "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": null,
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S3OS1Bgt3ltA59n1Xj9aYhj",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 15.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 85.0, \"description\": \"Lakeside Village Condominiums\", \"is_organizer\": false}]"
     }

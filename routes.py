@@ -1443,8 +1443,20 @@ def admin_transfers():
             }
             transfer_data.append(transfer_info)
         
-        # Get all active transfers (NEW SYSTEM) - including pending and consented
-        all_transfers = PledgeTransfer.query.filter(PledgeTransfer.status.in_(['consent_requested', 'completed'])).all()
+        # Get all active transfers (NEW SYSTEM) with eager loading to prevent N+1 queries
+        from sqlalchemy.orm import joinedload
+        all_transfers = PledgeTransfer.query.options(
+            joinedload(PledgeTransfer.source_event).joinedload(Event.organizer),
+            joinedload(PledgeTransfer.target_event).joinedload(Event.organizer),
+            joinedload(PledgeTransfer.consent_requests).joinedload(PledgeTransferConsent.pledge)
+        ).filter(PledgeTransfer.status.in_(['consent_requested', 'completed'])).all()
+        
+        # Pre-fetch all completed transfer pledge IDs to avoid repeated queries
+        completed_transfer_pledge_ids = set()
+        completed_consent_requests = PledgeTransferConsent.query.join(PledgeTransfer).filter(
+            PledgeTransfer.status == 'completed'
+        ).with_entities(PledgeTransferConsent.pledge_id).all()
+        completed_transfer_pledge_ids.update([req[0] for req in completed_consent_requests])
         
         for transfer in all_transfers:
             # Check if transfer should be auto-completed
@@ -1453,28 +1465,20 @@ def admin_transfers():
                 transfer.completed_at = datetime.utcnow()
                 db.session.add(transfer)
                 
-            # Get all consent requests for this transfer to show individual pledge status
-            consent_requests = PledgeTransferConsent.query.filter_by(transfer_id=transfer.id).all()
-            
-            for consent_request in consent_requests:
+            # Process consent requests for this transfer (already loaded via joinedload)
+            for consent_request in transfer.consent_requests:
                 pledge = consent_request.pledge
                 source_event = transfer.source_event
                 target_event = transfer.target_event
                 
                 # Skip pledges that have already been successfully transferred elsewhere
-                # Check if this pledge has any completed transfers
-                completed_transfers = PledgeTransferConsent.query.join(PledgeTransfer).filter(
-                    PledgeTransferConsent.pledge_id == pledge.id,
-                    PledgeTransfer.status == 'completed'
-                ).all()
-                
-                # If this pledge was already transferred and this current transfer is not completed, skip it
-                if completed_transfers and transfer.status != 'completed':
+                # Use pre-fetched completed transfer pledge IDs for efficiency
+                if pledge.id in completed_transfer_pledge_ids and transfer.status != 'completed':
                     continue
                 
-                # Get organizer details
-                source_organizer = Organizer.query.get(source_event.organizer_id) if source_event else None
-                target_organizer = Organizer.query.get(target_event.organizer_id) if target_event else None
+                # Get organizer details (already loaded via joinedload)
+                source_organizer = source_event.organizer if source_event else None
+                target_organizer = target_event.organizer if target_event else None
                 
                 # Determine display status
                 if consent_request.status == 'pending':
@@ -3483,12 +3487,19 @@ Thank you!"""
 </body>
 </html>"""
 
-                send_email(
+                # Send email with error handling
+                email_success = send_email(
                     pledge.email,
                     f"Transfer Request: Your {source_event.name} Pledge",
                     text_body,
                     html=html_body
                 )
+                
+                # Log email status for monitoring
+                if not email_success:
+                    logging.error(f"Failed to send transfer consent email to {pledge.email} for pledge {pledge.id}")
+                else:
+                    logging.info(f"Transfer consent email sent successfully to {pledge.email} for pledge {pledge.id}")
         
         flash(f'Transfer request sent to {len(transferable_pledges)} pledgers. You will be notified once they respond.', 'success')
         
@@ -3562,9 +3573,18 @@ def pledge_transfer_consent(token):
         old_event.update_pledge_total()
         new_event.update_pledge_total()
         
-        # Update transfer statistics
+        # Update transfer statistics atomically to prevent race conditions
         transfer.pledges_consented += 1
         transfer.amount_transferred += pledge.amount
+        
+        # Re-count actual consented pledges to ensure accuracy (prevents race conditions)
+        actual_consented_count = PledgeTransferConsent.query.filter_by(
+            transfer_id=transfer.id, 
+            status='consented'
+        ).count()
+        
+        # Update transfer stats with actual count
+        transfer.pledges_consented = actual_consented_count
         
         # Check if all pledges have consented - complete the transfer
         if transfer.pledges_consented == transfer.total_pledges_requested:
