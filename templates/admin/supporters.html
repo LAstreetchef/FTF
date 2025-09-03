@@ -61,7 +61,7 @@
                                     <th>Email Address</th>
                                     <th>Pledge Amount</th>
                                     <th>Date Pledged</th>
-                                    <th>Contact Actions</th>
+                                    <th>Chat</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,13 +76,14 @@
                                     </td>
                                     <td>{{ supporter.date }}</td>
                                     <td>
-                                        {% set email_subject = "Thank you for supporting " + event.name %}
-                                        {% set email_body = "Hi,\n\nThank you for supporting " + event.name + "! We appreciate your pledge of $" + "%.2f"|format(supporter.amount) + ".\n\nBest regards,\nFood Truck Fundraiser Team" %}
-                                        <a href="mailto:{{ supporter.email }}?subject={{ email_subject|urlencode }}&body={{ email_body|urlencode }}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i data-feather="mail" class="me-1"></i>
-                                            Send Email
+                                        <a href="{{ url_for('pledge_messages', pledge_id=supporter.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i data-feather="message-circle" class="me-1"></i>
+                                            Chat
                                         </a>
+                                        {% if supporter.message_count and supporter.message_count > 0 %}
+                                            <span class="badge bg-warning ms-2">{{ supporter.message_count }}</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -100,7 +101,7 @@
                             <ul class="small mb-0">
                                 <li>This admin view shows all supporters for event management</li>
                                 <li>Organizers can also view their own supporters in their dashboard</li>
-                                <li>Use email actions to contact supporters directly if needed</li>
+                                <li>Use chat interface to message supporters directly</li>
                                 <li>All supporter data is private and should be handled carefully</li>
                             </ul>
                         </div>

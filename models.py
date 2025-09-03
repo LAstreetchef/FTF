@@ -699,3 +699,25 @@ class OrganizerChallengeProgress(db.Model):
     # Relationships
     organizer = db.relationship('Organizer', backref='challenge_progress')
     challenge = db.relationship('AmbassadorChallenge', backref='participant_progress')
+
+class PledgeMessage(db.Model):
+    """Chat-like messaging system for pledge communications"""
+    id = db.Column(db.Integer, primary_key=True)
+    pledge_id = db.Column(db.Integer, db.ForeignKey('pledge.id'), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=True)
+    
+    # Message content
+    message = db.Column(db.Text, nullable=False)
+    sender_type = db.Column(db.String(20), nullable=False)  # 'admin' or 'pledger'
+    sender_email = db.Column(db.String(120), nullable=False)
+    
+    # Status
+    is_read = db.Column(db.Boolean, default=False)
+    email_sent = db.Column(db.Boolean, default=False)  # Track if email notification was sent
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    pledge = db.relationship('Pledge', backref='messages')
+    admin = db.relationship('Admin', backref='sent_messages')

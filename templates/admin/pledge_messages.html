@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+
+{% block title %}Chat with {{ pledge.email }} - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i data-feather="message-circle" class="me-2"></i>
+                        Chat with {{ pledge.email }}
+                        <span class="badge bg-secondary ms-2">Admin</span>
+                    </h2>
+                    <p class="text-muted">Event: {{ pledge.event.name }} | Pledge: ${{ "%.2f"|format(pledge.amount) }}</p>
+                </div>
+                <a href="{{ url_for('admin_supporters', event_id=pledge.event.id) }}" class="btn btn-outline-primary">
+                    <i data-feather="arrow-left" class="me-1"></i>
+                    Back to Supporters
+                </a>
+            </div>
+
+            <!-- Chat Interface -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="message-square" class="me-2"></i>
+                        Message History
+                    </h5>
+                    <span class="badge bg-info">{{ messages|length }} message{{ 's' if messages|length != 1 else '' }}</span>
+                </div>
+                <div class="card-body">
+                    <!-- Messages Container -->
+                    <div id="messages-container" class="mb-4" style="height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.375rem; padding: 1rem; background-color: #f8f9fa;">
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="message mb-3 {{ 'text-end' if message.sender_type == 'admin' else 'text-start' }}">
+                                <div class="d-inline-block p-3 rounded {{ 'bg-primary text-white' if message.sender_type == 'admin' else 'bg-white border' }}" style="max-width: 70%;">
+                                    <div class="message-content">{{ message.message }}</div>
+                                    <div class="message-meta mt-2">
+                                        <small class="{{ 'text-light' if message.sender_type == 'admin' else 'text-muted' }}">
+                                            <strong>{{ 'You' if message.sender_type == 'admin' else message.sender_email }}</strong>
+                                            • {{ message.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                            {% if message.sender_type == 'admin' %}
+                                                • <i data-feather="mail" style="width: 12px; height: 12px;"></i> {{ 'Sent' if message.email_sent else 'Failed' }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center text-muted py-5">
+                                <i data-feather="message-circle" style="width: 48px; height: 48px;" class="mb-3"></i>
+                                <p>No messages yet. Start the conversation!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Message Input Form -->
+                    <form id="message-form" class="border-top pt-3">
+                        <div class="row">
+                            <div class="col-10">
+                                <textarea id="message-input" 
+                                         class="form-control" 
+                                         rows="2" 
+                                         placeholder="Type your message to {{ pledge.email }}..." 
+                                         required></textarea>
+                            </div>
+                            <div class="col-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100" id="send-btn">
+                                    <i data-feather="send" class="me-1"></i>
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i data-feather="info" style="width: 12px; height: 12px;"></i>
+                                    Message will be sent via email notification to the pledger
+                                </small>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Pledge Details Card -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i data-feather="user" class="me-2"></i>
+                                Pledge Details
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Email:</strong> {{ pledge.email }}</p>
+                            <p><strong>Amount:</strong> ${{ "%.2f"|format(pledge.amount) }}</p>
+                            <p><strong>Status:</strong> 
+                                <span class="badge bg-{{ 'success' if pledge.status == 'charged' else 'warning' if pledge.status == 'pending' else 'secondary' }}">
+                                    {{ pledge.status.title() }}
+                                </span>
+                            </p>
+                            <p><strong>Date:</strong> {{ pledge.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            {% if pledge.is_gift %}
+                                <p><strong>Gift:</strong> For {{ pledge.recipient_name }} ({{ pledge.recipient_email }})</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i data-feather="calendar" class="me-2"></i>
+                                Event Details
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Event:</strong> {{ pledge.event.name }}</p>
+                            <p><strong>Date:</strong> {{ pledge.event.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                            <p><strong>Food Truck:</strong> {{ pledge.event.food_truck.name }}</p>
+                            <p><strong>Organizer:</strong> {{ pledge.event.organizer.name }}</p>
+                            <a href="{{ url_for('event_detail', event_id=pledge.event.id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i data-feather="external-link" class="me-1"></i>
+                                View Event
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize feather icons
+feather.replace();
+
+$(document).ready(function() {
+    // Scroll to bottom of messages
+    const messagesContainer = $('#messages-container');
+    messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+
+    // Handle message form submission
+    $('#message-form').on('submit', function(e) {
+        e.preventDefault();
+        
+        const messageInput = $('#message-input');
+        const sendBtn = $('#send-btn');
+        const message = messageInput.val().trim();
+        
+        if (!message) {
+            alert('Please enter a message');
+            return;
+        }
+        
+        // Disable send button
+        sendBtn.prop('disabled', true).html('<i data-feather="loader" class="me-1"></i> Sending...');
+        feather.replace();
+        
+        // Send AJAX request
+        $.post(`/admin/pledge/{{ pledge.id }}/send-message`, {
+            message: message
+        })
+        .done(function(response) {
+            if (response.success) {
+                // Clear input
+                messageInput.val('');
+                
+                // Add message to UI
+                const messageData = response.message_data;
+                const messageHtml = `
+                    <div class="message mb-3 text-end">
+                        <div class="d-inline-block p-3 rounded bg-primary text-white" style="max-width: 70%;">
+                            <div class="message-content">${messageData.message}</div>
+                            <div class="message-meta mt-2">
+                                <small class="text-light">
+                                    <strong>You</strong> • ${new Date(messageData.created_at).toLocaleString()}
+                                    • <i data-feather="mail" style="width: 12px; height: 12px;"></i> ${messageData.email_sent ? 'Sent' : 'Failed'}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Check if no messages placeholder exists and remove it
+                if (messagesContainer.find('.text-center.text-muted').length > 0) {
+                    messagesContainer.empty();
+                }
+                
+                messagesContainer.append(messageHtml);
+                feather.replace();
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+                
+                // Show success notification
+                if (messageData.email_sent) {
+                    showNotification('Message sent successfully and email notification delivered!', 'success');
+                } else {
+                    showNotification('Message saved but email notification failed to send.', 'warning');
+                }
+            } else {
+                alert('Error: ' + response.error);
+            }
+        })
+        .fail(function(xhr) {
+            alert('Error sending message. Please try again.');
+        })
+        .always(function() {
+            // Re-enable send button
+            sendBtn.prop('disabled', false).html('<i data-feather="send" class="me-1"></i> Send');
+            feather.replace();
+        });
+    });
+    
+    // Auto-resize textarea
+    $('#message-input').on('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+    
+    // Focus on message input
+    $('#message-input').focus();
+});
+
+// Notification function
+function showNotification(message, type = 'info') {
+    const alertClass = type === 'success' ? 'alert-success' : type === 'warning' ? 'alert-warning' : 'alert-info';
+    const notification = $(`
+        <div class="alert ${alertClass} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1060;" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        notification.fadeOut(() => notification.remove());
+    }, 5000);
+}
+</script>
+{% endblock %}

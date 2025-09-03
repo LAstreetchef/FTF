@@ -5353,4 +5353,114 @@ def init_challenges():
         'challenges_created': len(challenges)
     })
 
+# Pledge Messaging Routes
+@app.route('/admin/pledge/<int:pledge_id>/messages')
+def pledge_messages(pledge_id):
+    """View chat messages for a specific pledge"""
+    if 'admin_id' not in session:
+        return redirect(url_for('admin_login'))
+    
+    pledge = Pledge.query.get_or_404(pledge_id)
+    messages = PledgeMessage.query.filter_by(pledge_id=pledge_id).order_by(PledgeMessage.created_at.asc()).all()
+    
+    return render_template('admin/pledge_messages.html', pledge=pledge, messages=messages)
+
+@app.route('/admin/pledge/<int:pledge_id>/send-message', methods=['POST'])
+def send_pledge_message(pledge_id):
+    """Send a message to a pledger"""
+    if 'admin_id' not in session:
+        return jsonify({'success': False, 'error': 'Authentication required'}), 401
+    
+    try:
+        pledge = Pledge.query.get_or_404(pledge_id)
+        admin_id = session['admin_id']
+        admin = Admin.query.get(admin_id)
+        message_text = request.form.get('message', '').strip()
+        
+        if not message_text:
+            return jsonify({'success': False, 'error': 'Message cannot be empty'}), 400
+        
+        # Create the message record
+        message = PledgeMessage(
+            pledge_id=pledge_id,
+            admin_id=admin_id,
+            message=message_text,
+            sender_type='admin',
+            sender_email=admin.username
+        )
+        
+        db.session.add(message)
+        db.session.commit()
+        
+        # Send email notification to the pledger
+        from utils import send_email
+        
+        email_subject = f"Message from Food Truck Fundraiser Team - {pledge.event.name}"
+        email_body = f"""Hi,
+
+You have received a message regarding your pledge for "{pledge.event.name}":
+
+"{message_text}"
+
+You can reply to this email if you have any questions.
+
+Best regards,
+Food Truck Fundraiser Team"""
+        
+        email_success = send_email(pledge.email, email_subject, email_body)
+        
+        # Update email status
+        message.email_sent = email_success
+        db.session.commit()
+        
+        if email_success:
+            logging.info(f"Message sent to pledger {pledge.email} for pledge {pledge_id}")
+        else:
+            logging.error(f"Failed to send email notification for message to pledge {pledge_id}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Message sent successfully',
+            'message_data': {
+                'id': message.id,
+                'message': message.message,
+                'sender_type': message.sender_type,
+                'sender_email': message.sender_email,
+                'created_at': message.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'email_sent': message.email_sent
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error sending pledge message: {str(e)}")
+        return jsonify({'success': False, 'error': f'Failed to send message: {str(e)}'}), 500
+
+@app.route('/admin/pledge/<int:pledge_id>/messages/api')
+def get_pledge_messages_api(pledge_id):
+    """API endpoint to get messages for a pledge (for AJAX updates)"""
+    if 'admin_id' not in session:
+        return jsonify({'success': False, 'error': 'Authentication required'}), 401
+    
+    try:
+        messages = PledgeMessage.query.filter_by(pledge_id=pledge_id).order_by(PledgeMessage.created_at.asc()).all()
+        
+        message_data = []
+        for msg in messages:
+            message_data.append({
+                'id': msg.id,
+                'message': msg.message,
+                'sender_type': msg.sender_type,
+                'sender_email': msg.sender_email,
+                'created_at': msg.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                'email_sent': msg.email_sent,
+                'is_read': msg.is_read
+            })
+        
+        return jsonify({'success': True, 'messages': message_data})
+        
+    except Exception as e:
+        logging.error(f"Error fetching pledge messages: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
