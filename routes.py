@@ -3544,6 +3544,12 @@ def pledge_transfer_consent(token):
         transfer.pledges_consented += 1
         transfer.amount_transferred += pledge.amount
         
+        # Check if all pledges have consented - complete the transfer
+        if transfer.pledges_consented == transfer.total_pledges_requested:
+            transfer.status = 'completed'
+            transfer.completed_at = datetime.utcnow()
+            logging.info(f"Transfer {transfer.id} completed: {transfer.pledges_consented}/{transfer.total_pledges_requested} pledges consented")
+        
         db.session.commit()
         
         return render_template('transfer_consent_approved.html', 
