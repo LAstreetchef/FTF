@@ -4820,6 +4820,18 @@ def organizer_earnings():
         Event.status.in_(['approved', 'completed'])
     ).all()
     
+    # Get payout info for each event (avoid SQLAlchemy relationship issues)
+    events_with_payouts = []
+    for event in completed_events:
+        payout = OrganizerPayout.query.filter(
+            OrganizerPayout.event_id == event.id,
+            OrganizerPayout.organizer_id == organizer_id
+        ).first()
+        events_with_payouts.append({
+            'event': event,
+            'payout': payout
+        })
+    
     
     pending_payouts = organizer.get_pending_payouts()
     total_awaiting_payout = organizer.get_total_earnings_awaiting_payout()
@@ -4838,7 +4850,7 @@ def organizer_earnings():
     return render_template('organizer/earnings.html',
                          organizer=organizer,
                          tier_info=tier_info,
-                         completed_events=completed_events,
+                         events_with_payouts=events_with_payouts,
                          pending_payouts=pending_payouts,
                          total_awaiting_payout=total_awaiting_payout,
                          total_lifetime_earnings=total_lifetime_earnings,
@@ -4848,8 +4860,6 @@ def organizer_earnings():
 @app.route('/organizer/request-payout', methods=['POST'])
 def request_payout():
     """Request payout for completed events"""
-    print(f"DEBUG: Payout request received")
-    
     # Authentication check
     organizer_id = None
     auth_token = request.args.get('auth_token')
@@ -4917,9 +4927,8 @@ def request_payout():
             f'Payout Request: ${amount:.2f} for {organizer.name}',
             f'Organizer {organizer.name} has requested a payout of ${amount:.2f} for event "{event.name}".\\n\\nEvent Details:\\nDate: {event.date}\\nLocation: {event.location}\\nTotal Raised: ${event.current_pledges:.2f}\\nOrganizer Profit: ${amount:.2f}\\n\\nPlease process this payout in the admin dashboard.'
         )
-        print(f"DEBUG: Email notification sent for payout request")
-    except Exception as e:
-        print(f"DEBUG: Email notification failed, but continuing: {str(e)}")
+    except Exception:
+        pass  # Continue even if email fails
     
     return jsonify({
         'success': True, 
