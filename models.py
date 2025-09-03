@@ -222,13 +222,14 @@ class Event(db.Model):
     
     def get_progress_percentage(self):
         """Calculate progress percentage towards goal"""
-        if self.pledge_goal <= 0:
+        total_goal = self.get_total_goal_amount()
+        if total_goal <= 0:
             return 0
-        return min(100, (self.current_pledges / self.pledge_goal) * 100)
+        return min(100, (self.current_pledges / total_goal) * 100)
     
     def is_goal_met(self):
         """Check if pledge goal is met"""
-        return self.current_pledges >= self.pledge_goal
+        return self.current_pledges >= self.get_total_goal_amount()
     
     def update_pledge_total(self):
         """Update current pledges total from active pledges (pending + charged)"""
@@ -245,10 +246,10 @@ class Event(db.Model):
         if self.pledge_goal <= 0 or self.markup_percentage <= 0:
             return 0.0
         
-        # Calculate total profit based on markup percentage applied to the goal amount
-        markup_ratio = self.markup_percentage / 100.0
-        base_amount_needed = self.pledge_goal / (1 + markup_ratio)
-        total_profit = self.pledge_goal - base_amount_needed
+        # NEW LOGIC: Markup is applied ON TOP of the food truck minimum
+        # pledge_goal is the food truck minimum (base amount)
+        # total_profit = food_truck_minimum * markup_percentage
+        total_profit = self.pledge_goal * (self.markup_percentage / 100.0)
         
         # If markup splitting is configured, calculate organizer's share
         splits = self.get_markup_split_config()
@@ -269,10 +270,10 @@ class Event(db.Model):
         if self.pledge_goal <= 0 or self.markup_percentage <= 0:
             return []
         
-        # Calculate total profit
-        markup_ratio = self.markup_percentage / 100.0
-        base_amount_needed = self.pledge_goal / (1 + markup_ratio)
-        total_profit = self.pledge_goal - base_amount_needed
+        # NEW LOGIC: Markup is applied ON TOP of the food truck minimum
+        # pledge_goal is the food truck minimum (base amount)
+        # total_profit = food_truck_minimum * markup_percentage
+        total_profit = self.pledge_goal * (self.markup_percentage / 100.0)
         
         splits = self.get_markup_split_config()
         if not splits:
@@ -292,6 +293,15 @@ class Event(db.Model):
             })
         
         return result
+    
+    def get_total_goal_amount(self):
+        """Calculate the total amount needed including markup (food truck minimum + markup)"""
+        if self.markup_percentage <= 0:
+            return self.pledge_goal
+        
+        # Total goal = food truck minimum + markup amount
+        markup_amount = self.pledge_goal * (self.markup_percentage / 100.0)
+        return self.pledge_goal + markup_amount
     
     def can_be_deleted(self):
         """Check if event can be safely deleted"""
