@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-03T18:45:22.464652",
+  "timestamp": "2025-09-03T19:02:57.230616",
   "backup_type": "automatic",
   "event_count": 6,
   "events": [
@@ -95,7 +95,7 @@
       "markup_percentage": 20.0,
       "pledge_goal": 1000.0,
       "status": "pending",
-      "current_pledges": 75.8,
+      "current_pledges": 867.8,
       "approved_at": null,
       "created_at": "2025-09-03T18:37:12.985190",
       "organizer_fee_charged": true,
@@ -115,11 +115,11 @@
       "markup_percentage": 20.0,
       "pledge_goal": 1000.0,
       "status": "pending",
-      "current_pledges": 0.0,
+      "current_pledges": 5.0,
       "approved_at": null,
       "created_at": "2025-09-03T18:45:22.341683",
-      "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": null,
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S3LgVBgt3ltA59n0A2CyY6Y",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Westlake Athletic Club\", \"is_organizer\": false}]"
     }

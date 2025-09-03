@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-03T18:24:24.019511",
+  "timestamp": "2025-09-03T19:02:48.149804",
   "backup_type": "automatic",
-  "event_count": 4,
+  "event_count": 6,
   "events": [
     {
       "id": 1,
@@ -74,14 +74,54 @@
       "selected_menu_items": "[{\"name\": \"The Plate Lunch\", \"price\": 16.0, \"description\": \"K\\u0101lua Pig, Huli Huli Chicken, or Panko-Crusted Mahi Mahi\\u2014served with two scoops of rice and one scoop of macaroni salad\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Loco Moco\", \"price\": 16.0, \"description\": \"A classic Hawaiian dish featuring a hamburger patty over a bed of rice, topped with brown gravy and a fried egg\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Ahi Poke Bowl\", \"price\": 16.0, \"description\": \"Cubes of fresh, raw tuna marinated in a savory soy sauce and sesame oil mixture, served over steamed rice with fresh avocado and crispy wonton strips\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Garlic Shrimp Scampi Plate\", \"price\": 17.0, \"description\": \"Saut\\u00e9ed shrimp in a rich garlic butter sauce, served with rice and a lemon wedge\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Chicken Katsu\", \"price\": 16.0, \"description\": \"A crispy, deep-fried chicken cutlet served with a tangy tonkatsu sauce\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Beef Stew\", \"price\": 16.0, \"description\": \"Beef Stew: Tender chunks of beef and vegetables slow-cooked in a rich, savory broth, served over rice\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Macaroni Salad\", \"price\": 4.5, \"description\": \"A creamy and classic side dish with elbow macaroni, mayonnaise, and a hint of sweetness - 2 scoops\", \"original_price\": 4.5, \"marked_up_price\": 5.3999999999999995}, {\"name\": \"Fresh Mix Salad\", \"price\": 4.5, \"description\": \"Shredded lettuce, shredded cabbage, julienne carrots, julienne onions, edamame beans, and toasted black sesame, and our house made dressing\", \"original_price\": 4.5, \"marked_up_price\": 5.3999999999999995}, {\"name\": \"Spam Musubi\", \"price\": 6.0, \"description\": \"A grilled slice of Spam seasoned with teriyaki sauce, wrapped with rice and nori (seaweed) - 2 pcs\", \"original_price\": 6.0, \"marked_up_price\": 7.199999999999999}, {\"name\": \"POG (Passion Orange Guava) Juice:\", \"price\": 3.0, \"description\": \"POG (Passion Orange Guava) Juice: A sweet and tangy fruit juice blend that is a Hawaiian staple\", \"original_price\": 3.0, \"marked_up_price\": 3.5999999999999996}, {\"name\": \"Fresh-Brewed Iced Tea\", \"price\": 2.5, \"description\": \"A simple, refreshing drink to complement the savory flavors.\", \"original_price\": 2.5, \"marked_up_price\": 3.0}]",
       "markup_percentage": 20.0,
       "pledge_goal": 1000.0,
-      "status": "funded",
+      "status": "approved",
       "current_pledges": 2141.0,
-      "approved_at": null,
+      "approved_at": "2025-09-03T18:28:24.637429",
       "created_at": "2025-09-03T17:20:34.646469",
       "organizer_fee_charged": true,
       "organizer_fee_payment_intent": "pi_3S3KMcBgt3ltA59n1nKW2Tr4",
-      "organizer_entree_claimed": false,
+      "organizer_entree_claimed": true,
       "markup_split_config": "[{\"email\": \"arianalopez15.al@gmail.com\", \"percentage\": 20.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"culvercityhighhh@gmail.com\", \"percentage\": 80.0, \"description\": \"school\", \"is_organizer\": false}]"
+    },
+    {
+      "id": 5,
+      "name": "USTA Level 3 Junior Tournament - Lakewood Tennis Center",
+      "description": "USTA Junior Tournament - Support SoCal Junior Tennis",
+      "date": "2025-09-13T11:00:00",
+      "location": "4212 CLUBHOUSE DR, LAKEWOOD, CA, 90712",
+      "organizer_id": 6,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.8}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 867.8,
+      "approved_at": null,
+      "created_at": "2025-09-03T18:37:12.985190",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S3LYdBgt3ltA59n0OuY5DyV",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Lakewood Tennis Center\", \"is_organizer\": false}]"
+    },
+    {
+      "id": 6,
+      "name": "WAC Tennis Academy Fall Tournament",
+      "description": "USTA Junior Tournament - Support SoCal Junior Tennis",
+      "date": "2025-09-20T11:00:00",
+      "location": "Westlake Athletic Club - 32250 Triunfo Canyon Rd, Westlake Village, CA, 91361",
+      "organizer_id": 6,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.8}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 5.0,
+      "approved_at": null,
+      "created_at": "2025-09-03T18:45:22.341683",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S3LgVBgt3ltA59n0A2CyY6Y",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Westlake Athletic Club\", \"is_organizer\": false}]"
     }
   ]
 }
