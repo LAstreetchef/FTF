@@ -2796,10 +2796,12 @@ def admin_view_supporters(event_id):
         for pledge in event.pledges:
             if pledge.status == 'charged':
                 supporters.append({
+                    'id': pledge.id,  # Added pledge ID for messaging links
                     'email': pledge.email,
                     'amount': float(pledge.amount),
                     'date': pledge.created_at.strftime('%m/%d/%Y %I:%M %p'),
-                    'date_formatted': pledge.created_at.strftime('%B %d, %Y')
+                    'date_formatted': pledge.created_at.strftime('%B %d, %Y'),
+                    'message_count': 0  # TODO: Add actual message count if needed
                 })
         
         return render_template('admin/supporters.html', 
