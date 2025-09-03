@@ -156,9 +156,14 @@
                 </div>
                 
                 <div class="text-center">
+                    {% set total_goal = event.get_total_goal_amount() %}
+                    {% set remaining = total_goal - event.current_pledges %}
                     <p class="mb-2">
-                        <strong>${{ "%.2f"|format(event.pledge_goal - event.current_pledges) }}</strong> 
-                        needed to reach goal
+                        {% if remaining <= 0 %}
+                            <strong class="text-success">🎉 Funding reached!</strong>
+                        {% else %}
+                            <strong>${{ "%.2f"|format(remaining) }}</strong> needed to reach goal
+                        {% endif %}
                     </p>
                     
                     {% if event.status in ['pending', 'funded'] %}
