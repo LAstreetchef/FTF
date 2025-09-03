@@ -4879,8 +4879,8 @@ def request_payout():
     if event.organizer_id != organizer_id:
         return jsonify({'error': 'Access denied'}), 403
         
-    if event.status != 'completed':
-        return jsonify({'error': 'Event must be completed for payout'}), 400
+    if event.status not in ['approved', 'completed']:
+        return jsonify({'error': 'Event must be approved or completed for payout'}), 400
     
     # Check if payout already exists
     existing_payout = OrganizerPayout.query.filter(
