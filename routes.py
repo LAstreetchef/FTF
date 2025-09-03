@@ -3534,7 +3534,7 @@ def make_pledge(event_id):
     if request.method == 'POST':
         email = request.form['email']
         amount = float(request.form['amount'])
-        stripe_token = request.form.get('stripe_token')
+        stripe_payment_method = request.form.get('stripe_payment_method')
         selected_menu_items_json = request.form.get('selected_menu_items')
         
         # Gift meal information
@@ -3560,12 +3560,35 @@ def make_pledge(event_id):
             payment_intent_id = create_stripe_payment_intent(total_amount, email, f"Pledge for {event.name} (includes 4.5% processing fee)")
             
             if payment_intent_id:
+                if not stripe_payment_method:
+                    flash('Payment information is required. Please try again.', 'error')
+                    return redirect(url_for('make_pledge', event_id=event_id))
+                # Attach payment method to payment intent and confirm it
+                try:
+                    import stripe
+                    
+                    # Attach and confirm the payment intent
+                    intent = stripe.PaymentIntent.confirm(
+                        payment_intent_id,
+                        payment_method=stripe_payment_method,
+                        return_url=request.url_root  # For 3D Secure redirects if needed
+                    )
+                    
+                    if intent.status not in ['requires_capture', 'succeeded']:
+                        flash('Payment could not be processed. Please try again.', 'error')
+                        return redirect(url_for('make_pledge', event_id=event_id))
+                        
+                except Exception as e:
+                    logging.error(f"Error confirming payment intent: {str(e)}")
+                    flash('Payment processing error. Please try again.', 'error')
+                    return redirect(url_for('make_pledge', event_id=event_id))
+                
                 # Create pledge record
                 pledge = Pledge(
                     email=email,
                     amount=amount,
                     processing_fee=processing_fee,
-                    stripe_token=stripe_token,
+                    stripe_token=stripe_payment_method,  # Store payment method ID instead of token
                     stripe_payment_intent_id=payment_intent_id,
                     event_id=event_id,
                     is_gift=is_gift,

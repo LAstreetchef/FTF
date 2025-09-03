@@ -450,8 +450,11 @@ document.addEventListener('DOMContentLoaded', function() {
         buttonText.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
         
         try {
-            // Create token
-            const {token, error} = await stripe.createToken(paymentElement);
+            // Create payment method instead of token
+            const {paymentMethod, error} = await stripe.createPaymentMethod({
+                type: 'card',
+                card: paymentElement,
+            });
             
             if (error) {
                 displayError(error);
@@ -459,12 +462,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Add token to form
-            const tokenInput = document.createElement('input');
-            tokenInput.type = 'hidden';
-            tokenInput.name = 'stripe_token';
-            tokenInput.value = token.id;
-            form.appendChild(tokenInput);
+            // Add payment method to form
+            const paymentMethodInput = document.createElement('input');
+            paymentMethodInput.type = 'hidden';
+            paymentMethodInput.name = 'stripe_payment_method';
+            paymentMethodInput.value = paymentMethod.id;
+            form.appendChild(paymentMethodInput);
             
             // Add selected menu items to form (if any)
             const selectedItems = [];
