@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Transfer Already Processed{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-warning text-dark text-center py-4">
+                    <h1 class="h3 mb-0">
+                        <i data-feather="alert-circle" size="32" class="me-2"></i>
+                        Already Responded
+                    </h1>
+                </div>
+                <div class="card-body p-5 text-center">
+                    <div class="mb-4">
+                        <i data-feather="check-circle" size="64" class="text-warning mb-3"></i>
+                    </div>
+                    
+                    <h2 class="h4 mb-4">You've Already Responded to This Transfer</h2>
+                    
+                    <div class="alert alert-info mb-4">
+                        <p class="mb-0">
+                            <strong>Status:</strong> 
+                            {% if consent_request.status == 'consented' %}
+                                <span class="badge bg-success">✅ APPROVED</span>
+                            {% elif consent_request.status == 'declined' %}
+                                <span class="badge bg-danger">❌ DECLINED</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ consent_request.status|upper }}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="text-muted mb-4">
+                        <p>You previously responded to this transfer request on:</p>
+                        <p class="fw-bold">{{ consent_request.responded_at.strftime('%B %d, %Y at %I:%M %p') if consent_request.responded_at else 'Unknown date' }}</p>
+                    </div>
+                    
+                    {% if consent_request.status == 'consented' %}
+                    <div class="alert alert-success">
+                        <h5><i data-feather="check-circle" size="18"></i> Transfer Approved</h5>
+                        <p class="mb-0">Your pledge has been successfully transferred to the new event. Thank you for your flexibility!</p>
+                    </div>
+                    {% elif consent_request.status == 'declined' %}
+                    <div class="alert alert-info">
+                        <h5><i data-feather="x-circle" size="18"></i> Transfer Declined</h5>
+                        <p class="mb-0">Your pledge will remain with the original event. No further action is needed.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <p class="text-muted">If you have any questions about this transfer, please contact the event organizer.</p>
+                        <a href="/" class="btn btn-primary">
+                            <i data-feather="home" size="18"></i>
+                            Return to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 15px;
+}
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+.btn {
+    border-radius: 25px;
+    padding: 12px 24px;
+}
+.alert {
+    border-radius: 10px;
+}
+</style>
+{% endblock %}
