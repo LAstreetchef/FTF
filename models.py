@@ -173,9 +173,7 @@ class Event(db.Model):
     
     # Menu and pricing
     selected_menu_items = db.Column(db.Text)  # JSON string of selected items with markup
-    markup_percentage = db.Column(db.Float, default=0.0)  # Legacy field for backward compatibility
-    organizer_markup_percentage = db.Column(db.Float, default=0.0)  # Markup that goes to organizer
-    event_markup_percentage = db.Column(db.Float, default=0.0)  # Markup that goes to event/cause
+    markup_percentage = db.Column(db.Float, default=0.0)
     pledge_goal = db.Column(db.Float, nullable=False)
     
     # Status tracking
@@ -225,36 +223,16 @@ class Event(db.Model):
     
     def calculate_organizer_profit_if_goal_met(self):
         """Calculate how much money the organizer will make if the event reaches its goal"""
-        if self.pledge_goal <= 0 or self.organizer_markup_percentage <= 0:
+        if self.pledge_goal <= 0 or self.markup_percentage <= 0:
             return 0.0
         
-        # Calculate profit based on organizer markup percentage applied to the goal amount
-        # The organizer profit is only their markup percentage of the total sales
-        total_markup_ratio = (self.organizer_markup_percentage + self.event_markup_percentage) / 100.0
-        organizer_markup_ratio = self.organizer_markup_percentage / 100.0
+        # Calculate profit based on markup percentage applied to the goal amount
+        # The profit is the markup percentage of the total sales needed to reach the goal
+        markup_ratio = self.markup_percentage / 100.0
+        base_amount_needed = self.pledge_goal / (1 + markup_ratio)
+        profit_amount = self.pledge_goal - base_amount_needed
         
-        base_amount_needed = self.pledge_goal / (1 + total_markup_ratio)
-        organizer_profit = base_amount_needed * organizer_markup_ratio
-        
-        return round(organizer_profit, 2)
-    
-    def calculate_event_cause_profit_if_goal_met(self):
-        """Calculate how much money goes to the event/cause if the event reaches its goal"""
-        if self.pledge_goal <= 0 or self.event_markup_percentage <= 0:
-            return 0.0
-        
-        # Calculate profit that goes to event/cause based on event markup percentage
-        total_markup_ratio = (self.organizer_markup_percentage + self.event_markup_percentage) / 100.0
-        event_markup_ratio = self.event_markup_percentage / 100.0
-        
-        base_amount_needed = self.pledge_goal / (1 + total_markup_ratio)
-        event_profit = base_amount_needed * event_markup_ratio
-        
-        return round(event_profit, 2)
-    
-    def get_total_markup_percentage(self):
-        """Get the combined markup percentage for display purposes"""
-        return self.organizer_markup_percentage + self.event_markup_percentage
+        return round(profit_amount, 2)
     
     def can_be_deleted(self):
         """Check if event can be safely deleted"""

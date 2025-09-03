@@ -89,32 +89,14 @@
                     <div class="mb-4">
                         <h5>Menu Selection</h5>
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="organizer_markup_percentage" class="form-label">Your Markup %</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.1" min="0" max="50" class="form-control" 
-                                           id="organizer_markup_percentage" name="organizer_markup_percentage" value="10" required>
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <div class="form-text">Your personal profit percentage</div>
+                        <div class="mb-3">
+                            <label for="markup_percentage" class="form-label">Markup Percentage</label>
+                            <div class="input-group">
+                                <input type="number" step="0.1" min="0" max="100" class="form-control" 
+                                       id="markup_percentage" name="markup_percentage" value="15" required>
+                                <span class="input-group-text">%</span>
                             </div>
-                            <div class="col-md-6">
-                                <label for="event_markup_percentage" class="form-label">Event/Cause Markup %</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.1" min="0" max="50" class="form-control" 
-                                           id="event_markup_percentage" name="event_markup_percentage" value="15" required>
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                <div class="form-text">Markup for the event cause/charity</div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-2 p-2 bg-light rounded">
-                            <small class="text-muted">
-                                <strong>Total Markup: </strong><span id="total-markup">25</span>% 
-                                (Your <span id="organizer-portion">10</span>% + Event <span id="event-portion">15</span>%)
-                            </small>
+                            <div class="form-text">The percentage you'll add to the truck's base prices. This becomes your event's profit.</div>
                         </div>
                         
                         <div id="menu-selection" class="d-none">
@@ -201,11 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const truckGoal = document.getElementById('truck-goal');
     const menuSelection = document.getElementById('menu-selection');
     const menuItemsList = document.getElementById('menu-items-list');
-    const organizerMarkupInput = document.getElementById('organizer_markup_percentage');
-    const eventMarkupInput = document.getElementById('event_markup_percentage');
-    const totalMarkupSpan = document.getElementById('total-markup');
-    const organizerPortionSpan = document.getElementById('organizer-portion');
-    const eventPortionSpan = document.getElementById('event-portion');
+    const markupInput = document.getElementById('markup_percentage');
     
     // Handle truck selection
     truckSelect.addEventListener('change', function() {
@@ -230,11 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Handle markup changes
-    organizerMarkupInput.addEventListener('input', updateMarkupDisplay);
-    eventMarkupInput.addEventListener('input', updateMarkupDisplay);
-    
-    // Update markup display on load
-    updateMarkupDisplay();
+    markupInput.addEventListener('input', updatePricing);
     
     function loadMenuItems(truckId) {
         console.log('Loading menu for truck:', truckId);
@@ -275,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <span>
                                     <span class="text-muted">$${parseFloat(item.price).toFixed(2)}</span>
                                     →
-                                    <span class="text-primary marked-up-price">$${(parseFloat(item.price) * 1.25).toFixed(2)}</span>
+                                    <span class="text-primary marked-up-price">$${(parseFloat(item.price) * 1.15).toFixed(2)}</span>
                                 </span>
                             </div>
                             ${item.description ? `<div class="small text-muted">${item.description}</div>` : ''}
@@ -292,29 +266,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    function updateMarkupDisplay() {
-        const organizerMarkup = parseFloat(organizerMarkupInput.value) || 0;
-        const eventMarkup = parseFloat(eventMarkupInput.value) || 0;
-        const totalMarkup = organizerMarkup + eventMarkup;
-        
-        totalMarkupSpan.textContent = totalMarkup.toFixed(1);
-        organizerPortionSpan.textContent = organizerMarkup.toFixed(1);
-        eventPortionSpan.textContent = eventMarkup.toFixed(1);
-        
-        updatePricing();
-    }
-    
     function updatePricing() {
-        const organizerMarkup = parseFloat(organizerMarkupInput.value) || 0;
-        const eventMarkup = parseFloat(eventMarkupInput.value) || 0;
-        const totalMarkup = organizerMarkup + eventMarkup;
+        const markup = parseFloat(markupInput.value) || 0;
         const markedUpPrices = document.querySelectorAll('.marked-up-price');
         
         markedUpPrices.forEach(priceElement => {
             const itemDiv = priceElement.closest('.form-check');
             const originalPriceText = itemDiv.querySelector('.text-muted').textContent;
             const originalPrice = parseFloat(originalPriceText.replace('$', ''));
-            const newPrice = originalPrice * (1 + totalMarkup / 100);
+            const newPrice = originalPrice * (1 + markup / 100);
             priceElement.textContent = `$${newPrice.toFixed(2)}`;
         });
     }
