@@ -166,15 +166,16 @@ with app.app_context():
             # Check if Event table exists and has data
             result = db.session.execute(db.text("SELECT COUNT(*) FROM event")).scalar()
             if result > 0:
-                logging.info(f"Event table exists with {result} events - skipping table recreation")
-                # Only create missing tables, don't recreate existing ones
-                db.create_all(checkfirst=True)
+                logging.info(f"Event table exists with {result} events - PRESERVING existing data")
+                # DO NOT call db.create_all() if events exist - this prevents table recreation
+                logging.info("Skipping table creation to preserve existing events")
             else:
                 # Safe to create all tables if Event table is empty
+                logging.info("Event table empty - safe to create all tables")
                 db.create_all()
         except Exception as e:
-            # Event table doesn't exist or error - create all tables
-            logging.info(f"Creating tables (Event table check failed: {e})")
+            # Event table doesn't exist - create all tables
+            logging.info(f"Event table not found ({e}) - creating all tables")
             db.create_all()
         
         logging.info("Database tables created/verified")
