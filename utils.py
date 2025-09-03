@@ -70,19 +70,15 @@ def charge_stripe_payment(payment_intent_id, original_amount, description):
         logging.info(f"PaymentIntent {payment_intent_id} current status: {intent.status}")
         
         if intent.status == 'requires_capture':
-            # Update the PaymentIntent amount to include processing fee
-            total_amount_cents = int(total_amount_with_fee * 100)
-            
-            stripe.PaymentIntent.modify(
-                payment_intent_id,
-                amount=total_amount_cents,
-                description=f"{description} (includes $%.2f processing fee)" % processing_fee
-            )
-            
-            # Capture the updated payment
+            # Payment intent already includes processing fee from pledge creation
+            # Just capture without modifying amount
             intent = stripe.PaymentIntent.capture(payment_intent_id)
-            logging.info(f"Successfully charged PaymentIntent {payment_intent_id} - Original: ${original_amount:.2f}, Fee: ${processing_fee:.2f}, Total: ${total_amount_with_fee:.2f}")
-            return {'success': True, 'processing_fee': processing_fee, 'total_charged': total_amount_with_fee}
+            
+            # Get actual charged amount from the captured intent
+            actual_charged_amount = intent.amount / 100.0  # Convert from cents
+            
+            logging.info(f"Successfully charged PaymentIntent {payment_intent_id} - Total charged: ${actual_charged_amount:.2f}")
+            return {'success': True, 'processing_fee': processing_fee, 'total_charged': actual_charged_amount}
             
         elif intent.status == 'requires_payment_method':
             # This should not happen in production with proper payment collection
