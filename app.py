@@ -161,8 +161,22 @@ with app.app_context():
         except Exception as e:
             logging.warning(f"Database verification failed: {str(e)}")
         
-        # Create tables
-        db.create_all()
+        # Create tables safely - avoid recreating Event table in production
+        try:
+            # Check if Event table exists and has data
+            result = db.session.execute(db.text("SELECT COUNT(*) FROM event")).scalar()
+            if result > 0:
+                logging.info(f"Event table exists with {result} events - skipping table recreation")
+                # Only create missing tables, don't recreate existing ones
+                db.create_all(checkfirst=True)
+            else:
+                # Safe to create all tables if Event table is empty
+                db.create_all()
+        except Exception as e:
+            # Event table doesn't exist or error - create all tables
+            logging.info(f"Creating tables (Event table check failed: {e})")
+            db.create_all()
+        
         logging.info("Database tables created/verified")
         
         # Create default admin if not exists
