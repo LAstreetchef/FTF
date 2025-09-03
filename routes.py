@@ -2701,10 +2701,10 @@ def view_supporters_page(event_id):
             flash('Event not found', 'error')
             return redirect(url_for('organizer_dashboard'))
             
-        # Get supporters with pending pledges
+        # Get supporters with charged pledges (paid supporters)
         supporters = []
         for pledge in event.pledges:
-            if pledge.status == 'pending':
+            if pledge.status == 'charged':
                 supporters.append({
                     'email': pledge.email,
                     'amount': float(pledge.amount),
@@ -2733,10 +2733,10 @@ def admin_view_supporters(event_id):
     try:
         event = Event.query.get_or_404(event_id)
         
-        # Get supporters with pending pledges
+        # Get supporters with charged pledges (paid supporters)
         supporters = []
         for pledge in event.pledges:
-            if pledge.status == 'pending':
+            if pledge.status == 'charged':
                 supporters.append({
                     'email': pledge.email,
                     'amount': float(pledge.amount),
