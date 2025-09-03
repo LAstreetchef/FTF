@@ -1443,35 +1443,59 @@ def admin_transfers():
             }
             transfer_data.append(transfer_info)
         
-        # Get pending consent requests (NEW SYSTEM)
-        pending_consent_requests = PledgeTransferConsent.query.filter_by(status='pending').all()
+        # Get all active transfers (NEW SYSTEM) - including pending and consented
+        all_transfers = PledgeTransfer.query.filter(PledgeTransfer.status.in_(['consent_requested', 'completed'])).all()
         
-        for consent_request in pending_consent_requests:
-            pledge = consent_request.pledge
-            transfer = consent_request.transfer
-            source_event = transfer.source_event
-            target_event = transfer.target_event
+        for transfer in all_transfers:
+            # Check if transfer should be auto-completed
+            if transfer.status == 'consent_requested' and transfer.pledges_consented == transfer.total_pledges_requested:
+                transfer.status = 'completed'
+                transfer.completed_at = datetime.utcnow()
+                db.session.add(transfer)
+                
+            # Get all consent requests for this transfer to show individual pledge status
+            consent_requests = PledgeTransferConsent.query.filter_by(transfer_id=transfer.id).all()
             
-            # Get organizer details
-            source_organizer = Organizer.query.get(source_event.organizer_id) if source_event else None
-            target_organizer = Organizer.query.get(target_event.organizer_id) if target_event else None
-            
-            transfer_info = {
-                'pledge_id': pledge.id,
-                'pledge_amount': pledge.amount,
-                'pledger_email': pledge.email,
-                'pledger_name': pledge.email.split('@')[0] if pledge.email else 'Anonymous',
-                'transfer_token': consent_request.consent_token,
-                'transfer_initiated': consent_request.created_at,
-                'source_event': source_event,
-                'target_event': target_event,
-                'source_organizer': source_organizer,
-                'target_organizer': target_organizer,
-                'status': 'pending_confirmation',
-                'system': 'new',
-                'consent_request_id': consent_request.id
-            }
-            transfer_data.append(transfer_info)
+            for consent_request in consent_requests:
+                pledge = consent_request.pledge
+                source_event = transfer.source_event
+                target_event = transfer.target_event
+                
+                # Get organizer details
+                source_organizer = Organizer.query.get(source_event.organizer_id) if source_event else None
+                target_organizer = Organizer.query.get(target_event.organizer_id) if target_event else None
+                
+                # Determine display status
+                if consent_request.status == 'pending':
+                    display_status = 'pending_confirmation'
+                elif consent_request.status == 'consented':
+                    display_status = 'consented'
+                elif consent_request.status == 'declined':
+                    display_status = 'declined'
+                else:
+                    display_status = consent_request.status
+                
+                transfer_info = {
+                    'pledge_id': pledge.id,
+                    'pledge_amount': pledge.amount,
+                    'pledger_email': pledge.email,
+                    'pledger_name': pledge.email.split('@')[0] if pledge.email else 'Anonymous',
+                    'transfer_token': consent_request.consent_token,
+                    'transfer_initiated': transfer.consent_requested_at,
+                    'source_event': source_event,
+                    'target_event': target_event,
+                    'source_organizer': source_organizer,
+                    'target_organizer': target_organizer,
+                    'status': display_status,
+                    'system': 'new',
+                    'consent_request_id': consent_request.id,
+                    'transfer_id': transfer.id,
+                    'transfer_status': transfer.status
+                }
+                transfer_data.append(transfer_info)
+        
+        # Commit any status updates
+        db.session.commit()
         
         # Sort by transfer initiation date (newest first)
         transfer_data.sort(key=lambda x: x['transfer_initiated'] or datetime.min, reverse=True)
