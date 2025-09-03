@@ -2441,6 +2441,15 @@ def admin_delete_event(event_id):
     db.session.delete(event)
     db.session.commit()
     
+    # Create automatic backup after event deletion
+    try:
+        from backup_system import backup_events_to_file
+        remaining_events = Event.query.all()
+        backup_events_to_file(remaining_events)
+        logging.info(f"File backup created after event deletion")
+    except Exception as backup_error:
+        logging.error(f"Backup failed after event deletion: {backup_error}")
+    
     flash(f'Event "{event_name}" deleted successfully. {len(pledges)} associated pledges were also removed.', 'success')
     return redirect(url_for('admin_events'))
 
@@ -2968,6 +2977,15 @@ def organizer_create_event():
             
             db.session.add(event)
             db.session.commit()
+            
+            # Create automatic backup after event creation
+            try:
+                from backup_system import backup_events_to_file
+                all_events = Event.query.all()
+                backup_events_to_file(all_events)
+                logging.info(f"File backup created after event creation")
+            except Exception as backup_error:
+                logging.error(f"Backup failed after event creation: {backup_error}")
             
             logging.info(f"Event created successfully: {event.name} with {len(selected_items)} menu items")
             
