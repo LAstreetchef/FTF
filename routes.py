@@ -4814,11 +4814,24 @@ def organizer_earnings():
     # Update tier metrics
     tier_info = organizer.update_tier_metrics()
     
-    # Get earnings data
+    # Get earnings data - include both approved and completed events for consistency with tier calculation
     completed_events = Event.query.filter(
+        Event.organizer_id == organizer_id,
+        Event.status.in_(['approved', 'completed'])
+    ).all()
+    
+    # Debug logging
+    print(f"DEBUG: organizer_id = {organizer_id}")
+    print(f"DEBUG: Found {len(completed_events)} completed/approved events")
+    for event in completed_events:
+        print(f"DEBUG: Event {event.id}: {event.name} - Status: {event.status}")
+    
+    # Also check just completed events
+    just_completed = Event.query.filter(
         Event.organizer_id == organizer_id,
         Event.status == 'completed'
     ).all()
+    print(f"DEBUG: Found {len(just_completed)} strictly completed events")
     
     pending_payouts = organizer.get_pending_payouts()
     total_awaiting_payout = organizer.get_total_earnings_awaiting_payout()
