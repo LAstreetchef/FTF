@@ -1563,8 +1563,7 @@ def resend_transfer_confirmation(pledge_id):
         
         # Check if this is NEW SYSTEM (PledgeTransferConsent)
         consent_request = PledgeTransferConsent.query.filter_by(
-            pledge_id=pledge_id, 
-            status='pending'
+            pledge_id=pledge_id
         ).first()
         
         if consent_request:

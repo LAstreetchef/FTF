@@ -143,10 +143,27 @@
                                     
                                     <!-- Status -->
                                     <td>
+                                        {% if transfer.status == 'pending_confirmation' %}
                                         <span class="badge bg-warning text-dark">
                                             <i data-feather="clock" size="14"></i>
-                                            Pending Confirmation
+                                            PENDING CONFIRMATION
                                         </span>
+                                        {% elif transfer.status == 'consented' %}
+                                        <span class="badge bg-success text-white">
+                                            <i data-feather="check-circle" size="14"></i>
+                                            CONSENTED
+                                        </span>
+                                        {% elif transfer.status == 'declined' %}
+                                        <span class="badge bg-danger text-white">
+                                            <i data-feather="x-circle" size="14"></i>
+                                            DECLINED
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-secondary text-white">
+                                            <i data-feather="help-circle" size="14"></i>
+                                            {{ transfer.status|upper }}
+                                        </span>
+                                        {% endif %}
                                     </td>
                                     
                                     <!-- Actions -->
