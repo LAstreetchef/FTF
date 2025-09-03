@@ -162,7 +162,7 @@
                 <tbody>
                     {% for event in completed_events %}
                     {% set profit = event.calculate_organizer_profit_if_goal_met() %}
-                    {% set has_payout = event.payout %}
+                    {% set has_payout = event.payout[0] if event.payout else none %}
                     <tr>
                         <td>{{ event.name }}</td>
                         <td>{{ event.date.strftime('%m/%d/%Y') if event.date else 'TBD' }}</td>
