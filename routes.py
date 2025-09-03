@@ -5404,7 +5404,7 @@ You have received a message regarding your pledge for "{pledge.event.name}":
 
 "{message_text}"
 
-You can reply to this email if you have any questions.
+Please do not reply to this email. If you have questions, please contact us directly.
 
 Best regards,
 Food Truck Fundraiser Team"""
