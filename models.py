@@ -278,6 +278,12 @@ class Pledge(db.Model):
     # Selected menu items (JSON array of selected items with details)
     selected_menu_items = db.Column(db.Text)
     
+    # Gift meal functionality
+    recipient_name = db.Column(db.String(120))  # Name of gift recipient
+    recipient_email = db.Column(db.String(120))  # Email of gift recipient
+    gift_message = db.Column(db.Text)  # Personal message from giver to recipient
+    is_gift = db.Column(db.Boolean, default=False)  # Whether this is a gift pledge
+    
     # Transfer functionality fields
     transfer_token = db.Column(db.String(64), unique=True)  # For email confirmation
     transfer_target_event_id = db.Column(db.Integer, db.ForeignKey('event.id'))  # Target event for transfer

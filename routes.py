@@ -3489,6 +3489,12 @@ def make_pledge(event_id):
         stripe_token = request.form.get('stripe_token')
         selected_menu_items_json = request.form.get('selected_menu_items')
         
+        # Gift meal information
+        is_gift = request.form.get('is_gift') == 'on'
+        recipient_name = request.form.get('recipient_name') if is_gift else None
+        recipient_email = request.form.get('recipient_email') if is_gift else None
+        gift_message = request.form.get('gift_message') if is_gift else None
+        
         try:
             # Parse selected menu items if provided
             selected_menu_items = []
@@ -3513,7 +3519,11 @@ def make_pledge(event_id):
                     processing_fee=processing_fee,
                     stripe_token=stripe_token,
                     stripe_payment_intent_id=payment_intent_id,
-                    event_id=event_id
+                    event_id=event_id,
+                    is_gift=is_gift,
+                    recipient_name=recipient_name,
+                    recipient_email=recipient_email,
+                    gift_message=gift_message
                 )
                 
                 # Store selected menu items
@@ -3539,20 +3549,59 @@ def make_pledge(event_id):
                     )
                     
                     # Send goal reached confirmation to pledger
-                    send_email(
-                        email,
-                        f"Event Funded! - {event.name}",
-                        f"Great news! Your pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal Charged: ${total_amount:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
-                    )
+                    if is_gift:
+                        # Send notification to the gift giver
+                        send_email(
+                            email,
+                            f"Gift Meal Event Funded! - {event.name}",
+                            f"Great news! Your gift meal pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nGift Recipient: {recipient_name} ({recipient_email})\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal Charged: ${total_amount:.2f}\n\nYour gift recipient will receive their e-ticket soon!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your generosity!"
+                        )
+                        # Send notification to the gift recipient
+                        gift_email_message = f"You've received a gift meal for '{event.name}'!\n\nFrom: {email}"
+                        if gift_message:
+                            gift_email_message += f"\n\nPersonal message:\n\"{gift_message}\""
+                        gift_email_message += f"\n\nThe event has reached its funding goal and your meal is confirmed!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYou'll receive your e-ticket soon. Thank you {recipient_name}!"
+                        send_email(
+                            recipient_email,
+                            f"Gift Meal Confirmed! - {event.name}",
+                            gift_email_message
+                        )
+                    else:
+                        send_email(
+                            email,
+                            f"Event Funded! - {event.name}",
+                            f"Great news! Your pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal Charged: ${total_amount:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
+                        )
                 else:
                     # Send regular pledge confirmation
-                    send_email(
-                        email,
-                        f"Pledge Confirmation - {event.name}",
-                        f"Thank you for your ${amount:.2f} pledge for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal to be charged: ${total_amount:.2f}\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
-                    )
+                    if is_gift:
+                        # Send confirmation to gift giver
+                        send_email(
+                            email,
+                            f"Gift Meal Pledge Confirmation - {event.name}",
+                            f"Thank you for your ${amount:.2f} gift meal pledge for '{event.name}'!\n\nGift Recipient: {recipient_name} ({recipient_email})\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal to be charged: ${total_amount:.2f}\n\nYour payment will only be charged if the event reaches its funding goal. Once funded, your gift recipient will receive their e-ticket!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
+                        )
+                        # Send initial gift notification to recipient
+                        gift_email_message = f"You've received a gift meal pledge for '{event.name}'!\n\nFrom: {email}"
+                        if gift_message:
+                            gift_email_message += f"\n\nPersonal message:\n\"{gift_message}\""
+                        gift_email_message += f"\n\nThis event needs ${event.pledge_goal - event.current_pledges:.2f} more to reach its goal of ${event.pledge_goal:.2f}. If the goal is reached, you'll receive your meal e-ticket!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you {recipient_name}!"
+                        send_email(
+                            recipient_email,
+                            f"Gift Meal Pledge - {event.name}",
+                            gift_email_message
+                        )
+                    else:
+                        send_email(
+                            email,
+                            f"Pledge Confirmation - {event.name}",
+                            f"Thank you for your ${amount:.2f} pledge for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal to be charged: ${total_amount:.2f}\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
+                        )
                 
-                flash('Pledge created successfully! You will only be charged if the event reaches its funding goal.', 'success')
+                if is_gift:
+                    flash(f'Gift meal pledge created successfully! Both you and {recipient_name} will be notified when the event reaches its goal.', 'success')
+                else:
+                    flash('Pledge created successfully! You will only be charged if the event reaches its funding goal.', 'success')
                 return redirect(url_for('pledge_success', pledge_id=pledge.id))
             else:
                 flash('Error processing payment. Please try again.', 'error')
