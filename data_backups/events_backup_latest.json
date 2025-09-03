@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-03T21:25:53.229688",
+  "timestamp": "2025-09-03T21:28:45.438196",
   "backup_type": "automatic",
-  "event_count": 9,
+  "event_count": 10,
   "events": [
     {
       "id": 1,
@@ -182,6 +182,26 @@
       "organizer_fee_payment_intent": "pi_3S3O8IBgt3ltA59n1ytTBI1i",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 25.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 75.0, \"description\": \"\", \"is_organizer\": false}]"
+    },
+    {
+      "id": 10,
+      "name": "Health and Wellness Friday",
+      "description": "Support the Collins and Katz Family YMCA's community health and wellness programs by donating and enjoying a organic and healthy food.",
+      "date": "2025-09-20T11:00:00",
+      "location": "Collins & Katz Family YMCA - 1466 S Westgate Ave, Los Angeles, CA 90025",
+      "organizer_id": 6,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.6}]",
+      "markup_percentage": 15.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-03T21:28:45.308557",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": null,
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 20.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 80.0, \"description\": \"Collins and Katz Family YMCA\", \"is_organizer\": false}]"
     }
   ]
 }

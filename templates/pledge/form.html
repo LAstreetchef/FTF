@@ -292,59 +292,73 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function updateSelectionSummary() {
-        const selectedItems = [];
-        let subtotal = 0;
-        
-        quantityInputs.forEach(input => {
-            const quantity = parseInt(input.value) || 0;
-            if (quantity > 0) {
-                const item = {
-                    name: input.dataset.name,
-                    price: parseFloat(input.dataset.price),
-                    description: input.dataset.description,
-                    quantity: quantity
-                };
-                selectedItems.push(item);
-                subtotal += item.price * item.quantity;
+        try {
+            // Check if required elements exist
+            if (!quantityInputs || !selectionSummary || !selectedItemsList || 
+                !subtotalElement || !processingFeeElement || !totalAmountElement || 
+                !noSelectionMessage || !submitButton || !buttonText || !hiddenAmountInput) {
+                console.warn('updateSelectionSummary: Required DOM elements not found');
+                return;
             }
-        });
-        
-        if (selectedItems.length === 0) {
-            // No items selected
-            selectionSummary.style.display = 'none';
-            noSelectionMessage.style.display = 'block';
-            submitButton.disabled = true;
-            buttonText.textContent = 'Select items to continue';
-            hiddenAmountInput.value = '';
-        } else {
-            // Items selected - update display
-            noSelectionMessage.style.display = 'none';
-            selectionSummary.style.display = 'block';
             
-            // Update selected items list
-            selectedItemsList.innerHTML = selectedItems.map(item => 
-                `<div class="d-flex justify-content-between align-items-center mb-1">
-                    <span>${item.name} ${item.quantity > 1 ? '(x' + item.quantity + ')' : ''}</span>
-                    <span>$${(item.price * item.quantity).toFixed(2)}</span>
-                </div>`
-            ).join('');
+            const selectedItems = [];
+            let subtotal = 0;
             
-            // Calculate fees
-            const processingFee = subtotal * 0.045;
-            const totalAmount = subtotal + processingFee;
+            quantityInputs.forEach(input => {
+                const quantity = parseInt(input.value) || 0;
+                if (quantity > 0) {
+                    const item = {
+                        name: input.dataset.name,
+                        price: parseFloat(input.dataset.price),
+                        description: input.dataset.description,
+                        quantity: quantity
+                    };
+                    selectedItems.push(item);
+                    subtotal += item.price * item.quantity;
+                }
+            });
             
-            // Update amounts
-            subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
-            processingFeeElement.textContent = `$${processingFee.toFixed(2)}`;
-            totalAmountElement.textContent = `$${totalAmount.toFixed(2)}`;
-            hiddenAmountInput.value = subtotal.toFixed(2);
-            
-            // Update submit button
-            submitButton.disabled = false;
-            const totalQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
-            const itemText = totalQuantity === 1 ? 'item' : 'items';
-            buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge ${totalQuantity} ${itemText} ($${subtotal.toFixed(2)})`;
-            feather.replace();
+            if (selectedItems.length === 0) {
+                // No items selected
+                selectionSummary.style.display = 'none';
+                noSelectionMessage.style.display = 'block';
+                submitButton.disabled = true;
+                buttonText.textContent = 'Select items to continue';
+                hiddenAmountInput.value = '';
+            } else {
+                // Items selected - update display
+                noSelectionMessage.style.display = 'none';
+                selectionSummary.style.display = 'block';
+                
+                // Update selected items list
+                selectedItemsList.innerHTML = selectedItems.map(item => 
+                    `<div class="d-flex justify-content-between align-items-center mb-1">
+                        <span>${item.name} ${item.quantity > 1 ? '(x' + item.quantity + ')' : ''}</span>
+                        <span>$${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>`
+                ).join('');
+                
+                // Calculate fees
+                const processingFee = subtotal * 0.045;
+                const totalAmount = subtotal + processingFee;
+                
+                // Update amounts
+                subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+                processingFeeElement.textContent = `$${processingFee.toFixed(2)}`;
+                totalAmountElement.textContent = `$${totalAmount.toFixed(2)}`;
+                hiddenAmountInput.value = subtotal.toFixed(2);
+                
+                // Update submit button
+                submitButton.disabled = false;
+                const totalQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
+                const itemText = totalQuantity === 1 ? 'item' : 'items';
+                buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge ${totalQuantity} ${itemText} ($${subtotal.toFixed(2)})`;
+                if (typeof feather !== 'undefined') {
+                    feather.replace();
+                }
+            }
+        } catch (error) {
+            console.error('Error in updateSelectionSummary:', error);
         }
     }
     
