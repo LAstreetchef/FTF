@@ -1461,6 +1461,17 @@ def admin_transfers():
                 source_event = transfer.source_event
                 target_event = transfer.target_event
                 
+                # Skip pledges that have already been successfully transferred elsewhere
+                # Check if this pledge has any completed transfers
+                completed_transfers = PledgeTransferConsent.query.join(PledgeTransfer).filter(
+                    PledgeTransferConsent.pledge_id == pledge.id,
+                    PledgeTransfer.status == 'completed'
+                ).all()
+                
+                # If this pledge was already transferred and this current transfer is not completed, skip it
+                if completed_transfers and transfer.status != 'completed':
+                    continue
+                
                 # Get organizer details
                 source_organizer = Organizer.query.get(source_event.organizer_id) if source_event else None
                 target_organizer = Organizer.query.get(target_event.organizer_id) if target_event else None
