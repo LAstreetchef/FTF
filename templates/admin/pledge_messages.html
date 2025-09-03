@@ -143,18 +143,18 @@
 // Initialize feather icons
 feather.replace();
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     // Scroll to bottom of messages
-    const messagesContainer = $('#messages-container');
-    messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+    const messagesContainer = document.getElementById('messages-container');
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
     // Handle message form submission
-    $('#message-form').on('submit', function(e) {
+    document.getElementById('message-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const messageInput = $('#message-input');
-        const sendBtn = $('#send-btn');
-        const message = messageInput.val().trim();
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const message = messageInput.value.trim();
         
         if (!message) {
             alert('Please enter a message');
@@ -162,20 +162,26 @@ $(document).ready(function() {
         }
         
         // Disable send button
-        sendBtn.prop('disabled', true).html('<i data-feather="loader" class="me-1"></i> Sending...');
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i data-feather="loader" class="me-1"></i> Sending...';
         feather.replace();
         
-        // Send AJAX request
-        $.post(`/admin/pledge/{{ pledge.id }}/send-message`, {
-            message: message
+        // Send fetch request
+        fetch(`/admin/pledge/{{ pledge.id }}/send-message`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'message=' + encodeURIComponent(message)
         })
-        .done(function(response) {
-            if (response.success) {
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 // Clear input
-                messageInput.val('');
+                messageInput.value = '';
                 
                 // Add message to UI
-                const messageData = response.message_data;
+                const messageData = data.message_data;
                 const messageHtml = `
                     <div class="message mb-3 text-end">
                         <div class="d-inline-block p-3 rounded bg-primary text-white" style="max-width: 70%;">
@@ -191,15 +197,16 @@ $(document).ready(function() {
                 `;
                 
                 // Check if no messages placeholder exists and remove it
-                if (messagesContainer.find('.text-center.text-muted').length > 0) {
-                    messagesContainer.empty();
+                const placeholder = messagesContainer.querySelector('.text-center.text-muted');
+                if (placeholder) {
+                    messagesContainer.innerHTML = '';
                 }
                 
-                messagesContainer.append(messageHtml);
+                messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
                 feather.replace();
                 
                 // Scroll to bottom
-                messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
                 
                 // Show success notification
                 if (messageData.email_sent) {
@@ -208,44 +215,48 @@ $(document).ready(function() {
                     showNotification('Message saved but email notification failed to send.', 'warning');
                 }
             } else {
-                alert('Error: ' + response.error);
+                alert('Error: ' + data.error);
             }
         })
-        .fail(function(xhr) {
+        .catch(error => {
             alert('Error sending message. Please try again.');
         })
-        .always(function() {
+        .finally(() => {
             // Re-enable send button
-            sendBtn.prop('disabled', false).html('<i data-feather="send" class="me-1"></i> Send');
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i data-feather="send" class="me-1"></i> Send';
             feather.replace();
         });
     });
     
     // Auto-resize textarea
-    $('#message-input').on('input', function() {
+    document.getElementById('message-input').addEventListener('input', function() {
         this.style.height = 'auto';
         this.style.height = (this.scrollHeight) + 'px';
     });
     
     // Focus on message input
-    $('#message-input').focus();
+    document.getElementById('message-input').focus();
 });
 
 // Notification function
 function showNotification(message, type = 'info') {
     const alertClass = type === 'success' ? 'alert-success' : type === 'warning' ? 'alert-warning' : 'alert-info';
-    const notification = $(`
-        <div class="alert ${alertClass} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 1060;" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `);
+    const notification = document.createElement('div');
+    notification.className = `alert ${alertClass} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 1060;';
+    notification.setAttribute('role', 'alert');
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
     
-    $('body').append(notification);
+    document.body.appendChild(notification);
     
     // Auto-remove after 5 seconds
     setTimeout(() => {
-        notification.fadeOut(() => notification.remove());
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
     }, 5000);
 }
 </script>
