@@ -1504,10 +1504,14 @@ def admin_transfers():
         total_transfers = len(transfer_data)
         total_amount = sum(t['pledge_amount'] for t in transfer_data)
         
+        # Count only truly pending confirmations (status='pending')
+        pending_confirmations = len([t for t in transfer_data if t['status'] == 'pending_confirmation'])
+        
         return render_template('admin/transfers.html', 
                              transfers=transfer_data,
                              total_transfers=total_transfers,
-                             total_amount=total_amount)
+                             total_amount=total_amount,
+                             pending_confirmations=pending_confirmations)
                              
     except Exception as e:
         logging.error(f"Error loading transfer management page: {str(e)}")
