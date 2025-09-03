@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-03T20:08:58.448201",
+  "timestamp": "2025-09-03T21:22:09.872989",
   "backup_type": "automatic",
-  "event_count": 7,
+  "event_count": 9,
   "events": [
     {
       "id": 1,
@@ -134,14 +134,54 @@
       "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.8}]",
       "markup_percentage": 20.0,
       "pledge_goal": 1000.0,
-      "status": "pending",
-      "current_pledges": 70.8,
-      "approved_at": null,
+      "status": "approved",
+      "current_pledges": 1654.8,
+      "approved_at": "2025-09-03T21:04:50.538433",
       "created_at": "2025-09-03T18:37:12.985190",
       "organizer_fee_charged": true,
       "organizer_fee_payment_intent": "pi_3S3LYdBgt3ltA59n0OuY5DyV",
-      "organizer_entree_claimed": false,
+      "organizer_entree_claimed": true,
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Lakewood Tennis Center\", \"is_organizer\": false}]"
+    },
+    {
+      "id": 8,
+      "name": "Conejo Cup",
+      "description": "Annual Team Tennis Competition among the tennis clubs in the Conejo Valley Tennis League",
+      "date": "2025-10-25T11:00:00",
+      "location": "Westlake Athletic Club 32250 Triunfo Canyon Rd Westlake Village, CA  91361",
+      "organizer_id": 6,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.8}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 5.0,
+      "approved_at": null,
+      "created_at": "2025-09-03T21:11:05.803288",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S3NxgBgt3ltA59n1mERzjLl",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 25.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 75.0, \"description\": \"Westlake Athletic Club\", \"is_organizer\": false}]"
+    },
+    {
+      "id": 9,
+      "name": "Food Truck Friday",
+      "description": "Help support the YMCA's health and wellness programs for the community while enjoying organic and healthy food.",
+      "date": "2025-09-06T11:00:00",
+      "location": "Collins & Katz Family YMCA - 1466 S Westgate Avenue Los Angeles, CA 90025",
+      "organizer_id": 6,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.6}]",
+      "markup_percentage": 15.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-03T21:22:09.578687",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": null,
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 25.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 75.0, \"description\": \"\", \"is_organizer\": false}]"
     }
   ]
 }
