@@ -1,4 +1,6 @@
 from app import app
+import models  # Import models to ensure database tables are created
+import routes  # Import routes to register all endpoints
 import os
 
 if __name__ == '__main__':
