@@ -2849,11 +2849,16 @@ def organizer_create_event():
                 flash('Food truck not found', 'error')
                 return redirect(url_for('organizer_create_event') + f'?auth_token={auth_token}')
             
-            # Validate markup percentage
+            # Validate markup percentages
             try:
-                markup_percentage = float(request.form.get('markup_percentage', 0))
+                organizer_markup = float(request.form.get('organizer_markup_percentage', 0))
             except (ValueError, TypeError):
-                markup_percentage = 0.0
+                organizer_markup = 0.0
+                
+            try:
+                event_markup = float(request.form.get('event_markup_percentage', 0))
+            except (ValueError, TypeError):
+                event_markup = 0.0
             
             event = Event(
                 name=request.form['name'],
@@ -2862,7 +2867,8 @@ def organizer_create_event():
                 location=request.form['location'],
                 organizer_id=organizer_id,
                 food_truck_id=truck_id,
-                markup_percentage=markup_percentage,
+                organizer_markup_percentage=organizer_markup,
+                event_markup_percentage=event_markup,
                 pledge_goal=truck.sales_goal if truck.sales_goal else 1000.0
             )
             
@@ -2888,7 +2894,8 @@ def organizer_create_event():
                     if item_idx < len(truck_menu):
                         item = truck_menu[item_idx].copy()
                         item['original_price'] = item.get('price', 10.0)
-                        item['marked_up_price'] = item['original_price'] * (1 + markup_percentage / 100)
+                        total_markup = organizer_markup + event_markup
+                        item['marked_up_price'] = item['original_price'] * (1 + total_markup / 100)
                         selected_items.append(item)
                 except (ValueError, IndexError, KeyError) as e:
                     logging.warning(f"Error processing menu item {item_id}: {e}")
@@ -2901,7 +2908,8 @@ def organizer_create_event():
                     try:
                         fallback_item = item.copy()
                         fallback_item['original_price'] = item.get('price', 10.0)
-                        fallback_item['marked_up_price'] = round(fallback_item['original_price'] * (1 + markup_percentage / 100), 2)
+                        total_markup = organizer_markup + event_markup
+                        fallback_item['marked_up_price'] = round(fallback_item['original_price'] * (1 + total_markup / 100), 2)
                         selected_items.append(fallback_item)
                     except Exception as e:
                         logging.warning(f"Error processing fallback item: {e}")
@@ -2914,7 +2922,7 @@ def organizer_create_event():
                     'name': 'Special Item',
                     'price': 10.0,
                     'original_price': 10.0,
-                    'marked_up_price': 10.0 * (1 + markup_percentage / 100),
+                    'marked_up_price': 10.0 * (1 + (organizer_markup + event_markup) / 100),
                     'description': f'Special item from {truck.name}'
                 }]
             

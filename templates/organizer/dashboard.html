@@ -164,7 +164,7 @@
                             {% set profit = event.calculate_organizer_profit_if_goal_met() %}
                             {% if profit > 0 %}
                                 <span class="text-success fw-bold">${{ "%.2f"|format(profit) }}</span>
-                                <br><small class="text-muted">{{ event.markup_percentage }}% markup</small>
+                                <br><small class="text-muted">{{ event.get_total_markup_percentage() }}% total ({{ event.organizer_markup_percentage }}% yours + {{ event.event_markup_percentage }}% cause)</small>
                             {% else %}
                                 <span class="text-muted">$0.00</span>
                                 <br><small class="text-muted">No markup set</small>
