@@ -528,12 +528,12 @@ def admin_payouts():
     if not session.get('admin_id'):
         return redirect(url_for('admin_login'))
     
-    # Get events that are charged and may need payouts
-    completed_events = Event.query.filter_by(status='charged').order_by(Event.date.desc()).all()
+    # Get events that are approved and may need payouts
+    completed_events = Event.query.filter_by(status='approved').order_by(Event.date.desc()).all()
     
-    # Get existing payouts
-    pending_payouts = Payout.query.filter_by(status='pending').order_by(Payout.created_at.desc()).all()
-    completed_payouts = Payout.query.filter_by(status='completed').order_by(Payout.paid_at.desc()).limit(20).all()
+    # Get existing organizer payouts
+    pending_payouts = OrganizerPayout.query.filter_by(status='pending').order_by(OrganizerPayout.created_at.desc()).all()
+    completed_payouts = OrganizerPayout.query.filter_by(status='completed').order_by(OrganizerPayout.completed_at.desc()).limit(20).all()
     
     return render_template('admin/payouts.html',
                          completed_events=completed_events,

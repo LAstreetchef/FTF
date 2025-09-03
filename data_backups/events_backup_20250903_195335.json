@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-03T19:26:51.442891",
+  "timestamp": "2025-09-03T19:53:35.756752",
   "backup_type": "automatic",
-  "event_count": 6,
+  "event_count": 7,
   "events": [
     {
       "id": 1,
@@ -115,13 +115,33 @@
       "markup_percentage": 20.0,
       "pledge_goal": 1000.0,
       "status": "pending",
-      "current_pledges": 5.0,
+      "current_pledges": 10.0,
       "approved_at": null,
       "created_at": "2025-09-03T18:45:22.341683",
       "organizer_fee_charged": true,
       "organizer_fee_payment_intent": "pi_3S3LgVBgt3ltA59n0A2CyY6Y",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Westlake Athletic Club\", \"is_organizer\": false}]"
+    },
+    {
+      "id": 7,
+      "name": "WTN Tournament",
+      "description": "Fundraising Tournament for Agoura High School Boys Tennis",
+      "date": "2025-09-06T11:00:00",
+      "location": "Agoura High School - 28545 Driver Ave, Agoura Hills, CA, 91301",
+      "organizer_id": 6,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\\r\\n\", \"original_price\": 16.0, \"marked_up_price\": 20.0}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 21.25}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 21.25}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 20.0}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.25}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.25}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 5.0}]",
+      "markup_percentage": 25.0,
+      "pledge_goal": 1000.0,
+      "status": "approved",
+      "current_pledges": 1650.0,
+      "approved_at": "2025-09-03T19:48:56.464080",
+      "created_at": "2025-09-03T19:42:54.388305",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S3MaCBgt3ltA59n0oAO5B8v",
+      "organizer_entree_claimed": true,
+      "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 50.0, \"description\": \"Agoura HS\", \"is_organizer\": false}]"
     }
   ]
 }
