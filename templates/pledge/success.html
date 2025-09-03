@@ -199,7 +199,7 @@
                         <small class="text-muted">Total Raised</small>
                     </div>
                     <div class="col-4">
-                        <h5 class="text-muted mb-0">${{ "%.2f"|format(pledge.event.pledge_goal) }}</h5>
+                        <h5 class="text-muted mb-0">${{ "%.2f"|format(pledge.event.get_total_goal_amount()) }}</h5>
                         <small class="text-muted">Goal</small>
                     </div>
                     <div class="col-4">
@@ -211,7 +211,7 @@
                 {% if not pledge.event.is_goal_met() %}
                 <div class="text-center mt-3">
                     <p class="mb-2">
-                        <strong>${{ "%.2f"|format(pledge.event.pledge_goal - pledge.event.current_pledges) }}</strong> 
+                        <strong>${{ "%.2f"|format(pledge.event.get_total_goal_amount() - pledge.event.current_pledges) }}</strong> 
                         still needed to reach the goal
                     </p>
                 </div>
