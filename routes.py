@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, session, flash, jsonify, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
-from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout, SupportConversation, SupportMessage
+from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout, SupportConversation, SupportMessage, OrganizerPayout, OrganizerTier, AmbassadorChallenge, OrganizerChallengeProgress
 from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
 import stripe
 import os
