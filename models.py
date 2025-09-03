@@ -251,18 +251,9 @@ class Event(db.Model):
         # total_profit = food_truck_minimum * markup_percentage
         total_profit = self.pledge_goal * (self.markup_percentage / 100.0)
         
-        # If markup splitting is configured, calculate organizer's share
-        splits = self.get_markup_split_config()
-        if splits:
-            # Find the organizer's percentage (default to 100% if not found)
-            organizer_percentage = 100.0
-            for split in splits:
-                if split.get('is_organizer', False):
-                    organizer_percentage = split.get('percentage', 100.0)
-                    break
-            
-            return round(total_profit * (organizer_percentage / 100.0), 2)
-        
+        # ORGANIZER GETS FULL MARKUP AMOUNT - they are responsible for splitting with designees
+        # The markup splitting configuration is for informational purposes only
+        # Organizer receives 100% of markup profit and handles their own distributions
         return round(total_profit, 2)
     
     def calculate_markup_splits_if_goal_met(self):
