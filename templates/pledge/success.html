@@ -52,6 +52,49 @@
             </div>
         </div>
         
+        <!-- Selected Menu Items -->
+        {% set selected_items = pledge.get_selected_menu_items() %}
+        {% if selected_items %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="shopping-bag" class="me-2"></i>
+                    Your Order
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">You've ordered the following items. You'll receive e-tickets for these items when the event is approved:</p>
+                
+                <div class="menu-items-list">
+                    {% for item in selected_items %}
+                    <div class="d-flex justify-content-between align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+                        <div>
+                            <strong>{{ item.name }}</strong>
+                            {% if item.get('description') %}
+                            <br><small class="text-muted">{{ item.description }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="text-end">
+                            <strong class="text-primary">${{ "%.2f"|format(item.price) }}</strong>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <strong>Total Order Value:</strong>
+                    <strong class="text-primary">${{ "%.2f"|format(pledge.amount) }}</strong>
+                </div>
+                
+                <div class="alert alert-info mt-3 mb-0">
+                    <i data-feather="info" class="me-2"></i>
+                    <small>Your e-tickets will be emailed to you once the event reaches its funding goal and is approved by our team.</small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
         <!-- What Happens Next -->
         <div class="card mb-4">
             <div class="card-header">

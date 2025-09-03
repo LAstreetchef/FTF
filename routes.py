@@ -3487,8 +3487,17 @@ def make_pledge(event_id):
         email = request.form['email']
         amount = float(request.form['amount'])
         stripe_token = request.form.get('stripe_token')
+        selected_menu_items_json = request.form.get('selected_menu_items')
         
         try:
+            # Parse selected menu items if provided
+            selected_menu_items = []
+            if selected_menu_items_json:
+                try:
+                    selected_menu_items = json.loads(selected_menu_items_json)
+                except (json.JSONDecodeError, TypeError):
+                    selected_menu_items = []
+            
             # Calculate processing fee (4.5%)
             processing_fee = amount * 0.045
             total_amount = amount + processing_fee
@@ -3506,6 +3515,10 @@ def make_pledge(event_id):
                     stripe_payment_intent_id=payment_intent_id,
                     event_id=event_id
                 )
+                
+                # Store selected menu items
+                if selected_menu_items:
+                    pledge.set_selected_menu_items(selected_menu_items)
                 
                 db.session.add(pledge)
                 db.session.commit()

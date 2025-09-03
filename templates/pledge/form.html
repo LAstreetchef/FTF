@@ -69,46 +69,91 @@
                         </div>
                     </div>
                     
-                    <!-- Pledge Amount -->
+                    <!-- Menu Item Selection -->
                     <div class="mb-4">
-                        <h5>Pledge Amount</h5>
-                        <div class="mb-3">
-                            <label for="amount" class="form-label">How much would you like to pledge?</label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" step="0.01" min="5" class="form-control" id="amount" name="amount" required>
-                            </div>
-                            <div class="form-text">Minimum pledge: $5.00</div>
-                            <div id="fee-breakdown" class="mt-2 text-muted" style="display: none;">
-                                <small>
-                                    Processing fee (4.5%): <span id="processing-fee">$0.00</span><br>
-                                    <strong>Total to be charged: <span id="total-amount">$0.00</span></strong>
-                                </small>
-                            </div>
-                        </div>
-                        
-                        <!-- Menu Item Pledge Buttons -->
+                        <h5>Select Your Items</h5>
                         {% set menu_items = event.get_selected_menu_items() %}
                         {% if menu_items %}
-                        <div class="d-flex gap-2 flex-wrap">
-                            {% for item in menu_items %}
-                            <button type="button" class="btn btn-outline-primary btn-sm" 
-                                    onclick="setAmount({{ '%.2f'|format(item.marked_up_price) }})"
-                                    title="{{ item.name }}">
-                                {{ item.name }}<br>
-                                <small>${{ "%.2f"|format(item.marked_up_price) }}</small>
-                            </button>
-                            {% endfor %}
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="text-muted mb-3">Choose the items you'd like to order. You'll only be charged if the event reaches its funding goal.</p>
+                                <div id="menu-items-container">
+                                    {% for item in menu_items %}
+                                    <div class="form-check menu-item-check mb-3" data-price="{{ '%.2f'|format(item.marked_up_price) }}">
+                                        <input class="form-check-input menu-item-checkbox" type="checkbox" 
+                                               value="{{ loop.index0 }}" 
+                                               id="item-{{ loop.index0 }}"
+                                               data-name="{{ item.name }}"
+                                               data-price="{{ '%.2f'|format(item.marked_up_price) }}"
+                                               data-description="{{ item.get('description', '') }}"
+                                               name="selected_items">
+                                        <label class="form-check-label w-100" for="item-{{ loop.index0 }}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ item.name }}</strong>
+                                                    {% if item.get('description') %}
+                                                    <br><small class="text-muted">{{ item.description }}</small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="text-end">
+                                                    <strong class="text-primary">${{ "%.2f"|format(item.marked_up_price) }}</strong>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <!-- Selection Summary -->
+                                <div id="selection-summary" class="mt-3 p-3 bg-light rounded" style="display: none;">
+                                    <h6>Your Selection:</h6>
+                                    <div id="selected-items-list"></div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <strong>Subtotal:</strong>
+                                        <strong id="subtotal-amount">$0.00</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center text-muted">
+                                        <small>Processing fee (4.5%):</small>
+                                        <small id="processing-fee">$0.00</small>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong class="text-primary">Total to be charged:</strong>
+                                        <strong class="text-primary" id="total-amount">$0.00</strong>
+                                    </div>
+                                </div>
+                                
+                                <div id="no-selection-message" class="text-muted mt-3">
+                                    <small><i data-feather="info" class="me-1" style="width: 16px; height: 16px;"></i>Please select at least one item to continue.</small>
+                                </div>
+                            </div>
                         </div>
                         {% else %}
-                        <!-- Fallback quick amounts if no menu items -->
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(10)">$10</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(15)">$15</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(20)">$20</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(25)">$25</button>
+                        <!-- Fallback for events without menu items -->
+                        <div class="card">
+                            <div class="card-body">
+                                <p class="text-muted">This event doesn't have specific menu items. Please enter your pledge amount:</p>
+                                <div class="mb-3">
+                                    <label for="amount" class="form-label">Pledge Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="5" class="form-control" id="amount" name="amount" required>
+                                    </div>
+                                    <div class="form-text">Minimum pledge: $5.00</div>
+                                </div>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(10)">$10</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(15)">$15</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(20)">$20</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(25)">$25</button>
+                                </div>
+                            </div>
                         </div>
                         {% endif %}
+                        
+                        <!-- Hidden amount field that will be calculated from selected items -->
+                        <input type="hidden" id="amount" name="amount" required>
                     </div>
                     
 
@@ -132,9 +177,9 @@
                     
                     <!-- Submit -->
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg" id="submit-button">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submit-button" disabled>
                             <i data-feather="heart" class="me-2"></i>
-                            <span id="button-text">Pledge <span id="button-amount">$0</span></span>
+                            <span id="button-text">Select items to continue</span>
                         </button>
                         <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-secondary">
                             Back to Event
@@ -165,26 +210,97 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize payment form
     initializePaymentForm();
     
-    // Amount input handling
-    const amountInput = document.getElementById('amount');
-    const buttonAmount = document.getElementById('button-amount');
+    // Menu item selection handling
+    const checkboxes = document.querySelectorAll('.menu-item-checkbox');
+    const selectionSummary = document.getElementById('selection-summary');
+    const selectedItemsList = document.getElementById('selected-items-list');
+    const subtotalElement = document.getElementById('subtotal-amount');
+    const processingFeeElement = document.getElementById('processing-fee');
+    const totalAmountElement = document.getElementById('total-amount');
+    const noSelectionMessage = document.getElementById('no-selection-message');
+    const submitButton = document.getElementById('submit-button');
+    const buttonText = document.getElementById('button-text');
+    const hiddenAmountInput = document.getElementById('amount');
     
-    amountInput.addEventListener('input', function() {
-        const amount = parseFloat(this.value) || 0;
-        buttonAmount.textContent = `$${amount.toFixed(2)}`;
-        
-        // Calculate and display processing fee
-        if (amount >= 5) {
-            const processingFee = amount * 0.045;
-            const totalAmount = amount + processingFee;
-            
-            document.getElementById('processing-fee').textContent = `$${processingFee.toFixed(2)}`;
-            document.getElementById('total-amount').textContent = `$${totalAmount.toFixed(2)}`;
-            document.getElementById('fee-breakdown').style.display = 'block';
-        } else {
-            document.getElementById('fee-breakdown').style.display = 'none';
-        }
+    // Add event listeners to all checkboxes
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectionSummary);
     });
+    
+    function updateSelectionSummary() {
+        const selectedItems = [];
+        let subtotal = 0;
+        
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const item = {
+                    name: checkbox.dataset.name,
+                    price: parseFloat(checkbox.dataset.price),
+                    description: checkbox.dataset.description
+                };
+                selectedItems.push(item);
+                subtotal += item.price;
+            }
+        });
+        
+        if (selectedItems.length === 0) {
+            // No items selected
+            selectionSummary.style.display = 'none';
+            noSelectionMessage.style.display = 'block';
+            submitButton.disabled = true;
+            buttonText.textContent = 'Select items to continue';
+            hiddenAmountInput.value = '';
+        } else {
+            // Items selected - update display
+            noSelectionMessage.style.display = 'none';
+            selectionSummary.style.display = 'block';
+            
+            // Update selected items list
+            selectedItemsList.innerHTML = selectedItems.map(item => 
+                `<div class="d-flex justify-content-between align-items-center mb-1">
+                    <span>${item.name}</span>
+                    <span>$${item.price.toFixed(2)}</span>
+                </div>`
+            ).join('');
+            
+            // Calculate fees
+            const processingFee = subtotal * 0.045;
+            const totalAmount = subtotal + processingFee;
+            
+            // Update amounts
+            subtotalElement.textContent = `$${subtotal.toFixed(2)}`;
+            processingFeeElement.textContent = `$${processingFee.toFixed(2)}`;
+            totalAmountElement.textContent = `$${totalAmount.toFixed(2)}`;
+            hiddenAmountInput.value = subtotal.toFixed(2);
+            
+            // Update submit button
+            submitButton.disabled = false;
+            const itemCount = selectedItems.length;
+            const itemText = itemCount === 1 ? 'item' : 'items';
+            buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge ${itemCount} ${itemText} ($${subtotal.toFixed(2)})`;
+            feather.replace();
+        }
+    }
+    
+    // Fallback amount input handling for events without menu items
+    const fallbackAmountInput = document.querySelector('input[name="amount"]:not([type="hidden"])');
+    if (fallbackAmountInput) {
+        fallbackAmountInput.addEventListener('input', function() {
+            const amount = parseFloat(this.value) || 0;
+            hiddenAmountInput.value = amount.toFixed(2);
+            
+            if (amount >= 5) {
+                const processingFee = amount * 0.045;
+                const totalAmount = amount + processingFee;
+                buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge $${amount.toFixed(2)}`;
+                submitButton.disabled = false;
+                feather.replace();
+            } else {
+                buttonText.textContent = 'Enter amount ($5 minimum)';
+                submitButton.disabled = true;
+            }
+        });
+    }
     
     // Form submission
     const form = document.getElementById('pledge-form');
@@ -248,6 +364,25 @@ document.addEventListener('DOMContentLoaded', function() {
             tokenInput.value = token.id;
             form.appendChild(tokenInput);
             
+            // Add selected menu items to form (if any)
+            const selectedItems = [];
+            const checkboxes = document.querySelectorAll('.menu-item-checkbox:checked');
+            checkboxes.forEach(checkbox => {
+                selectedItems.push({
+                    name: checkbox.dataset.name,
+                    price: parseFloat(checkbox.dataset.price),
+                    description: checkbox.dataset.description
+                });
+            });
+            
+            if (selectedItems.length > 0) {
+                const itemsInput = document.createElement('input');
+                itemsInput.type = 'hidden';
+                itemsInput.name = 'selected_menu_items';
+                itemsInput.value = JSON.stringify(selectedItems);
+                form.appendChild(itemsInput);
+            }
+            
             // Submit form
             form.submit();
             
@@ -279,20 +414,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function setAmount(amount) {
-    const amountInput = document.getElementById('amount');
-    amountInput.value = amount;
-    document.getElementById('button-amount').textContent = `$${amount.toFixed(2)}`;
-    
-    // Trigger processing fee calculation
-    if (amount >= 5) {
-        const processingFee = amount * 0.045;
-        const totalAmount = amount + processingFee;
-        
-        document.getElementById('processing-fee').textContent = `$${processingFee.toFixed(2)}`;
-        document.getElementById('total-amount').textContent = `$${totalAmount.toFixed(2)}`;
-        document.getElementById('fee-breakdown').style.display = 'block';
-    } else {
-        document.getElementById('fee-breakdown').style.display = 'none';
+    // For fallback compatibility with events that don't have menu items
+    const fallbackAmountInput = document.querySelector('input[name="amount"]:not([type="hidden"])');
+    if (fallbackAmountInput) {
+        fallbackAmountInput.value = amount;
+        fallbackAmountInput.dispatchEvent(new Event('input'));
     }
 }
 </script>

@@ -275,10 +275,29 @@ class Pledge(db.Model):
     ticket_code = db.Column(db.String(50), unique=True)
     ticket_sent = db.Column(db.Boolean, default=False)
     
+    # Selected menu items (JSON array of selected items with details)
+    selected_menu_items = db.Column(db.Text)
+    
     # Transfer functionality fields
     transfer_token = db.Column(db.String(64), unique=True)  # For email confirmation
     transfer_target_event_id = db.Column(db.Integer, db.ForeignKey('event.id'))  # Target event for transfer
     transfer_initiated_at = db.Column(db.DateTime)  # When transfer was requested
+    
+    def set_selected_menu_items(self, items):
+        """Store selected menu items as JSON"""
+        if items:
+            self.selected_menu_items = json.dumps(items)
+        else:
+            self.selected_menu_items = None
+    
+    def get_selected_menu_items(self):
+        """Retrieve selected menu items from JSON"""
+        if self.selected_menu_items:
+            try:
+                return json.loads(self.selected_menu_items)
+            except (json.JSONDecodeError, TypeError):
+                return []
+        return []
 
 class EmailLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
