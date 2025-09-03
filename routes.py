@@ -2866,6 +2866,52 @@ def organizer_create_event():
                 pledge_goal=truck.sales_goal if truck.sales_goal else 1000.0
             )
             
+            # Process markup splitting configuration
+            split_emails = request.form.getlist('split_emails[]')
+            split_percentages = request.form.getlist('split_percentages[]')
+            split_descriptions = request.form.getlist('split_descriptions[]')
+            split_is_organizer = request.form.getlist('split_is_organizer[]')
+            
+            if split_emails and split_percentages:
+                splits = []
+                organizer = Organizer.query.get(organizer_id)
+                
+                for i, email in enumerate(split_emails):
+                    if i < len(split_percentages) and email.strip():
+                        try:
+                            percentage = float(split_percentages[i])
+                            description = split_descriptions[i] if i < len(split_descriptions) else ''
+                            is_organizer = (i < len(split_is_organizer) and split_is_organizer[i] == 'true')
+                            
+                            # If this is the organizer split but email is empty, use organizer's email
+                            if is_organizer and not email.strip():
+                                email = organizer.email
+                            
+                            splits.append({
+                                'email': email.strip(),
+                                'percentage': percentage,
+                                'description': description.strip(),
+                                'is_organizer': is_organizer
+                            })
+                        except (ValueError, TypeError):
+                            continue
+                
+                # Validate that percentages add up to 100
+                total_percentage = sum(split.get('percentage', 0) for split in splits)
+                if abs(total_percentage - 100) > 0.1:
+                    flash('Markup split percentages must add up to 100%', 'error')
+                    trucks = FoodTruck.query.filter_by(status='approved', registration_fee_charged=True).all()
+                    return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
+                
+                # Set the markup split configuration
+                if splits:
+                    try:
+                        event.set_markup_split_config(splits)
+                    except ValueError as e:
+                        flash(str(e), 'error')
+                        trucks = FoodTruck.query.filter_by(status='approved', registration_fee_charged=True).all()
+                        return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
+            
             # Parse selected menu items with markup - ROBUST handling
             selected_items = []
             selected_item_ids = request.form.getlist('selected_items')
@@ -2937,8 +2983,10 @@ def organizer_create_event():
     # GET request - show form
     # Only show approved food trucks that have paid registration fee to organizers
     trucks = FoodTruck.query.filter_by(status='approved', registration_fee_charged=True).all()
-    # Pass auth token to template for form submission consistency  
-    return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token)
+    organizer = Organizer.query.get(organizer_id)
+    
+    # Pass auth token and organizer info to template for form submission consistency  
+    return render_template('organizer/create_event.html', trucks=trucks, auth_token=auth_token, organizer=organizer)
 
 @app.route('/organizer/pay-fee/<int:event_id>', methods=['GET', 'POST'])
 def organizer_pay_fee(event_id):

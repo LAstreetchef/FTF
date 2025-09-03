@@ -187,6 +187,9 @@ class Event(db.Model):
     organizer_fee_payment_intent = db.Column(db.String(255))  # Stripe payment intent ID
     organizer_entree_claimed = db.Column(db.Boolean, default=False)  # Whether organizer got their free entree
     
+    # Markup splitting configuration
+    markup_split_config = db.Column(db.Text)  # JSON string storing split configuration
+    
     # Relationships
     pledges = db.relationship('Pledge', foreign_keys='Pledge.event_id', backref='event', lazy=True)
     
@@ -200,6 +203,22 @@ class Event(db.Model):
     def set_selected_menu_items(self, items):
         """Set selected menu items as JSON string"""
         self.selected_menu_items = json.dumps(items)
+    
+    def get_markup_split_config(self):
+        """Parse markup split configuration from JSON string"""
+        try:
+            return json.loads(self.markup_split_config) if self.markup_split_config else []
+        except:
+            return []
+    
+    def set_markup_split_config(self, splits):
+        """Set markup split configuration as JSON string"""
+        # Validate splits add up to 100%
+        total_percentage = sum(split.get('percentage', 0) for split in splits)
+        if abs(total_percentage - 100) > 0.01:  # Allow for small floating point errors
+            raise ValueError("Split percentages must add up to 100%")
+        
+        self.markup_split_config = json.dumps(splits)
     
     def get_progress_percentage(self):
         """Calculate progress percentage towards goal"""
@@ -226,13 +245,53 @@ class Event(db.Model):
         if self.pledge_goal <= 0 or self.markup_percentage <= 0:
             return 0.0
         
-        # Calculate profit based on markup percentage applied to the goal amount
-        # The profit is the markup percentage of the total sales needed to reach the goal
+        # Calculate total profit based on markup percentage applied to the goal amount
         markup_ratio = self.markup_percentage / 100.0
         base_amount_needed = self.pledge_goal / (1 + markup_ratio)
-        profit_amount = self.pledge_goal - base_amount_needed
+        total_profit = self.pledge_goal - base_amount_needed
         
-        return round(profit_amount, 2)
+        # If markup splitting is configured, calculate organizer's share
+        splits = self.get_markup_split_config()
+        if splits:
+            # Find the organizer's percentage (default to 100% if not found)
+            organizer_percentage = 100.0
+            for split in splits:
+                if split.get('is_organizer', False):
+                    organizer_percentage = split.get('percentage', 100.0)
+                    break
+            
+            return round(total_profit * (organizer_percentage / 100.0), 2)
+        
+        return round(total_profit, 2)
+    
+    def calculate_markup_splits_if_goal_met(self):
+        """Calculate markup split amounts for all parties if goal is met"""
+        if self.pledge_goal <= 0 or self.markup_percentage <= 0:
+            return []
+        
+        # Calculate total profit
+        markup_ratio = self.markup_percentage / 100.0
+        base_amount_needed = self.pledge_goal / (1 + markup_ratio)
+        total_profit = self.pledge_goal - base_amount_needed
+        
+        splits = self.get_markup_split_config()
+        if not splits:
+            # Default: 100% to organizer
+            return [{'email': self.organizer.email, 'percentage': 100.0, 'amount': round(total_profit, 2), 'is_organizer': True}]
+        
+        # Calculate amounts for each split
+        result = []
+        for split in splits:
+            amount = round(total_profit * (split.get('percentage', 0) / 100.0), 2)
+            result.append({
+                'email': split.get('email', ''),
+                'percentage': split.get('percentage', 0),
+                'amount': amount,
+                'description': split.get('description', ''),
+                'is_organizer': split.get('is_organizer', False)
+            })
+        
+        return result
     
     def can_be_deleted(self):
         """Check if event can be safely deleted"""
@@ -469,6 +528,34 @@ class OrganizerPayout(db.Model):
     # Relationships
     organizer = db.relationship('Organizer', backref='payouts')
     event = db.relationship('Event', backref='payout')
+
+class PayoutSplit(db.Model):
+    """Track split payouts for events with markup sharing"""
+    id = db.Column(db.Integer, primary_key=True)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    
+    # Recipient details
+    recipient_email = db.Column(db.String(120), nullable=False)
+    recipient_description = db.Column(db.String(200))  # e.g., "Local Charity", "Organizer"
+    percentage = db.Column(db.Float, nullable=False)  # Percentage of total markup
+    amount = db.Column(db.Float, nullable=False)  # Calculated payout amount
+    is_organizer = db.Column(db.Boolean, default=False)  # Whether this split goes to the organizer
+    
+    # Payout status
+    status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
+    payout_method = db.Column(db.String(50), default='stripe')  # stripe, manual, etc.
+    
+    # Stripe integration
+    stripe_transfer_id = db.Column(db.String(255))  # Stripe transfer ID for tracking
+    stripe_account_id = db.Column(db.String(255))  # Recipient's connected Stripe account
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    event = db.relationship('Event', backref='payout_splits')
 
 class OrganizerTier(db.Model):
     """Track organizer ambassador tiers and progression"""
