@@ -1542,8 +1542,12 @@ def resend_transfer_confirmation(pledge_id):
             from flask_mail import Mail, Message
             mail = Mail(app)
             
-            confirm_url = url_for('confirm_transfer', token=pledge.transfer_token, _external=True)
-            decline_url = url_for('decline_transfer', token=pledge.transfer_token, _external=True)
+            # Build correct URLs using current request host instead of _external=True
+            from flask import request
+            host = request.headers.get('Host', 'localhost:5000')
+            scheme = 'https' if 'replit.dev' in host or 'foodtruckfundraiser.com' in host else 'http'
+            confirm_url = f"{scheme}://{host}/confirm-transfer/{pledge.transfer_token}"
+            decline_url = f"{scheme}://{host}/decline-transfer/{pledge.transfer_token}"
             
             try:
                 msg = Message(
@@ -1576,9 +1580,12 @@ def resend_transfer_confirmation(pledge_id):
             source_event = transfer.source_event
             target_event = transfer.target_event
             
-            consent_url = url_for('pledge_transfer_consent', 
-                                token=consent_request.consent_token, 
-                                _external=True)
+            # Build correct URL using current request host instead of _external=True
+            # This prevents wrong domain issues in development vs production
+            from flask import request
+            host = request.headers.get('Host', 'localhost:5000')
+            scheme = 'https' if 'replit.dev' in host or 'foodtruckfundraiser.com' in host else 'http'
+            consent_url = f"{scheme}://{host}/pledge-transfer/consent/{consent_request.consent_token}"
             
             # Resend new system email
             from flask_mail import Mail, Message
