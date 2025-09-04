@@ -2830,6 +2830,94 @@ def view_supporters_page(event_id):
         flash('Error loading supporters', 'error')
         return redirect(url_for('organizer_dashboard'))
 
+@app.route('/organizer/supporters/<int:event_id>/send-thank-you', methods=['POST'])
+def send_thank_you_email(event_id):
+    """Send thank you email directly from platform to supporter"""
+    try:
+        # Verify organizer owns this event
+        organizer_id = session.get('organizer_id')
+        if not organizer_id:
+            return jsonify({'success': False, 'error': 'Authentication required'}), 401
+        
+        event = Event.query.filter_by(id=event_id, organizer_id=organizer_id).first()
+        if not event:
+            return jsonify({'success': False, 'error': 'Event not found'}), 404
+            
+        supporter_email = request.form.get('supporter_email')
+        custom_message = request.form.get('custom_message', '').strip()
+        
+        if not supporter_email:
+            return jsonify({'success': False, 'error': 'Supporter email required'}), 400
+        
+        # Find the supporter's pledge to get amount
+        supporter_pledge = None
+        for pledge in event.pledges:
+            if pledge.email == supporter_email and pledge.status == 'charged':
+                supporter_pledge = pledge
+                break
+                
+        if not supporter_pledge:
+            return jsonify({'success': False, 'error': 'Supporter not found'}), 404
+        
+        organizer = Organizer.query.get(organizer_id)
+        
+        # Create personalized thank you email
+        subject = f"Thank you for supporting {event.name}!"
+        
+        if custom_message:
+            email_body = f"""Hi,
+
+{custom_message}
+
+Thank you for supporting our "{event.name}" event! We truly appreciate your pledge of ${supporter_pledge.amount:.2f}.
+
+Best regards,
+{organizer.name}
+
+---
+This message was sent through the Food Truck Fundraiser platform."""
+        else:
+            email_body = f"""Hi,
+
+Thank you so much for supporting our "{event.name}" event! We truly appreciate your pledge of ${supporter_pledge.amount:.2f}.
+
+Your support helps make this community event possible. We're excited to bring great food and fun to our neighborhood!
+
+Event Details:
+- Date: {event.date.strftime('%B %d, %Y at %I:%M %p')}
+- Location: {event.location}
+
+Thank you again for being part of our community!
+
+Best regards,
+{organizer.name}
+
+---
+This message was sent through the Food Truck Fundraiser platform."""
+
+        # Send the email
+        email_success = send_email(supporter_email, subject, email_body)
+        
+        if email_success:
+            logging.info(f"Thank you email sent from organizer {organizer_id} to {supporter_email} for event {event_id}")
+            return jsonify({
+                'success': True,
+                'message': f'Thank you email sent successfully to {supporter_email}!'
+            })
+        else:
+            logging.error(f"Failed to send thank you email from organizer {organizer_id} to {supporter_email}")
+            return jsonify({
+                'success': False, 
+                'error': 'Failed to send email. Please try again.'
+            }), 500
+            
+    except Exception as e:
+        logging.error(f"Error sending thank you email: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': 'An error occurred while sending the email'
+        }), 500
+
 @app.route('/admin/supporters/<int:event_id>')
 def admin_view_supporters(event_id):
     """Admin page to view supporters for any event"""
