@@ -232,10 +232,10 @@ with app.app_context():
         from models import Admin
         from werkzeug.security import generate_password_hash
         
-        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
         if not admin:
             admin = Admin()
-            admin.username = 'truckstopsla@gmail.com'
+            admin.username = 'support@foodtruckfundraiser.com'
             admin.password_hash = generate_password_hash('password')
             db.session.add(admin)
             db.session.commit()

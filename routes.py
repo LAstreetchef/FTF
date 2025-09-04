@@ -132,7 +132,7 @@ def index():
 def quick_admin_login():
     """Quick login for admin in iframe contexts"""
     try:
-        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
         if admin:
             session['admin_id'] = admin.id
             session['user_type'] = 'admin'
@@ -1913,10 +1913,10 @@ def update_pledge_totals():
     """Debug route to test admin login credentials"""
     try:
         if request.method == 'POST':
-            username = request.form.get('username', 'truckstopsla@gmail.com')
+            username = request.form.get('username', 'support@foodtruckfundraiser.com')
             password = request.form.get('password', 'password')
         else:
-            username = 'truckstopsla@gmail.com'
+            username = 'support@foodtruckfundraiser.com'
             password = 'password'
         
         # Find admin user
@@ -1943,7 +1943,7 @@ def update_pledge_totals():
             'password_valid': password_valid,
             'password_hash_prefix': admin.password_hash[:20] + '...',
             'test_credentials': {
-                'username': 'truckstopsla@gmail.com',
+                'username': 'support@foodtruckfundraiser.com',
                 'password': 'password'
             }
         })
@@ -3207,7 +3207,7 @@ def confirm_food_truck_registration_fee_payment(truck_id):
             owner = FoodTruckOwner.query.get(owner_id)
             owner_name = owner.name if owner else "Unknown Owner"
             send_email(
-                'truckstopsla@gmail.com',
+                'support@foodtruckfundraiser.com',
                 f"Food Truck Registration Fee Paid: {truck.name}",
                 f"A food truck registration fee has been paid and automatically approved:\n\nTruck: {truck.name}\nOwner: {owner_name}\nCuisine: {truck.cuisine_type}\nGoal: ${truck.sales_goal:.2f}\n\nThe truck is now approved and can participate in events immediately."
             )
@@ -3280,7 +3280,7 @@ def confirm_organizer_fee_payment(event_id):
             # Send notification email to admin about new event
             organizer_name = organizer.name if organizer else "Unknown Organizer"
             send_email(
-                'truckstopsla@gmail.com',
+                'support@foodtruckfundraiser.com',
                 f"New Event Published: {event.name}",
                 f"A new event has been published (organizer pledge paid):\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {event.food_truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}\n\nOrganizer will receive a free entree when the event is successfully funded."
             )
@@ -3742,7 +3742,7 @@ def make_pledge(event_id):
                     
                     # Send notification to admin
                     send_email(
-                        'truckstopsla@gmail.com',
+                        'support@foodtruckfundraiser.com',
                         f"Event Goal Met: {event.name}",
                         f"The event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}. Please review and approve the event to charge all pledges."
                     )
@@ -3902,7 +3902,7 @@ def chat_message():
             
             # Send notification to admin
             send_email(
-                'truckstopsla@gmail.com',
+                'support@foodtruckfundraiser.com',
                 f'Support Chat Escalated - {session_id}',
                 f'A support conversation has been escalated to human support.\n\nSession: {session_id}\nUser Message: {user_message}\nAI Response: {ai_result["response"]}\n\nView conversation: /admin/support/{conversation.id}'
             )
@@ -3958,7 +3958,7 @@ def chat_escalate():
         conversation_preview = '\n'.join([f"{msg.sender_type}: {msg.content}" for msg in reversed(recent_messages)])
         
         send_email(
-            'truckstopsla@gmail.com',
+            'support@foodtruckfundraiser.com',
             f'Support Chat Manual Escalation - {session_id}',
             f'A user manually requested human support.\n\nSession: {session_id}\n\nRecent conversation:\n{conversation_preview}\n\nView full conversation: /admin/support/{conversation.id}'
         )
@@ -4141,7 +4141,7 @@ def internal_error(error):
 # def debug_admin_login():
     """Debug route to test admin credentials"""
     try:
-        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
         if admin:
             password_test = check_password_hash(admin.password_hash, 'password')
             return f"""
@@ -4151,7 +4151,7 @@ def internal_error(error):
             <p><strong>Password Hash (first 30 chars):</strong> {admin.password_hash[:30]}...</p>
             <p><strong>Password 'password' test:</strong> {'✓ PASS' if password_test else '✗ FAIL'}</p>
             <hr>
-            <p>Try logging in with: truckstopsla@gmail.com / password</p>
+            <p>Try logging in with: support@foodtruckfundraiser.com / password</p>
             <p><a href="/admin/login">Go to Admin Login</a></p>
             """
         else:
@@ -4165,7 +4165,7 @@ def login_admin_direct():
     """Direct admin login for troubleshooting"""
     if request.method == 'POST':
         # Process login
-        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
         if admin and check_password_hash(admin.password_hash, 'password'):
             # Clear any existing session data first
             session.clear()
@@ -4202,7 +4202,7 @@ def login_admin_direct():
     
     <form method="POST">
         <p><button type="submit" style="padding: 15px 30px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px;">
-            Login as Admin (truckstopsla@gmail.com)
+            Login as Admin (support@foodtruckfundraiser.com)
         </button></p>
     </form>
     
@@ -4223,7 +4223,7 @@ def setup_admin():
         debug_info = f"Database URL: {db_url}<br>Current admin count: {admin_count}<br><br>"
         
         # Check if admin already exists
-        admin = Admin.query.filter_by(username='truckstopsla@gmail.com').first()
+        admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
         
         if admin:
             # Update existing admin password
@@ -4238,11 +4238,11 @@ def setup_admin():
             {debug_info}Admin user updated successfully!<br>
             Old hash: {old_hash}<br>
             Password test: {'PASS' if test_result else 'FAIL'}<br><br>
-            <strong>You can now login with truckstopsla@gmail.com / password</strong><br><br>
+            <strong>You can now login with support@foodtruckfundraiser.com / password</strong><br><br>
             <hr>
             <h4>Quick Login Test:</h4>
             <form action="/admin/login" method="POST" style="margin: 10px 0;">
-                <input type="hidden" name="username" value="truckstopsla@gmail.com">
+                <input type="hidden" name="username" value="support@foodtruckfundraiser.com">
                 <input type="hidden" name="password" value="password">
                 <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">
                     Login as Admin Now
@@ -4253,7 +4253,7 @@ def setup_admin():
         else:
             # Create new admin
             new_admin = Admin(
-                username='truckstopsla@gmail.com',
+                username='support@foodtruckfundraiser.com',
                 password_hash=generate_password_hash('password')
             )
             db.session.add(new_admin)
@@ -4265,11 +4265,11 @@ def setup_admin():
             return f"""
             {debug_info}Admin user created successfully!<br>
             Password test: {'PASS' if test_result else 'FAIL'}<br><br>
-            <strong>You can now login with truckstopsla@gmail.com / password</strong><br><br>
+            <strong>You can now login with support@foodtruckfundraiser.com / password</strong><br><br>
             <hr>
             <h4>Quick Login Test:</h4>
             <form action="/admin/login" method="POST" style="margin: 10px 0;">
-                <input type="hidden" name="username" value="truckstopsla@gmail.com">
+                <input type="hidden" name="username" value="support@foodtruckfundraiser.com">
                 <input type="hidden" name="password" value="password">
                 <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">
                     Login as Admin Now
@@ -5184,7 +5184,7 @@ def request_payout():
     # Send notification to admin (optional - don't fail if email fails)
     try:
         send_email(
-            'truckstopsla@gmail.com',
+            'support@foodtruckfundraiser.com',
             f'Payout Request: ${amount:.2f} for {organizer.name}',
             f'Organizer {organizer.name} has requested a payout of ${amount:.2f} for event "{event.name}".\\n\\nEvent Details:\\nDate: {event.date}\\nLocation: {event.location}\\nTotal Raised: ${event.current_pledges:.2f}\\nOrganizer Profit: ${amount:.2f}\\n\\nPlease process this payout in the admin dashboard.'
         )
