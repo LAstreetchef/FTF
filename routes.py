@@ -4025,20 +4025,30 @@ def admin_support_dashboard():
     if not session.get('admin_id'):
         return redirect(url_for('admin_login'))
     
-    # Get conversation statistics
-    total_conversations = SupportConversation.query.count()
-    active_conversations = SupportConversation.query.filter_by(status='active').count()
-    escalated_conversations = SupportConversation.query.filter_by(status='escalated').count()
-    resolved_conversations = SupportConversation.query.filter_by(status='resolved').count()
-    
-    # Get recent conversations
-    recent_conversations = SupportConversation.query.order_by(SupportConversation.last_activity.desc()).limit(20).all()
-    
-    # Get unassigned escalated conversations
-    unassigned_escalated = SupportConversation.query.filter_by(
-        status='escalated',
-        assigned_admin_id=None
-    ).order_by(SupportConversation.escalated_at.desc()).all()
+    # Get conversation statistics with error handling
+    try:
+        total_conversations = SupportConversation.query.count()
+        active_conversations = SupportConversation.query.filter_by(status='active').count()
+        escalated_conversations = SupportConversation.query.filter_by(status='escalated').count()
+        resolved_conversations = SupportConversation.query.filter_by(status='resolved').count()
+        
+        # Get recent conversations
+        recent_conversations = SupportConversation.query.order_by(SupportConversation.last_activity.desc()).limit(20).all()
+        
+        # Get unassigned escalated conversations
+        unassigned_escalated = SupportConversation.query.filter_by(
+            status='escalated',
+            assigned_admin_id=None
+        ).order_by(SupportConversation.escalated_at.desc()).all()
+    except Exception as e:
+        logging.error(f"Support dashboard query error: {e}")
+        # Return safe defaults when database has issues
+        total_conversations = 0
+        active_conversations = 0
+        escalated_conversations = 0
+        resolved_conversations = 0
+        recent_conversations = []
+        unassigned_escalated = []
     
     return render_template('admin/support_dashboard.html',
                          total_conversations=total_conversations,
