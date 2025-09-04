@@ -3842,20 +3842,37 @@ def chat_message():
         if not session_id or not user_message:
             return jsonify({'success': False, 'error': 'Missing session_id or message'}), 400
         
-        # Get or create conversation
-        conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        # Get or create conversation with error handling
+        try:
+            conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        except Exception as db_error:
+            logging.error(f"Database query error in chat_message: {db_error}")
+            return jsonify({
+                'success': False,
+                'error': 'Database connection issue',
+                'response': 'I\'m having trouble connecting to support right now. Please try again in a moment.'
+            }), 500
+            
         if not conversation:
-            conversation = SupportConversation(
-                session_id=session_id,
-                user_agent=request.headers.get('User-Agent', ''),
-                ip_address=request.remote_addr,
-                page_url=page_context.get('url'),
-                page_type=page_context.get('page_type', 'general'),
-                event_id=page_context.get('event_id'),
-                event_name=page_context.get('event_name')
-            )
-            db.session.add(conversation)
-            db.session.commit()
+            try:
+                conversation = SupportConversation(
+                    session_id=session_id,
+                    user_agent=request.headers.get('User-Agent', ''),
+                    ip_address=request.remote_addr,
+                    page_url=page_context.get('url'),
+                    page_type=page_context.get('page_type', 'general'),
+                    event_id=page_context.get('event_id'),
+                    event_name=page_context.get('event_name')
+                )
+                db.session.add(conversation)
+                db.session.commit()
+            except Exception as db_error:
+                logging.error(f"Database creation error in chat_message: {db_error}")
+                return jsonify({
+                    'success': False,
+                    'error': 'Database connection issue',
+                    'response': 'Unable to start conversation right now. Please try again later.'
+                }), 500
         
         # Update last activity
         conversation.last_activity = datetime.utcnow()
@@ -3940,7 +3957,15 @@ def chat_escalate():
         if not session_id:
             return jsonify({'success': False, 'error': 'Missing session_id'}), 400
         
-        conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        try:
+            conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        except Exception as db_error:
+            logging.error(f"Database query error in chat_escalate: {db_error}")
+            return jsonify({
+                'success': False, 
+                'error': 'Unable to connect to human support right now. Please try again later.'
+            }), 500
+            
         if not conversation:
             return jsonify({'success': False, 'error': 'Conversation not found'}), 404
         
@@ -3986,7 +4011,15 @@ def chat_poll():
         if not session_id:
             return jsonify({'success': False, 'error': 'Missing session_id'}), 400
         
-        conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        try:
+            conversation = SupportConversation.query.filter_by(session_id=session_id).first()
+        except Exception as db_error:
+            logging.error(f"Database query error in chat_poll: {db_error}")
+            return jsonify({
+                'success': False, 
+                'error': 'Unable to connect to human support right now. Please try again later.'
+            }), 500
+            
         if not conversation:
             return jsonify({'success': False, 'error': 'Conversation not found'}), 404
         
