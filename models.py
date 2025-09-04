@@ -582,6 +582,7 @@ class OrganizerPayout(db.Model):
     amount = db.Column(db.Float, nullable=False)  # Amount to be paid out
     status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
     payout_method = db.Column(db.String(50), default='stripe')  # stripe, manual, etc.
+    transaction_id = db.Column(db.String(255))  # PayPal batch ID or other provider transaction ID
     
     # Stripe integration
     stripe_transfer_id = db.Column(db.String(255))  # Stripe transfer ID for tracking

@@ -123,7 +123,7 @@
                         <th>Event</th>
                         <th>Amount</th>
                         <th>Status</th>
-                        <th>Processed</th>
+                        <th>Transaction ID</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -146,12 +146,10 @@
                             </span>
                         </td>
                         <td>
-                            {% if payout.completed_at %}
-                                {{ payout.completed_at.strftime('%m/%d/%Y') }}
-                            {% elif payout.processed_at %}
-                                {{ payout.processed_at.strftime('%m/%d/%Y') }}
+                            {% if payout.transaction_id %}
+                                <small class="text-monospace">{{ payout.transaction_id[:20] }}{% if payout.transaction_id|length > 20 %}...{% endif %}</small>
                             {% else %}
-                                -
+                                <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td>

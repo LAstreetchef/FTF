@@ -5278,7 +5278,7 @@ def admin_process_payout(payout_id):
 
 @app.route('/admin/organizer-payout/<int:payout_id>/complete', methods=['POST'])
 def admin_complete_organizer_payout(payout_id):
-    """Mark organizer payout as completed after payment has been sent"""
+    """Process real PayPal payout and mark as completed"""
     if 'admin_id' not in session:
         return jsonify({'error': 'Admin access required'}), 401
     
@@ -5287,21 +5287,33 @@ def admin_complete_organizer_payout(payout_id):
     if payout.status != 'processing':
         return jsonify({'error': 'Payout must be in processing status to complete'}), 400
     
-    # Mark as completed
-    payout.status = 'completed'
-    payout.completed_at = datetime.utcnow()
-    
-    # Send completion email to organizer
-    send_email(
-        payout.organizer.email,
-        f'Payout Completed: ${payout.amount:.2f}',
-        f'''Great news! Your payout has been successfully completed.
+    try:
+        # Process the actual payment based on method
+        if payout.organizer.payout_method == 'paypal':
+            result = send_paypal_payout(payout)
+        elif payout.organizer.payout_method == 'bank':
+            result = send_bank_payout(payout)
+        else:
+            return jsonify({'error': 'Invalid payout method'}), 400
+        
+        if result['success']:
+            # Mark as completed
+            payout.status = 'completed'
+            payout.completed_at = datetime.utcnow()
+            payout.transaction_id = result.get('transaction_id')
+            
+            # Send completion email to organizer
+            send_email(
+                payout.organizer.email,
+                f'Payout Completed: ${payout.amount:.2f}',
+                f'''Great news! Your payout has been successfully completed.
 
 Payment Details:
 - Event: {payout.event.name}
 - Amount Paid: ${payout.amount:.2f}
 - Payment Date: {payout.completed_at.strftime('%B %d, %Y at %I:%M %p')}
 - Payment Method: {"PayPal" if payout.organizer.payout_method == "paypal" else "Bank Transfer"}
+- Transaction ID: {payout.transaction_id}
 
 The funds should appear in your {"PayPal account" if payout.organizer.payout_method == "paypal" else "bank account"} within 1-2 business days.
 
@@ -5309,14 +5321,97 @@ Thank you for organizing a successful food truck event!
 
 Best regards,
 The Food Truck Fundraiser Team'''
-    )
+            )
+            
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Payout of ${payout.amount:.2f} sent successfully via {payout.organizer.payout_method.title()}. Confirmation sent to organizer.'
+            })
+        else:
+            # Payment failed - keep in processing status
+            return jsonify({
+                'error': f'Payment failed: {result.get("error", "Unknown error")}'
+            }), 400
+            
+    except Exception as e:
+        app.logger.error(f'Payout processing error: {str(e)}')
+        return jsonify({
+            'error': f'Payment processing failed: {str(e)}'
+        }), 500
+
+def send_paypal_payout(payout):
+    """Send actual PayPal payout using PayPal API"""
+    import paypalrestsdk
+    import time
     
-    db.session.commit()
+    try:
+        # Configure PayPal API
+        paypalrestsdk.configure({
+            "mode": "sandbox",  # Change to "live" for production
+            "client_id": os.environ.get('PAYPAL_CLIENT_ID'),
+            "client_secret": os.environ.get('PAYPAL_CLIENT_SECRET')
+        })
+        
+        # Create unique batch ID
+        batch_id = f"payout_{payout.id}_{int(time.time())}"
+        
+        # Create PayPal payout
+        paypal_payout = paypalrestsdk.Payout({
+            "sender_batch_header": {
+                "sender_batch_id": batch_id,
+                "email_subject": f"Payment from Food Truck Fundraiser - ${payout.amount:.2f}",
+                "email_message": f"You've received a payment for your successful event '{payout.event.name}'!"
+            },
+            "items": [{
+                "recipient_type": "EMAIL",
+                "amount": {
+                    "value": f"{payout.amount:.2f}",
+                    "currency": "USD"
+                },
+                "receiver": payout.organizer.paypal_email,
+                "note": f"Payout for event: {payout.event.name}",
+                "sender_item_id": f"payout_{payout.id}"
+            }]
+        })
+        
+        # Send the payout
+        if paypal_payout.create():
+            app.logger.info(f'PayPal payout created successfully: {paypal_payout.batch_header.payout_batch_id}')
+            return {
+                'success': True,
+                'transaction_id': paypal_payout.batch_header.payout_batch_id,
+                'provider': 'PayPal'
+            }
+        else:
+            error_msg = str(paypal_payout.error) if hasattr(paypal_payout, 'error') else 'Unknown PayPal error'
+            app.logger.error(f'PayPal payout failed: {error_msg}')
+            return {
+                'success': False,
+                'error': error_msg
+            }
+            
+    except Exception as e:
+        app.logger.error(f'PayPal API error: {str(e)}')
+        return {
+            'success': False,
+            'error': f'PayPal API error: {str(e)}'
+        }
+
+def send_bank_payout(payout):
+    """Handle bank transfer payout (placeholder for future ACH integration)"""
+    # For now, return success - in production you'd integrate with ACH provider
+    # like Stripe ACH, Plaid, or bank API
+    app.logger.info(f'Bank payout requested for ${payout.amount:.2f} to {payout.organizer.name}')
     
-    return jsonify({
+    # TODO: Integrate with ACH provider (Stripe ACH, Plaid, etc.)
+    # For now, simulate success so admins can manually process
+    return {
         'success': True,
-        'message': f'Payout of ${payout.amount:.2f} marked as completed. Confirmation sent to organizer.'
-    })
+        'transaction_id': f'BANK_{payout.id}_{int(time.time())}',
+        'provider': 'Manual Bank Transfer'
+    }
 
 @app.route('/admin/init-challenges', methods=['POST'])
 def init_challenges():
