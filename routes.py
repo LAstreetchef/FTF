@@ -5908,8 +5908,9 @@ def admin_create_food_truck_payouts():
     if 'admin_id' not in session:
         return jsonify({'error': 'Admin access required'}), 401
     
-    # Find completed events that don't have food truck payouts yet
-    completed_events = Event.query.filter_by(status='completed').all()
+    # Find approved/completed events that don't have food truck payouts yet
+    # Both approved and completed events are eligible for payouts
+    completed_events = Event.query.filter(Event.status.in_(['approved', 'completed'])).all()
     
     created_count = 0
     for event in completed_events:
