@@ -18,6 +18,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+- **2025-09-04**: Social Media Preview Enhancement System
+  - Added comprehensive Open Graph meta tags for rich social media sharing
+  - Created custom food truck fundraising banner image (food-truck-social.jpg)
+  - Implemented dynamic event-specific titles and descriptions for social platforms
+  - Added Twitter Card support with large image previews
+  - Fixed database table synchronization issue affecting production environment
+  - **NOTE**: Social media previews require production deployment - localhost URLs won't work on social platforms
+  - Meta tags include: event name, food truck details, location, date, and supporter count
+  - Supports Facebook, Twitter, LinkedIn, WhatsApp, Discord and other social platforms
+
 - **2025-09-03**: Critical Payment System Modernization and Markup Calculation Fixes
   - Fixed major payment processing bug affecting all pledge charging functionality
   - Modernized Stripe integration from deprecated tokens to Payment Methods API for reliable processing
