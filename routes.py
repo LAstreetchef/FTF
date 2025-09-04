@@ -4068,6 +4068,16 @@ def admin_support_dashboard():
         # Get recent conversations
         recent_conversations = SupportConversation.query.order_by(SupportConversation.last_activity.desc()).limit(20).all()
         
+        # Pre-calculate message counts to avoid relationship errors
+        for conversation in recent_conversations:
+            try:
+                conversation._message_count = db.session.query(db.func.count(SupportMessage.id)).filter(
+                    SupportMessage.conversation_id == conversation.id
+                ).scalar() or 0
+            except Exception as msg_error:
+                logging.error(f"Error counting messages for conversation {conversation.id}: {msg_error}")
+                conversation._message_count = 0
+        
         # Get unassigned escalated conversations
         unassigned_escalated = SupportConversation.query.filter_by(
             status='escalated',
