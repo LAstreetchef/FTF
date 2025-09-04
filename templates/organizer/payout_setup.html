@@ -127,20 +127,28 @@
                             <strong>Tax ID Required:</strong> We need your tax identification for IRS reporting purposes.
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="tax_id_type" class="form-label">Tax ID Type</label>
-                            <select class="form-select" id="tax_id_type" name="tax_id_type" required>
-                                <option value="">Select tax ID type</option>
-                                <option value="ssn" {% if organizer.tax_id_type == 'ssn' %}selected{% endif %}>Social Security Number (SSN)</option>
-                                <option value="ein" {% if organizer.tax_id_type == 'ein' %}selected{% endif %}>Employer Identification Number (EIN)</option>
-                                <option value="itin" {% if organizer.tax_id_type == 'itin' %}selected{% endif %}>Individual Taxpayer Identification Number (ITIN)</option>
-                            </select>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="tax_id_type" class="form-label">Tax ID Type</label>
+                                <select class="form-select" id="tax_id_type" name="tax_id_type" required>
+                                    <option value="">Select tax ID type</option>
+                                    <option value="ssn" {% if organizer.tax_id_type == 'ssn' %}selected{% endif %}>Social Security Number (SSN)</option>
+                                    <option value="ein" {% if organizer.tax_id_type == 'ein' %}selected{% endif %}>Employer Identification Number (EIN)</option>
+                                    <option value="itin" {% if organizer.tax_id_type == 'itin' %}selected{% endif %}>Individual Taxpayer Identification Number (ITIN)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="tax_id_number" class="form-label">Tax ID Number</label>
+                                <input type="password" class="form-control" id="tax_id_number" name="tax_id_number" 
+                                       placeholder="Enter your tax ID number" required>
+                                <div class="form-text">This is used for verification only and is not stored</div>
+                            </div>
                         </div>
                         
-                        <div class="alert alert-warning">
+                        <div class="alert alert-warning mt-3">
                             <i data-feather="shield" class="me-2"></i>
-                            <strong>Security Note:</strong> Your tax ID number is not stored on our servers. 
-                            We only track that you've provided this information for compliance purposes.
+                            <strong>Security & Privacy:</strong> Your tax ID number is used only for verification and compliance purposes. 
+                            We do not store this sensitive information on our servers - only that you've provided it.
                         </div>
                     </div>
 
