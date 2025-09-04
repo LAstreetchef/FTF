@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Food Truck Payout Management{% endblock %}
+
+{% block content %}
+<style>
+.payout-header {
+    background: linear-gradient(135deg, #ff8c00, #ffa500);
+    color: white;
+    padding: 2rem 0;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.payout-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-processing {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-failed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.approve-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    margin-right: 0.5rem;
+}
+
+.complete-btn {
+    background: linear-gradient(135deg, #ff8c00, #ffa500);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ff8c00;
+}
+
+.create-payouts-btn {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+</style>
+
+<div class="container">
+    <!-- Header -->
+    <div class="payout-header text-center">
+        <h1>🚚 Food Truck Payout Management</h1>
+        <p class="mb-0">Manage food truck earnings and payouts</p>
+    </div>
+
+    <!-- Create Payouts Button -->
+    <div class="text-center mb-4">
+        <button class="create-payouts-btn" onclick="createFoodTruckPayouts()">
+            ➕ Create Payouts for Completed Events
+        </button>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stat-number">{{ pending_count }}</div>
+                <div class="text-muted">Pending Requests</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stat-number">${{ "%.2f"|format(pending_amount) }}</div>
+                <div class="text-muted">Pending Amount</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stats-card">
+                <div class="stat-number">${{ "%.2f"|format(completed_amount) }}</div>
+                <div class="text-muted">Total Paid Out</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payouts Table -->
+    <div class="payout-card">
+        <h4>📋 All Food Truck Payout Requests</h4>
+        {% if payouts %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Food Truck</th>
+                        <th>Event</th>
+                        <th>Amount</th>
+                        <th>PayPal Email</th>
+                        <th>Status</th>
+                        <th>Transaction ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payout in payouts %}
+                    <tr>
+                        <td>{{ payout.created_at.strftime('%m/%d/%Y') }}</td>
+                        <td>
+                            <strong>{{ payout.food_truck.name }}</strong><br>
+                            <small class="text-muted">{{ payout.food_truck.contact_email }}</small>
+                        </td>
+                        <td>
+                            <strong>{{ payout.event.name }}</strong><br>
+                            <small class="text-muted">{{ payout.event.date.strftime('%m/%d/%Y') }}</small>
+                        </td>
+                        <td><strong>${{ "%.2f"|format(payout.amount) }}</strong></td>
+                        <td>
+                            {% if payout.recipient_email %}
+                                {{ payout.recipient_email }}
+                            {% else %}
+                                <span class="text-muted">No PayPal email</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ payout.status }}">
+                                {{ payout.status.upper() }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if payout.transaction_id %}
+                                <small class="text-muted">{{ payout.transaction_id }}</small>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if payout.status == 'pending' %}
+                                <button class="approve-btn" onclick="approveFoodTruckPayout({{ payout.id }})">
+                                    ✅ Approve
+                                </button>
+                            {% elif payout.status == 'processing' %}
+                                <button class="complete-btn" onclick="completeFoodTruckPayout({{ payout.id }})">
+                                    💰 Complete Payout
+                                </button>
+                            {% elif payout.status == 'completed' %}
+                                <small class="text-success">
+                                    Paid {{ payout.completed_at.strftime('%m/%d/%Y') }}
+                                </small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <p class="text-muted">No food truck payout requests yet.</p>
+            <p class="text-muted">Use the "Create Payouts" button above to generate payouts for completed events.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function createFoodTruckPayouts() {
+    const button = event.target;
+    button.disabled = true;
+    button.innerHTML = '⏳ Creating Payouts...';
+    
+    fetch('/admin/create-food-truck-payouts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + data.message);
+            location.reload();
+        } else {
+            alert('❌ Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Failed to create payouts. Please try again.');
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '➕ Create Payouts for Completed Events';
+    });
+}
+
+function approveFoodTruckPayout(payoutId) {
+    if (!confirm('Are you sure you want to approve this food truck payout?')) {
+        return;
+    }
+    
+    const button = event.target;
+    button.disabled = true;
+    button.innerHTML = '⏳ Approving...';
+    
+    fetch(`/admin/food-truck-payouts/${payoutId}/approve`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + data.message);
+            location.reload();
+        } else {
+            alert('❌ Error: ' + data.error);
+            button.disabled = false;
+            button.innerHTML = '✅ Approve';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Failed to approve payout. Please try again.');
+        button.disabled = false;
+        button.innerHTML = '✅ Approve';
+    });
+}
+
+function completeFoodTruckPayout(payoutId) {
+    if (!confirm('⚠️ This will send a REAL PayPal payment! Are you absolutely sure you want to complete this payout?')) {
+        return;
+    }
+    
+    const button = event.target;
+    button.disabled = true;
+    button.innerHTML = '⏳ Processing Payment...';
+    
+    fetch(`/admin/food-truck-payouts/${payoutId}/complete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ ' + data.message);
+            location.reload();
+        } else {
+            alert('❌ Error: ' + data.error);
+            button.disabled = false;
+            button.innerHTML = '💰 Complete Payout';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('❌ Failed to complete payout. Please try again.');
+        button.disabled = false;
+        button.innerHTML = '💰 Complete Payout';
+    });
+}
+</script>
+{% endblock %}

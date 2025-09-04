@@ -597,6 +597,34 @@ class OrganizerPayout(db.Model):
     organizer = db.relationship('Organizer', backref='payouts')
     event = db.relationship('Event', backref='payout')
 
+class FoodTruckPayout(db.Model):
+    """Track payouts to food trucks for their event earnings (base minimum amounts)"""
+    id = db.Column(db.Integer, primary_key=True)
+    food_truck_id = db.Column(db.Integer, db.ForeignKey('food_truck.id'), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
+    
+    # Payout details
+    amount = db.Column(db.Float, nullable=False)  # Amount to be paid out (usually the base minimum)
+    status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
+    payout_method = db.Column(db.String(50), default='paypal')  # paypal, stripe, manual, etc.
+    transaction_id = db.Column(db.String(255))  # PayPal batch ID or other provider transaction ID
+    
+    # Food truck contact info for payouts
+    recipient_email = db.Column(db.String(120))  # Food truck owner's PayPal email
+    
+    # Stripe integration (backup method)
+    stripe_transfer_id = db.Column(db.String(255))  # Stripe transfer ID for tracking
+    stripe_account_id = db.Column(db.String(255))  # Food truck's connected Stripe account
+    
+    # Timestamps
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    processed_at = db.Column(db.DateTime)
+    completed_at = db.Column(db.DateTime)
+    
+    # Relationships
+    food_truck = db.relationship('FoodTruck', backref='truck_payouts')
+    event = db.relationship('Event', backref='truck_payout')
+
 class PayoutSplit(db.Model):
     """Track split payouts for events with markup sharing"""
     id = db.Column(db.Integer, primary_key=True)

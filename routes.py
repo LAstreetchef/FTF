@@ -5724,3 +5724,220 @@ def organizer_payout_status():
                           total_paid=total_paid,
                           auth_token=current_auth_token)
 
+# =============================================================================
+# FOOD TRUCK PAYOUT SYSTEM
+# =============================================================================
+
+@app.route('/admin/food-truck-payouts', methods=['GET'])
+def admin_food_truck_payout_management():
+    """Admin dashboard for managing food truck payouts"""
+    if 'admin_id' not in session:
+        flash('Admin access required', 'error')
+        return redirect(url_for('admin_login'))
+    
+    # Get all food truck payouts with their related data
+    payouts = FoodTruckPayout.query.join(FoodTruck).join(Event).order_by(
+        FoodTruckPayout.created_at.desc()
+    ).all()
+    
+    # Calculate summary statistics
+    pending_count = len([p for p in payouts if p.status == 'pending'])
+    pending_amount = sum([p.amount for p in payouts if p.status == 'pending'])
+    completed_amount = sum([p.amount for p in payouts if p.status == 'completed'])
+    
+    return render_template('admin/food_truck_payout_management.html',
+                         payouts=payouts,
+                         pending_count=pending_count,
+                         pending_amount=pending_amount,
+                         completed_amount=completed_amount)
+
+@app.route('/admin/food-truck-payouts/<int:payout_id>/approve', methods=['POST'])
+def admin_approve_food_truck_payout(payout_id):
+    """Approve a food truck payout request and move it to processing status"""
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Admin access required'}), 401
+    
+    payout = FoodTruckPayout.query.get_or_404(payout_id)
+    
+    if payout.status != 'pending':
+        return jsonify({'error': 'Payout must be pending to approve'}), 400
+    
+    # Move to processing status
+    payout.status = 'processing'
+    payout.processed_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Food truck payout of ${payout.amount:.2f} approved and ready for payment'
+    })
+
+@app.route('/admin/food-truck-payouts/<int:payout_id>/complete', methods=['POST'])
+def admin_complete_food_truck_payout(payout_id):
+    """Process real PayPal payout to food truck and mark as completed"""
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Admin access required'}), 401
+    
+    payout = FoodTruckPayout.query.get_or_404(payout_id)
+    
+    if payout.status != 'processing':
+        return jsonify({'error': 'Payout must be in processing status to complete'}), 400
+    
+    try:
+        # Process the actual payment to food truck
+        result = send_food_truck_paypal_payout(payout)
+        
+        if result['success']:
+            # Mark as completed
+            payout.status = 'completed'
+            payout.completed_at = datetime.utcnow()
+            payout.transaction_id = result.get('transaction_id')
+            
+            # Send completion email to food truck
+            send_email(
+                payout.recipient_email or payout.food_truck.contact_email,
+                f'Payment Received: ${payout.amount:.2f}',
+                f'''Great news! Your payment has been successfully sent.
+
+Payment Details:
+- Event: {payout.event.name}
+- Amount Paid: ${payout.amount:.2f}
+- Payment Date: {payout.completed_at.strftime('%B %d, %Y at %I:%M %p')}
+- Payment Method: PayPal
+- Transaction ID: {payout.transaction_id}
+
+The funds should appear in your PayPal account within 1-2 business days.
+
+Thank you for participating in this successful food truck event!
+
+Best regards,
+The Food Truck Fundraiser Team'''
+            )
+            
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Payout of ${payout.amount:.2f} sent successfully to {payout.food_truck.name}. Confirmation sent to food truck.'
+            })
+        else:
+            # Payment failed - keep in processing status
+            return jsonify({
+                'error': f'Payment failed: {result.get("error", "Unknown error")}'
+            }), 400
+            
+    except Exception as e:
+        app.logger.error(f'Food truck payout processing error: {str(e)}')
+        return jsonify({
+            'error': f'Payment processing failed: {str(e)}'
+        }), 500
+
+def send_food_truck_paypal_payout(payout):
+    """Send actual PayPal payout to food truck using PayPal API"""
+    import paypalrestsdk
+    import time
+    
+    try:
+        # Configure PayPal API
+        paypalrestsdk.configure({
+            "mode": "sandbox",  # Change to "live" for production
+            "client_id": os.environ.get('PAYPAL_CLIENT_ID'),
+            "client_secret": os.environ.get('PAYPAL_CLIENT_SECRET')
+        })
+        
+        # Create unique batch ID
+        batch_id = f"truck_payout_{payout.id}_{int(time.time())}"
+        
+        # Use food truck contact email as recipient
+        recipient_email = payout.recipient_email or payout.food_truck.contact_email
+        
+        if not recipient_email:
+            return {
+                'success': False,
+                'error': 'No PayPal email configured for food truck'
+            }
+        
+        # Create PayPal payout
+        paypal_payout = paypalrestsdk.Payout({
+            "sender_batch_header": {
+                "sender_batch_id": batch_id,
+                "email_subject": f"Payment from Food Truck Fundraiser - ${payout.amount:.2f}",
+                "email_message": f"You've received payment for participating in event '{payout.event.name}'!"
+            },
+            "items": [{
+                "recipient_type": "EMAIL",
+                "amount": {
+                    "value": f"{payout.amount:.2f}",
+                    "currency": "USD"
+                },
+                "receiver": recipient_email,
+                "note": f"Payment for food truck participation in event: {payout.event.name}",
+                "sender_item_id": f"truck_payout_{payout.id}"
+            }]
+        })
+        
+        # Send the payout
+        if paypal_payout.create():
+            app.logger.info(f"✅ PayPal payout created successfully for food truck: {batch_id}")
+            
+            return {
+                'success': True,
+                'transaction_id': batch_id,
+                'paypal_payout_id': paypal_payout.batch_header.payout_batch_id
+            }
+        else:
+            error_details = str(paypal_payout.error) if hasattr(paypal_payout, 'error') else 'Unknown PayPal error'
+            app.logger.error(f"❌ PayPal payout creation failed: {error_details}")
+            
+            return {
+                'success': False,
+                'error': f'PayPal API error: {error_details}'
+            }
+            
+    except Exception as e:
+        app.logger.error(f"❌ PayPal payout exception: {str(e)}")
+        return {
+            'success': False,
+            'error': f'PayPal processing error: {str(e)}'
+        }
+
+@app.route('/admin/create-food-truck-payouts', methods=['POST'])
+def admin_create_food_truck_payouts():
+    """Create payout records for completed events (food truck base amounts)"""
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Admin access required'}), 401
+    
+    # Find completed events that don't have food truck payouts yet
+    completed_events = Event.query.filter_by(status='completed').all()
+    
+    created_count = 0
+    for event in completed_events:
+        # Check if food truck payout already exists
+        existing_payout = FoodTruckPayout.query.filter_by(
+            event_id=event.id,
+            food_truck_id=event.food_truck_id
+        ).first()
+        
+        if not existing_payout:
+            # Calculate food truck payout amount (base minimum)
+            payout_amount = event.pledge_goal  # Food truck gets their base minimum
+            
+            # Create payout record
+            payout = FoodTruckPayout(
+                food_truck_id=event.food_truck_id,
+                event_id=event.id,
+                amount=payout_amount,
+                recipient_email=event.food_truck.contact_email
+            )
+            
+            db.session.add(payout)
+            created_count += 1
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Created {created_count} food truck payout records'
+    })
+
