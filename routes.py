@@ -14,6 +14,54 @@ from translations import get_text, get_language_from_request
 # Configure Stripe
 stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
 
+def send_new_chat_notification(conversation, user_message, page_context):
+    """Send email notification when a new chat conversation is started"""
+    try:
+        # Build context information
+        context_info = []
+        if page_context.get('event_name'):
+            context_info.append(f"Event: {page_context['event_name']}")
+        if page_context.get('page_url'):
+            context_info.append(f"Page: {page_context['page_url']}")
+        if page_context.get('page_type'):
+            context_info.append(f"Page Type: {page_context['page_type']}")
+        
+        context_str = "\n".join(context_info) if context_info else "General website support"
+        
+        # Create email subject and body
+        subject = f"New Chat Support Request - {conversation.session_id[:8]}"
+        
+        email_body = f"""A new chat support conversation has been initiated.
+
+Session ID: {conversation.session_id}
+First Message: {user_message}
+
+Context:
+{context_str}
+
+User Details:
+IP Address: {conversation.ip_address}
+User Agent: {conversation.user_agent}
+Started: {conversation.created_at.strftime('%B %d, %Y at %I:%M %p')}
+
+View Conversation: {url_for('admin_support_conversation', conversation_id=conversation.id, _external=True)}
+
+This notification is sent automatically when users start new chat conversations.
+"""
+        
+        # Send notification email
+        send_email(
+            'support@foodtruckfundraiser.com',
+            subject,
+            email_body
+        )
+        
+        logging.info(f"New chat notification sent for conversation {conversation.id}")
+        
+    except Exception as e:
+        logging.error(f"Failed to send new chat notification: {str(e)}")
+        raise
+
 @app.route('/health')
 def health_check():
     """Health check endpoint for deployment readiness"""
@@ -3866,6 +3914,13 @@ def chat_message():
                 )
                 db.session.add(conversation)
                 db.session.commit()
+                
+                # Send notification email for new chat conversation
+                try:
+                    send_new_chat_notification(conversation, user_message, page_context)
+                except Exception as email_error:
+                    logging.error(f"Failed to send new chat notification email: {email_error}")
+                    # Don't fail the conversation creation if email fails
             except Exception as db_error:
                 logging.error(f"Database creation error in chat_message: {db_error}")
                 return jsonify({
