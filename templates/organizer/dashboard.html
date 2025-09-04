@@ -8,15 +8,49 @@
         <i data-feather="user" class="me-2"></i>
         Welcome, {{ organizer.name }}
     </h1>
-    <a href="{{ url_for('organizer_create_event') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-primary">
-        <i data-feather="plus" class="me-2"></i>
-        Create New Event
-    </a>
-    <a href="{{ url_for('organizer_earnings') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-warning ms-2">
-        <i data-feather="dollar-sign" class="me-2"></i>
-        View Earnings
-    </a>
+    <div class="btn-group">
+        <a href="{{ url_for('organizer_create_event') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-primary">
+            <i data-feather="plus" class="me-2"></i>
+            Create New Event
+        </a>
+        <a href="{{ url_for('organizer_earnings') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-warning">
+            <i data-feather="dollar-sign" class="me-2"></i>
+            View Earnings
+        </a>
+        {% if not organizer.has_payout_method_setup() %}
+        <a href="{{ url_for('organizer_payout_setup') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-danger">
+            <i data-feather="credit-card" class="me-2"></i>
+            Set Up Payouts
+        </a>
+        {% else %}
+        <a href="{{ url_for('organizer_payout_status') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-success">
+            <i data-feather="check-circle" class="me-2"></i>
+            Payout Status
+        </a>
+        {% endif %}
+    </div>
 </div>
+
+<!-- Payout Setup Alert -->
+{% if not organizer.has_payout_method_setup() and total_potential_earnings > 0 %}
+<div class="alert alert-warning alert-dismissible mb-4" role="alert">
+    <i data-feather="alert-triangle" class="me-2"></i>
+    <strong>Action Required:</strong> You have potential earnings of ${{ "%.2f"|format(total_potential_earnings) }} but haven't set up a payout method yet.
+    <a href="{{ url_for('organizer_payout_setup') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-sm btn-warning ms-2">
+        Set Up Payouts Now
+    </a>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% elif organizer.has_payout_method_setup() and not organizer.payout_verified %}
+<div class="alert alert-info alert-dismissible mb-4" role="alert">
+    <i data-feather="clock" class="me-2"></i>
+    <strong>Payout Verification in Progress:</strong> Your payout information is being reviewed. You'll be notified once verification is complete.
+    <a href="{{ url_for('organizer_payout_status') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-sm btn-info ms-2">
+        Check Status
+    </a>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
 
 <!-- Quick Stats -->
 <div class="row g-4 mb-5">

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Payout Setup - Food Truck Fundraiser{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i data-feather="credit-card" class="me-2"></i>
+                    Set Up Your Payout Method
+                </h4>
+                <p class="text-muted mb-0 mt-2">
+                    Configure how you'd like to receive payments from your successful events
+                </p>
+            </div>
+            <div class="card-body">
+                {% if organizer.payout_setup_completed %}
+                <div class="alert alert-success">
+                    <i data-feather="check-circle" class="me-2"></i>
+                    <strong>Payout Method Configured!</strong><br>
+                    {{ organizer.get_payout_display_info() }}
+                    {% if not organizer.payout_verified %}
+                    <br><small>Your information is being reviewed for verification.</small>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-3">
+                    <a href="{{ url_for('organizer_payout_status') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-primary">
+                        <i data-feather="dollar-sign" class="me-2"></i>
+                        View Payout Status
+                    </a>
+                    <a href="{{ url_for('organizer_dashboard') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-outline-secondary ms-2">
+                        <i data-feather="arrow-left" class="me-2"></i>
+                        Back to Dashboard
+                    </a>
+                </div>
+                
+                <hr>
+                <h5>Update Your Information</h5>
+                <p class="text-muted">You can update your payout information below if needed.</p>
+                {% endif %}
+
+                <form method="POST" id="payoutForm">
+                    <!-- Payout Method Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select Payout Method</label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <input type="radio" class="form-check-input me-2" name="payout_method" value="bank" id="bank" 
+                                               {% if organizer.payout_method == 'bank' %}checked{% endif %} required>
+                                        <label for="bank" class="form-check-label">
+                                            <i data-feather="home" class="d-block mb-2" style="margin: 0 auto;"></i>
+                                            <strong>Bank Transfer</strong><br>
+                                            <small class="text-muted">Direct deposit to your bank account</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <input type="radio" class="form-check-input me-2" name="payout_method" value="paypal" id="paypal"
+                                               {% if organizer.payout_method == 'paypal' %}checked{% endif %}>
+                                        <label for="paypal" class="form-check-label">
+                                            <i data-feather="credit-card" class="d-block mb-2" style="margin: 0 auto;"></i>
+                                            <strong>PayPal</strong><br>
+                                            <small class="text-muted">Transfer to your PayPal account</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bank Account Details -->
+                    <div id="bankDetails" class="payout-details" style="display: {% if organizer.payout_method == 'bank' %}block{% else %}none{% endif %};">
+                        <h5><i data-feather="home" class="me-2"></i>Bank Account Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="bank_account_holder" class="form-label">Account Holder Name</label>
+                                <input type="text" class="form-control" id="bank_account_holder" name="bank_account_holder" 
+                                       value="{{ organizer.bank_account_holder or '' }}" placeholder="Full name on account">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bank_account_type" class="form-label">Account Type</label>
+                                <select class="form-select" id="bank_account_type" name="bank_account_type">
+                                    <option value="checking" {% if organizer.bank_account_type == 'checking' %}selected{% endif %}>Checking</option>
+                                    <option value="savings" {% if organizer.bank_account_type == 'savings' %}selected{% endif %}>Savings</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bank_routing_number" class="form-label">Routing Number</label>
+                                <input type="text" class="form-control" id="bank_routing_number" name="bank_routing_number" 
+                                       value="{{ organizer.bank_routing_number or '' }}" placeholder="9-digit routing number" maxlength="9">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="bank_account_number" class="form-label">Account Number</label>
+                                <input type="text" class="form-control" id="bank_account_number" name="bank_account_number" 
+                                       placeholder="{% if organizer.bank_account_number_last4 %}****{{ organizer.bank_account_number_last4 }}{% else %}Your account number{% endif %}">
+                                {% if organizer.bank_account_number_last4 %}
+                                <div class="form-text">Currently ending in {{ organizer.bank_account_number_last4 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PayPal Details -->
+                    <div id="paypalDetails" class="payout-details" style="display: {% if organizer.payout_method == 'paypal' %}block{% else %}none{% endif %};">
+                        <h5><i data-feather="credit-card" class="me-2"></i>PayPal Information</h5>
+                        <div class="mb-3">
+                            <label for="paypal_email" class="form-label">PayPal Email Address</label>
+                            <input type="email" class="form-control" id="paypal_email" name="paypal_email" 
+                                   value="{{ organizer.paypal_email or '' }}" placeholder="your.email@example.com">
+                            <div class="form-text">This should be the email address associated with your PayPal account</div>
+                        </div>
+                    </div>
+
+                    <!-- Tax Information -->
+                    <div class="mb-4">
+                        <h5><i data-feather="file-text" class="me-2"></i>Tax Information</h5>
+                        <div class="alert alert-info">
+                            <i data-feather="info" class="me-2"></i>
+                            <strong>Tax ID Required:</strong> We need your tax identification for IRS reporting purposes.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tax_id_type" class="form-label">Tax ID Type</label>
+                            <select class="form-select" id="tax_id_type" name="tax_id_type" required>
+                                <option value="">Select tax ID type</option>
+                                <option value="ssn" {% if organizer.tax_id_type == 'ssn' %}selected{% endif %}>Social Security Number (SSN)</option>
+                                <option value="ein" {% if organizer.tax_id_type == 'ein' %}selected{% endif %}>Employer Identification Number (EIN)</option>
+                                <option value="itin" {% if organizer.tax_id_type == 'itin' %}selected{% endif %}>Individual Taxpayer Identification Number (ITIN)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <i data-feather="shield" class="me-2"></i>
+                            <strong>Security Note:</strong> Your tax ID number is not stored on our servers. 
+                            We only track that you've provided this information for compliance purposes.
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="mb-4">
+                        <h5><i data-feather="map-pin" class="me-2"></i>Address Information</h5>
+                        <p class="text-muted">Required for tax reporting and verification</p>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label for="address_line1" class="form-label">Address Line 1</label>
+                                <input type="text" class="form-control" id="address_line1" name="address_line1" 
+                                       value="{{ organizer.address_line1 or '' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="address_line2" class="form-label">Address Line 2 (Optional)</label>
+                                <input type="text" class="form-control" id="address_line2" name="address_line2" 
+                                       value="{{ organizer.address_line2 or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" 
+                                       value="{{ organizer.city or '' }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="state" class="form-label">State</label>
+                                <select class="form-select" id="state" name="state" required>
+                                    <option value="">Select state</option>
+                                    <option value="CA" {% if organizer.state == 'CA' %}selected{% endif %}>California</option>
+                                    <option value="NY" {% if organizer.state == 'NY' %}selected{% endif %}>New York</option>
+                                    <option value="TX" {% if organizer.state == 'TX' %}selected{% endif %}>Texas</option>
+                                    <option value="FL" {% if organizer.state == 'FL' %}selected{% endif %}>Florida</option>
+                                    <!-- Add more states as needed -->
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="zip_code" class="form-label">ZIP Code</label>
+                                <input type="text" class="form-control" id="zip_code" name="zip_code" 
+                                       value="{{ organizer.zip_code or '' }}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('organizer_dashboard') }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}" class="btn btn-outline-secondary">
+                            <i data-feather="arrow-left" class="me-2"></i>
+                            Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i data-feather="save" class="me-2"></i>
+                            Save Payout Information
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle payout method selection
+    const payoutMethods = document.querySelectorAll('input[name="payout_method"]');
+    const bankDetails = document.getElementById('bankDetails');
+    const paypalDetails = document.getElementById('paypalDetails');
+    
+    payoutMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            if (this.value === 'bank') {
+                bankDetails.style.display = 'block';
+                paypalDetails.style.display = 'none';
+                
+                // Make bank fields required
+                document.getElementById('bank_account_holder').required = true;
+                document.getElementById('bank_routing_number').required = true;
+                document.getElementById('bank_account_number').required = true;
+                
+                // Remove PayPal requirements
+                document.getElementById('paypal_email').required = false;
+            } else if (this.value === 'paypal') {
+                bankDetails.style.display = 'none';
+                paypalDetails.style.display = 'block';
+                
+                // Make PayPal fields required
+                document.getElementById('paypal_email').required = true;
+                
+                // Remove bank requirements
+                document.getElementById('bank_account_holder').required = false;
+                document.getElementById('bank_routing_number').required = false;
+                document.getElementById('bank_account_number').required = false;
+            }
+        });
+    });
+    
+    // Initialize form state
+    const selectedMethod = document.querySelector('input[name="payout_method"]:checked');
+    if (selectedMethod) {
+        selectedMethod.dispatchEvent(new Event('change'));
+    }
+    
+    // Form validation
+    document.getElementById('payoutForm').addEventListener('submit', function(e) {
+        const selectedMethod = document.querySelector('input[name="payout_method"]:checked');
+        if (!selectedMethod) {
+            e.preventDefault();
+            alert('Please select a payout method');
+            return;
+        }
+        
+        // Additional validation based on method
+        if (selectedMethod.value === 'bank') {
+            const routingNumber = document.getElementById('bank_routing_number').value;
+            if (routingNumber && routingNumber.length !== 9) {
+                e.preventDefault();
+                alert('Routing number must be exactly 9 digits');
+                return;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

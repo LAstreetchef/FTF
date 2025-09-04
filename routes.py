@@ -5465,4 +5465,125 @@ def get_pledge_messages_api(pledge_id):
         logging.error(f"Error fetching pledge messages: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# =============================================================================
+# ORGANIZER PAYOUT SETUP ROUTES
+# =============================================================================
+
+@app.route('/organizer/payout-setup', methods=['GET', 'POST'])
+def organizer_payout_setup():
+    """Organizer payout method setup"""
+    # Authentication check
+    organizer_id = None
+    auth_token = request.args.get('auth_token')
+    
+    if auth_token:
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+    
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+    
+    if not organizer_id:
+        flash('Authentication required', 'error')
+        return redirect(url_for('organizer_login'))
+    
+    organizer = Organizer.query.get_or_404(organizer_id)
+    
+    if request.method == 'POST':
+        try:
+            payout_method = request.form.get('payout_method')
+            
+            if payout_method == 'bank':
+                # Bank account setup
+                organizer.payout_method = 'bank'
+                organizer.bank_account_holder = request.form.get('bank_account_holder', '').strip()
+                organizer.bank_routing_number = request.form.get('bank_routing_number', '').strip()
+                
+                # Only store last 4 digits of account number for security
+                full_account_number = request.form.get('bank_account_number', '').strip()
+                if len(full_account_number) >= 4:
+                    organizer.bank_account_number_last4 = full_account_number[-4:]
+                
+                organizer.bank_account_type = request.form.get('bank_account_type', 'checking')
+                
+            elif payout_method == 'paypal':
+                # PayPal setup
+                organizer.payout_method = 'paypal'
+                organizer.paypal_email = request.form.get('paypal_email', '').strip()
+            
+            # Tax information
+            organizer.tax_id_type = request.form.get('tax_id_type')
+            organizer.tax_id_provided = True
+            
+            # Address information
+            organizer.address_line1 = request.form.get('address_line1', '').strip()
+            organizer.address_line2 = request.form.get('address_line2', '').strip()
+            organizer.city = request.form.get('city', '').strip()
+            organizer.state = request.form.get('state', '').strip()
+            organizer.zip_code = request.form.get('zip_code', '').strip()
+            organizer.country = request.form.get('country', 'US')
+            
+            # Mark setup as completed
+            organizer.payout_setup_completed = True
+            
+            db.session.commit()
+            
+            flash('Payout information saved successfully! Your information will be reviewed for verification.', 'success')
+            return redirect(url_for('organizer_dashboard', auth_token=auth_token) if auth_token else url_for('organizer_dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            logging.error(f"Error saving payout setup: {str(e)}")
+            flash('Error saving payout information. Please try again.', 'error')
+    
+    # Pass auth token to template for iframe navigation
+    current_auth_token = auth_token or session.get('auth_token', '')
+    return render_template('organizer/payout_setup.html', 
+                          organizer=organizer, 
+                          auth_token=current_auth_token)
+
+@app.route('/organizer/payout-status')
+def organizer_payout_status():
+    """Show organizer's payout status and earnings"""
+    # Authentication check
+    organizer_id = None
+    auth_token = request.args.get('auth_token')
+    
+    if auth_token:
+        token_record = AuthToken.query.filter_by(
+            token=auth_token,
+            is_active=True
+        ).filter(AuthToken.expires_at > datetime.utcnow()).first()
+        
+        if token_record:
+            organizer_id = token_record.organizer_id
+    
+    if not organizer_id:
+        organizer_id = session.get('organizer_id')
+    
+    if not organizer_id:
+        flash('Authentication required', 'error')
+        return redirect(url_for('organizer_login'))
+    
+    organizer = Organizer.query.get_or_404(organizer_id)
+    
+    # Get payout history
+    payouts = OrganizerPayout.query.filter_by(organizer_id=organizer_id).order_by(OrganizerPayout.created_at.desc()).all()
+    
+    # Calculate totals
+    total_pending = sum(p.amount for p in payouts if p.status == 'pending')
+    total_paid = sum(p.amount for p in payouts if p.status == 'completed')
+    
+    current_auth_token = auth_token or session.get('auth_token', '')
+    return render_template('organizer/payout_status.html', 
+                          organizer=organizer,
+                          payouts=payouts,
+                          total_pending=total_pending,
+                          total_paid=total_paid,
+                          auth_token=current_auth_token)
 
