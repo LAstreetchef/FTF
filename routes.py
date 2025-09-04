@@ -5276,6 +5276,48 @@ def admin_process_payout(payout_id):
     
     return jsonify({'error': 'Invalid action'}), 400
 
+@app.route('/admin/organizer-payout/<int:payout_id>/complete', methods=['POST'])
+def admin_complete_organizer_payout(payout_id):
+    """Mark organizer payout as completed after payment has been sent"""
+    if 'admin_id' not in session:
+        return jsonify({'error': 'Admin access required'}), 401
+    
+    payout = OrganizerPayout.query.get_or_404(payout_id)
+    
+    if payout.status != 'processing':
+        return jsonify({'error': 'Payout must be in processing status to complete'}), 400
+    
+    # Mark as completed
+    payout.status = 'completed'
+    payout.completed_at = datetime.utcnow()
+    
+    # Send completion email to organizer
+    send_email(
+        payout.organizer.email,
+        f'Payout Completed: ${payout.amount:.2f}',
+        f'''Great news! Your payout has been successfully completed.
+
+Payment Details:
+- Event: {payout.event.name}
+- Amount Paid: ${payout.amount:.2f}
+- Payment Date: {payout.completed_at.strftime('%B %d, %Y at %I:%M %p')}
+- Payment Method: {"PayPal" if payout.organizer.payout_method == "paypal" else "Bank Transfer"}
+
+The funds should appear in your {"PayPal account" if payout.organizer.payout_method == "paypal" else "bank account"} within 1-2 business days.
+
+Thank you for organizing a successful food truck event!
+
+Best regards,
+The Food Truck Fundraiser Team'''
+    )
+    
+    db.session.commit()
+    
+    return jsonify({
+        'success': True,
+        'message': f'Payout of ${payout.amount:.2f} marked as completed. Confirmation sent to organizer.'
+    })
+
 @app.route('/admin/init-challenges', methods=['POST'])
 def init_challenges():
     """Initialize default challenges for the ambassador program"""

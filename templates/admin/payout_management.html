@@ -163,7 +163,9 @@
                                     ✗ Review
                                 </button>
                             {% elif payout.status == 'processing' %}
-                                <span class="text-primary">Processing...</span>
+                                <button class="btn btn-success btn-sm" onclick="completePayout({{ payout.id }})">
+                                    💰 Complete Payout
+                                </button>
                             {% elif payout.status == 'completed' %}
                                 <span class="text-success">✓ Completed</span>
                             {% elif payout.status == 'failed' %}
@@ -293,6 +295,41 @@ function approveAllPending() {
         .catch(error => {
             console.error('Error processing payout:', error);
         });
+    });
+}
+
+function completePayout(payoutId) {
+    if (!confirm('Mark this payout as completed? This means the payment has been sent to the organizer.')) {
+        return;
+    }
+    
+    // Find the button and disable it
+    const row = document.getElementById(`payout-row-${payoutId}`);
+    const button = row.querySelector('button');
+    button.disabled = true;
+    button.innerHTML = 'Completing...';
+    
+    fetch(`/admin/organizer-payout/${payoutId}/complete`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+            button.disabled = false;
+            button.innerHTML = '💰 Complete Payout';
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+        button.disabled = false;
+        button.innerHTML = '💰 Complete Payout';
     });
 }
 </script>
