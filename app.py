@@ -50,10 +50,13 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
-# Configure Flask-Mail for Network Solutions
-app.config['MAIL_SERVER'] = 'smtp.networksolutionsemail.com'
-app.config['MAIL_PORT'] = 587
+# Configure Flask-Mail for Network Solutions (2024 updated settings)
+# Try multiple server configurations for maximum compatibility
+# First try the updated 2024 server
+app.config['MAIL_SERVER'] = 'netsol-smtp-oxcs.hostingplatform.com'
+app.config['MAIL_PORT'] = 587  # Back to TLS port
 app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD', 'your-email-password')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
