@@ -169,11 +169,57 @@
                                 <label for="state" class="form-label">State</label>
                                 <select class="form-select" id="state" name="state" required>
                                     <option value="">Select state</option>
+                                    <option value="AL" {% if organizer.state == 'AL' %}selected{% endif %}>Alabama</option>
+                                    <option value="AK" {% if organizer.state == 'AK' %}selected{% endif %}>Alaska</option>
+                                    <option value="AZ" {% if organizer.state == 'AZ' %}selected{% endif %}>Arizona</option>
+                                    <option value="AR" {% if organizer.state == 'AR' %}selected{% endif %}>Arkansas</option>
                                     <option value="CA" {% if organizer.state == 'CA' %}selected{% endif %}>California</option>
-                                    <option value="NY" {% if organizer.state == 'NY' %}selected{% endif %}>New York</option>
-                                    <option value="TX" {% if organizer.state == 'TX' %}selected{% endif %}>Texas</option>
+                                    <option value="CO" {% if organizer.state == 'CO' %}selected{% endif %}>Colorado</option>
+                                    <option value="CT" {% if organizer.state == 'CT' %}selected{% endif %}>Connecticut</option>
+                                    <option value="DE" {% if organizer.state == 'DE' %}selected{% endif %}>Delaware</option>
                                     <option value="FL" {% if organizer.state == 'FL' %}selected{% endif %}>Florida</option>
-                                    <!-- Add more states as needed -->
+                                    <option value="GA" {% if organizer.state == 'GA' %}selected{% endif %}>Georgia</option>
+                                    <option value="HI" {% if organizer.state == 'HI' %}selected{% endif %}>Hawaii</option>
+                                    <option value="ID" {% if organizer.state == 'ID' %}selected{% endif %}>Idaho</option>
+                                    <option value="IL" {% if organizer.state == 'IL' %}selected{% endif %}>Illinois</option>
+                                    <option value="IN" {% if organizer.state == 'IN' %}selected{% endif %}>Indiana</option>
+                                    <option value="IA" {% if organizer.state == 'IA' %}selected{% endif %}>Iowa</option>
+                                    <option value="KS" {% if organizer.state == 'KS' %}selected{% endif %}>Kansas</option>
+                                    <option value="KY" {% if organizer.state == 'KY' %}selected{% endif %}>Kentucky</option>
+                                    <option value="LA" {% if organizer.state == 'LA' %}selected{% endif %}>Louisiana</option>
+                                    <option value="ME" {% if organizer.state == 'ME' %}selected{% endif %}>Maine</option>
+                                    <option value="MD" {% if organizer.state == 'MD' %}selected{% endif %}>Maryland</option>
+                                    <option value="MA" {% if organizer.state == 'MA' %}selected{% endif %}>Massachusetts</option>
+                                    <option value="MI" {% if organizer.state == 'MI' %}selected{% endif %}>Michigan</option>
+                                    <option value="MN" {% if organizer.state == 'MN' %}selected{% endif %}>Minnesota</option>
+                                    <option value="MS" {% if organizer.state == 'MS' %}selected{% endif %}>Mississippi</option>
+                                    <option value="MO" {% if organizer.state == 'MO' %}selected{% endif %}>Missouri</option>
+                                    <option value="MT" {% if organizer.state == 'MT' %}selected{% endif %}>Montana</option>
+                                    <option value="NE" {% if organizer.state == 'NE' %}selected{% endif %}>Nebraska</option>
+                                    <option value="NV" {% if organizer.state == 'NV' %}selected{% endif %}>Nevada</option>
+                                    <option value="NH" {% if organizer.state == 'NH' %}selected{% endif %}>New Hampshire</option>
+                                    <option value="NJ" {% if organizer.state == 'NJ' %}selected{% endif %}>New Jersey</option>
+                                    <option value="NM" {% if organizer.state == 'NM' %}selected{% endif %}>New Mexico</option>
+                                    <option value="NY" {% if organizer.state == 'NY' %}selected{% endif %}>New York</option>
+                                    <option value="NC" {% if organizer.state == 'NC' %}selected{% endif %}>North Carolina</option>
+                                    <option value="ND" {% if organizer.state == 'ND' %}selected{% endif %}>North Dakota</option>
+                                    <option value="OH" {% if organizer.state == 'OH' %}selected{% endif %}>Ohio</option>
+                                    <option value="OK" {% if organizer.state == 'OK' %}selected{% endif %}>Oklahoma</option>
+                                    <option value="OR" {% if organizer.state == 'OR' %}selected{% endif %}>Oregon</option>
+                                    <option value="PA" {% if organizer.state == 'PA' %}selected{% endif %}>Pennsylvania</option>
+                                    <option value="RI" {% if organizer.state == 'RI' %}selected{% endif %}>Rhode Island</option>
+                                    <option value="SC" {% if organizer.state == 'SC' %}selected{% endif %}>South Carolina</option>
+                                    <option value="SD" {% if organizer.state == 'SD' %}selected{% endif %}>South Dakota</option>
+                                    <option value="TN" {% if organizer.state == 'TN' %}selected{% endif %}>Tennessee</option>
+                                    <option value="TX" {% if organizer.state == 'TX' %}selected{% endif %}>Texas</option>
+                                    <option value="UT" {% if organizer.state == 'UT' %}selected{% endif %}>Utah</option>
+                                    <option value="VT" {% if organizer.state == 'VT' %}selected{% endif %}>Vermont</option>
+                                    <option value="VA" {% if organizer.state == 'VA' %}selected{% endif %}>Virginia</option>
+                                    <option value="WA" {% if organizer.state == 'WA' %}selected{% endif %}>Washington</option>
+                                    <option value="WV" {% if organizer.state == 'WV' %}selected{% endif %}>West Virginia</option>
+                                    <option value="WI" {% if organizer.state == 'WI' %}selected{% endif %}>Wisconsin</option>
+                                    <option value="WY" {% if organizer.state == 'WY' %}selected{% endif %}>Wyoming</option>
+                                    <option value="DC" {% if organizer.state == 'DC' %}selected{% endif %}>District of Columbia</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
