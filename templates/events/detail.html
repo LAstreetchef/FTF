@@ -2,6 +2,28 @@
 
 {% block title %}{{ event.name }} - Food Truck Event{% endblock %}
 
+{% block head %}
+<!-- Open Graph / Social Media Meta Tags -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ event.name }} - Food Truck Event">
+<meta property="og:description" content="Support {{ event.food_truck.name }} at {{ event.location }} on {{ event.date.strftime('%B %d, %Y') }}. Join {{ event.pledges|length }} supporters in funding this delicious food truck event!">
+<meta property="og:url" content="{{ request.url }}">
+<meta property="og:site_name" content="Food Truck Fundraiser">
+<meta property="og:image" content="{{ url_for('static', filename='images/food-truck-social.jpg', _external=True) }}">
+<meta property="og:image:alt" content="Food truck fundraising event">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ event.name }} - Food Truck Event">
+<meta name="twitter:description" content="Support {{ event.food_truck.name }} at {{ event.location }} on {{ event.date.strftime('%B %d, %Y') }}. Join {{ event.pledges|length }} supporters!">
+<meta name="twitter:image" content="{{ url_for('static', filename='images/food-truck-social.jpg', _external=True) }}">
+
+<!-- Additional Social Meta -->
+<meta name="description" content="Support {{ event.food_truck.name }} at {{ event.location }} on {{ event.date.strftime('%B %d, %Y') }}. Help us reach our ${{ '%.0f'|format(event.pledge_goal) }} goal with {{ event.pledges|length }} supporters!">
+{% endblock %}
+
 {% block content %}
 <div class="row">
     <!-- Main Event Details -->
