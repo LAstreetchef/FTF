@@ -3837,6 +3837,7 @@ def chat_message():
         data = request.get_json()
         session_id = data.get('session_id')
         user_message = data.get('message', '').strip()
+        page_context = data.get('page_context', {})
         
         if not session_id or not user_message:
             return jsonify({'success': False, 'error': 'Missing session_id or message'}), 400
@@ -3847,7 +3848,11 @@ def chat_message():
             conversation = SupportConversation(
                 session_id=session_id,
                 user_agent=request.headers.get('User-Agent', ''),
-                ip_address=request.remote_addr
+                ip_address=request.remote_addr,
+                page_url=page_context.get('url'),
+                page_type=page_context.get('page_type', 'general'),
+                event_id=page_context.get('event_id'),
+                event_name=page_context.get('event_name')
             )
             db.session.add(conversation)
             db.session.commit()

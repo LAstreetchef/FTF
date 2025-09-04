@@ -100,6 +100,40 @@
                                     </p>
                                 </div>
                             </div>
+                            
+                            <!-- Event Context Section -->
+                            {% if conversation.event_id or conversation.page_type != 'general' %}
+                            <hr>
+                            <div class="row">
+                                <div class="col-12">
+                                    <h6><i data-feather="map-pin"></i> Page Context</h6>
+                                    {% if conversation.event_id %}
+                                    <div class="alert alert-info">
+                                        <strong>🎪 Event Context:</strong> 
+                                        <a href="{{ url_for('event_detail', event_id=conversation.event_id) }}" target="_blank">
+                                            {{ conversation.event_name or ('Event #' + conversation.event_id|string) }}
+                                        </a>
+                                        <small class="d-block text-muted">User was viewing this event when they started the conversation</small>
+                                    </div>
+                                    {% endif %}
+                                    <p><strong>Page Type:</strong> 
+                                        {% if conversation.page_type == 'event_detail' %}
+                                        <span class="badge bg-primary">Event Page</span>
+                                        {% elif conversation.page_type == 'organizer' %}
+                                        <span class="badge bg-success">Organizer Dashboard</span>
+                                        {% elif conversation.page_type == 'admin' %}
+                                        <span class="badge bg-danger">Admin Panel</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">{{ conversation.page_type|title }}</span>
+                                        {% endif %}
+                                    </p>
+                                    {% if conversation.page_url %}
+                                    <p><strong>Original URL:</strong> <small><a href="{{ conversation.page_url }}" target="_blank">{{ conversation.page_url }}</a></small></p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>

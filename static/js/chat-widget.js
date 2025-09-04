@@ -5,12 +5,45 @@ class SupportChatWidget {
         this.escalated = false;
         this.adminConnected = false;
         
+        // Capture page context for better support
+        this.pageContext = this.capturePageContext();
+        
         this.initializeElements();
         this.bindEvents();
     }
     
     generateSessionId() {
         return 'chat_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    }
+    
+    capturePageContext() {
+        // Capture current page information for support context
+        const context = {
+            url: window.location.href,
+            pathname: window.location.pathname,
+            page_title: document.title
+        };
+        
+        // Check if we're on an event page and extract event ID
+        const eventMatch = window.location.pathname.match(/\/events\/(\d+)/);
+        if (eventMatch) {
+            context.event_id = parseInt(eventMatch[1]);
+            context.page_type = 'event_detail';
+            
+            // Try to extract event name from page title or DOM
+            const eventNameMatch = document.title.match(/^([^-]+)/);
+            if (eventNameMatch) {
+                context.event_name = eventNameMatch[1].trim();
+            }
+        } else if (window.location.pathname.includes('/organizer')) {
+            context.page_type = 'organizer';
+        } else if (window.location.pathname.includes('/admin')) {
+            context.page_type = 'admin';
+        } else {
+            context.page_type = 'general';
+        }
+        
+        return context;
     }
     
     initializeElements() {
@@ -93,7 +126,8 @@ class SupportChatWidget {
                 },
                 body: JSON.stringify({
                     session_id: this.sessionId,
-                    message: message
+                    message: message,
+                    page_context: this.pageContext
                 })
             });
             

@@ -533,6 +533,12 @@ class SupportConversation(db.Model):
     assigned_admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'))
     assigned_at = db.Column(db.DateTime)
     
+    # Page context for better support
+    page_url = db.Column(db.String(500))  # URL where support was initiated
+    page_type = db.Column(db.String(50))  # event_detail, organizer, admin, general
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))  # Related event if applicable
+    event_name = db.Column(db.String(200))  # Event name for quick reference
+    
     # Metadata
     user_agent = db.Column(db.String(500))
     ip_address = db.Column(db.String(45))
@@ -545,6 +551,7 @@ class SupportConversation(db.Model):
     # Relationships
     messages = db.relationship('SupportMessage', backref='conversation', lazy=True, order_by='SupportMessage.created_at')
     assigned_admin = db.relationship('Admin', backref='support_conversations')
+    related_event = db.relationship('Event', backref='support_conversations')
 
 class SupportMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
