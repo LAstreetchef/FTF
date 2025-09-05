@@ -61,9 +61,22 @@ app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruc
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD', 'your-email-password')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
 
-# Configure Stripe - Use LIVE keys for real payment processing
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
-app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+# Configure Stripe - Smart mode switching (defaults to LIVE for production)
+# Set STRIPE_TEST_MODE=true environment variable to enable test mode
+STRIPE_TEST_MODE = os.environ.get('STRIPE_TEST_MODE', 'false').lower() == 'true'
+
+if STRIPE_TEST_MODE:
+    # Test mode - for development and testing
+    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
+    app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+    app.config['STRIPE_MODE'] = 'test'
+    logging.info("🧪 STRIPE TEST MODE ENABLED - Using test keys (4242 cards will work)")
+else:
+    # Live mode - for real payment processing
+    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+    app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+    app.config['STRIPE_MODE'] = 'live'
+    logging.info("💳 STRIPE LIVE MODE ENABLED - Processing real payments")
 
 # Initialize extensions
 db.init_app(app)

@@ -714,12 +714,36 @@ def admin_dashboard():
     
     recent_events = Event.query.order_by(Event.created_at.desc()).limit(5).all()
     
+    # Get Stripe mode status
+    stripe_mode = app.config.get('STRIPE_MODE', 'unknown')
+    
     return render_template('admin/dashboard.html', 
                          total_trucks=total_trucks,
                          total_events=total_events,
                          pending_events=pending_events,
                          funded_events=funded_events,
-                         recent_events=recent_events)
+                         recent_events=recent_events,
+                         stripe_mode=stripe_mode)
+
+@app.route('/admin/stripe-test-mode', methods=['POST'])
+def enable_stripe_test_mode():
+    """Switch to Stripe test mode for development"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    flash('⚠️ Test mode enabled! You can now use test cards like 4242 4242 4242 4242. Remember to switch back to live mode for real users.', 'warning')
+    flash('🔄 Restart required: Please restart the application to apply Stripe test mode.', 'info')
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/stripe-live-mode', methods=['POST'])  
+def enable_stripe_live_mode():
+    """Switch to Stripe live mode for production"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    flash('💳 Live mode enabled! All payments will now process real money.', 'success')
+    flash('🔄 Restart required: Please restart the application to apply Stripe live mode.', 'info')
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/force-template-refresh-xyz123')
 def force_template_refresh():
