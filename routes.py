@@ -3242,19 +3242,16 @@ def organizer_pay_fee(event_id):
     
     if request.method == 'POST':
         try:
-            # Clear any old test payment intent that can't be accessed in live mode
+            # AGGRESSIVE: Always clear payment intent for events to prevent test/live conflicts
             if event.organizer_fee_payment_intent:
-                try:
-                    # Try to retrieve the existing payment intent
-                    existing_intent = stripe.PaymentIntent.retrieve(event.organizer_fee_payment_intent)
-                except stripe.error.InvalidRequestError as e:
-                    if "similar object exists in test mode" in str(e):
-                        # Clear the test payment intent and create a new live one
-                        logging.info(f"Clearing test mode payment intent for event {event.id}: {event.organizer_fee_payment_intent}")
-                        event.organizer_fee_payment_intent = None
-                        db.session.commit()
-                    else:
-                        raise e
+                logging.info(f"Preemptively clearing payment intent for event {event.id}: {event.organizer_fee_payment_intent}")
+                event.organizer_fee_payment_intent = None
+                db.session.commit()
+            
+            # Ensure we're using live mode keys
+            if not stripe.api_key or not stripe.api_key.startswith('sk_live_'):
+                logging.error(f"Stripe not in live mode. Current key starts with: {stripe.api_key[:10] if stripe.api_key else 'None'}")
+                return jsonify({'error': 'Payment system configuration error'}), 500
             
             # Create Stripe payment intent for $5 organizer pledge
             payment_intent = stripe.PaymentIntent.create(
