@@ -106,7 +106,10 @@ def set_language(lang):
 @app.route('/')
 def index():
     """Homepage with overview and navigation"""
-    recent_events = Event.query.filter(Event.status.in_(['pending', 'funded'])).order_by(Event.created_at.desc()).limit(3).all()
+    recent_events = Event.query.filter(
+        Event.status.in_(['pending', 'funded']),
+        Event.organizer_fee_charged == True
+    ).order_by(Event.created_at.desc()).limit(3).all()
     current_lang = get_language_from_request()
     return render_template('index.html', recent_events=recent_events, current_lang=current_lang)
 
@@ -3764,10 +3767,21 @@ def pledge_transfer_consent(token):
 @app.route('/events')
 def events_list():
     """Public page listing all events by status"""
-    # Get events by different status categories
-    active_events = Event.query.filter(Event.status.in_(['pending', 'funded'])).order_by(Event.created_at.desc()).all()
-    completed_events = Event.query.filter(Event.status == 'approved').order_by(Event.created_at.desc()).all()
-    all_events = Event.query.order_by(Event.created_at.desc()).all()
+    # Get events by different status categories - ONLY show events where organizer paid the $5 fee
+    active_events = Event.query.filter(
+        Event.status.in_(['pending', 'funded']),
+        Event.organizer_fee_charged == True
+    ).order_by(Event.created_at.desc()).all()
+    
+    completed_events = Event.query.filter(
+        Event.status == 'approved',
+        Event.organizer_fee_charged == True
+    ).order_by(Event.created_at.desc()).all()
+    
+    # All events - also filtered by fee payment
+    all_events = Event.query.filter(
+        Event.organizer_fee_charged == True
+    ).order_by(Event.created_at.desc()).all()
     
     return render_template('events/list.html', 
                          active_events=active_events, 
@@ -3780,6 +3794,11 @@ def event_detail(event_id):
     from sqlalchemy.orm import joinedload
     event = Event.query.options(joinedload(Event.pledges)).get_or_404(event_id)
     
+    # Check if organizer paid the $5 fee - if not, event shouldn't be accessible
+    if not event.organizer_fee_charged:
+        flash('This event is not yet available for pledges', 'error')
+        return redirect(url_for('events_list'))
+    
     if event.status not in ['pending', 'funded']:
         flash('This event is no longer accepting pledges', 'info')
         return redirect(url_for('events_list'))
@@ -3790,6 +3809,11 @@ def event_detail(event_id):
 def make_pledge(event_id):
     """Handle pledge creation with Stripe tokenization"""
     event = Event.query.get_or_404(event_id)
+    
+    # Check if organizer paid the $5 fee - if not, pledging shouldn't be allowed
+    if not event.organizer_fee_charged:
+        flash('This event is not yet available for pledges', 'error')
+        return redirect(url_for('events_list'))
     
     if event.status not in ['pending', 'funded']:
         flash('This event is no longer accepting pledges', 'error')
