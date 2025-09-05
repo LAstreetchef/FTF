@@ -3430,7 +3430,15 @@ def confirm_organizer_fee_payment(event_id):
         if not event.organizer_fee_payment_intent:
             return jsonify({'error': 'No payment intent found'}), 400
         
-        payment_intent = stripe.PaymentIntent.retrieve(event.organizer_fee_payment_intent)
+        try:
+            payment_intent = stripe.PaymentIntent.retrieve(event.organizer_fee_payment_intent)
+        except stripe.error.InvalidRequestError as e:
+            if "similar object exists in test mode" in str(e):
+                # Test payment intent can't be accessed in live mode
+                logging.error(f"Cannot access test payment intent {event.organizer_fee_payment_intent} in live mode for event {event.id}")
+                return jsonify({'error': 'Payment was created in test mode but system is now in live mode. Please refresh and try payment again.'}), 400
+            else:
+                raise e
         
         if payment_intent.status == 'succeeded':
             # Mark fee as paid and publish event
