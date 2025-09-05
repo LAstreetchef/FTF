@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-05T06:41:26.206841",
+  "timestamp": "2025-09-05T09:07:36.750338",
   "backup_type": "automatic",
-  "event_count": 21,
+  "event_count": 20,
   "events": [
     {
       "id": 1,
@@ -362,26 +362,6 @@
       "organizer_fee_payment_intent": "pi_3S3OsFBgt3ltA59n0BJhXcLI",
       "organizer_entree_claimed": true,
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 10.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 90.0, \"description\": \"National Breast Cancer Foundation\", \"is_organizer\": false}]"
-    },
-    {
-      "id": 18,
-      "name": "Amazon gate 2 Meals for Mutts",
-      "description": "Come out for a healthy bite and support location adoption clinics",
-      "date": "2025-12-04T10:30:00",
-      "location": "9047 Lindblade Street Culver City CA 90232",
-      "organizer_id": 1,
-      "food_truck_id": 9,
-      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 20.4}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 19.2}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 6.0}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.8}, {\"name\": \"Tourney Combo\", \"price\": 22.0, \"description\": \"1 Main + 1 Side + 1 Drink\", \"original_price\": 22.0, \"marked_up_price\": 26.4}]",
-      "markup_percentage": 20.0,
-      "pledge_goal": 1000.0,
-      "status": "pending",
-      "current_pledges": 0.0,
-      "approved_at": null,
-      "created_at": "2025-09-04T20:29:13.924634",
-      "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": null,
-      "organizer_entree_claimed": false,
-      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 50.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"greentruck.sales@gmail.com\", \"percentage\": 50.0, \"description\": \"Food Truck Particant\", \"is_organizer\": false}]"
     },
     {
       "id": 19,

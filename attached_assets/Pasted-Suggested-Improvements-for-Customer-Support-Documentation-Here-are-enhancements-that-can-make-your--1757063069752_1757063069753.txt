@@ -1,0 +1,94 @@
+Suggested Improvements for Customer Support Documentation
+
+Here are enhancements that can make your support materials more effective, clear, and user-friendly:
+
+1. Add a Clear, Structured Help Center
+
+Sections: Organize documentation into logical categories—e.g., “Creating Events,” “Managing Pledges,” “Food Truck Logistics,” “Payments,” and “Troubleshooting.”
+
+Search Functionality: Let users quickly find help articles using keywords like “marks,” “pledges,” or “refund.”
+
+Popular FAQs: Include one-liners like:
+
+"What happens if I don’t reach my goal?"
+
+"How do I change my event date?"
+
+"When are tickets delivered?"
+
+2. Embed Step-by-Step Visual Guides
+
+Use screenshots or short gifs (annotated with arrows or highlights) to walk users through key tasks—e.g., event creation and ticket releasing.
+
+Tooltips or hover prompts within the app can replicate your external tutorial inside the actual workflow for hands-on guidance.
+
+3. Clarify the AI Assistant’s Capabilities
+
+Right now, users see “I’m your AI assistant… Want human help?” but the boundaries of what the bot can do remain unclear. Consider clarifying:
+
+What questions it can help with—e.g., “track my event,” “modify my markup.”
+
+Common questions it cannot handle—e.g., legal advice, dispute resolution.
+
+When to escalate to a human representative—and how long responses generally take.
+
+4. Include Troubleshooting & Edge Cases
+
+FAQ Examples:
+
+What if a payment fails?
+
+What if the food truck cancels last minute?
+
+How do I contact my truck vendor directly?
+
+Resolution Steps:
+
+Provide next steps or links (e.g., “Contact the organizer via email,” “Cancel event via dashboard,” etc.).
+
+5. Support Contact Options
+
+Beyond AI assistant:
+
+Offer multiple ways to reach support—email, chat, or phone (if available).
+
+Include expected response times (“We reply within 24 hours on business days.”).
+
+Ensure high-touch support is clearly visible for urgent issues like event cancellations.
+
+6. Make Support Content Easily Accessible
+
+Place a “Help” or “Support” link in the app header or sidebar—so users don’t have to hunt for a tutorial.
+
+Consider a sticky help icon or chat bubble that users can access on any page.
+
+7. Showcase Common Use Scenarios
+
+Walk users through effective examples:
+
+Fundraising for a School: Show typical markup strategy and social sharing tips.
+
+Corporate Event Use Case: Include ideal pricing, timeline setup, and vendor communication.
+These real-life examples make the service feel tangible and trustworthy.
+
+8. Gather & Publish User Feedback
+
+Add a “Was this helpful?” prompt under support articles.
+
+Consider a short, optional feedback widget (e.g., “Still confused? Let us know!”).
+
+9. Help with Food Trucks’ Side
+
+Your documentation seems organizer-focused, but since trucks also register, be sure to include truck-specific support:
+
+How to set up menus,
+
+How to join events,
+
+How to contact organizers,
+
+What to do in case of cancelations or refunds.
+
+10. Use Friendly, Consistent Tone
+
+Your tutorial copy is upbeat (“delicious menu items,” “community celebrates together”—great tone!). Keep this voice throughout the support documentation to match brand personality, but ensure explanations remain clear and concise.
