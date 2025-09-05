@@ -61,9 +61,9 @@ app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruc
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD', 'your-email-password')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
 
-# Configure Stripe
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+# Configure Stripe - Use LIVE keys for real payment processing
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
 
 # Initialize extensions
 db.init_app(app)
