@@ -731,6 +731,7 @@ def admin_dashboard():
 
 
 
+
 @app.route('/force-template-refresh-xyz123')
 def force_template_refresh():
     """Force template refresh by clearing Flask template cache"""

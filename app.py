@@ -90,6 +90,13 @@ else:
         logging.warning("🔧 Stripe key assignment failed, forcing direct assignment")
         import stripe as stripe_module
         stripe_module.api_key = live_secret_key
+    
+    # CRITICAL FIX: Force verification that live key is actually set
+    if not stripe.api_key.startswith('sk_live_'):
+        logging.error("🚨 CRITICAL: Live key not properly set despite configuration!")
+        # Force override with live key
+        stripe.api_key = live_secret_key
+        logging.info("🔧 FORCED live key assignment completed")
 
 # Initialize extensions
 db.init_app(app)

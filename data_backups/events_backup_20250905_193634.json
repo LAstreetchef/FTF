@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-05T17:03:31.328572",
+  "timestamp": "2025-09-05T19:36:34.314723",
   "backup_type": "automatic",
-  "event_count": 22,
+  "event_count": 23,
   "events": [
     {
       "id": 1,
@@ -284,6 +284,26 @@
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 10.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 90.0, \"description\": \"Tennis Center\", \"is_organizer\": false}]"
     },
     {
+      "id": 24,
+      "name": "Hayden Tract Tower",
+      "description": "Pet Adoption",
+      "date": "2025-10-30T16:05:00",
+      "location": "3515 Hayden, Culver City CA 90232",
+      "organizer_id": 1,
+      "food_truck_id": 12,
+      "selected_menu_items": "[{\"name\": \"Classic Wrapped Hot Dog\", \"price\": 6.0, \"description\": \"All-beef hot dog wrapped in bacon\", \"original_price\": 6.0, \"marked_up_price\": 6.8999999999999995}, {\"name\": \"Chili Cheese Dog\", \"price\": 7.5, \"description\": \"Hot dog with chili and cheese\", \"original_price\": 7.5, \"marked_up_price\": 8.625}, {\"name\": \"LA Street Dog\", \"price\": 8.0, \"description\": \"Bacon-wrapped with peppers, onions, and mayo\", \"original_price\": 8.0, \"marked_up_price\": 9.2}, {\"name\": \"Veggie Dog\", \"price\": 6.5, \"description\": \"Plant-based hot dog with toppings\", \"original_price\": 6.5, \"marked_up_price\": 7.475}, {\"name\": \"Polish Sausage\", \"price\": 7.0, \"description\": \"Grilled Polish sausage with mustard\", \"original_price\": 7.0, \"marked_up_price\": 8.049999999999999}]",
+      "markup_percentage": 15.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-05T17:06:16.235343",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": "pi_3S45KtBgt3ltA59n1SPHRjNn",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
+    },
+    {
       "id": 16,
       "name": "Donut Street ",
       "description": "donut + coffee anytime",
@@ -439,7 +459,7 @@
       "approved_at": null,
       "created_at": "2025-09-05T16:54:23.777990",
       "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": "pi_3S42uIBgt3ltA59n01wlhKhr",
+      "organizer_fee_payment_intent": "pi_3S434RBgt3ltA59n0bY7v5qG",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
