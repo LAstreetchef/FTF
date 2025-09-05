@@ -745,6 +745,7 @@ def enable_stripe_live_mode():
     flash('🔄 Restart required: Please restart the application to apply Stripe live mode.', 'info')
     return redirect(url_for('admin_dashboard'))
 
+
 @app.route('/force-template-refresh-xyz123')
 def force_template_refresh():
     """Force template refresh by clearing Flask template cache"""
