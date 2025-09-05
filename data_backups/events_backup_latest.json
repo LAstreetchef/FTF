@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-05T16:49:56.457595",
+  "timestamp": "2025-09-05T16:52:22.154325",
   "backup_type": "automatic",
   "event_count": 21,
   "events": [
@@ -419,7 +419,7 @@
       "approved_at": null,
       "created_at": "2025-09-05T16:46:58.852362",
       "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": "pi_3S42p4Bgt3ltA59n1pAyTrPO",
+      "organizer_fee_payment_intent": "pi_3S42qEBgt3ltA59n1zeBoXna",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
