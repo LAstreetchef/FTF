@@ -3243,18 +3243,30 @@ def organizer_pay_fee(event_id):
     
     if request.method == 'POST':
         try:
-            # AGGRESSIVE: Always clear payment intent for events to prevent test/live conflicts
+            # ULTIMATE SAFETY: Always clear payment intent and force fresh creation
             if event.organizer_fee_payment_intent:
-                logging.info(f"Preemptively clearing payment intent for event {event.id}: {event.organizer_fee_payment_intent}")
+                logging.info(f"Clearing existing payment intent for event {event.id}: {event.organizer_fee_payment_intent}")
                 event.organizer_fee_payment_intent = None
                 db.session.commit()
             
-            # Ensure we're using live mode keys
+            # Double-check Stripe configuration at runtime
             if not stripe.api_key or not stripe.api_key.startswith('sk_live_'):
-                logging.error(f"Stripe not in live mode. Current key starts with: {stripe.api_key[:10] if stripe.api_key else 'None'}")
-                return jsonify({'error': 'Payment system configuration error'}), 500
+                # Force fix if needed
+                live_secret = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+                if live_secret:
+                    stripe.api_key = live_secret
+                    app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+                    logging.warning("🔧 Fixed Stripe keys during payment intent creation")
+                else:
+                    logging.error(f"No live keys available. Current key: {stripe.api_key[:10] if stripe.api_key else 'None'}")
+                    return jsonify({'error': 'Payment system not configured for live mode'}), 500
             
-            # Create Stripe payment intent for $5 organizer pledge
+            # Final verification before creating payment intent
+            if not stripe.api_key.startswith('sk_live_'):
+                return jsonify({'error': 'Payment system still not in live mode'}), 500
+            
+            # Create fresh Stripe payment intent with verified live keys
+            logging.info(f"Creating live payment intent with key: {stripe.api_key[:20]}...")
             payment_intent = stripe.PaymentIntent.create(
                 amount=500,  # $5.00 in cents
                 currency='usd',
