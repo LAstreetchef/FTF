@@ -73,10 +73,23 @@ if STRIPE_TEST_MODE:
     logging.info("🧪 STRIPE TEST MODE ENABLED - Using test keys (4242 cards will work)")
 else:
     # Live mode - for real payment processing
-    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
-    app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+    live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+    live_publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+    
+    if not live_secret_key or not live_publishable_key:
+        logging.error("❌ Live Stripe keys not found in environment variables")
+        raise ValueError("STRIPE_SECRET_KEY_LIVE and STRIPE_PUBLISHABLE_KEY_LIVE must be set for live mode")
+    
+    stripe.api_key = live_secret_key
+    app.config['STRIPE_PUBLISHABLE_KEY'] = live_publishable_key
     app.config['STRIPE_MODE'] = 'live'
-    logging.info("💳 STRIPE LIVE MODE ENABLED - Processing real payments")
+    logging.info(f"💳 STRIPE LIVE MODE ENABLED - Secret key: {live_secret_key[:20]}... Publishable key: {live_publishable_key[:20]}...")
+    
+    # Double-check the assignment worked (fix for mysterious test key persistence)
+    if stripe.api_key != live_secret_key:
+        logging.warning("🔧 Stripe key assignment failed, forcing direct assignment")
+        import stripe as stripe_module
+        stripe_module.api_key = live_secret_key
 
 # Initialize extensions
 db.init_app(app)

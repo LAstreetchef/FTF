@@ -747,6 +747,7 @@ def enable_stripe_live_mode():
 
 
 
+
 @app.route('/force-template-refresh-xyz123')
 def force_template_refresh():
     """Force template refresh by clearing Flask template cache"""
@@ -3297,7 +3298,7 @@ def organizer_pay_fee(event_id):
     
     # GET request - show payment form
     organizer = Organizer.query.get(organizer_id)
-    return render_template('organizer/pay_fee.html', event=event, organizer=organizer, auth_token=auth_token)
+    return render_template('organizer/pay_fee.html', event=event, organizer=organizer, auth_token=auth_token, config=app.config)
 
 @app.route('/food-truck/pay-registration-fee/<int:truck_id>', methods=['GET', 'POST'])
 def food_truck_pay_registration_fee(truck_id):
