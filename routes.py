@@ -725,34 +725,6 @@ def admin_dashboard():
                          recent_events=recent_events,
                          stripe_mode=stripe_mode)
 
-@app.route('/admin/stripe-test-mode', methods=['POST'])
-def enable_stripe_test_mode():
-    """Switch to Stripe test mode for development"""
-    if not session.get('admin_id'):
-        return redirect(url_for('admin_login'))
-    
-    # Set environment variable for test mode
-    os.environ['STRIPE_TEST_MODE'] = 'true'
-    logging.info("🧪 Admin enabled Stripe test mode - Environment variable set")
-    
-    flash('⚠️ Test mode enabled! You can now use test cards like 4242 4242 4242 4242. Remember to switch back to live mode for real users.', 'warning')
-    flash('🔄 Restart required: Please restart the application to apply Stripe test mode.', 'info')
-    return redirect(url_for('admin_dashboard'))
-
-@app.route('/admin/stripe-live-mode', methods=['POST'])  
-def enable_stripe_live_mode():
-    """Switch to Stripe live mode for production"""
-    if not session.get('admin_id'):
-        return redirect(url_for('admin_login'))
-    
-    # Remove/unset environment variable for live mode
-    if 'STRIPE_TEST_MODE' in os.environ:
-        del os.environ['STRIPE_TEST_MODE']
-    logging.info("💳 Admin enabled Stripe live mode - Environment variable cleared")
-    
-    flash('💳 Live mode enabled! All payments will now process real money.', 'success')
-    flash('🔄 Restart required: Please restart the application to apply Stripe live mode.', 'info')
-    return redirect(url_for('admin_dashboard'))
 
 
 

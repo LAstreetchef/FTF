@@ -10,41 +10,6 @@
     </h1>
 </div>
 
-<!-- Stripe Mode Indicator -->
-<div class="row mb-4">
-    <div class="col-12">
-        {% if stripe_mode == 'live' %}
-        <div class="alert alert-success d-flex align-items-center" role="alert">
-            <i data-feather="credit-card" class="me-2"></i>
-            <strong>💳 LIVE MODE ACTIVE</strong> - Processing real payments (live Stripe keys)
-            <div class="ms-auto">
-                <form method="post" action="/admin/stripe-test-mode" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-primary">
-                        <i data-feather="test-tube" class="me-1"></i>Switch to Test Mode
-                    </button>
-                </form>
-            </div>
-        </div>
-        {% elif stripe_mode == 'test' %}
-        <div class="alert alert-warning d-flex align-items-center" role="alert">
-            <i data-feather="test-tube" class="me-2"></i>
-            <strong>🧪 TEST MODE ACTIVE</strong> - Using test cards (4242 4242 4242 4242)
-            <div class="ms-auto">
-                <form method="post" action="/admin/stripe-live-mode" class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-success">
-                        <i data-feather="credit-card" class="me-1"></i>Switch to Live Mode
-                    </button>
-                </form>
-            </div>
-        </div>
-        {% else %}
-        <div class="alert alert-danger d-flex align-items-center" role="alert">
-            <i data-feather="alert-circle" class="me-2"></i>
-            <strong>⚠️ STRIPE MODE UNKNOWN</strong> - Check configuration
-        </div>
-        {% endif %}
-    </div>
-</div>
 
 <!-- Statistics Cards -->
 <div class="row g-4 mb-5">
