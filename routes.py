@@ -758,6 +758,7 @@ def enable_stripe_live_mode():
 
 
 
+
 @app.route('/force-template-refresh-xyz123')
 def force_template_refresh():
     """Force template refresh by clearing Flask template cache"""
