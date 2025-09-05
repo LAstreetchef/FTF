@@ -3261,8 +3261,14 @@ def organizer_pay_fee(event_id):
                 event.organizer_fee_payment_intent = None
                 db.session.commit()
             
+            # FINAL VERIFICATION: Check what key we're actually using
+            current_key_type = "LIVE" if live_secret_key.startswith('sk_live_') else "TEST" if live_secret_key.startswith('sk_test_') else "UNKNOWN"
+            logging.info(f"ATTEMPTING PAYMENT CREATION:")
+            logging.info(f"  Secret key type: {current_key_type}")
+            logging.info(f"  Secret key prefix: {live_secret_key[:20]}")
+            logging.info(f"  Frontend will use publishable key: {live_publishable_key[:20]}")
+            
             # Use fresh stripe instance with guaranteed live key
-            logging.info(f"NUCLEAR FIX: Creating payment intent with fresh live key: {live_secret_key[:20]}...")
             payment_intent = stripe_fresh.PaymentIntent.create(
                 amount=500,  # $5.00 in cents
                 currency='usd',
@@ -3273,6 +3279,13 @@ def organizer_pay_fee(event_id):
                 },
                 api_key=live_secret_key  # Explicitly pass the live key
             )
+            
+            # VERIFY the created payment intent
+            created_key_type = "LIVE" if payment_intent.id.startswith('pi_') and 'livemode' in str(payment_intent) else "TEST"
+            logging.info(f"PAYMENT INTENT CREATED:")
+            logging.info(f"  Payment Intent ID: {payment_intent.id}")
+            logging.info(f"  Detected mode: {created_key_type}")
+            logging.info(f"  Full payment intent object: {payment_intent}")
             
             # Store payment intent ID
             event.organizer_fee_payment_intent = payment_intent.id
