@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-05T16:52:22.154325",
+  "timestamp": "2025-09-05T17:03:47.662237",
   "backup_type": "automatic",
-  "event_count": 21,
+  "event_count": 22,
   "events": [
     {
       "id": 1,
@@ -419,7 +419,27 @@
       "approved_at": null,
       "created_at": "2025-09-05T16:46:58.852362",
       "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": "pi_3S42qEBgt3ltA59n1zeBoXna",
+      "organizer_fee_payment_intent": "pi_3S42svBgt3ltA59n1YywaCpx",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
+    },
+    {
+      "id": 23,
+      "name": "Culver Skate Park",
+      "description": "Support the park!",
+      "date": "2025-10-03T12:53:00",
+      "location": "Duquene & Jefferson",
+      "organizer_id": 1,
+      "food_truck_id": 3,
+      "selected_menu_items": "[{\"name\": \"Classic Acai Bowl\", \"price\": 12.5, \"original_price\": 12.5, \"marked_up_price\": 15.0}, {\"name\": \"Berry Blast Bowl\", \"price\": 14.0, \"original_price\": 14.0, \"marked_up_price\": 16.8}, {\"name\": \"Green Goddess Bowl\", \"price\": 13.25, \"original_price\": 13.25, \"marked_up_price\": 15.899999999999999}, {\"name\": \"Protein Power Bowl\", \"price\": 15.5, \"original_price\": 15.5, \"marked_up_price\": 18.599999999999998}, {\"name\": \"Mini Acai Bowl\", \"price\": 8.75, \"original_price\": 8.75, \"marked_up_price\": 10.5}, {\"name\": \"Acai Smoothie\", \"price\": 7.5, \"original_price\": 7.5, \"marked_up_price\": 9.0}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1750.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-05T16:54:23.777990",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": "pi_3S42uIBgt3ltA59n01wlhKhr",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
