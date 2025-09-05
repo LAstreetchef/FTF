@@ -4349,6 +4349,14 @@ def admin_support_resolve(conversation_id):
     flash('Conversation marked as resolved', 'success')
     return redirect(url_for('admin_support_dashboard'))
 
+@app.route('/admin/support/tutorial')
+def admin_support_tutorial():
+    """Help desk tutorial for admin support staff"""
+    if not session.get('admin_id'):
+        return redirect(url_for('admin_login'))
+    
+    return render_template('admin/support_tutorial.html')
+
 # Error handlers
 @app.errorhandler(404)
 def not_found(error):

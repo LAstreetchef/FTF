@@ -1,0 +1,578 @@
+{% extends "base.html" %}
+
+{% block title %}Help Desk Tutorial - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-light sidebar">
+            <div class="d-flex flex-column p-3">
+                <h5>Admin Panel</h5>
+                <ul class="nav nav-pills flex-column mb-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_dashboard') }}" class="nav-link">
+                            <i data-feather="home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_food_trucks') }}" class="nav-link">
+                            <i data-feather="truck"></i> Food Trucks
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_events') }}" class="nav-link">
+                            <i data-feather="calendar"></i> Events
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_support_dashboard') }}" class="nav-link">
+                            <i data-feather="message-circle"></i> Support
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('admin_support_tutorial') }}" class="nav-link active">
+                            <i data-feather="book"></i> Help Desk Tutorial
+                        </a>
+                    </li>
+                </ul>
+                <hr>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-secondary">
+                    <i data-feather="log-out"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i data-feather="book" class="me-2"></i>
+                    Help Desk Tutorial
+                </h1>
+                <a href="{{ url_for('admin_support_dashboard') }}" class="btn btn-outline-primary">
+                    <i data-feather="arrow-left"></i> Back to Support
+                </a>
+            </div>
+
+            <!-- Table of Contents -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i data-feather="list" class="me-2"></i>Quick Navigation</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><a href="#platform-overview">🏠 Platform Overview</a></li>
+                                        <li><a href="#organizer-support">👤 Supporting Organizers</a></li>
+                                        <li><a href="#food-truck-support">🚚 Supporting Food Trucks</a></li>
+                                        <li><a href="#payment-issues">💳 Payment Issues</a></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled">
+                                        <li><a href="#event-management">📅 Event Management</a></li>
+                                        <li><a href="#technical-issues">🔧 Technical Issues</a></li>
+                                        <li><a href="#escalation">⚠️ Escalation Process</a></li>
+                                        <li><a href="#common-solutions">💡 Quick Solutions</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Overview -->
+            <section id="platform-overview" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="home" class="me-2"></i>Platform Overview</h4>
+                    </div>
+                    <div class="card-body">
+                        <h6>How Food Truck Fundraiser Works:</h6>
+                        <ol>
+                            <li><strong>Organizers create events</strong> by selecting food trucks, setting menu markups, and defining goals</li>
+                            <li><strong>$5 organizer fee</strong> must be paid before events go public</li>
+                            <li><strong>Supporters pledge</strong> for menu items if the event reaches its funding goal</li>
+                            <li><strong>Payments are charged</strong> only when events are fully funded</li>
+                            <li><strong>Organizers earn markup profit</strong> and food trucks get their minimum guaranteed sales</li>
+                        </ol>
+                        
+                        <div class="alert alert-info mt-3">
+                            <strong>Key Concept:</strong> This is conditional crowdfunding - money only moves when goals are met.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Supporting Organizers -->
+            <section id="organizer-support" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="user" class="me-2"></i>Supporting Organizers</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <h6>Common Organizer Issues:</h6>
+                        <div class="accordion" id="organizerAccordion">
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#org-payment">
+                                        💳 "My event isn't showing up publicly"
+                                    </button>
+                                </h2>
+                                <div id="org-payment" class="accordion-collapse collapse" data-bs-parent="#organizerAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Solution:</strong> Check if they paid the $5 organizer fee.
+                                        <br><strong>How to check:</strong> Go to Admin → Events, find their event, check "Organizer Fee Charged" column.
+                                        <br><strong>If unpaid:</strong> They can pay from their dashboard under "Payment Required" status.
+                                        <br><strong>Admin action:</strong> You can manually mark fee as paid if needed in event details.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#org-payout">
+                                        💰 "When do I get paid my markup profit?"
+                                    </button>
+                                </h2>
+                                <div id="org-payout" class="accordion-collapse collapse" data-bs-parent="#organizerAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Payout Process:</strong>
+                                        <ol>
+                                            <li>Event must reach funding goal and be approved</li>
+                                            <li>Organizer must complete payout setup (bank/PayPal)</li>
+                                            <li>Admin processes payout from Admin → Events → "Process Payout"</li>
+                                        </ol>
+                                        <strong>Check payout status:</strong> Admin → Events → View event details → Payout section
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#org-supporters">
+                                        👥 "How do I contact my supporters?"
+                                    </button>
+                                </h2>
+                                <div id="org-supporters" class="accordion-collapse collapse" data-bs-parent="#organizerAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Supporter Contact:</strong>
+                                        <ul>
+                                            <li>From organizer dashboard: Click "Supporters (X)" button</li>
+                                            <li>Shows supporter emails and pledge details</li>
+                                            <li>Built-in "Send Thank You" feature with email templates</li>
+                                            <li>Admin can also access this from Admin → Events → "Supporters"</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#org-editing">
+                                        ✏️ "Can I edit my event after creating it?"
+                                    </button>
+                                </h2>
+                                <div id="org-editing" class="accordion-collapse collapse" data-bs-parent="#organizerAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Event Editing Limitations:</strong>
+                                        <ul>
+                                            <li><strong>Before any pledges:</strong> Admin can edit most details</li>
+                                            <li><strong>After pledges:</strong> Only basic info (description, date) to protect pledger agreements</li>
+                                            <li><strong>Cannot change:</strong> Food truck, menu items, pricing, goals once pledges exist</li>
+                                        </ul>
+                                        <strong>Admin action:</strong> Edit from Admin → Events → Edit button
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Supporting Food Trucks -->
+            <section id="food-truck-support" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="truck" class="me-2"></i>Supporting Food Trucks</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <h6>Common Food Truck Issues:</h6>
+                        <div class="accordion" id="truckAccordion">
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#truck-registration">
+                                        🎯 "My truck isn't showing up for organizers to select"
+                                    </button>
+                                </h2>
+                                <div id="truck-registration" class="accordion-collapse collapse" data-bs-parent="#truckAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Truck Approval Process:</strong>
+                                        <ol>
+                                            <li>Food truck registers and pays $25 registration fee</li>
+                                            <li>Admin reviews and approves truck</li>
+                                            <li>Truck appears in organizer selection list</li>
+                                        </ol>
+                                        <strong>Check status:</strong> Admin → Food Trucks → Check "Status" and "Registration Fee Charged" columns
+                                        <br><strong>Admin action:</strong> Approve truck or mark registration fee as paid
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#truck-menu">
+                                        🍕 "How do I update my menu items?"
+                                    </button>
+                                </h2>
+                                <div id="truck-menu" class="accordion-collapse collapse" data-bs-parent="#truckAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Menu Management:</strong>
+                                        <ul>
+                                            <li>Food trucks manage menus from their dashboard</li>
+                                            <li>Can add/edit items before events use them</li>
+                                            <li>Cannot change items that are already in active events</li>
+                                        </ul>
+                                        <strong>Admin help:</strong> Admin → Food Trucks → Edit truck → Menu Items section
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#truck-payment">
+                                        💰 "When do I get paid for my sales?"
+                                    </button>
+                                </h2>
+                                <div id="truck-payment" class="accordion-collapse collapse" data-bs-parent="#truckAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Food Truck Payment:</strong>
+                                        <ul>
+                                            <li>Payments processed after event completion</li>
+                                            <li>Food trucks receive their base menu prices (before markup)</li>
+                                            <li>Payments sent via established payout method</li>
+                                        </ul>
+                                        <strong>Check payout:</strong> Admin → Food Trucks → View payout history
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Issues -->
+            <section id="payment-issues" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="credit-card" class="me-2"></i>Payment Issues</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Failed Pledge Payments:</h6>
+                                <ul>
+                                    <li>Check Admin → Events → View pledges</li>
+                                    <li>Failed payments show "failed" status</li>
+                                    <li>Supporters can retry payment from their email</li>
+                                    <li>Admin can manually mark as paid if verified</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Payout Issues:</h6>
+                                <ul>
+                                    <li>Verify payout method is set up correctly</li>
+                                    <li>Check bank details or PayPal email accuracy</li>
+                                    <li>Ensure minimum thresholds are met</li>
+                                    <li>Review payout status in admin dashboard</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning mt-3">
+                            <strong>Important:</strong> Always verify payment information before processing manual payouts. Document any manual interventions in the event notes.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Event Management -->
+            <section id="event-management" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="calendar" class="me-2"></i>Event Management</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <h6>Event Lifecycle:</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <div class="card border-warning">
+                                    <div class="card-body text-center">
+                                        <h6>PENDING</h6>
+                                        <small>Collecting pledges</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <h6>FUNDED</h6>
+                                        <small>Goal reached, payments processing</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-primary">
+                                    <div class="card-body text-center">
+                                        <h6>APPROVED</h6>
+                                        <small>Event completed, payouts available</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card border-secondary">
+                                    <div class="card-body text-center">
+                                        <h6>CANCELLED</h6>
+                                        <small>Event cancelled, pledges refunded</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6>Common Admin Actions:</h6>
+                        <ul>
+                            <li><strong>Approve funded events:</strong> Admin → Events → "Approve" button</li>
+                            <li><strong>Cancel events:</strong> Admin → Events → "Cancel" (refunds all pledges)</li>
+                            <li><strong>Process payouts:</strong> Admin → Events → "Process Payout"</li>
+                            <li><strong>Contact supporters:</strong> Admin → Events → "Supporters" button</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technical Issues -->
+            <section id="technical-issues" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="settings" class="me-2"></i>Technical Issues</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Login Problems:</h6>
+                                <ul>
+                                    <li>Verify correct email address</li>
+                                    <li>Check password requirements (6+ characters)</li>
+                                    <li>Clear browser cache and cookies</li>
+                                    <li>Try incognito/private browsing mode</li>
+                                </ul>
+
+                                <h6>Email Issues:</h6>
+                                <ul>
+                                    <li>Check spam/junk folders</li>
+                                    <li>Whitelist support@foodtruckfundraiser.com</li>
+                                    <li>Admin can resend notifications manually</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Payment Processing:</h6>
+                                <ul>
+                                    <li>Stripe handles all payment processing</li>
+                                    <li>Failed payments usually due to insufficient funds or card issues</li>
+                                    <li>Admin can view detailed payment logs</li>
+                                    <li>Refunds processed automatically for cancelled events</li>
+                                </ul>
+
+                                <h6>Browser Compatibility:</h6>
+                                <ul>
+                                    <li>Modern browsers recommended</li>
+                                    <li>JavaScript must be enabled</li>
+                                    <li>Mobile-friendly responsive design</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Escalation Process -->
+            <section id="escalation" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="alert-triangle" class="me-2"></i>Escalation Process</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <h6>When to Escalate:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-danger">
+                                    <strong>High Priority - Escalate Immediately:</strong>
+                                    <ul>
+                                        <li>Payment system errors</li>
+                                        <li>Security concerns</li>
+                                        <li>Legal/compliance issues</li>
+                                        <li>Data loss or corruption</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">
+                                    <strong>Medium Priority - Escalate if Unresolved:</strong>
+                                    <ul>
+                                        <li>Complex payout issues</li>
+                                        <li>Event cancellation requests</li>
+                                        <li>Multiple failed attempts</li>
+                                        <li>Technical bugs</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6>Escalation Contacts:</h6>
+                        <ul>
+                            <li><strong>Technical Issues:</strong> Forward to development team</li>
+                            <li><strong>Payment Issues:</strong> Financial operations team</li>
+                            <li><strong>Legal Issues:</strong> Management</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quick Solutions -->
+            <section id="common-solutions" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="zap" class="me-2"></i>Quick Solutions Reference</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Problem</th>
+                                        <th>Quick Solution</th>
+                                        <th>Admin Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Event not public</td>
+                                        <td>Check if $5 organizer fee paid</td>
+                                        <td>Admin → Events → Mark fee paid</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Can't find food truck</td>
+                                        <td>Truck needs approval and registration fee</td>
+                                        <td>Admin → Food Trucks → Approve</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Payment failed</td>
+                                        <td>Check card details, retry payment</td>
+                                        <td>Admin → View pledge details</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Missing email notifications</td>
+                                        <td>Check spam, whitelist domain</td>
+                                        <td>Admin → Resend notifications</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Payout delays</td>
+                                        <td>Verify payout method setup</td>
+                                        <td>Admin → Process payout manually</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Event changes needed</td>
+                                        <td>Limited editing after pledges</td>
+                                        <td>Admin → Edit event details</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Emergency Contacts -->
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5><i data-feather="phone" class="me-2"></i>Emergency Contacts</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Technical Emergencies:</strong><br>
+                            Platform outages, security issues<br>
+                            <code>tech@foodtruckfundraiser.com</code>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Payment Emergencies:</strong><br>
+                            Payment system failures, refund issues<br>
+                            <code>payments@foodtruckfundraiser.com</code>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Management:</strong><br>
+                            Legal issues, policy questions<br>
+                            <code>admin@foodtruckfundraiser.com</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.accordion-button {
+    font-size: 0.95rem;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.alert {
+    border-left: 4px solid;
+}
+
+.alert-danger { border-left-color: #dc3545; }
+.alert-warning { border-left-color: #ffc107; }
+.alert-info { border-left-color: #0dcaf0; }
+
+section {
+    scroll-margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        height: auto;
+    }
+}
+</style>
+
+{% endblock %}
