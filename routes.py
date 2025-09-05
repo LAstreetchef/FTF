@@ -3907,13 +3907,26 @@ def make_pledge(event_id):
                     return redirect(url_for('make_pledge', event_id=event_id))
                 # Attach payment method to payment intent and confirm it
                 try:
-                    import stripe
+                    # NUCLEAR OPTION: Complete environment reset for live mode (same as organizer fix)
+                    live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
                     
-                    # Attach and confirm the payment intent
-                    intent = stripe.PaymentIntent.confirm(
+                    if not live_secret_key:
+                        logging.error("CRITICAL: Live Stripe key not found for pledge payment")
+                        flash('Payment system not configured for live mode', 'error')
+                        return redirect(url_for('make_pledge', event_id=event_id))
+                    
+                    # FORCE complete reconfiguration for pledge payments
+                    import stripe as stripe_fresh
+                    stripe_fresh.api_key = live_secret_key
+                    
+                    logging.info(f"PLEDGE NUCLEAR FIX: Confirming payment with fresh live key: {live_secret_key[:20]}...")
+                    
+                    # Attach and confirm the payment intent using fresh live stripe instance
+                    intent = stripe_fresh.PaymentIntent.confirm(
                         payment_intent_id,
                         payment_method=stripe_payment_method,
-                        return_url=request.url_root  # For 3D Secure redirects if needed
+                        return_url=request.url_root,  # For 3D Secure redirects if needed
+                        api_key=live_secret_key  # Explicitly pass the live key
                     )
                     
                     if intent.status not in ['requires_capture', 'succeeded']:

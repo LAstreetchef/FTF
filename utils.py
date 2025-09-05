@@ -31,11 +31,24 @@ def generate_ticket_code():
 def create_stripe_payment_intent(amount, customer_email, description):
     """Create a Stripe PaymentIntent for future charging"""
     try:
+        # NUCLEAR OPTION: Force live keys for payment intent creation
+        live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+        
+        if not live_secret_key:
+            logging.error("CRITICAL: Live Stripe key not found for payment intent creation")
+            return None
+        
+        # Use fresh stripe instance with guaranteed live key
+        import stripe as stripe_fresh
+        stripe_fresh.api_key = live_secret_key
+        
         # Convert amount to cents
         amount_cents = int(amount * 100)
         
+        logging.info(f"UTILS NUCLEAR FIX: Creating payment intent with fresh live key: {live_secret_key[:20]}...")
+        
         # Create PaymentIntent with explicit payment method configuration
-        intent = stripe.PaymentIntent.create(
+        intent = stripe_fresh.PaymentIntent.create(
             amount=amount_cents,
             currency='usd',
             capture_method='manual',  # Don't charge immediately
@@ -48,7 +61,8 @@ def create_stripe_payment_intent(amount, customer_email, description):
             metadata={
                 'customer_email': customer_email,
                 'description': description
-            }
+            },
+            api_key=live_secret_key  # Explicitly pass the live key
         )
         
         logging.info(f"Created PaymentIntent {intent.id} for ${amount}")
@@ -61,18 +75,31 @@ def create_stripe_payment_intent(amount, customer_email, description):
 def charge_stripe_payment(payment_intent_id, original_amount, description):
     """Charge a previously created PaymentIntent with 4.5% processing fee"""
     try:
+        # NUCLEAR OPTION: Force live keys for payment charging
+        live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+        
+        if not live_secret_key:
+            logging.error("CRITICAL: Live Stripe key not found for payment charging")
+            return {'success': False, 'error': 'Payment system not configured for live mode'}
+        
+        # Use fresh stripe instance with guaranteed live key
+        import stripe as stripe_fresh
+        stripe_fresh.api_key = live_secret_key
+        
         # Calculate total amount including processing fee
         total_amount_with_fee = calculate_total_with_processing_fee(original_amount)
         processing_fee = calculate_processing_fee(original_amount)
         
+        logging.info(f"CHARGE NUCLEAR FIX: Using fresh live key for charging: {live_secret_key[:20]}...")
+        
         # Retrieve the PaymentIntent
-        intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        intent = stripe_fresh.PaymentIntent.retrieve(payment_intent_id, api_key=live_secret_key)
         logging.info(f"PaymentIntent {payment_intent_id} current status: {intent.status}")
         
         if intent.status == 'requires_capture':
             # Payment intent already includes processing fee from pledge creation
             # Just capture without modifying amount
-            intent = stripe.PaymentIntent.capture(payment_intent_id)
+            intent = stripe_fresh.PaymentIntent.capture(payment_intent_id, api_key=live_secret_key)
             
             # Get actual charged amount from the captured intent
             actual_charged_amount = intent.amount / 100.0  # Convert from cents
