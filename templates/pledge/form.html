@@ -259,9 +259,11 @@
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Stripe
+    // Initialize Stripe with potential live key override (same fix as organizer payments)
     {% if stripe_publishable_key %}
-    const stripe = Stripe('{{ stripe_publishable_key }}');
+    let stripePublishableKey = '{{ stripe_publishable_key }}';
+    const stripe = Stripe(stripePublishableKey);
+    console.log('🔧 Pledge form initialized with Stripe key:', stripePublishableKey.substring(0, 20) + '...');
     {% else %}
     // Stripe not properly configured - show error
     document.getElementById('payment-errors').innerHTML = '<div class="alert alert-danger">Payment system not available</div>';
