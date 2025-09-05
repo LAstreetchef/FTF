@@ -58,7 +58,7 @@ app.config['MAIL_PORT'] = 587  # Back to TLS port
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
-app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD', 'your-email-password')
+app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD_NEW', 'your-email-password')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
 
 # Configure Stripe - Smart mode switching (defaults to LIVE for production)
