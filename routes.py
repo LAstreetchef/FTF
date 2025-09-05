@@ -3257,6 +3257,20 @@ def organizer_pay_fee(event_id):
     
     if request.method == 'POST':
         try:
+            # Clear any old test payment intent that can't be accessed in live mode
+            if event.organizer_fee_payment_intent:
+                try:
+                    # Try to retrieve the existing payment intent
+                    existing_intent = stripe.PaymentIntent.retrieve(event.organizer_fee_payment_intent)
+                except stripe.error.InvalidRequestError as e:
+                    if "similar object exists in test mode" in str(e):
+                        # Clear the test payment intent and create a new live one
+                        logging.info(f"Clearing test mode payment intent for event {event.id}: {event.organizer_fee_payment_intent}")
+                        event.organizer_fee_payment_intent = None
+                        db.session.commit()
+                    else:
+                        raise e
+            
             # Create Stripe payment intent for $5 organizer pledge
             payment_intent = stripe.PaymentIntent.create(
                 amount=500,  # $5.00 in cents

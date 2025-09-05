@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-05T11:07:00.964724",
+  "timestamp": "2025-09-05T16:48:49.222578",
   "backup_type": "automatic",
-  "event_count": 20,
+  "event_count": 21,
   "events": [
     {
       "id": 1,
@@ -402,6 +402,26 @@
       "organizer_fee_payment_intent": null,
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"marcsonson@gmail.com\", \"percentage\": 10.0, \"description\": \"Organizer\", \"is_organizer\": true}, {\"email\": \"marcsonson@gmail.com\", \"percentage\": 90.0, \"description\": \"Lakewood Tennis Center\", \"is_organizer\": false}]"
+    },
+    {
+      "id": 22,
+      "name": "Amazon gate 2",
+      "description": "Culver City StakePark Funds",
+      "date": "2025-10-01T12:46:00",
+      "location": "9040 Lindblade Street Culver City CA 90232",
+      "organizer_id": 1,
+      "food_truck_id": 12,
+      "selected_menu_items": "[{\"name\": \"Classic Wrapped Hot Dog\", \"price\": 6.0, \"description\": \"All-beef hot dog wrapped in bacon\", \"original_price\": 6.0, \"marked_up_price\": 7.199999999999999}, {\"name\": \"Chili Cheese Dog\", \"price\": 7.5, \"description\": \"Hot dog with chili and cheese\", \"original_price\": 7.5, \"marked_up_price\": 9.0}, {\"name\": \"LA Street Dog\", \"price\": 8.0, \"description\": \"Bacon-wrapped with peppers, onions, and mayo\", \"original_price\": 8.0, \"marked_up_price\": 9.6}, {\"name\": \"Veggie Dog\", \"price\": 6.5, \"description\": \"Plant-based hot dog with toppings\", \"original_price\": 6.5, \"marked_up_price\": 7.8}, {\"name\": \"Polish Sausage\", \"price\": 7.0, \"description\": \"Grilled Polish sausage with mustard\", \"original_price\": 7.0, \"marked_up_price\": 8.4}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-05T16:46:58.852362",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": "pi_3S42n6Bgt3ltA59n0WIcLm6Z",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
   ]
 }
