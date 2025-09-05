@@ -75,6 +75,8 @@
                                 <div class="col-md-6">
                                     <ul class="list-unstyled">
                                         <li><a href="#event-management">📅 Event Management</a></li>
+                                        <li><a href="#pledge-transfers">🔄 Pledge Transfers</a></li>
+                                        <li><a href="#ai-chat-system">🤖 AI Chat Support</a></li>
                                         <li><a href="#technical-issues">🔧 Technical Issues</a></li>
                                         <li><a href="#escalation">⚠️ Escalation Process</a></li>
                                         <li><a href="#common-solutions">💡 Quick Solutions</a></li>
@@ -193,6 +195,48 @@
                                 </div>
                             </div>
 
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#gift-meals">
+                                        🎁 "How do gift meals work?"
+                                    </button>
+                                </h2>
+                                <div id="gift-meals" class="accordion-collapse collapse" data-bs-parent="#organizerAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Gift Meal Feature:</strong>
+                                        <ul>
+                                            <li>Pledgers can purchase meals as gifts for others</li>
+                                            <li>Gift recipient gets separate email with e-ticket</li>
+                                            <li>Purchaser can include personal message</li>
+                                            <li>Both purchaser and recipient receive confirmation emails</li>
+                                            <li>Gift meals count toward event funding goals</li>
+                                        </ul>
+                                        <strong>Admin support:</strong> Check gift details in Admin → Events → View Pledges
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#terms-service">
+                                        📋 "What are the Terms of Service?"
+                                    </button>
+                                </h2>
+                                <div id="terms-service" class="accordion-collapse collapse" data-bs-parent="#organizerAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Key Terms for Organizers:</strong>
+                                        <ul>
+                                            <li><strong>Risk assumption:</strong> Organizers assume all event risks and responsibilities</li>
+                                            <li><strong>Platform role:</strong> We're a technology platform, not event managers</li>
+                                            <li><strong>No liability:</strong> Platform not responsible for event outcomes or disputes</li>
+                                            <li><strong>Compliance:</strong> Organizers responsible for permits, taxes, insurance</li>
+                                            <li><strong>Termination:</strong> Platform can suspend accounts for violations</li>
+                                        </ul>
+                                        <strong>Full terms:</strong> Available during organizer registration process
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -303,6 +347,126 @@
 
                         <div class="alert alert-warning mt-3">
                             <strong>Important:</strong> Always verify payment information before processing manual payouts. Document any manual interventions in the event notes.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pledge Transfers -->
+            <section id="pledge-transfers" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="repeat" class="me-2"></i>Pledge Transfer System</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <h6>How Pledge Transfers Work:</h6>
+                        <ol>
+                            <li><strong>Organizer initiates transfer</strong> from their dashboard using "Transfer" button</li>
+                            <li><strong>Email sent to each pledger</strong> asking for consent to move their pledge</li>
+                            <li><strong>Pledgers have 7 days</strong> to approve or decline via email links</li>
+                            <li><strong>Approved pledges transfer</strong> to the target event automatically</li>
+                            <li><strong>Declined/expired pledges remain</strong> with the original event</li>
+                        </ol>
+
+                        <div class="accordion" id="transferAccordion">
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#transfer-issues">
+                                        ❓ "I didn't receive the transfer consent email"
+                                    </button>
+                                </h2>
+                                <div id="transfer-issues" class="accordion-collapse collapse" data-bs-parent="#transferAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Troubleshooting Transfer Emails:</strong>
+                                        <ul>
+                                            <li>Check spam/junk folders first</li>
+                                            <li>Emails sent from support@foodtruckfundraiser.com</li>
+                                            <li>Admin can check transfer status: Admin → Events → View Transfers</li>
+                                            <li>Admin can resend transfer emails if needed</li>
+                                            <li>Transfer requests expire after 7 days</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#transfer-rules">
+                                        📋 Transfer Rules & Limitations
+                                    </button>
+                                </h2>
+                                <div id="transfer-rules" class="accordion-collapse collapse" data-bs-parent="#transferAccordion">
+                                    <div class="accordion-body">
+                                        <strong>Transfer Requirements:</strong>
+                                        <ul>
+                                            <li><strong>Same organizer:</strong> Can only transfer between events owned by same organizer</li>
+                                            <li><strong>Event status:</strong> Source can be pending/funded/approved, target must be pending/funded</li>
+                                            <li><strong>Pledge status:</strong> Only pending or charged pledges can transfer</li>
+                                            <li><strong>Amount preservation:</strong> Pledge amounts remain the same</li>
+                                            <li><strong>Menu differences:</strong> Pledgers will see new menu options in target event</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- AI Chat Support System -->
+            <section id="ai-chat-system" class="mb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><i data-feather="message-square" class="me-2"></i>AI Chat Support System</h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <div class="alert alert-info">
+                            <strong>🤖 Platform has built-in AI chat support</strong> that handles 80% of common questions automatically. 
+                            You'll primarily handle escalated conversations and complex issues.
+                        </div>
+
+                        <h6>AI System Capabilities:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>✅ AI Can Handle:</strong>
+                                <ul>
+                                    <li>Platform pricing ($25 food truck, $5 event fee)</li>
+                                    <li>How the fundraising process works</li>
+                                    <li>Account registration questions</li>
+                                    <li>Basic payment information</li>
+                                    <li>Event creation steps</li>
+                                    <li>General platform navigation</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>🚨 AI Escalates to You:</strong>
+                                <ul>
+                                    <li>Refunds or billing disputes</li>
+                                    <li>Technical bugs or errors</li>
+                                    <li>Account suspension issues</li>
+                                    <li>Custom business arrangements</li>
+                                    <li>Legal or compliance questions</li>
+                                    <li>Complex troubleshooting</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <h6>Managing AI Escalations:</h6>
+                        <ol>
+                            <li><strong>Auto-notification:</strong> You receive email when AI escalates a conversation</li>
+                            <li><strong>Review context:</strong> Check conversation history in Support Dashboard</li>
+                            <li><strong>Page context:</strong> AI includes what page user was on when asking for help</li>
+                            <li><strong>Take over:</strong> Assign conversation to yourself and respond directly</li>
+                            <li><strong>Resolution:</strong> Mark as resolved when issue is handled</li>
+                        </ol>
+
+                        <div class="alert alert-warning">
+                            <strong>Important:</strong> When users request "human support," they're automatically escalated to your queue. 
+                            Respond promptly as they've specifically asked for human assistance.
                         </div>
                     </div>
                 </div>
@@ -488,7 +652,7 @@
                                     </tr>
                                     <tr>
                                         <td>Missing email notifications</td>
-                                        <td>Check spam, whitelist domain</td>
+                                        <td>Check spam, whitelist support@foodtruckfundraiser.com</td>
                                         <td>Admin → Resend notifications</td>
                                     </tr>
                                     <tr>
@@ -500,6 +664,36 @@
                                         <td>Event changes needed</td>
                                         <td>Limited editing after pledges</td>
                                         <td>Admin → Edit event details</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Transfer consent email missing</td>
+                                        <td>Check spam, emails expire in 7 days</td>
+                                        <td>Admin → Resend transfer email</td>
+                                    </tr>
+                                    <tr>
+                                        <td>AI chat escalation</td>
+                                        <td>User requested human support</td>
+                                        <td>Admin → Support → Take conversation</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Gift meal confusion</td>
+                                        <td>Explain separate recipient emails</td>
+                                        <td>Admin → View pledge gift details</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Login problems</td>
+                                        <td>Check email format, clear cookies</td>
+                                        <td>Admin → Reset password if needed</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Terms of Service questions</td>
+                                        <td>Platform role is technology only</td>
+                                        <td>Refer to legal responsibilities</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4.5% processing fee questions</td>
+                                        <td>Explain fee covers payment processing</td>
+                                        <td>Show fee breakdown in pledge details</td>
                                     </tr>
                                 </tbody>
                             </table>
