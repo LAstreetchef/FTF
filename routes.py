@@ -3243,38 +3243,35 @@ def organizer_pay_fee(event_id):
     
     if request.method == 'POST':
         try:
-            # ULTIMATE SAFETY: Always clear payment intent and force fresh creation
+            # NUCLEAR OPTION: Complete environment reset for live mode
+            live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+            live_publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+            
+            if not live_secret_key or not live_publishable_key:
+                logging.error("CRITICAL: Live Stripe keys not found in environment")
+                return jsonify({'error': 'Live Stripe keys not configured'}), 500
+            
+            # FORCE complete reconfiguration
+            import stripe as stripe_fresh
+            stripe_fresh.api_key = live_secret_key
+            
+            # Clear any existing payment intent
             if event.organizer_fee_payment_intent:
                 logging.info(f"Clearing existing payment intent for event {event.id}: {event.organizer_fee_payment_intent}")
                 event.organizer_fee_payment_intent = None
                 db.session.commit()
             
-            # Double-check Stripe configuration at runtime
-            if not stripe.api_key or not stripe.api_key.startswith('sk_live_'):
-                # Force fix if needed
-                live_secret = os.environ.get('STRIPE_SECRET_KEY_LIVE')
-                if live_secret:
-                    stripe.api_key = live_secret
-                    app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
-                    logging.warning("🔧 Fixed Stripe keys during payment intent creation")
-                else:
-                    logging.error(f"No live keys available. Current key: {stripe.api_key[:10] if stripe.api_key else 'None'}")
-                    return jsonify({'error': 'Payment system not configured for live mode'}), 500
-            
-            # Final verification before creating payment intent
-            if not stripe.api_key.startswith('sk_live_'):
-                return jsonify({'error': 'Payment system still not in live mode'}), 500
-            
-            # Create fresh Stripe payment intent with verified live keys
-            logging.info(f"Creating live payment intent with key: {stripe.api_key[:20]}...")
-            payment_intent = stripe.PaymentIntent.create(
+            # Use fresh stripe instance with guaranteed live key
+            logging.info(f"NUCLEAR FIX: Creating payment intent with fresh live key: {live_secret_key[:20]}...")
+            payment_intent = stripe_fresh.PaymentIntent.create(
                 amount=500,  # $5.00 in cents
                 currency='usd',
                 metadata={
                     'type': 'organizer_pledge',
                     'event_id': event.id,
                     'organizer_id': organizer_id
-                }
+                },
+                api_key=live_secret_key  # Explicitly pass the live key
             )
             
             # Store payment intent ID
