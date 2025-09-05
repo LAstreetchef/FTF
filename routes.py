@@ -3291,8 +3291,10 @@ def organizer_pay_fee(event_id):
             event.organizer_fee_payment_intent = payment_intent.id
             db.session.commit()
             
+            # CRITICAL: Ensure frontend gets the correct live publishable key
             return jsonify({
-                'client_secret': payment_intent.client_secret
+                'client_secret': payment_intent.client_secret,
+                'publishable_key': live_publishable_key  # Force live key to frontend
             })
             
         except Exception as e:

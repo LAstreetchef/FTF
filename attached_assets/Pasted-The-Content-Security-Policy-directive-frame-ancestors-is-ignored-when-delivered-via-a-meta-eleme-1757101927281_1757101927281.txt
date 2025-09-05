@@ -1,0 +1,23 @@
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+v3/:1 [Stripe.js] It looks like Stripe.js was loaded more than one time. Please only load it once per page.
+3543 @ v3/:1
+25?auth_token=-zmNy410y6N6ErKMnDenuCuh3Dr_cI4LrfXZOCqKn74:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+ Coinbase Wallet no longer injects web3.
+get @ requestProvider.js:2
+js.stripe.com/v3/elements-inner-card-f1b7a66d849817f19a647facffc5bdfb.html#__shared_params__[version]=v3&__shared_params__[light_experiment_assignments]=%7B%22token%22%3A%22fe66ccff-72bb-4f3b-ab82-a95574b251f5%22%2C%22assignments%22%3A%7B%22optimize_ewcs_link_get_cookie%22%3A%22treatment%22%7D%7D&wait=false&mids[guid]=NA&mids[muid]=356dfbc8-9145-42c3-ab03-f8185cfa25dccba67a&mids[sid]=c4bd7ce9-f9e7-41dd-adbe-c752e5b0d3c39b084a&elementId=card-5aedac07-0cd7-4cfd-9c72-a2701091917e&style[base][fontSize]=16px&style[base][color]=%23424770&style[base][::placeholder][color]=%23aab7c4&rtl=false&componentName=card&keyMode=live&apiKey=pk_live_wJhaKra0GF97FTNcnBThn7Sg&frameMessagingStrategy=postMessage&referrer=https%3A%2F%2Ffoodtruckfundraiser.com%2Forganizer%2Fpay-fee%2F25%3Fauth_token%3D-zmNy410y6N6ErKMnDenuCuh3Dr_cI4LrfXZOCqKn74&controllerId=__privateStripeController8561:1 Blocked aria-hidden on an element because its descendant retained focus. The focus must not be hidden from assistive technology users. Avoid using aria-hidden on a focused element or its ancestor. Consider using the inert attribute instead, which will also prevent focus. For more details, see the aria-hidden section of the WAI-ARIA specification at https://w3c.github.io/aria/#aria-hidden.
+Element with focus: <input.InputElement is-complete Input>
+Ancestor with aria-hidden: <input.InputElement is-complete Input> <input class=​"InputElement is-complete Input" autocomplete=​"cc-csc" autocorrect=​"off" spellcheck=​"false" type=​"text" name=​"cvc" data-elements-stable-field-name=​"cardCvc" aria-required=​"true" inputmode=​"numeric" aria-label=​"Credit or debit card CVC/​CVV" placeholder=​"CVC" aria-invalid=​"false" tabindex=​"0" value=​"0201">​
+api.stripe.com/v1/payment_intents/pi_3S45anBgt3ltA59n1TgtZEEo/confirm:1  Failed to load resource: the server responded with a status of 404 ()
+api.stripe.com/v1/payment_intents/pi_3S45anBgt3ltA59n1TgtZEEo/confirm:1  Failed to load resource: the server responded with a status of 404 ()
+api.stripe.com/v1/payment_intents/pi_3S45anBgt3ltA59n1TgtZEEo/confirm:1  Failed to load resource: the server responded with a status of 404 ()
+api.stripe.com/v1/payment_intents/pi_3S45anBgt3ltA59n1TgtZEEo/confirm:1  Failed to load resource: the server responded with a status of 404 ()
+api.stripe.com/v1/payment_intents/pi_3S45anBgt3ltA59n1TgtZEEo/confirm:1  Failed to load resource: the server responded with a status of 404 ()
+api.stripe.com/v1/payment_intents/pi_3S45anBgt3ltA59n1TgtZEEo/confirm:1  Failed to load resource: the server responded with a status of 404 ()
+api.stripe.com/v1/payment_intents/pi_3S45anBgt3ltA59n1TgtZEEo/confirm:1  Failed to load resource: the server responded with a status of 404 ()

@@ -108,8 +108,9 @@
 
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-// Initialize Stripe
-const stripe = Stripe('{{ config.STRIPE_PUBLISHABLE_KEY }}');
+// Initialize Stripe with potential live key override
+let stripePublishableKey = '{{ config.STRIPE_PUBLISHABLE_KEY }}';
+const stripe = Stripe(stripePublishableKey);
 const elements = stripe.elements();
 
 // Create card element
@@ -158,10 +159,54 @@ form.addEventListener('submit', async (event) => {
             },
         });
         
-        const {client_secret, error} = await response.json();
+        const {client_secret, publishable_key, error} = await response.json();
         
         if (error) {
             throw new Error(error);
+        }
+        
+        // CRITICAL FIX: Use live publishable key from backend if provided
+        if (publishable_key && publishable_key !== stripePublishableKey) {
+            console.log('🔧 Switching to live publishable key from backend:', publishable_key.substring(0, 20) + '...');
+            stripePublishableKey = publishable_key;
+            // Reinitialize Stripe with correct live key
+            const liveStripe = Stripe(publishable_key);
+            
+            // Use the live Stripe instance for confirmation
+            const {error: stripeError, paymentIntent} = await liveStripe.confirmCardPayment(client_secret, {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: '{{ organizer.name }}',
+                        email: '{{ organizer.email }}'
+                    },
+                }
+            });
+            
+            if (stripeError) {
+                throw new Error(stripeError.message);
+            }
+            
+            if (paymentIntent.status === 'succeeded') {
+                // Confirm payment on server
+                const confirmResponse = await fetch('{{ url_for("confirm_organizer_fee_payment", event_id=event.id) }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                
+                const confirmResult = await confirmResponse.json();
+                
+                if (confirmResult.success) {
+                    // Success! Redirect to dashboard
+                    window.location.href = confirmResult.redirect;
+                } else {
+                    throw new Error(confirmResult.error || 'Payment confirmation failed');
+                }
+            }
+            
+            return; // Exit early since we handled everything above
         }
         
         // Confirm payment with Stripe
