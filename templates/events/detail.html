@@ -305,20 +305,43 @@ function shareEvent() {
 }
 
 function copyLink() {
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    
+    // Show loading state
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Copying...';
+    btn.disabled = true;
+    
     navigator.clipboard.writeText(window.location.href).then(function() {
-        // Show temporary success message
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i data-feather="check" class="me-2"></i>Copied!';
+        // Show success state with animation
+        btn.innerHTML = '<i data-feather="check-circle" class="me-2"></i>Link Copied!';
         btn.classList.remove('btn-outline-secondary');
         btn.classList.add('btn-success');
+        btn.disabled = false;
+        
+        // Add a subtle pulse animation
+        btn.style.animation = 'pulse 0.5s ease-in-out';
         
         setTimeout(function() {
             btn.innerHTML = originalText;
             btn.classList.remove('btn-success');
             btn.classList.add('btn-outline-secondary');
+            btn.style.animation = '';
             feather.replace();
-        }, 2000);
+        }, 3000);
+    }).catch(function() {
+        // Show error state if clipboard fails
+        btn.innerHTML = '<i data-feather="x-circle" class="me-2"></i>Copy Failed';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-danger');
+        btn.disabled = false;
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-danger');
+            btn.classList.add('btn-outline-secondary');
+            feather.replace();
+        }, 3000);
     });
 }
 
