@@ -1,0 +1,2039 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+load-script.ts:58  GET https://cdn.segment.com/next-integrations/actions/tiktok-pixel/920266289e7b08bf066b.js net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ load-script.ts:58
+i @ load-script.ts:32
+(anonymous) @ index.ts:247
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+Vt @ index.ts:227
+(anonymous) @ index.ts:281
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:274
+(anonymous) @ index.ts:274
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+Gt @ index.ts:268
+(anonymous) @ index.ts:171
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+ne @ index.ts:116
+(anonymous) @ index.ts:304
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+re @ index.ts:239
+(anonymous) @ index.ts:338
+Promise.then
+(anonymous) @ index.ts:339
+t @ index.ts:307
+n @ index.ts:337
+(anonymous) @ index.ts:389
+(anonymous) @ index.ts:393
+(anonymous) @ standalone-analytics.ts:53
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+se @ standalone-analytics.ts:49
+(anonymous) @ standalone.ts:69
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+de @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+index.ts:256 Failed to create PluginFactory {name: 'TikTok Pixel', creationName: 'TikTok Pixel', libraryName: 'tiktok-pixelDestination', url: 'https://cdn.segment.com/next-integrations/actions/tiktok-pixel/920266289e7b08bf066b.js', settings: {…}}
+(anonymous) @ index.ts:256
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+u @ tslib.es6.js:74
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+Vt @ index.ts:227
+(anonymous) @ index.ts:281
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:274
+(anonymous) @ index.ts:274
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+Gt @ index.ts:268
+(anonymous) @ index.ts:171
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+ne @ index.ts:116
+(anonymous) @ index.ts:304
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+re @ index.ts:239
+(anonymous) @ index.ts:338
+Promise.then
+(anonymous) @ index.ts:339
+t @ index.ts:307
+n @ index.ts:337
+(anonymous) @ index.ts:389
+(anonymous) @ index.ts:393
+(anonymous) @ standalone-analytics.ts:53
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+se @ standalone-analytics.ts:49
+(anonymous) @ standalone.ts:69
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+de @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+index.ts:311 Failed to load Remote Plugin Error: Failed to load https://cdn.segment.com/next-integrations/actions/tiktok-pixel/920266289e7b08bf066b.js
+    at HTMLScriptElement.<anonymous> (load-script.ts:53:24)
+(anonymous) @ index.ts:311
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+u @ tslib.es6.js:74
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+(anonymous) @ index.ts:274
+(anonymous) @ index.ts:274
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+Gt @ index.ts:268
+(anonymous) @ index.ts:171
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+ne @ index.ts:116
+(anonymous) @ index.ts:304
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+re @ index.ts:239
+(anonymous) @ index.ts:338
+Promise.then
+(anonymous) @ index.ts:339
+t @ index.ts:307
+n @ index.ts:337
+(anonymous) @ index.ts:389
+(anonymous) @ index.ts:393
+(anonymous) @ standalone-analytics.ts:53
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+se @ standalone-analytics.ts:49
+(anonymous) @ standalone.ts:69
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+de @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+(anonymous) @ sdk.min.js:1
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+FoodTruckFundraiser:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+FoodTruckFundraiser:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+FoodTruckFundraiser:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+_app-bb123b5614defcb2.js:40  POST https://o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:38
+add @ _app-bb123b5614defcb2.js:38
+i @ _app-bb123b5614defcb2.js:38
+_sendEnvelope @ _app-bb123b5614defcb2.js:38
+sendSession @ _app-bb123b5614defcb2.js:36
+captureSession @ _app-bb123b5614defcb2.js:36
+E @ _app-bb123b5614defcb2.js:40
+_ @ _app-bb123b5614defcb2.js:40
+dsn @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ main-743873da7bf0d5f2.js:1
+b @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+Promise.then
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+Promise.then
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+Promise.then
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+eb @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+Promise.then
+66756 @ main-743873da7bf0d5f2.js:1
+c @ webpack-b7b0cfb7302b5d0a.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+c.O @ webpack-b7b0cfb7302b5d0a.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+a @ webpack-b7b0cfb7302b5d0a.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+_app-bb123b5614defcb2.js:38 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-bb123b5614defcb2.js:38 [LaunchDarkly] LaunchDarkly client initialized
+framework-55e0cf1dcc3bddb5.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'battery'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'ambient-light-sensor'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'battery'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-not-rendered'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'execution-while-out-of-viewport'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'layout-animations'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'legacy-image-formats'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'navigation-override'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'oversized-images'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'publickey-credentials'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'speaker-selection'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unoptimized-images'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Unrecognized feature: 'unsized-media'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowfullscreen'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+Allow attribute will take precedence over 'allowpaymentrequest'.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+The Content Security Policy directive 'frame-ancestors' is ignored when delivered via a <meta> element.
+eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the stylesheet '<URL>' because it violates the following Content Security Policy directive: "style-src 'self' 'unsafe-inline' <URL> <URL>". Note that 'style-src-elem' was not explicitly set, so 'style-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+a.flush @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+a.start @ _app-bb123b5614defcb2.js:40
+start @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+Promise.catch
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+a.flush @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+a.start @ _app-bb123b5614defcb2.js:40
+start @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+FoodTruckFundraiser:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/events/19:623  GET https://82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev/events/19 502 (Bad Gateway)
+(anonymous) @ VM120 19:46
+setTimeout
+(anonymous) @ VM120 19:45
+framework-55e0cf1dcc3bddb5.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+Console.js:61 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+VM241 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+VM271 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+VM303 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+25:596 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:596:27
+(anonymous) @ 25:596
+Promise.then
+shareToInstagram @ 25:595
+onclick @ 25:475
+25:596 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:596:27
+(anonymous) @ 25:596
+Promise.then
+shareToInstagram @ 25:595
+onclick @ 25:475
+_app-bb123b5614defcb2.js:40  POST https://logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Abeacon%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A15fbf51b&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=8fa6da22-ec03-4b6c-b32f-00698576deba net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+sendOnExit @ _app-bb123b5614defcb2.js:40
+e.flush @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+f @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+r.capture @ _app-bb123b5614defcb2.js:1
+d @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+_app-bb123b5614defcb2.js:40  POST https://o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:38
+add @ _app-bb123b5614defcb2.js:38
+i @ _app-bb123b5614defcb2.js:38
+_sendEnvelope @ _app-bb123b5614defcb2.js:38
+_flushOutcomes @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+_app-bb123b5614defcb2.js:40  POST https://logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Abeacon%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A15fbf51b&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=64db044a-3cfe-4d52-955f-7c02a7a62a19 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+sendOnExit @ _app-bb123b5614defcb2.js:40
+e.flush @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+f @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+r.capture @ _app-bb123b5614defcb2.js:1
+d @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+_app-bb123b5614defcb2.js:40  POST https://o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:38
+add @ _app-bb123b5614defcb2.js:38
+i @ _app-bb123b5614defcb2.js:38
+_sendEnvelope @ _app-bb123b5614defcb2.js:38
+_flushOutcomes @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+25:596 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:596:27
+(anonymous) @ 25:596
+Promise.then
+shareToInstagram @ 25:595
+onclick @ 25:475
+25:596 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:596:27
+(anonymous) @ 25:596
+Promise.then
+shareToInstagram @ 25:595
+onclick @ 25:475
+25:596 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:596:27
+(anonymous) @ 25:596
+Promise.then
+shareToInstagram @ 25:595
+onclick @ 25:475
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+a.flush @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+Promise.catch
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+a.flush @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+VM334 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+VM364 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'font-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Console.js:61 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'self' <URL>".
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to load the script '<URL>' because it violates the following Content Security Policy directive: "script-src 'self' 'unsafe-inline' 'unsafe-eval' <URL> <URL> <URL>". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+Refused to frame '<URL>' because it violates the following Content Security Policy directive: "default-src 'self'". Note that 'frame-src' was not explicitly set, so 'default-src' is used as a fallback.
+
+VM467 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
+_app-bb123b5614defcb2.js:40  POST https://logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Abeacon%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A15fbf51b&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=793234e4-7d10-441b-a636-eb97e43f1fe8 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+sendOnExit @ _app-bb123b5614defcb2.js:40
+e.flush @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+f @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+r.capture @ _app-bb123b5614defcb2.js:1
+d @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+_app-bb123b5614defcb2.js:40  POST https://o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:38
+add @ _app-bb123b5614defcb2.js:38
+i @ _app-bb123b5614defcb2.js:38
+_sendEnvelope @ _app-bb123b5614defcb2.js:38
+_flushOutcomes @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
+VM518 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+Console.js:61 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/diagnostic/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+m @ _app-bb123b5614defcb2.js:40
+b @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/diagnostic/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+Promise.catch
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+m @ _app-bb123b5614defcb2.js:40
+b @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+a.flush @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+promise @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+r.httpRequest @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+Promise.catch
+t @ _app-bb123b5614defcb2.js:40
+a.sendChunk @ _app-bb123b5614defcb2.js:40
+a.sendEvents @ _app-bb123b5614defcb2.js:40
+a.flush @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
+VM642 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+VM692 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+VM692 eruda.js:2 [Stripe.js] It looks like Stripe.js was loaded more than one time. Please only load it once per page.
+Mt.forEach.n.<computed> @ VM692 eruda.js:2
+3543 @ VM716:1
+e @ VM716:1
+(anonymous) @ VM716:1
+(anonymous) @ VM716:1
+VM692 eruda.js:2 🔧 Pledge form initialized with Stripe key: pk_live_wJhaKra0GF97...
+VM747 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+VM798 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
+_app-bb123b5614defcb2.js:40  POST https://logs.browser-intake-us5-datadoghq.com/api/v2/logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Abeacon%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3A15fbf51b&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=318e0fdf-0568-4aeb-bac5-62a9877f966b net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+sendOnExit @ _app-bb123b5614defcb2.js:40
+e.flush @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+f @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+e.notify @ _app-bb123b5614defcb2.js:1
+r.capture @ _app-bb123b5614defcb2.js:1
+d @ _app-bb123b5614defcb2.js:1
+(anonymous) @ _app-bb123b5614defcb2.js:1
+_app-bb123b5614defcb2.js:40  POST https://o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:38
+add @ _app-bb123b5614defcb2.js:38
+i @ _app-bb123b5614defcb2.js:38
+_sendEnvelope @ _app-bb123b5614defcb2.js:38
+_flushOutcomes @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+VM848 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+Console.js:61 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+Console.js:61 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
+25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')
+    at 25:595:27
+(anonymous) @ 25:595
+Promise.then
+shareToInstagram @ 25:594
+onclick @ 25:474
