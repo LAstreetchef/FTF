@@ -300,7 +300,21 @@ function shareEvent() {
             url: window.location.href
         });
     } else {
-        copyLink();
+        // Show message that sharing isn't supported
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="info" class="me-2"></i>Sharing not supported';
+        btn.classList.add('btn-outline-warning');
+        btn.classList.remove('btn-outline-primary');
+        btn.disabled = true;
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-outline-warning');
+            btn.classList.add('btn-outline-primary');
+            btn.disabled = false;
+            feather.replace();
+        }, 2000);
     }
 }
 
