@@ -21,7 +21,7 @@
     <li class="nav-item" role="presentation">
         <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-events" type="button" role="tab">
             <i data-feather="calendar" class="me-2"></i>
-            All Events ({{ all_events|length }})
+            All Events{% if pagination %} ({{ pagination.total }}){% else %} ({{ all_events|length }}){% endif %}
         </button>
     </li>
     <li class="nav-item" role="presentation">

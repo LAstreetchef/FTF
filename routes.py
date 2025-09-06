@@ -3832,27 +3832,36 @@ def pledge_transfer_consent(token):
 # Public Routes
 @app.route('/events')
 def events_list():
-    """Public page listing all events by status"""
+    """Public page listing all events by status with performance optimization"""
+    # Add pagination to prevent timeout issues
+    page = request.args.get('page', 1, type=int)
+    per_page = 12  # Show 12 events per page for better mobile experience
+    
     # Get events by different status categories - ONLY show events where organizer paid the $5 fee
+    # Limit initial queries to prevent timeouts
     active_events = Event.query.filter(
         Event.status.in_(['pending', 'funded']),
         Event.organizer_fee_charged == True
-    ).order_by(Event.created_at.desc()).all()
+    ).order_by(Event.created_at.desc()).limit(20).all()  # Show only recent 20 active events
     
     completed_events = Event.query.filter(
         Event.status == 'approved',
         Event.organizer_fee_charged == True
-    ).order_by(Event.created_at.desc()).all()
+    ).order_by(Event.created_at.desc()).limit(20).all()  # Show only recent 20 completed events
     
-    # All events - also filtered by fee payment
-    all_events = Event.query.filter(
+    # All events with pagination
+    all_events_pagination = Event.query.filter(
         Event.organizer_fee_charged == True
-    ).order_by(Event.created_at.desc()).all()
+    ).order_by(Event.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    all_events = all_events_pagination.items
     
     return render_template('events/list.html', 
                          active_events=active_events, 
                          completed_events=completed_events,
-                         all_events=all_events)
+                         all_events=all_events,
+                         pagination=all_events_pagination)
 
 @app.route('/events/<int:event_id>')
 def event_detail(event_id):
