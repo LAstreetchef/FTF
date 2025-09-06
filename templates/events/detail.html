@@ -251,11 +251,24 @@
                 <h5 class="card-title">Share This Event</h5>
                 <p class="small text-muted">Help spread the word about this event!</p>
                 
+                <div class="d-flex gap-2 mb-3">
+                    <a href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ ('Support this food truck event: ' + event.name + ' in ' + event.location)|urlencode }}" 
+                       target="_blank" class="btn btn-outline-primary flex-fill">
+                        <i data-feather="twitter" class="me-1"></i>
+                        X
+                    </a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" 
+                       target="_blank" class="btn btn-outline-primary flex-fill">
+                        <i data-feather="facebook" class="me-1"></i>
+                        Facebook
+                    </a>
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url|urlencode }}" 
+                       target="_blank" class="btn btn-outline-primary flex-fill">
+                        <i data-feather="linkedin" class="me-1"></i>
+                        LinkedIn
+                    </a>
+                </div>
                 <div class="d-grid gap-2">
-                    <button class="btn btn-outline-primary" onclick="shareEvent()">
-                        <i data-feather="share-2" class="me-2"></i>
-                        Share Event
-                    </button>
                     <button class="btn btn-outline-secondary" onclick="copyLink()">
                         <i data-feather="link" class="me-2"></i>
                         Copy Link
@@ -292,31 +305,6 @@
 
 {% block scripts %}
 <script>
-function shareEvent() {
-    if (navigator.share) {
-        navigator.share({
-            title: '{{ event.name }}',
-            text: 'Support this food truck event: {{ event.name }}',
-            url: window.location.href
-        });
-    } else {
-        // Show message that sharing isn't supported
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i data-feather="info" class="me-2"></i>Sharing not supported';
-        btn.classList.add('btn-outline-warning');
-        btn.classList.remove('btn-outline-primary');
-        btn.disabled = true;
-        
-        setTimeout(function() {
-            btn.innerHTML = originalText;
-            btn.classList.remove('btn-outline-warning');
-            btn.classList.add('btn-outline-primary');
-            btn.disabled = false;
-            feather.replace();
-        }, 2000);
-    }
-}
 
 function copyLink() {
     const btn = event.target.closest('button');
