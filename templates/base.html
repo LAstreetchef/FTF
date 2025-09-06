@@ -22,7 +22,7 @@
     {% block head %}{% endblock %}
     
     <!-- Iframe compatibility -->
-    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com https://*.squarespace.com https://*.sqsp.com *.squarespace-cdn.com https://static1.squarespace.com">
+    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com https://*.squarespace.com https://*.sqsp.com *.squarespace-cdn.com https://static1.squarespace.com; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com">
     
     <!-- Check if running in iframe and adjust accordingly -->
     <script>

@@ -107,7 +107,7 @@ mail.init_app(app)
 def after_request(response):
     # Allow embedding in iframes from your custom domain
     response.headers['X-Frame-Options'] = 'ALLOWALL'
-    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com"
+    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net https://unpkg.com; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com"
     
     # Configure ALL cookies for iframe/cross-origin use
     if 'Set-Cookie' in response.headers:
