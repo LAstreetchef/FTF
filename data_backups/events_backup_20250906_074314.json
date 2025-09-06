@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-05T20:56:52.375827",
+  "timestamp": "2025-09-06T07:43:14.679911",
   "backup_type": "automatic",
   "event_count": 24,
   "events": [
@@ -304,26 +304,6 @@
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     },
     {
-      "id": 25,
-      "name": "Sony Gate 2",
-      "description": "Come support Motor Park Athletics",
-      "date": "2025-10-31T22:45:00",
-      "location": "Motor Park ",
-      "organizer_id": 1,
-      "food_truck_id": 12,
-      "selected_menu_items": "[{\"name\": \"Classic Wrapped Hot Dog\", \"price\": 6.0, \"description\": \"All-beef hot dog wrapped in bacon\", \"original_price\": 6.0, \"marked_up_price\": 7.199999999999999}, {\"name\": \"Chili Cheese Dog\", \"price\": 7.5, \"description\": \"Hot dog with chili and cheese\", \"original_price\": 7.5, \"marked_up_price\": 9.0}, {\"name\": \"LA Street Dog\", \"price\": 8.0, \"description\": \"Bacon-wrapped with peppers, onions, and mayo\", \"original_price\": 8.0, \"marked_up_price\": 9.6}, {\"name\": \"Veggie Dog\", \"price\": 6.5, \"description\": \"Plant-based hot dog with toppings\", \"original_price\": 6.5, \"marked_up_price\": 7.8}, {\"name\": \"Polish Sausage\", \"price\": 7.0, \"description\": \"Grilled Polish sausage with mustard\", \"original_price\": 7.0, \"marked_up_price\": 8.4}]",
-      "markup_percentage": 20.0,
-      "pledge_goal": 1000.0,
-      "status": "pending",
-      "current_pledges": 5.0,
-      "approved_at": null,
-      "created_at": "2025-09-05T19:40:37.951083",
-      "organizer_fee_charged": true,
-      "organizer_fee_payment_intent": "pi_3S45pjBgt3ltA59n0XMNjbuI",
-      "organizer_entree_claimed": false,
-      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
-    },
-    {
       "id": 16,
       "name": "Donut Street ",
       "description": "donut + coffee anytime",
@@ -480,6 +460,26 @@
       "created_at": "2025-09-05T16:54:23.777990",
       "organizer_fee_charged": false,
       "organizer_fee_payment_intent": "pi_3S434RBgt3ltA59n0bY7v5qG",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
+    },
+    {
+      "id": 25,
+      "name": "Sony Gate 2",
+      "description": "Come support Motor Park Athletics",
+      "date": "2025-10-31T22:45:00",
+      "location": "Motor Park ",
+      "organizer_id": 1,
+      "food_truck_id": 12,
+      "selected_menu_items": "[{\"name\": \"Classic Wrapped Hot Dog\", \"price\": 6.0, \"description\": \"All-beef hot dog wrapped in bacon\", \"original_price\": 6.0, \"marked_up_price\": 7.199999999999999}, {\"name\": \"Chili Cheese Dog\", \"price\": 7.5, \"description\": \"Hot dog with chili and cheese\", \"original_price\": 7.5, \"marked_up_price\": 9.0}, {\"name\": \"LA Street Dog\", \"price\": 8.0, \"description\": \"Bacon-wrapped with peppers, onions, and mayo\", \"original_price\": 8.0, \"marked_up_price\": 9.6}, {\"name\": \"Veggie Dog\", \"price\": 6.5, \"description\": \"Plant-based hot dog with toppings\", \"original_price\": 6.5, \"marked_up_price\": 7.8}, {\"name\": \"Polish Sausage\", \"price\": 7.0, \"description\": \"Grilled Polish sausage with mustard\", \"original_price\": 7.0, \"marked_up_price\": 8.4}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 14.0,
+      "approved_at": null,
+      "created_at": "2025-09-05T19:40:37.951083",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S45pjBgt3ltA59n0XMNjbuI",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
