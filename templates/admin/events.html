@@ -143,6 +143,47 @@
             </div>
         </div>
     </div>
+    
+    <!-- Pagination -->
+    {% if pagination and pagination.pages > 1 %}
+    <nav aria-label="Events pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin_events', page=pagination.prev_num) }}">Previous</a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in pagination.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != pagination.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('admin_events', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% endif %}
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if pagination.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('admin_events', page=pagination.next_num) }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+        
+        <div class="text-center text-muted">
+            <small>Showing {{ pagination.per_page * (pagination.page - 1) + 1 }} to {{ pagination.per_page * pagination.page if pagination.page < pagination.pages else pagination.total }} of {{ pagination.total }} events</small>
+        </div>
+    </nav>
+    {% endif %}
 </div>
 
 {% else %}

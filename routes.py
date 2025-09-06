@@ -2107,11 +2107,23 @@ def admin_events():
             logging.warning("Admin events access denied - no admin_id in session")
             return redirect(url_for('admin_login'))
         
-        logging.info(f"Admin {session.get('admin_id')} accessing events management")
-        events = Event.query.order_by(Event.created_at.desc()).all()
-        logging.info(f"Found {len(events)} events to display")
+        # Add pagination to prevent timeout issues
+        page = request.args.get('page', 1, type=int)
+        per_page = 20  # Show 20 events per page
         
-        return render_template('admin/events.html', events=events)
+        logging.info(f"Admin {session.get('admin_id')} accessing events management - Page {page}")
+        
+        # Use pagination instead of loading all events
+        events_pagination = Event.query.order_by(Event.created_at.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        events = events_pagination.items
+        
+        logging.info(f"Found {len(events)} events on page {page} (total: {events_pagination.total})")
+        
+        return render_template('admin/events.html', 
+                             events=events, 
+                             pagination=events_pagination)
     except Exception as e:
         logging.error(f"Admin events error: {str(e)}", exc_info=True)
         flash('Error loading events. Please try again.', 'error')
@@ -4306,18 +4318,28 @@ def admin_support_dashboard():
         escalated_conversations = SupportConversation.query.filter_by(status='escalated').count()
         resolved_conversations = SupportConversation.query.filter_by(status='resolved').count()
         
-        # Get recent conversations
-        recent_conversations = SupportConversation.query.order_by(SupportConversation.last_activity.desc()).limit(20).all()
+        # Get recent conversations with optimized message count query (prevent N+1)
+        from sqlalchemy.orm import joinedload
+        from sqlalchemy import func
         
-        # Pre-calculate message counts to avoid relationship errors
-        for conversation in recent_conversations:
-            try:
-                conversation._message_count = db.session.query(db.func.count(SupportMessage.id)).filter(
-                    SupportMessage.conversation_id == conversation.id
-                ).scalar() or 0
-            except Exception as msg_error:
-                logging.error(f"Error counting messages for conversation {conversation.id}: {msg_error}")
-                conversation._message_count = 0
+        # Use a subquery to get message counts efficiently
+        message_counts = db.session.query(
+            SupportMessage.conversation_id,
+            func.count(SupportMessage.id).label('message_count')
+        ).group_by(SupportMessage.conversation_id).subquery()
+        
+        # Join conversations with message counts in a single query
+        recent_conversations_with_counts = db.session.query(
+            SupportConversation, 
+            func.coalesce(message_counts.c.message_count, 0).label('message_count')
+        ).outerjoin(
+            message_counts, SupportConversation.id == message_counts.c.conversation_id
+        ).order_by(SupportConversation.last_activity.desc()).limit(20).all()
+        
+        recent_conversations = []
+        for conversation, message_count in recent_conversations_with_counts:
+            conversation._message_count = message_count
+            recent_conversations.append(conversation)
         
         # Get unassigned escalated conversations
         unassigned_escalated = SupportConversation.query.filter_by(
