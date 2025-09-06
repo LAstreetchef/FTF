@@ -1,0 +1,268 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+_app-bb123b5614defcb2.js:40  POST https://o1151714.ingest.sentry.io/api/6318792/envelope/?sentry_key=8aa91189a4274b5a8c9b7b01d46ea360&sentry_version=7&sentry_client=sentry.javascript.browser%2F7.112.0 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:38
+add @ _app-bb123b5614defcb2.js:38
+i @ _app-bb123b5614defcb2.js:38
+_sendEnvelope @ _app-bb123b5614defcb2.js:38
+sendSession @ _app-bb123b5614defcb2.js:36
+captureSession @ _app-bb123b5614defcb2.js:36
+E @ _app-bb123b5614defcb2.js:40
+_ @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ main-743873da7bf0d5f2.js:1
+b @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+Promise.then
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+Promise.then
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+Promise.then
+n @ main-743873da7bf0d5f2.js:1
+u @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+eb @ main-743873da7bf0d5f2.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+Promise.then
+66756 @ main-743873da7bf0d5f2.js:1
+c @ webpack-b7b0cfb7302b5d0a.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+(anonymous) @ webpack-b7b0cfb7302b5d0a.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+a @ webpack-b7b0cfb7302b5d0a.js:1
+(anonymous) @ main-743873da7bf0d5f2.js:1
+_app-bb123b5614defcb2.js:38 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+FoodTruckFundraiser:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+FoodTruckFundraiser:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+FoodTruckFundraiser:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+_app-bb123b5614defcb2.js:38 [LaunchDarkly] LaunchDarkly client initialized
+framework-55e0cf1dcc3bddb5.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'battery'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+framework-55e0cf1dcc3bddb5.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-55e0cf1dcc3bddb5.js:1
+(anonymous) @ framework-55e0cf1dcc3bddb5.js:1
+uD @ framework-55e0cf1dcc3bddb5.js:1
+uI @ framework-55e0cf1dcc3bddb5.js:1
+uM @ framework-55e0cf1dcc3bddb5.js:1
+uS @ framework-55e0cf1dcc3bddb5.js:1
+C @ framework-55e0cf1dcc3bddb5.js:1
+z @ framework-55e0cf1dcc3bddb5.js:1
+FoodTruckFundraiser:148  GET https://sp.replit.com/sdk.js/v1/dMePKGC4BqfBivpe0Hvl8IoPpzSHgjdX/sdk.min.js net::ERR_TIMED_OUT
+analytics.load @ FoodTruckFundraiser:148
+(anonymous) @ FoodTruckFundraiser:149
+(anonymous) @ FoodTruckFundraiser:150
+FoodTruckFundraiser:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:40
+start @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+_app-bb123b5614defcb2.js:38  POST https://events.launchdarkly.com/events/bulk/62b35a865152ab14c5942820 net::ERR_BLOCKED_BY_CLIENT
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+t @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+Promise.catch
+t @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+(anonymous) @ _app-bb123b5614defcb2.js:40
+e @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
+setTimeout
+(anonymous) @ _app-bb123b5614defcb2.js:38
+(anonymous) @ _app-bb123b5614defcb2.js:40
+start @ _app-bb123b5614defcb2.js:40
+n @ _app-bb123b5614defcb2.js:38
