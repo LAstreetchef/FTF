@@ -274,10 +274,11 @@
                         </a>
                     </div>
                     <div class="col-3">
-                        <button class="btn btn-outline-primary w-100" onclick="shareToInstagram()">
+                        <a href="https://www.instagram.com/create/story/?url={{ request.url|urlencode }}" 
+                           target="_blank" class="btn btn-outline-primary w-100">
                             <i data-feather="instagram" class="me-1"></i>
                             Instagram
-                        </button>
+                        </a>
                     </div>
                 </div>
                 <div class="d-grid gap-2">
@@ -318,40 +319,6 @@
 {% block scripts %}
 <script>
 
-function shareToInstagram() {
-    // Instagram doesn't have a direct web share API, so we copy the link and show instructions
-    const url = window.location.href;
-    const btn = event.target.closest('button');
-    const originalText = btn.innerHTML;
-    
-    navigator.clipboard.writeText(url).then(function() {
-        btn.innerHTML = '<i data-feather="check" class="me-1"></i>Link Copied!';
-        btn.classList.add('btn-success');
-        btn.classList.remove('btn-outline-primary');
-        
-        // Show instructions
-        alert('Link copied! Open Instagram and paste the link in your story or post.');
-        
-        setTimeout(function() {
-            btn.innerHTML = originalText;
-            btn.classList.remove('btn-success');
-            btn.classList.add('btn-outline-primary');
-            feather.replace();
-        }, 3000);
-    }).catch(function() {
-        // Show error state if clipboard fails
-        btn.innerHTML = '<i data-feather="x-circle" class="me-1"></i>Copy Failed';
-        btn.classList.remove('btn-outline-primary');
-        btn.classList.add('btn-danger');
-        
-        setTimeout(function() {
-            btn.innerHTML = originalText;
-            btn.classList.remove('btn-danger');
-            btn.classList.add('btn-outline-primary');
-            feather.replace();
-        }, 2000);
-    });
-}
 
 function copyLink() {
     const btn = event.target.closest('button');
