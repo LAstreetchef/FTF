@@ -321,9 +321,10 @@
 function shareToInstagram() {
     // Instagram doesn't have a direct web share API, so we copy the link and show instructions
     const url = window.location.href;
+    const btn = event.target.closest('button');
+    const originalText = btn.innerHTML;
+    
     navigator.clipboard.writeText(url).then(function() {
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
         btn.innerHTML = '<i data-feather="check" class="me-1"></i>Link Copied!';
         btn.classList.add('btn-success');
         btn.classList.remove('btn-outline-primary');
@@ -337,6 +338,18 @@ function shareToInstagram() {
             btn.classList.add('btn-outline-primary');
             feather.replace();
         }, 3000);
+    }).catch(function() {
+        // Show error state if clipboard fails
+        btn.innerHTML = '<i data-feather="x-circle" class="me-1"></i>Copy Failed';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-danger');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-danger');
+            btn.classList.add('btn-outline-primary');
+            feather.replace();
+        }, 2000);
     });
 }
 
