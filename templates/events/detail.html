@@ -251,22 +251,34 @@
                 <h5 class="card-title">Share This Event</h5>
                 <p class="small text-muted">Help spread the word about this event!</p>
                 
-                <div class="d-flex gap-2 mb-3">
-                    <a href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ ('Support this food truck event: ' + event.name + ' in ' + event.location)|urlencode }}" 
-                       target="_blank" class="btn btn-outline-primary flex-fill">
-                        <i data-feather="twitter" class="me-1"></i>
-                        X
-                    </a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" 
-                       target="_blank" class="btn btn-outline-primary flex-fill">
-                        <i data-feather="facebook" class="me-1"></i>
-                        Facebook
-                    </a>
-                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url|urlencode }}" 
-                       target="_blank" class="btn btn-outline-primary flex-fill">
-                        <i data-feather="linkedin" class="me-1"></i>
-                        LinkedIn
-                    </a>
+                <div class="row g-2 mb-3">
+                    <div class="col-3">
+                        <a href="https://twitter.com/intent/tweet?url={{ request.url|urlencode }}&text={{ ('Support this food truck event: ' + event.name + ' in ' + event.location)|urlencode }}" 
+                           target="_blank" class="btn btn-outline-primary w-100">
+                            <i data-feather="twitter" class="me-1"></i>
+                            X
+                        </a>
+                    </div>
+                    <div class="col-3">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url|urlencode }}" 
+                           target="_blank" class="btn btn-outline-primary w-100">
+                            <i data-feather="facebook" class="me-1"></i>
+                            Facebook
+                        </a>
+                    </div>
+                    <div class="col-3">
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.url|urlencode }}" 
+                           target="_blank" class="btn btn-outline-primary w-100">
+                            <i data-feather="linkedin" class="me-1"></i>
+                            LinkedIn
+                        </a>
+                    </div>
+                    <div class="col-3">
+                        <button class="btn btn-outline-primary w-100" onclick="shareToInstagram()">
+                            <i data-feather="instagram" class="me-1"></i>
+                            Instagram
+                        </button>
+                    </div>
                 </div>
                 <div class="d-grid gap-2">
                     <button class="btn btn-outline-secondary" onclick="copyLink()">
@@ -305,6 +317,28 @@
 
 {% block scripts %}
 <script>
+
+function shareToInstagram() {
+    // Instagram doesn't have a direct web share API, so we copy the link and show instructions
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(function() {
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="check" class="me-1"></i>Link Copied!';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-primary');
+        
+        // Show instructions
+        alert('Link copied! Open Instagram and paste the link in your story or post.');
+        
+        setTimeout(function() {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+            feather.replace();
+        }, 3000);
+    });
+}
 
 function copyLink() {
     const btn = event.target.closest('button');
