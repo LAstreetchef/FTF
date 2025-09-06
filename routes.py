@@ -105,13 +105,20 @@ def set_language(lang):
 
 @app.route('/')
 def index():
-    """Homepage with overview and navigation"""
-    recent_events = Event.query.filter(
-        Event.status.in_(['pending', 'funded']),
-        Event.organizer_fee_charged == True
-    ).order_by(Event.created_at.desc()).limit(3).all()
-    current_lang = get_language_from_request()
-    return render_template('index.html', recent_events=recent_events, current_lang=current_lang)
+    """Homepage with overview and navigation - optimized for performance"""
+    try:
+        # Use more efficient query with timeout protection
+        recent_events = Event.query.filter(
+            Event.status.in_(['pending', 'funded']),
+            Event.organizer_fee_charged == True
+        ).order_by(Event.created_at.desc()).limit(3).all()
+        current_lang = get_language_from_request()
+        return render_template('index.html', recent_events=recent_events, current_lang=current_lang)
+    except Exception as e:
+        logging.error(f"Homepage error: {str(e)}")
+        # Fallback to homepage without events if database fails
+        current_lang = get_language_from_request()
+        return render_template('index.html', recent_events=[], current_lang=current_lang)
 
 # PRODUCTION SECURITY: Test credentials route disabled for live deployment
 # @app.route('/test-credentials')

@@ -48,6 +48,12 @@ logging.info(f"Database configured (PRODUCTION): ep-royal-morning-adkc9dgx.c-2.u
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
+    "pool_timeout": 10,  # Add connection timeout
+    "connect_args": {
+        "connect_timeout": 10,  # PostgreSQL connection timeout
+        "application_name": "food_truck_app",
+        "options": "-c statement_timeout=30000"  # 30 second statement timeout (proper format)
+    }
 }
 
 # Configure Flask-Mail for Network Solutions (2024 updated settings)
