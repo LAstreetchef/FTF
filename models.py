@@ -322,6 +322,15 @@ class Event(db.Model):
         # Organizer receives 100% of markup profit and handles their own distributions
         return round(total_profit, 2)
     
+    def calculate_organizer_net_payout_if_goal_met(self):
+        """Calculate the net amount organizer will receive after 4.5% processing fee"""
+        gross_profit = self.calculate_organizer_profit_if_goal_met()
+        if gross_profit <= 0:
+            return 0.0
+        processing_fee = round(gross_profit * 0.045, 2)  # 4.5% processing fee
+        net_payout = round(gross_profit - processing_fee, 2)
+        return net_payout
+    
     def calculate_markup_splits_if_goal_met(self):
         """Calculate markup split amounts for all parties if goal is met"""
         if self.pledge_goal <= 0 or self.markup_percentage <= 0:

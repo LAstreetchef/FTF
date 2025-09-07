@@ -164,11 +164,15 @@
                     {% set event = item.event %}
                     {% set has_payout = item.payout %}
                     {% set profit = event.calculate_organizer_profit_if_goal_met() %}
+                    {% set net_payout = event.calculate_organizer_net_payout_if_goal_met() %}
                     <tr>
                         <td>{{ event.name }}</td>
                         <td>{{ event.date.strftime('%m/%d/%Y') if event.date else 'TBD' }}</td>
                         <td>${{ "%.2f"|format(event.current_pledges) }}</td>
-                        <td>${{ "%.2f"|format(profit) }}</td>
+                        <td>
+                            <div style="font-weight: bold;">${{ "%.2f"|format(net_payout) }}</div>
+                            <small class="text-muted">(${{ "%.2f"|format(profit) }} gross - 4.5% fee)</small>
+                        </td>
                         <td>
                             {% if has_payout %}
                                 <span class="badge badge-{{ 'success' if has_payout.status == 'completed' else 'warning' }}">
@@ -180,7 +184,7 @@
                         </td>
                         <td>
                             {% if not has_payout and profit > 0 %}
-                                <button class="btn payout-btn btn-sm" onclick="requestPayout({{ event.id }}, {{ profit }})">
+                                <button class="btn payout-btn btn-sm" onclick="requestPayout({{ event.id }}, {{ net_payout }})">
                                     Request Payout
                                 </button>
                             {% elif has_payout.status == 'pending' %}
@@ -212,7 +216,7 @@
                     <tr>
                         <th>Date Requested</th>
                         <th>Event</th>
-                        <th>Amount</th>
+                        <th>Net Amount</th>
                         <th>Status</th>
                         <th>Completed</th>
                     </tr>
@@ -222,7 +226,12 @@
                     <tr>
                         <td>{{ payout.created_at.strftime('%m/%d/%Y') }}</td>
                         <td>{{ payout.event.name }}</td>
-                        <td>${{ "%.2f"|format(payout.amount) }}</td>
+                        <td>
+                            <div style="font-weight: bold;">${{ "%.2f"|format(payout.amount) }}</div>
+                            {% if payout.gross_amount and payout.processing_fee %}
+                            <small class="text-muted">(${{ "%.2f"|format(payout.gross_amount) }} gross - ${{ "%.2f"|format(payout.processing_fee) }} fee)</small>
+                            {% endif %}
+                        </td>
                         <td>
                             <span class="badge badge-{{ 'success' if payout.status == 'completed' else 'warning' }}">
                                 {{ payout.status.title() }}
