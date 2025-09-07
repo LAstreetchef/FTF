@@ -139,7 +139,15 @@
                             <strong>{{ payout.event.name }}</strong><br>
                             <small class="text-muted">{{ payout.event.date.strftime('%m/%d/%Y') if payout.event.date else 'TBD' }}</small>
                         </td>
-                        <td class="font-weight-bold">${{ "%.2f"|format(payout.amount) }}</td>
+                        <td class="font-weight-bold">
+                            <div style="font-size: 1.1em;">${{ "%.2f"|format(payout.amount) }}</div>
+                            {% if payout.gross_amount and payout.processing_fee %}
+                            <small class="text-muted">
+                                Gross: ${{ "%.2f"|format(payout.gross_amount) }}<br>
+                                Fee (4.5%): -${{ "%.2f"|format(payout.processing_fee) }}
+                            </small>
+                            {% endif %}
+                        </td>
                         <td>
                             <span class="status-badge status-{{ payout.status }}">
                                 {{ payout.status }}
