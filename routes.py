@@ -121,6 +121,12 @@ def index():
         current_lang = get_language_from_request()
         return render_template('index.html', recent_events=[], current_lang=current_lang)
 
+@app.route('/deployment-test-789')
+def deployment_test():
+    """Test route to verify deployment is picking up new code - REMOVE AFTER TESTING"""
+    from datetime import datetime
+    return "<h1>✅ DEPLOYMENT WORKING</h1><p>New code is being deployed successfully!</p><p>Timestamp: " + str(datetime.now()) + "</p>"
+
 # PRODUCTION SECURITY: Test credentials route disabled for live deployment
 # @app.route('/test-credentials')
 # def test_credentials():
