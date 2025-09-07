@@ -3262,17 +3262,14 @@ def organizer_pay_fee(event_id):
     
     if request.method == 'POST':
         try:
-            # NUCLEAR OPTION: Complete environment reset for live mode
-            live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
-            live_publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+            # Use the correct Stripe keys based on current mode configuration
+            current_secret_key = stripe.api_key
+            current_publishable_key = app.config.get('STRIPE_PUBLISHABLE_KEY')
+            mode = "TEST" if current_secret_key and current_secret_key.startswith('sk_test_') else "LIVE"
             
-            if not live_secret_key or not live_publishable_key:
-                logging.error("CRITICAL: Live Stripe keys not found in environment")
-                return jsonify({'error': 'Live Stripe keys not configured'}), 500
-            
-            # FORCE complete reconfiguration
-            import stripe as stripe_fresh
-            stripe_fresh.api_key = live_secret_key
+            if not current_secret_key or not current_publishable_key:
+                logging.error("CRITICAL: Stripe keys not configured")
+                return jsonify({'error': 'Stripe keys not configured'}), 500
             
             # Clear any existing payment intent
             if event.organizer_fee_payment_intent:
@@ -3280,40 +3277,29 @@ def organizer_pay_fee(event_id):
                 event.organizer_fee_payment_intent = None
                 db.session.commit()
             
-            # FINAL VERIFICATION: Check what key we're actually using
-            current_key_type = "LIVE" if live_secret_key.startswith('sk_live_') else "TEST" if live_secret_key.startswith('sk_test_') else "UNKNOWN"
-            logging.info(f"ATTEMPTING PAYMENT CREATION:")
-            logging.info(f"  Secret key type: {current_key_type}")
-            logging.info(f"  Secret key prefix: {live_secret_key[:20]}")
-            logging.info(f"  Frontend will use publishable key: {live_publishable_key[:20]}")
+            logging.info(f"Creating organizer fee payment with {mode} key: {current_secret_key[:20]}...")
             
-            # Use fresh stripe instance with guaranteed live key
-            payment_intent = stripe_fresh.PaymentIntent.create(
+            # Create payment intent with current configured key
+            payment_intent = stripe.PaymentIntent.create(
                 amount=195,  # $1.95 in cents ($1.45 base + $0.50 processing)
                 currency='usd',
                 metadata={
                     'type': 'organizer_pledge',
                     'event_id': event.id,
                     'organizer_id': organizer_id
-                },
-                api_key=live_secret_key  # Explicitly pass the live key
+                }
             )
             
-            # VERIFY the created payment intent
-            created_key_type = "LIVE" if payment_intent.id.startswith('pi_') and 'livemode' in str(payment_intent) else "TEST"
-            logging.info(f"PAYMENT INTENT CREATED:")
-            logging.info(f"  Payment Intent ID: {payment_intent.id}")
-            logging.info(f"  Detected mode: {created_key_type}")
-            logging.info(f"  Full payment intent object: {payment_intent}")
+            logging.info(f"Payment intent created in {mode} mode: {payment_intent.id}")
             
             # Store payment intent ID
             event.organizer_fee_payment_intent = payment_intent.id
             db.session.commit()
             
-            # CRITICAL: Ensure frontend gets the correct live publishable key
+            # Return matching publishable key for frontend
             return jsonify({
                 'client_secret': payment_intent.client_secret,
-                'publishable_key': live_publishable_key  # Force live key to frontend
+                'publishable_key': current_publishable_key  # Use matching key
             })
             
         except Exception as e:

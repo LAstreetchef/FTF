@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-07T08:26:26.493387",
+  "timestamp": "2025-09-07T09:16:50.553795",
   "backup_type": "automatic",
-  "event_count": 24,
+  "event_count": 25,
   "events": [
     {
       "id": 1,
@@ -474,12 +474,32 @@
       "selected_menu_items": "[{\"name\": \"Classic Wrapped Hot Dog\", \"price\": 6.0, \"description\": \"All-beef hot dog wrapped in bacon\", \"original_price\": 6.0, \"marked_up_price\": 7.199999999999999}, {\"name\": \"Chili Cheese Dog\", \"price\": 7.5, \"description\": \"Hot dog with chili and cheese\", \"original_price\": 7.5, \"marked_up_price\": 9.0}, {\"name\": \"LA Street Dog\", \"price\": 8.0, \"description\": \"Bacon-wrapped with peppers, onions, and mayo\", \"original_price\": 8.0, \"marked_up_price\": 9.6}, {\"name\": \"Veggie Dog\", \"price\": 6.5, \"description\": \"Plant-based hot dog with toppings\", \"original_price\": 6.5, \"marked_up_price\": 7.8}, {\"name\": \"Polish Sausage\", \"price\": 7.0, \"description\": \"Grilled Polish sausage with mustard\", \"original_price\": 7.0, \"marked_up_price\": 8.4}]",
       "markup_percentage": 20.0,
       "pledge_goal": 1000.0,
-      "status": "pending",
-      "current_pledges": 14.0,
-      "approved_at": null,
+      "status": "approved",
+      "current_pledges": 1634.0,
+      "approved_at": "2025-09-07T09:10:01.728184",
       "created_at": "2025-09-05T19:40:37.951083",
       "organizer_fee_charged": true,
       "organizer_fee_payment_intent": "pi_3S45pjBgt3ltA59n0XMNjbuI",
+      "organizer_entree_claimed": true,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
+    },
+    {
+      "id": 26,
+      "name": "Fox Lot",
+      "description": "Fox Lot",
+      "date": "2025-11-17T11:00:00",
+      "location": "Fox Lot",
+      "organizer_id": 1,
+      "food_truck_id": 13,
+      "selected_menu_items": "[{\"name\": \"Carne Asada Taco\", \"price\": 4.0, \"description\": \"Grilled beef with onions and cilantro\", \"original_price\": 4.0, \"marked_up_price\": 4.6}, {\"name\": \"Chicken Taco\", \"price\": 3.5, \"description\": \"Seasoned chicken with fresh toppings\", \"original_price\": 3.5, \"marked_up_price\": 4.0249999999999995}, {\"name\": \"Fish Taco\", \"price\": 4.5, \"description\": \"Grilled fish with cabbage slaw\", \"original_price\": 4.5, \"marked_up_price\": 5.175}, {\"name\": \"Carnitas Taco\", \"price\": 4.0, \"description\": \"Slow-cooked pork with traditional toppings\", \"original_price\": 4.0, \"marked_up_price\": 4.6}, {\"name\": \"Veggie Taco\", \"price\": 3.0, \"description\": \"Black beans, lettuce, tomato, and cheese\", \"original_price\": 3.0, \"marked_up_price\": 3.4499999999999997}, {\"name\": \"Burrito Bowl\", \"price\": 9.0, \"description\": \"Rice, beans, meat, and fresh toppings\", \"original_price\": 9.0, \"marked_up_price\": 10.35}]",
+      "markup_percentage": 15.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-07T09:15:20.063577",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": "pi_3S4eh7Bgt3ltA59n07YXfHA5",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
