@@ -4729,25 +4729,38 @@ def food_truck_register():
 @app.route('/food-truck/login', methods=['GET', 'POST'])
 def food_truck_login():
     """Food truck owner login"""
-    if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
-        
-        owner = FoodTruckOwner.query.filter_by(email=email).first()
-        
-        if owner and check_password_hash(owner.password_hash, password):
-            # Food truck owners are auto-approved upon registration
+    try:
+        if request.method == 'POST':
+            email = request.form.get('email')
+            password = request.form.get('password')
             
-            # Set session
-            session['food_truck_owner_id'] = owner.id
-            session['user_type'] = 'food_truck_owner'
-            session['authenticated'] = True
+            logging.info(f"Food truck login attempt: {email}")
             
-            return redirect(url_for('food_truck_dashboard'))
-        else:
-            flash('Invalid email or password.', 'error')
-    
-    return render_template('food_truck/login.html')
+            owner = FoodTruckOwner.query.filter_by(email=email).first()
+            logging.info(f"Owner found: {owner is not None}")
+            
+            if owner and check_password_hash(owner.password_hash, password):
+                logging.info("Password check passed")
+                # Food truck owners are auto-approved upon registration
+                
+                # Set session
+                session['food_truck_owner_id'] = owner.id
+                session['user_type'] = 'food_truck_owner'
+                session['authenticated'] = True
+                
+                logging.info("Session set, redirecting to dashboard")
+                return redirect(url_for('food_truck_dashboard'))
+            else:
+                logging.info("Login failed - invalid credentials")
+                flash('Invalid email or password.', 'error')
+        
+        logging.info("Rendering food truck login template")
+        return render_template('food_truck/login.html')
+        
+    except Exception as e:
+        logging.error(f"Error in food_truck_login: {str(e)}")
+        # Return a simple error page instead of causing 500
+        return f"<h1>Login Error</h1><p>Error: {str(e)}</p><p><a href='/'>Back to Home</a></p>", 500
 
 @app.route('/food-truck/dashboard')
 def food_truck_dashboard():
