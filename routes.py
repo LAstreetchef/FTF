@@ -619,7 +619,7 @@ def admin_create_payout(event_id):
     
     # Calculate payout amount (total pledges minus platform fee)
     total_collected = event.current_pledges
-    platform_fee_percent = 5.0  # 5% platform fee
+    platform_fee_percent = 9.0  # 9% platform fee
     platform_fee = total_collected * (platform_fee_percent / 100)
     payout_amount = total_collected - platform_fee
     
@@ -649,7 +649,7 @@ Event Details:
 - Event: {event.name}
 - Date: {event.date.strftime('%B %d, %Y')}
 - Total Collected: ${total_collected:.2f}
-- Platform Fee (5%): ${platform_fee:.2f}
+- Platform Fee (9%): ${platform_fee:.2f}
 - Your Payout: ${payout_amount:.2f}
 
 The payout will be processed and sent to your registered bank account within 3-5 business days.
