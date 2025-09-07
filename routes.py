@@ -6396,3 +6396,135 @@ def fix_phantom_pledges():
         </html>
         """
 
+@app.route('/remove-organizer-pledges-abc123')
+def remove_organizer_pledges():
+    """Remove all organizer pledges ($5.00 amounts) since organizer fee should not create pledges"""
+    try:
+        # Find all pledges that are likely organizer pledges
+        # These are typically $5.00 amounts tied to organizers
+        organizer_pledges = []
+        total_removed = 0
+        
+        for pledge in Pledge.query.filter_by(amount=5.00).all():
+            # Check if this pledge belongs to an organizer
+            event = Event.query.get(pledge.event_id)
+            if event and event.organizer:
+                if pledge.email == event.organizer.email:
+                    organizer_pledges.append({
+                        'pledge_id': pledge.id,
+                        'event_name': event.name,
+                        'organizer_email': pledge.email,
+                        'amount': pledge.amount,
+                        'created_at': pledge.created_at
+                    })
+                    
+                    # Remove the pledge
+                    db.session.delete(pledge)
+                    total_removed += 1
+        
+        # Update pledge totals for affected events
+        affected_events = {}
+        for pledge_info in organizer_pledges:
+            event = Event.query.join(Organizer).filter(
+                Organizer.email == pledge_info['organizer_email']
+            ).filter(Event.name == pledge_info['event_name']).first()
+            
+            if event:
+                event.update_pledge_total()
+                affected_events[event.id] = event.name
+        
+        db.session.commit()
+        
+        # Generate report
+        html_report = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Organizer Pledge Cleanup Report</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .summary {{ background: #e8f5e8; padding: 15px; margin-bottom: 20px; border-radius: 5px; }}
+                .success {{ color: #28a745; font-weight: bold; }}
+                table {{ width: 100%; border-collapse: collapse; margin-top: 15px; }}
+                th, td {{ padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }}
+                th {{ background-color: #f2f2f2; }}
+                .removed {{ background: #e8f5e8; }}
+            </style>
+        </head>
+        <body>
+            <h1>🧹 Organizer Pledge Cleanup Report</h1>
+            
+            <div class="summary">
+                <h2>Summary</h2>
+                <p><strong>Total Organizer Pledges Found:</strong> {len(organizer_pledges)}</p>
+                <p><strong>Pledges Removed:</strong> <span class="success">{total_removed}</span></p>
+                <p><strong>Events Updated:</strong> {len(affected_events)}</p>
+                <p><strong>Status:</strong> {'✅ Cleanup Complete - All organizer pledges removed!' if organizer_pledges else '✅ No organizer pledges found to remove!'}</p>
+            </div>
+            
+            <h3>What This Fix Does:</h3>
+            <ul>
+                <li>✅ Removes automatic $5.00 pledges created when organizers pay fees</li>
+                <li>✅ Corrects events to show $0 pledges until real supporters contribute</li>
+                <li>✅ Fixes progress displays that were inflated by organizer pledges</li>
+                <li>✅ Organizer fee remains as fee only - no pledge credit</li>
+            </ul>
+        """
+        
+        if organizer_pledges:
+            html_report += f"""
+            <h2>Removed Organizer Pledges</h2>
+            <table>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Organizer Email</th>
+                    <th>Amount Removed</th>
+                    <th>Created Date</th>
+                </tr>
+            """
+            
+            for pledge in organizer_pledges:
+                html_report += f"""
+                <tr class="removed">
+                    <td>{pledge['event_name'][:40]}{'...' if len(pledge['event_name']) > 40 else ''}</td>
+                    <td>{pledge['organizer_email']}</td>
+                    <td>${pledge['amount']:.2f}</td>
+                    <td>{pledge['created_at'].strftime('%m/%d/%Y %I:%M %p') if pledge['created_at'] else 'Unknown'}</td>
+                </tr>
+                """
+            
+            html_report += "</table>"
+        
+        html_report += f"""
+            <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                <h3>Next Steps:</h3>
+                <p>Events now show correct pledge totals without organizer fee amounts. Going forward:</p>
+                <ul>
+                    <li>Organizers pay $1.95 fee → Event stays at $0 pledges</li>
+                    <li>Real supporters make pledges → Progress displays correctly</li>
+                    <li>Event goals are achieved by genuine community support</li>
+                </ul>
+                
+                <p><a href="/admin/events" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Back to Admin Events</a></p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return html_report
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Organizer pledge cleanup error: {str(e)}")
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Cleanup Error</title></head>
+        <body>
+            <h1>❌ Cleanup Failed</h1>
+            <p><strong>Error:</strong> {str(e)}</p>
+            <p><a href="/admin/events">Back to Admin Events</a></p>
+        </body>
+        </html>
+        """
+
