@@ -170,8 +170,58 @@ class FoodTruckOwner(db.Model):
     approved_at = db.Column(db.DateTime)
     approved_by = db.Column(db.Integer, db.ForeignKey('admin.id'))
     
+    # Payout information
+    payout_method = db.Column(db.String(50))  # 'bank', 'paypal', 'stripe'
+    payout_setup_completed = db.Column(db.Boolean, default=False)
+    
+    # PayPal information
+    paypal_email = db.Column(db.String(200))
+    
+    # Bank account details (for security, only store last 4 digits)
+    bank_account_holder = db.Column(db.String(200))
+    bank_routing_number = db.Column(db.String(50))
+    bank_account_number_last4 = db.Column(db.String(10))  # Only last 4 digits
+    bank_account_type = db.Column(db.String(20))  # 'checking', 'savings'
+    
+    # Address for tax/legal purposes
+    address_line1 = db.Column(db.String(200))
+    address_line2 = db.Column(db.String(200))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(50))
+    zip_code = db.Column(db.String(20))
+    country = db.Column(db.String(50), default='US')
+    
+    # Verification status
+    payout_verified = db.Column(db.Boolean, default=False)
+    verification_notes = db.Column(db.Text)
+    verified_at = db.Column(db.DateTime)
+    
     # Relationships
     food_trucks = db.relationship('FoodTruck', backref='owner', lazy=True)
+    
+    def has_payout_method_setup(self):
+        """Check if food truck owner has set up a payout method"""
+        return self.payout_setup_completed and self.payout_method is not None
+    
+    def get_payout_display_info(self):
+        """Get safe display information for payout method"""
+        if not self.has_payout_method_setup():
+            return "No payout method set up"
+            
+        if self.payout_method == 'bank' and self.bank_account_number_last4:
+            return f"Bank account ending in {self.bank_account_number_last4}"
+        elif self.payout_method == 'paypal' and self.paypal_email:
+            return f"PayPal: {self.paypal_email}"
+        elif self.payout_method == 'stripe':
+            return "Stripe account"
+        else:
+            return f"{self.payout_method.title()} account"
+    
+    def can_receive_payouts(self):
+        """Check if food truck owner is eligible to receive payouts"""
+        return (self.has_payout_method_setup() and 
+                self.status == 'approved' and
+                self.payout_verified)
 
 class FoodTruck(db.Model):
     id = db.Column(db.Integer, primary_key=True)

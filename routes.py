@@ -4815,6 +4815,81 @@ def food_truck_payouts():
                          processing_amount=processing_amount,
                          total_processing_fees=total_processing_fees)
 
+@app.route('/food-truck/payout-settings', methods=['POST'])
+def update_food_truck_payout_settings():
+    """Update food truck payout settings"""
+    if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
+        return redirect(url_for('food_truck_login'))
+    
+    owner = FoodTruckOwner.query.get(session['food_truck_owner_id'])
+    if not owner:
+        session.clear()
+        return redirect(url_for('food_truck_login'))
+    
+    try:
+        # Get form data
+        payout_method = request.form.get('payout_method')
+        
+        # Update payout method
+        owner.payout_method = payout_method
+        
+        # Update PayPal information
+        if payout_method == 'paypal':
+            owner.paypal_email = request.form.get('paypal_email', '').strip()
+            # Clear bank info when switching to PayPal
+            owner.bank_account_holder = None
+            owner.bank_routing_number = None
+            owner.bank_account_number_last4 = None
+            owner.bank_account_type = None
+        
+        # Update Bank information
+        elif payout_method == 'bank':
+            owner.bank_account_holder = request.form.get('bank_account_holder', '').strip()
+            owner.bank_routing_number = request.form.get('bank_routing_number', '').strip()
+            owner.bank_account_number_last4 = request.form.get('bank_account_number_last4', '').strip()
+            owner.bank_account_type = request.form.get('bank_account_type', '').strip()
+            # Clear PayPal info when switching to bank
+            owner.paypal_email = None
+        
+        # Update address information
+        owner.address_line1 = request.form.get('address_line1', '').strip()
+        owner.address_line2 = request.form.get('address_line2', '').strip()
+        owner.city = request.form.get('city', '').strip()
+        owner.state = request.form.get('state', '').strip()
+        owner.zip_code = request.form.get('zip_code', '').strip()
+        
+        # Check if setup is complete
+        setup_complete = False
+        if payout_method == 'paypal' and owner.paypal_email:
+            setup_complete = True
+        elif payout_method == 'bank' and all([
+            owner.bank_account_holder,
+            owner.bank_routing_number,
+            owner.bank_account_number_last4,
+            owner.bank_account_type
+        ]):
+            setup_complete = True
+        
+        owner.payout_setup_completed = setup_complete
+        
+        # If setup is newly completed, mark for verification
+        if setup_complete and not owner.payout_verified:
+            owner.payout_verified = False  # Will need admin verification
+        
+        db.session.commit()
+        
+        if setup_complete:
+            flash('✅ Payout settings saved successfully! Your information will be verified for security.', 'success')
+        else:
+            flash('⚠️ Payout settings saved, but setup is incomplete. Please fill in all required fields.', 'warning')
+            
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error updating food truck payout settings: {str(e)}")
+        flash('❌ Error saving payout settings. Please try again.', 'error')
+    
+    return redirect(url_for('food_truck_payouts'))
+
 @app.route('/food-truck/logout')
 def food_truck_logout():
     """Food truck owner logout"""

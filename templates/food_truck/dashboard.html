@@ -30,6 +30,16 @@
         {% endif %}
     {% endwith %}
 
+    <!-- Payout Setup Reminder -->
+    {% if not owner.has_payout_method_setup() %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>⚠️ Payout Setup Required</strong><br>
+        You need to set up your payout information to receive payments from events.
+        <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-sm btn-warning ms-2">Set Up Payouts</a>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
     <!-- Food truck owners are auto-approved - individual trucks require payment for approval -->
 
     <!-- Quick Stats -->
