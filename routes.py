@@ -3935,26 +3935,22 @@ def make_pledge(event_id):
                     return redirect(url_for('make_pledge', event_id=event_id))
                 # Attach payment method to payment intent and confirm it
                 try:
-                    # NUCLEAR OPTION: Complete environment reset for live mode (same as organizer fix)
-                    live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+                    # Use the correct Stripe key based on current mode configuration
+                    current_key = stripe.api_key
+                    mode = "TEST" if current_key and current_key.startswith('sk_test_') else "LIVE"
                     
-                    if not live_secret_key:
-                        logging.error("CRITICAL: Live Stripe key not found for pledge payment")
-                        flash('Payment system not configured for live mode', 'error')
+                    if not current_key:
+                        logging.error("CRITICAL: No Stripe key configured for pledge payment")
+                        flash('Payment system not configured', 'error')
                         return redirect(url_for('make_pledge', event_id=event_id))
                     
-                    # FORCE complete reconfiguration for pledge payments
-                    import stripe as stripe_fresh
-                    stripe_fresh.api_key = live_secret_key
+                    logging.info(f"Confirming payment with {mode} key: {current_key[:20]}...")
                     
-                    logging.info(f"PLEDGE NUCLEAR FIX: Confirming payment with fresh live key: {live_secret_key[:20]}...")
-                    
-                    # Attach and confirm the payment intent using fresh live stripe instance
-                    intent = stripe_fresh.PaymentIntent.confirm(
+                    # Attach and confirm the payment intent using configured stripe key
+                    intent = stripe.PaymentIntent.confirm(
                         payment_intent_id,
                         payment_method=stripe_payment_method,
-                        return_url=request.url_root,  # For 3D Secure redirects if needed
-                        api_key=live_secret_key  # Explicitly pass the live key
+                        return_url=request.url_root  # For 3D Secure redirects if needed
                     )
                     
                     if intent.status not in ['requires_capture', 'succeeded']:
