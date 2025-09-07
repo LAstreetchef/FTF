@@ -4830,50 +4830,72 @@ def update_food_truck_payout_settings():
         # Get form data
         payout_method = request.form.get('payout_method')
         
-        # Update payout method
-        owner.payout_method = payout_method
+        # Update payout method (with safety checks)
+        if hasattr(owner, 'payout_method'):
+            owner.payout_method = payout_method
         
         # Update PayPal information
         if payout_method == 'paypal':
-            owner.paypal_email = request.form.get('paypal_email', '').strip()
-            # Clear bank info when switching to PayPal
-            owner.bank_account_holder = None
-            owner.bank_routing_number = None
-            owner.bank_account_number_last4 = None
-            owner.bank_account_type = None
+            if hasattr(owner, 'paypal_email'):
+                owner.paypal_email = request.form.get('paypal_email', '').strip()
+            # Clear bank info when switching to PayPal (safely)
+            if hasattr(owner, 'bank_account_holder'):
+                owner.bank_account_holder = None
+            if hasattr(owner, 'bank_routing_number'):
+                owner.bank_routing_number = None
+            if hasattr(owner, 'bank_account_number_last4'):
+                owner.bank_account_number_last4 = None
+            if hasattr(owner, 'bank_account_type'):
+                owner.bank_account_type = None
         
         # Update Bank information
         elif payout_method == 'bank':
-            owner.bank_account_holder = request.form.get('bank_account_holder', '').strip()
-            owner.bank_routing_number = request.form.get('bank_routing_number', '').strip()
-            owner.bank_account_number_last4 = request.form.get('bank_account_number_last4', '').strip()
-            owner.bank_account_type = request.form.get('bank_account_type', '').strip()
-            # Clear PayPal info when switching to bank
-            owner.paypal_email = None
+            if hasattr(owner, 'bank_account_holder'):
+                owner.bank_account_holder = request.form.get('bank_account_holder', '').strip()
+            if hasattr(owner, 'bank_routing_number'):
+                owner.bank_routing_number = request.form.get('bank_routing_number', '').strip()
+            if hasattr(owner, 'bank_account_number_last4'):
+                owner.bank_account_number_last4 = request.form.get('bank_account_number_last4', '').strip()
+            if hasattr(owner, 'bank_account_type'):
+                owner.bank_account_type = request.form.get('bank_account_type', '').strip()
+            # Clear PayPal info when switching to bank (safely)
+            if hasattr(owner, 'paypal_email'):
+                owner.paypal_email = None
         
-        # Update address information
-        owner.address_line1 = request.form.get('address_line1', '').strip()
-        owner.address_line2 = request.form.get('address_line2', '').strip()
-        owner.city = request.form.get('city', '').strip()
-        owner.state = request.form.get('state', '').strip()
-        owner.zip_code = request.form.get('zip_code', '').strip()
+        # Update address information (safely)
+        if hasattr(owner, 'address_line1'):
+            owner.address_line1 = request.form.get('address_line1', '').strip()
+        if hasattr(owner, 'address_line2'):
+            owner.address_line2 = request.form.get('address_line2', '').strip()
+        if hasattr(owner, 'city'):
+            owner.city = request.form.get('city', '').strip()
+        if hasattr(owner, 'state'):
+            owner.state = request.form.get('state', '').strip()
+        if hasattr(owner, 'zip_code'):
+            owner.zip_code = request.form.get('zip_code', '').strip()
         
-        # Check if setup is complete
+        # Check if setup is complete (safely)
         setup_complete = False
-        if payout_method == 'paypal' and owner.paypal_email:
-            setup_complete = True
-        elif payout_method == 'bank' and all([
-            owner.bank_account_holder,
-            owner.bank_routing_number,
-            owner.bank_account_number_last4,
-            owner.bank_account_type
-        ]):
-            setup_complete = True
+        try:
+            if (payout_method == 'paypal' and hasattr(owner, 'paypal_email') and 
+                getattr(owner, 'paypal_email', None)):
+                setup_complete = True
+            elif payout_method == 'bank' and all([
+                hasattr(owner, 'bank_account_holder') and getattr(owner, 'bank_account_holder', None),
+                hasattr(owner, 'bank_routing_number') and getattr(owner, 'bank_routing_number', None),
+                hasattr(owner, 'bank_account_number_last4') and getattr(owner, 'bank_account_number_last4', None),
+                hasattr(owner, 'bank_account_type') and getattr(owner, 'bank_account_type', None)
+            ]):
+                setup_complete = True
+        except:
+            setup_complete = False
         
-        owner.payout_setup_completed = setup_complete
+        if hasattr(owner, 'payout_setup_completed'):
+            owner.payout_setup_completed = setup_complete
         
-        # If setup is newly completed, mark for verification
-        if setup_complete and not owner.payout_verified:
+        # If setup is newly completed, mark for verification (safely)
+        if (setup_complete and hasattr(owner, 'payout_verified') and 
+            not getattr(owner, 'payout_verified', False)):
             owner.payout_verified = False  # Will need admin verification
         
         db.session.commit()

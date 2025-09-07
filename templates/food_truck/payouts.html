@@ -163,14 +163,14 @@
                             <label class="form-label"><strong>Preferred Payout Method</strong></label>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="payout_method" value="paypal" 
-                                       id="paypalMethod" {{ 'checked' if owner.payout_method == 'paypal' else '' }}>
+                                       id="paypalMethod" {{ 'checked' if owner.payout_method|default('') == 'paypal' else '' }}>
                                 <label class="form-check-label" for="paypalMethod">
                                     PayPal (Recommended - Fast & Easy)
                                 </label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="payout_method" value="bank" 
-                                       id="bankMethod" {{ 'checked' if owner.payout_method == 'bank' else '' }}>
+                                       id="bankMethod" {{ 'checked' if owner.payout_method|default('') == 'bank' else '' }}>
                                 <label class="form-check-label" for="bankMethod">
                                     Bank Transfer
                                 </label>
@@ -182,7 +182,7 @@
                             <div class="mb-3">
                                 <label class="form-label">PayPal Email Address</label>
                                 <input type="email" class="form-control" name="paypal_email" 
-                                       value="{{ owner.paypal_email or '' }}" 
+                                       value="{{ owner.paypal_email|default('') }}" 
                                        placeholder="your-paypal@email.com">
                                 <small class="text-muted">Must match your PayPal account email</small>
                             </div>
@@ -193,27 +193,27 @@
                             <div class="mb-3">
                                 <label class="form-label">Account Holder Name</label>
                                 <input type="text" class="form-control" name="bank_account_holder" 
-                                       value="{{ owner.bank_account_holder or '' }}">
+                                       value="{{ owner.bank_account_holder|default('') }}">
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Routing Number</label>
                                     <input type="text" class="form-control" name="bank_routing_number" 
-                                           value="{{ owner.bank_routing_number or '' }}" maxlength="9">
+                                           value="{{ owner.bank_routing_number|default('') }}" maxlength="9">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Account Type</label>
                                     <select class="form-select" name="bank_account_type">
                                         <option value="">Select Type</option>
-                                        <option value="checking" {{ 'selected' if owner.bank_account_type == 'checking' else '' }}>Checking</option>
-                                        <option value="savings" {{ 'selected' if owner.bank_account_type == 'savings' else '' }}>Savings</option>
+                                        <option value="checking" {{ 'selected' if owner.bank_account_type|default('') == 'checking' else '' }}>Checking</option>
+                                        <option value="savings" {{ 'selected' if owner.bank_account_type|default('') == 'savings' else '' }}>Savings</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Account Number (Last 4 Digits)</label>
                                 <input type="text" class="form-control" name="bank_account_number_last4" 
-                                       value="{{ owner.bank_account_number_last4 or '' }}" maxlength="4" 
+                                       value="{{ owner.bank_account_number_last4|default('') }}" maxlength="4" 
                                        placeholder="1234">
                                 <small class="text-muted">For security, we only store the last 4 digits</small>
                             </div>
@@ -226,27 +226,27 @@
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Address Line 1</label>
                                 <input type="text" class="form-control" name="address_line1" 
-                                       value="{{ owner.address_line1 or '' }}">
+                                       value="{{ owner.address_line1|default('') }}">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Address Line 2 (Optional)</label>
                                 <input type="text" class="form-control" name="address_line2" 
-                                       value="{{ owner.address_line2 or '' }}">
+                                       value="{{ owner.address_line2|default('') }}">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">City</label>
                                 <input type="text" class="form-control" name="city" 
-                                       value="{{ owner.city or '' }}">
+                                       value="{{ owner.city|default('') }}">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">State</label>
                                 <input type="text" class="form-control" name="state" 
-                                       value="{{ owner.state or '' }}">
+                                       value="{{ owner.state|default('') }}">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">ZIP Code</label>
                                 <input type="text" class="form-control" name="zip_code" 
-                                       value="{{ owner.zip_code or '' }}">
+                                       value="{{ owner.zip_code|default('') }}">
                             </div>
                         </div>
 
