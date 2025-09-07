@@ -1754,19 +1754,27 @@ def resend_transfer_confirmation(pledge_id):
         return jsonify({'success': False, 'error': f'Server error: {str(e)}'}), 500
 
 
-@app.route('/production-db-setup-xyz987')
-def production_database_setup():
-    """One-time production database setup - adds missing columns and test account"""
+@app.route('/database-sync-xyz456')
+def database_sync():
+    """Smart database synchronization - automatically syncs development features to production"""
     try:
         results = []
         
-        # Step 1: Add missing payout columns to production database
+        # Step 1: Detect current database environment
+        database_url = os.environ.get("DATABASE_URL", "")
+        if "ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech" in database_url:
+            env = "PRODUCTION"
+        else:
+            env = "DEVELOPMENT"
+        
+        results.append(f"🔍 Connected to {env} database")
+        
+        # Step 2: Check and add missing columns for FoodTruckOwner
         try:
-            # Check if columns already exist by trying a simple query
             db.session.execute(text("SELECT payout_method FROM food_truck_owner LIMIT 1"))
-            results.append("✅ Payout columns already exist")
+            results.append("✅ Food truck payout columns already exist")
         except Exception:
-            # Columns don't exist, add them
+            # Add missing payout columns
             db.session.execute(text("""
                 ALTER TABLE food_truck_owner 
                 ADD COLUMN IF NOT EXISTS payout_method VARCHAR(50),
@@ -1787,47 +1795,71 @@ def production_database_setup():
                 ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP
             """))
             db.session.commit()
-            results.append("✅ Added missing payout columns to production database")
+            results.append("✅ Added missing food truck payout columns")
         
-        # Step 2: Create test food truck owner account
-        existing = FoodTruckOwner.query.filter_by(email='holeechowtruck@gmail.com').first()
-        if existing:
-            results.append(f"✅ Food truck owner already exists: {existing.email}")
-        else:
-            from werkzeug.security import generate_password_hash
-            
-            owner = FoodTruckOwner(
-                email='holeechowtruck@gmail.com',
-                name='Ho Lee Chow Test Owner',
-                phone='555-0123',
-                business_name='Ho Lee Chow Food Truck',
-                business_license='TEST-LICENSE-123',
-                password_hash=generate_password_hash('password123'),
-                status='approved'
-            )
-            
-            db.session.add(owner)
-            db.session.commit()
-            results.append("✅ Created test food truck owner account")
+        # Step 3: Ensure essential food truck owner accounts exist (for testing)
+        essential_accounts = [
+            {
+                'email': 'holeechowtruck@gmail.com',
+                'name': 'Ho Lee Chow Test Owner',
+                'business_name': 'Ho Lee Chow Food Truck',
+                'password': 'password123'
+            },
+            {
+                'email': 'test@foodtruck.com', 
+                'name': 'Test Food Truck Owner',
+                'business_name': 'Test Food Truck',
+                'password': 'password123'
+            }
+        ]
         
-        # Step 3: Test database connection
-        count = FoodTruckOwner.query.count()
-        results.append(f"✅ Database working - {count} food truck owners total")
+        for account in essential_accounts:
+            existing = FoodTruckOwner.query.filter_by(email=account['email']).first()
+            if not existing:
+                from werkzeug.security import generate_password_hash
+                
+                owner = FoodTruckOwner(
+                    email=account['email'],
+                    name=account['name'],
+                    phone='555-0123',
+                    business_name=account['business_name'],
+                    business_license='TEST-LICENSE-123',
+                    password_hash=generate_password_hash(account['password']),
+                    status='approved'
+                )
+                
+                db.session.add(owner)
+                results.append(f"✅ Created food truck account: {account['email']}")
+        
+        db.session.commit()
+        
+        # Step 4: Database health check
+        owner_count = FoodTruckOwner.query.count()
+        event_count = Event.query.count()
+        pledge_count = Pledge.query.count()
+        
+        results.append(f"📊 Database Stats: {owner_count} food truck owners, {event_count} events, {pledge_count} pledges")
         
         return f"""
-        <h1>🎯 Production Database Setup Complete</h1>
+        <h1>🔄 Database Sync Complete</h1>
+        <p><strong>Environment:</strong> {env}</p>
         <ul>
         {"".join([f"<li>{result}</li>" for result in results])}
         </ul>
-        <p><strong>Login Details:</strong><br>
-        Email: holeechowtruck@gmail.com<br>
-        Password: password123</p>
-        <p><a href='/food-truck/login'>🚚 Go to Food Truck Login</a></p>
+        
+        <h3>🚚 Food Truck Login</h3>
+        <p><strong>Test Accounts:</strong><br>
+        📧 holeechowtruck@gmail.com / password123<br>
+        📧 test@foodtruck.com / password123</p>
+        
+        <p><a href='/food-truck/login' class='btn'>🚚 Go to Food Truck Login</a></p>
+        <p><a href='/admin/login' class='btn'>🔧 Go to Admin Login</a></p>
+        <p><a href='/' class='btn'>🏠 Go to Home Page</a></p>
         """
         
     except Exception as e:
         db.session.rollback()
-        return f"<h1>❌ Setup Error</h1><p>Error: {str(e)}</p><p><a href='/'>Back to Home</a></p>"
+        return f"<h1>❌ Sync Error</h1><p>Error: {str(e)}</p><p><a href='/'>Back to Home</a></p>"
 
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
