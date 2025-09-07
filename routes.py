@@ -631,9 +631,10 @@ def admin_create_payout(event_id):
     payout = Payout(
         event_id=event_id,
         food_truck_id=event.food_truck_id,
-        amount=payout_amount,
+        total_sales=total_collected,
+        payout_amount=payout_amount,
         platform_fee=platform_fee,
-        created_by=admin.id,
+        initiated_by=admin.id,
         status='pending'
     )
     
