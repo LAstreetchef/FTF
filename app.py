@@ -44,8 +44,8 @@ database_url = os.environ.get("DATABASE_URL")
 if database_url:
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
     # Determine if this is production or development based on database URL
-    if "ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech" in database_url:
-        logging.info("Database configured (PRODUCTION): ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech")
+    if "ep-young-bush-adblwffc.c-2.us-east-1.aws.neon.tech" in database_url:
+        logging.info("Database configured (PRODUCTION): ep-young-bush-adblwffc.c-2.us-east-1.aws.neon.tech")
     else:
         logging.info(f"Database configured (DEVELOPMENT): {database_url.split('@')[1].split('/')[0] if '@' in database_url else 'local'}")
 else:
