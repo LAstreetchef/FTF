@@ -97,7 +97,7 @@ translations = {
         'choose_popular_trucks': 'Choose Popular Trucks',
         'choose_popular_trucks_desc': 'Select food trucks with appealing menus and good reputations to attract more pledges.',
         'organizer_benefits': 'Organizer Benefits',
-        'organizer_benefits_desc': 'Pay the $5 organizer pledge to publish your event and get a FREE entree when it\'s successfully funded!',
+        'organizer_benefits_desc': 'Pay the $1.95 organizer fee to publish your event and get a FREE entree when it\'s successfully funded!',
 
         # How It Works Tutorial
         'how_it_works_tutorial': 'How It Works - Interactive Tutorial',
@@ -107,7 +107,7 @@ translations = {
         'finish': 'Finish',
         'skip_tutorial': 'Skip Tutorial',
         'tutorial_step_1_title': '🎯 Step 1: Create Your Event',
-        'tutorial_step_1_desc': 'Choose a food truck, select delicious menu items, set your fundraising goal, and pay the $5 organizer pledge to publish your event.',
+        'tutorial_step_1_desc': 'Choose a food truck, select delicious menu items, set your fundraising goal, and pay the $1.95 organizer fee to publish your event.',
         'tutorial_step_2_title': '💵 Step 2: Add Your Markup & Earn!',
         'tutorial_step_2_desc': 'Here\'s how you make money! Add markup to menu prices - this extra amount goes directly to your cause or yourself. The more markup, the more you earn!',
         'tutorial_step_3_title': '💖 Step 3: Share & Rally Support',
@@ -291,7 +291,7 @@ translations = {
         'choose_popular_trucks': 'Elige Food Trucks Populares',
         'choose_popular_trucks_desc': 'Selecciona food trucks con menús atractivos y buenas reputaciones para atraer más promesas.',
         'organizer_benefits': 'Beneficios del Organizador',
-        'organizer_benefits_desc': '¡Paga la tarifa de $5 del organizador para publicar tu evento y obtén un plato principal GRATIS cuando se financie exitosamente!',
+        'organizer_benefits_desc': '¡Paga la tarifa de $1.95 del organizador para publicar tu evento y obtén un plato principal GRATIS cuando se financie exitosamente!',
 
         # How It Works Tutorial
         'how_it_works_tutorial': 'Cómo Funciona - Tutorial Interactivo',
@@ -301,7 +301,7 @@ translations = {
         'finish': 'Finalizar',
         'skip_tutorial': 'Saltar Tutorial',
         'tutorial_step_1_title': '🎯 Paso 1: Crea Tu Evento',
-        'tutorial_step_1_desc': 'Elige un food truck, selecciona deliciosos elementos del menú, establece tu meta de recaudación y paga la tarifa de $5 del organizador para publicar tu evento.',
+        'tutorial_step_1_desc': 'Elige un food truck, selecciona deliciosos elementos del menú, establece tu meta de recaudación y paga la tarifa de $1.95 del organizador para publicar tu evento.',
         'tutorial_step_2_title': '💵 Paso 2: ¡Agrega Tu Margen y Gana!',
         'tutorial_step_2_desc': '¡Así es como ganas dinero! Agrega margen a los precios del menú - esta cantidad extra va directamente a tu causa o para ti. ¡Más margen, más ganancias!',
         'tutorial_step_3_title': '💖 Paso 3: Comparte y Reúne Apoyo',

@@ -60,12 +60,12 @@ The Food Truck Fundraiser platform enables community crowdfunding for food truck
 ### Payment Processing:
 - All payments processed securely through Stripe
 - Food truck registration: $25 (one-time fee)
-- Event creation: $5 per event
+- Event creation: $1.95 per event ($1.45 + $0.50 processing)
 - Pledges: Only charged when goals are met
 - E-tickets automatically sent upon successful funding
 
 ### Event Lifecycle:
-1. Organizer pays $5 fee and creates event
+1. Organizer pays $1.95 fee and creates event
 2. Community members make pledges (not charged yet)
 3. If pledge goal is met, all pledges are charged
 4. E-tickets automatically sent to pledgers
@@ -78,13 +78,13 @@ The Food Truck Fundraiser platform enables community crowdfunding for food truck
 Answer: It costs $25 to register your food truck on the platform. This is a one-time fee that gives you access to participate in unlimited fundraising events. After payment, your truck is automatically approved and ready to participate.
 
 ### "How much do organizers pay?"
-Answer: Event organizers pay $5 per event they create. Registration on the platform is free, but each fundraising event costs $5 to set up.
+Answer: Event organizers pay $1.95 per event they create ($1.45 + $0.50 processing fee). Registration on the platform is free, but each fundraising event costs $1.95 to set up.
 
 ### "Do community members pay anything?"
 Answer: No, community members can browse and pledge for events completely free. They only pay if the events they pledge for reach their funding goals.
 
 ### "How do payments work?"
-Answer: We use Stripe for secure payment processing. Food truck owners pay $25 upfront for registration. Event organizers pay $5 when creating events. Community members' pledges are only charged if events meet their funding goals.
+Answer: We use Stripe for secure payment processing. Food truck owners pay $25 upfront for registration. Event organizers pay $1.95 when creating events ($1.45 + $0.50 processing). Community members' pledges are only charged if events meet their funding goals.
 
 ### "What happens if an event doesn't reach its goal?"
 Answer: If an event doesn't reach its funding goal, no pledges are charged and the event is cancelled. Pledgers are automatically notified via email.
@@ -181,7 +181,7 @@ def get_ai_response(conversation_id, user_message, conversation_history=None):
         if "cost" in user_lower and "register" in user_lower and ("truck" in user_lower or "food" in user_lower):
             fallback_response = "Food truck registration costs $25. This is a one-time fee that gives you access to participate in unlimited fundraising events. After payment, your truck is automatically approved. Would you like me to connect you with a human agent for more details?"
         elif "cost" in user_lower and ("event" in user_lower or "organizer" in user_lower):
-            fallback_response = "Event organizers pay $5 per event they create. Registration is free, but each fundraising event costs $5 to set up. Would you like me to connect you with a human agent for more details?"
+            fallback_response = "Event organizers pay $1.95 per event they create ($1.45 + $0.50 processing). Registration is free, but each fundraising event costs $1.95 to set up. Would you like me to connect you with a human agent for more details?"
         elif "payment" in user_lower or "pay" in user_lower:
             fallback_response = "We process payments securely through Stripe. Food truck registration is $25, event creation is $5, and community members only pay if events reach their goals. Would you like me to connect you with a human agent for more details?"
         

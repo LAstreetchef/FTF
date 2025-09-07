@@ -74,7 +74,7 @@
                                             <p><strong>Location:</strong> {{ event.location }}</p>
                                             <p><strong>Total Collected:</strong> ${{ "%.2f"|format(event.current_pledges) }}</p>
                                             
-                                            {% set platform_fee = event.current_pledges * 0.05 %}
+                                            {% set platform_fee = event.current_pledges * 0.09 %}
                                             {% set payout_amount = event.current_pledges - platform_fee %}
                                             <div class="mt-3 p-3 bg-light rounded">
                                                 <h6>Payout Breakdown:</h6>
@@ -83,7 +83,7 @@
                                                     <div class="col-6 text-end">${{ "%.2f"|format(event.current_pledges) }}</div>
                                                 </div>
                                                 <div class="row">
-                                                    <div class="col-6">Platform Fee (5%):</div>
+                                                    <div class="col-6">Platform Fee (9%):</div>
                                                     <div class="col-6 text-end">-${{ "%.2f"|format(platform_fee) }}</div>
                                                 </div>
                                                 <hr>

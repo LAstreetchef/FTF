@@ -3209,8 +3209,8 @@ def organizer_create_event():
             
             logging.info(f"Event created successfully: {event.name} with {len(selected_items)} menu items")
             
-            # Redirect to payment step for $5 organizer pledge
-            flash('Event details saved! Please complete your $5 organizer pledge to publish your event.', 'info')
+            # Redirect to payment step for $1.95 organizer fee
+            flash('Event details saved! Please complete your $1.95 organizer fee to publish your event.', 'info')
             return redirect(url_for('organizer_pay_fee', event_id=event.id) + f'?auth_token={auth_token}' if auth_token else url_for('organizer_pay_fee', event_id=event.id))
             
         except Exception as e:
@@ -3228,7 +3228,7 @@ def organizer_create_event():
 
 @app.route('/organizer/pay-fee/<int:event_id>', methods=['GET', 'POST'])
 def organizer_pay_fee(event_id):
-    """Handle $5 organizer pledge payment"""
+    """Handle $1.95 organizer fee payment"""
     # Authentication check (same pattern as other organizer routes)
     organizer_id = None
     auth_token = request.args.get('auth_token')
@@ -3470,7 +3470,7 @@ def confirm_organizer_fee_payment(event_id):
             # Mark fee as paid and publish event
             event.organizer_fee_charged = True
             
-            # Create organizer's $5 pledge to show on event page
+            # Create organizer's $1.95 pledge to show on event page
             organizer = Organizer.query.get(organizer_id)
             organizer_pledge = Pledge(
                 email=organizer.email,
@@ -3844,7 +3844,7 @@ def events_list():
     page = request.args.get('page', 1, type=int)
     per_page = 12  # Show 12 events per page for better mobile experience
     
-    # Get events by different status categories - ONLY show events where organizer paid the $5 fee
+    # Get events by different status categories - ONLY show events where organizer paid the $1.95 fee
     # Limit initial queries to prevent timeouts
     active_events = Event.query.filter(
         Event.status.in_(['pending', 'funded']),
@@ -3876,7 +3876,7 @@ def event_detail(event_id):
     from sqlalchemy.orm import joinedload
     event = Event.query.options(joinedload(Event.pledges)).get_or_404(event_id)
     
-    # Check if organizer paid the $5 fee - if not, event shouldn't be accessible
+    # Check if organizer paid the $1.95 fee - if not, event shouldn't be accessible
     if not event.organizer_fee_charged:
         flash('This event is not yet available for pledges', 'error')
         return redirect(url_for('events_list'))
@@ -3892,7 +3892,7 @@ def make_pledge(event_id):
     """Handle pledge creation with Stripe tokenization"""
     event = Event.query.get_or_404(event_id)
     
-    # Check if organizer paid the $5 fee - if not, pledging shouldn't be allowed
+    # Check if organizer paid the $1.95 fee - if not, pledging shouldn't be allowed
     if not event.organizer_fee_charged:
         flash('This event is not yet available for pledges', 'error')
         return redirect(url_for('events_list'))
