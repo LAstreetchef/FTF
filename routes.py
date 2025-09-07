@@ -4064,16 +4064,16 @@ def make_pledge(event_id):
             logging.error(f"Error creating pledge: {str(e)}")
             flash('Error processing pledge. Please try again.', 'error')
     
-    # NUCLEAR OPTION: Force live publishable key for pledges (same as organizer fix)
-    live_publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
-    if not live_publishable_key:
-        logging.error("CRITICAL: Live Stripe publishable key not found for pledge form")
-        flash('Payment system not configured for live mode', 'error')
+    # Use the correct publishable key based on mode (respects test mode)
+    stripe_publishable_key = app.config.get('STRIPE_PUBLISHABLE_KEY')
+    if not stripe_publishable_key:
+        logging.error("CRITICAL: Stripe publishable key not found for pledge form")
+        flash('Payment system not configured', 'error')
         return redirect(url_for('events_list'))
     
     return render_template('pledge/form.html', 
                           event=event, 
-                          stripe_publishable_key=live_publishable_key)
+                          stripe_publishable_key=stripe_publishable_key)
 
 @app.route('/pledge/<int:pledge_id>/success')
 def pledge_success(pledge_id):
