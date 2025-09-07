@@ -586,7 +586,9 @@ class OrganizerPayout(db.Model):
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     
     # Payout details
-    amount = db.Column(db.Float, nullable=False)  # Amount to be paid out
+    gross_amount = db.Column(db.Float, nullable=False)  # Gross markup profit before processing fee
+    processing_fee = db.Column(db.Float, default=0.0)  # 4.5% processing fee
+    amount = db.Column(db.Float, nullable=False)  # Net amount to be paid out (after processing fee)
     status = db.Column(db.String(20), default='pending')  # pending, processing, completed, failed
     payout_method = db.Column(db.String(50), default='stripe')  # stripe, manual, etc.
     transaction_id = db.Column(db.String(255))  # PayPal batch ID or other provider transaction ID
