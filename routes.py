@@ -6528,3 +6528,67 @@ def remove_organizer_pledges():
         </html>
         """
 
+
+@app.route('/admin/create-missing-payouts-xyz456')
+def create_missing_payouts():
+    """Create missing organizer payouts for approved events - Admin only"""
+    if not session.get('admin_id'):
+        return "Access denied", 403
+    
+    try:
+        from models import OrganizerPayout
+        
+        # Find approved events without payout records
+        approved_events = Event.query.filter_by(status='approved').all()
+        missing_payouts = []
+        created_count = 0
+        
+        for event in approved_events:
+            # Check if payout already exists
+            existing_payout = OrganizerPayout.query.filter_by(
+                event_id=event.id,
+                organizer_id=event.organizer_id
+            ).first()
+            
+            if not existing_payout and event.organizer:
+                # Calculate organizer profit
+                profit = event.calculate_organizer_profit_if_goal_met()
+                
+                if profit > 0:
+                    # Calculate processing fee (4.5% of gross amount)
+                    processing_fee = profit * 0.045
+                    net_amount = profit - processing_fee
+                    
+                    # Create payout record
+                    payout = OrganizerPayout(
+                        organizer_id=event.organizer_id,
+                        event_id=event.id,
+                        gross_amount=profit,
+                        processing_fee=processing_fee,
+                        amount=net_amount,
+                        recipient_email=event.organizer.paypal_email or event.organizer.email,
+                        status='pending'
+                    )
+                    
+                    db.session.add(payout)
+                    missing_payouts.append({
+                        'event_name': event.name,
+                        'organizer_email': event.organizer.email,
+                        'gross_amount': profit,
+                        'net_amount': net_amount,
+                        'processing_fee': processing_fee
+                    })
+                    created_count += 1
+        
+        db.session.commit()
+        
+        return f"""
+        <h1>💰 Missing Payouts Created!</h1>
+        <p><strong>Created {created_count} payouts</strong> for approved events.</p>
+        <p>Organizers can now see earnings in their dashboard.</p>
+        <p><a href="/admin/payouts">View Admin Payouts</a></p>
+        """
+        
+    except Exception as e:
+        db.session.rollback()
+        return f"Error: {str(e)}"
