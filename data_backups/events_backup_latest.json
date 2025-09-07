@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-07T09:48:10.097885",
+  "timestamp": "2025-09-07T09:51:14.697468",
   "backup_type": "automatic",
-  "event_count": 1,
+  "event_count": 2,
   "events": [
     {
       "id": 1,
@@ -22,6 +22,26 @@
       "organizer_fee_payment_intent": null,
       "organizer_entree_claimed": false,
       "markup_split_config": null
+    },
+    {
+      "id": 2,
+      "name": "Culver Skate Park",
+      "description": "Culver Skate Park Support Team",
+      "date": "2025-12-24T15:50:00",
+      "location": "Culver Skate Park",
+      "organizer_id": 1,
+      "food_truck_id": 1,
+      "selected_menu_items": "[{\"name\": \"Carnitas Taco\", \"price\": 4.5, \"original_price\": 4.5, \"marked_up_price\": 5.175}, {\"name\": \"Chicken Taco\", \"price\": 4.0, \"original_price\": 4.0, \"marked_up_price\": 4.6}, {\"name\": \"Veggie Taco\", \"price\": 3.75, \"original_price\": 3.75, \"marked_up_price\": 4.3125}, {\"name\": \"Combo Meal\", \"price\": 12.0, \"original_price\": 12.0, \"marked_up_price\": 13.799999999999999}]",
+      "markup_percentage": 15.0,
+      "pledge_goal": 1500.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-07T09:51:14.585608",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": null,
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
   ]
 }
