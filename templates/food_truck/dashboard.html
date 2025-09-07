@@ -35,7 +35,7 @@
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <strong>⚠️ Payout Setup Required</strong><br>
         You need to set up your payout information to receive payments from events.
-        <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-sm btn-warning ms-2">Set Up Payouts</a>
+        <a href="{{ url_for('food_truck_payouts_disabled') }}" class="btn btn-sm btn-warning ms-2">Set Up Payouts</a>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     {% endif %}
@@ -162,7 +162,7 @@
             <div class="card shadow-sm mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">💰 Recent Payouts</h5>
-                    <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-outline-primary btn-sm">View All</a>
+                    <a href="{{ url_for('food_truck_payouts_disabled') }}" class="btn btn-outline-primary btn-sm">View All</a>
                 </div>
                 <div class="card-body">
                     {% for payout in payouts %}
@@ -179,7 +179,7 @@
                     {% endfor %}
                 </div>
                 <div class="card-footer text-center">
-                    <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-primary btn-sm">📋 View Detailed Payout History</a>
+                    <a href="{{ url_for('food_truck_payouts_disabled') }}" class="btn btn-primary btn-sm">📋 View Detailed Payout History</a>
                 </div>
             </div>
             {% else %}
@@ -189,7 +189,7 @@
                 </div>
                 <div class="card-body text-center">
                     <p class="text-muted">No payouts yet</p>
-                    <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-outline-primary btn-sm">📋 View Payout Tracking</a>
+                    <a href="{{ url_for('food_truck_payouts_disabled') }}" class="btn btn-outline-primary btn-sm">📋 View Payout Tracking</a>
                 </div>
             </div>
             {% endif %}
