@@ -4870,7 +4870,7 @@ def food_truck_dashboard():
                          payouts=payouts)
 
 @app.route('/food-truck/payouts')
-def food_truck_payouts():
+def food_truck_payouts_disabled():
     """Food truck payout tracking page"""
     if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
         return redirect(url_for('food_truck_login'))
@@ -4905,7 +4905,7 @@ def food_truck_payouts():
                          total_processing_fees=total_processing_fees)
 
 @app.route('/food-truck/payout-settings', methods=['POST'])
-def update_food_truck_payout_settings():
+def update_food_truck_payout_settings_disabled():
     """Update food truck payout settings"""
     if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
         return redirect(url_for('food_truck_login'))
