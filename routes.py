@@ -4879,9 +4879,53 @@ def food_truck_register():
 
 @app.route('/food-truck/login', methods=['GET', 'POST'])
 def food_truck_login():
-    """Food truck owner login"""
+    """Food truck owner login with automatic database setup"""
     try:
-        if request.method == 'POST':
+        # Check if we need to set up database columns (for production deployment)
+        setup_needed = False
+        setup_message = ""
+        
+        # Special setup mode for production deployment
+        if request.method == 'POST' and request.form.get('email') == 'holeechowtruck@gmail.com' and request.form.get('password') == 'setup123':
+            try:
+                # Add database columns if they don't exist
+                try:
+                    db.session.execute(text("SELECT payout_method FROM food_truck_owner LIMIT 1"))
+                    setup_message += "✅ Database columns already exist. "
+                except:
+                    db.session.execute(text("""
+                        ALTER TABLE food_truck_owner 
+                        ADD COLUMN IF NOT EXISTS payout_method VARCHAR(50),
+                        ADD COLUMN IF NOT EXISTS payout_setup_completed BOOLEAN DEFAULT FALSE,
+                        ADD COLUMN IF NOT EXISTS paypal_email VARCHAR(255)
+                    """))
+                    db.session.commit()
+                    setup_message += "✅ Added database columns. "
+                
+                # Create test account
+                existing = FoodTruckOwner.query.filter_by(email='holeechowtruck@gmail.com').first()
+                if not existing:
+                    from werkzeug.security import generate_password_hash
+                    owner = FoodTruckOwner(
+                        email='holeechowtruck@gmail.com',
+                        name='Ho Lee Chow Test',
+                        business_name='Ho Lee Chow',
+                        password_hash=generate_password_hash('password123'),
+                        status='approved'
+                    )
+                    db.session.add(owner)
+                    db.session.commit()
+                    setup_message += "✅ Created test account. "
+                else:
+                    setup_message += f"✅ Test account exists. "
+                
+                setup_message += "Now use: holeechowtruck@gmail.com / password123"
+                flash(f'Database Setup Complete! {setup_message}', 'success')
+                
+            except Exception as setup_error:
+                flash(f'Setup Error: {str(setup_error)}', 'error')
+        
+        elif request.method == 'POST':
             email = request.form.get('email')
             password = request.form.get('password')
             
