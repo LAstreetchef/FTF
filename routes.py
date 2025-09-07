@@ -3971,6 +3971,14 @@ def make_pledge(event_id):
                         f"The event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}. Please review and approve the event to charge all pledges."
                     )
                     
+                    # Send notification to food truck
+                    if event.food_truck.contact_email:
+                        send_email(
+                            event.food_truck.contact_email,
+                            f"Event Funded: {event.name}",
+                            f"Congratulations! Your event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}!\n\nTotal Raised: ${event.current_pledges:.2f}\nNumber of Pledgers: {len(event.pledges)}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYour event will be reviewed and approved soon. Once approved, all pledges will be charged and you'll receive your payout.\n\nThank you for participating in our platform!"
+                        )
+                    
                     # Send goal reached confirmation to pledger
                     if is_gift:
                         # Send notification to the gift giver
