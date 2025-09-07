@@ -9,6 +9,7 @@ import os
 import json
 import logging
 import secrets
+import time
 from datetime import datetime
 from translations import get_text, get_language_from_request
 
@@ -121,11 +122,7 @@ def index():
         current_lang = get_language_from_request()
         return render_template('index.html', recent_events=[], current_lang=current_lang)
 
-@app.route('/deployment-test-789')
-def deployment_test():
-    """Test route to verify deployment is picking up new code - REMOVE AFTER TESTING"""
-    from datetime import datetime
-    return "<h1>✅ DEPLOYMENT WORKING</h1><p>New code is being deployed successfully!</p><p>Timestamp: " + str(datetime.now()) + "</p>"
+# Removed deployment test route
 
 # PRODUCTION SECURITY: Test credentials route disabled for live deployment
 # @app.route('/test-credentials')
@@ -258,7 +255,7 @@ def admin_login():
         admin = Admin.query.filter_by(username=username).first()
         logging.info(f"Admin found in database: {admin is not None}")
         
-        if admin:
+        if admin and admin.password_hash:
             password_valid = check_password_hash(admin.password_hash, password)
             logging.info(f"Password validation result: {password_valid}")
             
@@ -4622,7 +4619,7 @@ def internal_error(error):
     try:
         admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
         if admin:
-            password_test = check_password_hash(admin.password_hash, 'password')
+            password_test = admin.password_hash and check_password_hash(admin.password_hash, 'password')
             return f"""
             <h3>Admin Debug Info</h3>
             <p><strong>Username:</strong> {admin.username}</p>
