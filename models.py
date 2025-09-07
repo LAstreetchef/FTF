@@ -170,32 +170,31 @@ class FoodTruckOwner(db.Model):
     approved_at = db.Column(db.DateTime)
     approved_by = db.Column(db.Integer, db.ForeignKey('admin.id'))
     
-    # Payout information - TEMPORARILY DISABLED FOR DEPLOYMENT
-    # Will be added via runtime migration after deployment succeeds
-    # payout_method = db.Column(db.String(50))  # 'bank', 'paypal', 'stripe'
-    # payout_setup_completed = db.Column(db.Boolean, default=False)
+    # Payout information
+    payout_method = db.Column(db.String(50))  # 'bank', 'paypal', 'stripe'
+    payout_setup_completed = db.Column(db.Boolean, default=False)
     
     # PayPal information
-    # paypal_email = db.Column(db.String(200))
+    paypal_email = db.Column(db.String(200))
     
     # Bank account details (for security, only store last 4 digits)
-    # bank_account_holder = db.Column(db.String(200))
-    # bank_routing_number = db.Column(db.String(50))
-    # bank_account_number_last4 = db.Column(db.String(10))  # Only last 4 digits
-    # bank_account_type = db.Column(db.String(20))  # 'checking', 'savings'
+    bank_account_holder = db.Column(db.String(200))
+    bank_routing_number = db.Column(db.String(50))
+    bank_account_number_last4 = db.Column(db.String(10))  # Only last 4 digits
+    bank_account_type = db.Column(db.String(20))  # 'checking', 'savings'
     
     # Address for tax/legal purposes
-    # address_line1 = db.Column(db.String(200))
-    # address_line2 = db.Column(db.String(200))
-    # city = db.Column(db.String(100))
-    # state = db.Column(db.String(50))
-    # zip_code = db.Column(db.String(20))
-    # country = db.Column(db.String(50), default='US')
+    address_line1 = db.Column(db.String(200))
+    address_line2 = db.Column(db.String(200))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(50))
+    zip_code = db.Column(db.String(20))
+    country = db.Column(db.String(50), default='US')
     
     # Verification status
-    # payout_verified = db.Column(db.Boolean, default=False)
-    # verification_notes = db.Column(db.Text)
-    # verified_at = db.Column(db.DateTime)
+    payout_verified = db.Column(db.Boolean, default=False)
+    verification_notes = db.Column(db.Text)
+    verified_at = db.Column(db.DateTime)
     
     # Relationships
     food_trucks = db.relationship('FoodTruck', backref='owner', lazy=True)
