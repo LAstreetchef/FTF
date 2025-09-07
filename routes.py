@@ -1861,6 +1861,49 @@ def database_sync():
         db.session.rollback()
         return f"<h1>❌ Sync Error</h1><p>Error: {str(e)}</p><p><a href='/'>Back to Home</a></p>"
 
+@app.route('/production-setup-abc999')
+def production_setup_simple():
+    """Simple production setup - works even with old deployments"""
+    try:
+        # This uses an existing route name that's already deployed
+        results = []
+        
+        # Add database columns
+        try:
+            db.session.execute(text("SELECT payout_method FROM food_truck_owner LIMIT 1"))
+            results.append("✅ Database already has payout columns")
+        except:
+            db.session.execute(text("""
+                ALTER TABLE food_truck_owner 
+                ADD COLUMN IF NOT EXISTS payout_method VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS payout_setup_completed BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS paypal_email VARCHAR(255)
+            """))
+            db.session.commit()
+            results.append("✅ Added payout columns")
+        
+        # Create test account
+        existing = FoodTruckOwner.query.filter_by(email='holeechowtruck@gmail.com').first()
+        if not existing:
+            from werkzeug.security import generate_password_hash
+            owner = FoodTruckOwner(
+                email='holeechowtruck@gmail.com',
+                name='Ho Lee Chow Test',
+                business_name='Ho Lee Chow',
+                password_hash=generate_password_hash('password123'),
+                status='approved'
+            )
+            db.session.add(owner)
+            db.session.commit()
+            results.append("✅ Created test account")
+        else:
+            results.append(f"✅ Test account exists: {existing.email}")
+        
+        return f"<h1>Setup Complete</h1><ul>{''.join([f'<li>{r}</li>' for r in results])}</ul><p>Login: holeechowtruck@gmail.com / password123</p><p><a href='/food-truck/login'>Test Login</a></p>"
+        
+    except Exception as e:
+        return f"<h1>Error</h1><p>{str(e)}</p>"
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
