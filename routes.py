@@ -6574,7 +6574,6 @@ def create_missing_payouts():
                         gross_amount=profit,
                         processing_fee=processing_fee,
                         amount=net_amount,
-                        recipient_email=event.organizer.paypal_email or event.organizer.email,
                         status='pending'
                     )
                     
