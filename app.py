@@ -38,13 +38,20 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=3600  # 1 hour for production security
 )
 
-# Configure the database - ALWAYS use production database for consistency
-# Force production database URL to prevent development/production sync issues
-PRODUCTION_DATABASE_URL = "postgresql://neondb_owner:npg_3rnURNs4fLvp@ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
+# Configure the database with proper environment separation
+database_url = os.environ.get("DATABASE_URL")
 
-# Override any environment database URL with production URL
-app.config["SQLALCHEMY_DATABASE_URI"] = PRODUCTION_DATABASE_URL
-logging.info(f"Database configured (PRODUCTION): ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech")
+if database_url:
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+    # Determine if this is production or development based on database URL
+    if "ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech" in database_url:
+        logging.info("Database configured (PRODUCTION): ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech")
+    else:
+        logging.info(f"Database configured (DEVELOPMENT): {database_url.split('@')[1].split('/')[0] if '@' in database_url else 'local'}")
+else:
+    # Fallback for local development
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
+    logging.info("Database configured (LOCAL): SQLite fallback")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
