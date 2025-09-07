@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-07T09:22:43.830256",
+  "timestamp": "2025-09-07T09:30:18.153700",
   "backup_type": "automatic",
   "event_count": 26,
   "events": [
@@ -464,26 +464,6 @@
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     },
     {
-      "id": 27,
-      "name": "Warner Bros",
-      "description": "Warner Back Lot",
-      "date": "2025-12-01T05:22:00",
-      "location": "Warner Lot",
-      "organizer_id": 1,
-      "food_truck_id": 9,
-      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.6}, {\"name\": \"Tourney Combo\", \"price\": 22.0, \"description\": \"1 Main + 1 Side + 1 Drink\", \"original_price\": 22.0, \"marked_up_price\": 25.299999999999997}]",
-      "markup_percentage": 15.0,
-      "pledge_goal": 1000.0,
-      "status": "pending",
-      "current_pledges": 0.0,
-      "approved_at": null,
-      "created_at": "2025-09-07T09:22:43.677075",
-      "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": null,
-      "organizer_entree_claimed": false,
-      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
-    },
-    {
       "id": 25,
       "name": "Sony Gate 2",
       "description": "Come support Motor Park Athletics",
@@ -520,6 +500,26 @@
       "created_at": "2025-09-07T09:15:20.063577",
       "organizer_fee_charged": true,
       "organizer_fee_payment_intent": "pi_3S4ej6Bgt3ltA59n1iqOlF6M",
+      "organizer_entree_claimed": false,
+      "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
+    },
+    {
+      "id": 27,
+      "name": "Warner Bros",
+      "description": "Warner Back Lot",
+      "date": "2025-12-01T05:22:00",
+      "location": "Warner Lot",
+      "organizer_id": 1,
+      "food_truck_id": 9,
+      "selected_menu_items": "[{\"name\": \"Mother Trucker Vegan Burger\", \"price\": 16.0, \"description\": \"House-Made Veggie Patty, Mixed Greens, Tomato, Trucker Sauce, Ciabatta (V)\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Chiptole Cheddar Burger\", \"price\": 17.0, \"description\": \"California Grass-Fed Beef, Aged Cheddar, Grilled Onions, Mixed Greens, Tomato, Chipotle Sauce, Artisanal Bun\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Chicken Pesto Sandwich\", \"price\": 17.0, \"description\": \"Organic Chicken Breast, Mozzarella, Arugula, Roasted Red Peppers, Pesto Veganaise, Local Ciabatta\", \"original_price\": 17.0, \"marked_up_price\": 19.549999999999997}, {\"name\": \"Superfood Bowl or Wrap\", \"price\": 16.0, \"description\": \"Red & Gold Quinoa, Black Beans, Kale, Broccoli, Avocado, Hemp Seed, Gogi Berry, Goddess Dressing\", \"original_price\": 16.0, \"marked_up_price\": 18.4}, {\"name\": \"Sweet Potato Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Regular Fries\", \"price\": 5.0, \"description\": \"\", \"original_price\": 5.0, \"marked_up_price\": 5.75}, {\"name\": \"Seasonal Agua Fresca\", \"price\": 4.0, \"description\": \"Fresh Fruit, Agave, and Water\", \"original_price\": 4.0, \"marked_up_price\": 4.6}, {\"name\": \"Tourney Combo\", \"price\": 22.0, \"description\": \"1 Main + 1 Side + 1 Drink\", \"original_price\": 22.0, \"marked_up_price\": 25.299999999999997}]",
+      "markup_percentage": 15.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 5.0,
+      "approved_at": null,
+      "created_at": "2025-09-07T09:22:43.677075",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": "pi_3S4eoIBgt3ltA59n0r23aSIG",
       "organizer_entree_claimed": false,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
     }
