@@ -4769,16 +4769,51 @@ def food_truck_dashboard():
     if truck_ids:
         recent_events = Event.query.filter(Event.food_truck_id.in_(truck_ids)).order_by(Event.created_at.desc()).limit(5).all()
     
-    # Get payouts
+    # Get payouts using FoodTruckPayout model
     payouts = []
     if truck_ids:
-        payouts = Payout.query.filter(Payout.food_truck_id.in_(truck_ids)).order_by(Payout.created_at.desc()).limit(5).all()
+        payouts = FoodTruckPayout.query.filter(FoodTruckPayout.food_truck_id.in_(truck_ids)).order_by(FoodTruckPayout.created_at.desc()).limit(5).all()
     
     return render_template('food_truck/dashboard.html', 
                          owner=owner, 
                          food_trucks=food_trucks, 
                          recent_events=recent_events,
                          payouts=payouts)
+
+@app.route('/food-truck/payouts')
+def food_truck_payouts():
+    """Food truck payout tracking page"""
+    if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
+        return redirect(url_for('food_truck_login'))
+    
+    owner = FoodTruckOwner.query.get(session['food_truck_owner_id'])
+    if not owner:
+        session.clear()
+        return redirect(url_for('food_truck_login'))
+    
+    # Get owner's food trucks
+    food_trucks = FoodTruck.query.filter_by(owner_id=owner.id).all()
+    truck_ids = [truck.id for truck in food_trucks]
+    
+    # Get all payouts for their trucks
+    all_payouts = []
+    if truck_ids:
+        all_payouts = FoodTruckPayout.query.filter(
+            FoodTruckPayout.food_truck_id.in_(truck_ids)
+        ).join(FoodTruck).join(Event).order_by(FoodTruckPayout.created_at.desc()).all()
+    
+    # Calculate totals
+    total_earned = sum(payout.amount for payout in all_payouts if payout.status == 'completed')
+    processing_amount = sum(payout.amount for payout in all_payouts if payout.status == 'processing')
+    total_processing_fees = sum(payout.processing_fee or 0 for payout in all_payouts)
+    
+    return render_template('food_truck/payouts.html', 
+                         owner=owner, 
+                         food_trucks=food_trucks,
+                         payouts=all_payouts,
+                         total_earned=total_earned,
+                         processing_amount=processing_amount,
+                         total_processing_fees=total_processing_fees)
 
 @app.route('/food-truck/logout')
 def food_truck_logout():

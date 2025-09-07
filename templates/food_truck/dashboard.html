@@ -53,7 +53,7 @@
         <div class="col-md-3 col-6 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <h5 class="card-title text-info">${{ "%.2f"|format(payouts|sum(attribute='payout_amount') or 0) }}</h5>
+                    <h5 class="card-title text-info">${{ "%.2f"|format(payouts|sum(attribute='amount') or 0) }}</h5>
                     <p class="card-text">Total Payouts</p>
                 </div>
             </div>
@@ -61,8 +61,8 @@
         <div class="col-md-3 col-6 mb-3">
             <div class="card text-center h-100">
                 <div class="card-body">
-                    <h5 class="card-title text-warning">{{ payouts|selectattr('status', 'equalto', 'pending')|list|length }}</h5>
-                    <p class="card-text">Pending Payouts</p>
+                    <h5 class="card-title text-warning">{{ payouts|selectattr('status', 'equalto', 'processing')|list|length }}</h5>
+                    <p class="card-text">Processing Payouts</p>
                 </div>
             </div>
         </div>
@@ -150,21 +150,36 @@
 
             {% if payouts %}
             <div class="card shadow-sm mt-4">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">💰 Recent Payouts</h5>
+                    <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-outline-primary btn-sm">View All</a>
                 </div>
                 <div class="card-body">
                     {% for payout in payouts %}
                         <div class="border-bottom pb-2 mb-2">
                             <div class="d-flex justify-content-between">
-                                <span>${{ "%.2f"|format(payout.payout_amount) }}</span>
-                                <span class="badge bg-{{ 'success' if payout.status == 'completed' else 'warning' }}">
+                                <span>${{ "%.2f"|format(payout.amount) }}</span>
+                                <span class="badge bg-{{ 'success' if payout.status == 'completed' else 'primary' if payout.status == 'processing' else 'secondary' }}">
                                     {{ payout.status.title() }}
                                 </span>
                             </div>
-                            <small class="text-muted">{{ payout.event.name }}</small>
+                            <small class="text-muted">{{ payout.event.name if payout.event else 'Event N/A' }}</small>
+                            <br><small class="text-muted">{{ payout.created_at.strftime('%b %d, %Y') }}</small>
                         </div>
                     {% endfor %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-primary btn-sm">📋 View Detailed Payout History</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">💰 Payouts</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p class="text-muted">No payouts yet</p>
+                    <a href="{{ url_for('food_truck_payouts') }}" class="btn btn-outline-primary btn-sm">📋 View Payout Tracking</a>
                 </div>
             </div>
             {% endif %}

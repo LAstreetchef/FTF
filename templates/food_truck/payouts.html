@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Payout Tracking - {{ owner.business_name }}{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="display-5 mb-3 text-gradient">💰 Payout Tracking</h1>
+                <p class="lead">{{ owner.business_name }} - Track your earnings and payouts</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('food_truck_dashboard') }}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Payout Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100 border-success">
+                <div class="card-body">
+                    <h5 class="card-title text-success">${{ "%.2f"|format(total_earned) }}</h5>
+                    <p class="card-text">Total Completed</p>
+                    <small class="text-muted">Money in your account</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100 border-primary">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">${{ "%.2f"|format(processing_amount) }}</h5>
+                    <p class="card-text">Processing</p>
+                    <small class="text-muted">Being transferred</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100 border-warning">
+                <div class="card-body">
+                    <h5 class="card-title text-warning">${{ "%.2f"|format(total_processing_fees) }}</h5>
+                    <p class="card-text">Processing Fees</p>
+                    <small class="text-muted">Platform fees paid</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6 mb-3">
+            <div class="card text-center h-100 border-info">
+                <div class="card-body">
+                    <h5 class="card-title text-info">{{ payouts|length }}</h5>
+                    <p class="card-text">Total Payouts</p>
+                    <small class="text-muted">All transactions</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Payout List -->
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h5 class="mb-0">📋 All Payouts</h5>
+            <small class="text-muted">Complete transaction history for all your food trucks</small>
+        </div>
+        <div class="card-body">
+            {% if payouts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Event</th>
+                                <th>Food Truck</th>
+                                <th>Gross Amount</th>
+                                <th>Processing Fee</th>
+                                <th>Net Amount</th>
+                                <th>Status</th>
+                                <th>Payout Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payout in payouts %}
+                            <tr>
+                                <td>
+                                    <strong>{{ payout.created_at.strftime('%b %d, %Y') }}</strong>
+                                    <br><small class="text-muted">{{ payout.created_at.strftime('%I:%M %p') }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ payout.event.name if payout.event else 'Event N/A' }}</strong>
+                                    {% if payout.event %}
+                                        <br><small class="text-muted">{{ payout.event.location }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ payout.food_truck.name if payout.food_truck else 'N/A' }}</strong>
+                                </td>
+                                <td>
+                                    <span class="text-muted">${{ "%.2f"|format((payout.amount or 0) + (payout.processing_fee or 0)) }}</span>
+                                    <br><small class="text-muted">Before fees</small>
+                                </td>
+                                <td>
+                                    <span class="text-warning">-${{ "%.2f"|format(payout.processing_fee or 0) }}</span>
+                                    <br><small class="text-muted">9.5% platform fee</small>
+                                </td>
+                                <td>
+                                    <strong class="text-success">${{ "%.2f"|format(payout.amount or 0) }}</strong>
+                                    <br><small class="text-muted">Final payout</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if payout.status == 'completed' else 'primary' if payout.status == 'processing' else 'secondary' }}">
+                                        {{ payout.status.title() }}
+                                    </span>
+                                    {% if payout.completed_at %}
+                                        <br><small class="text-muted">{{ payout.completed_at.strftime('%b %d') }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-capitalize">{{ payout.payout_method or 'PayPal' }}</span>
+                                    {% if payout.transaction_id %}
+                                        <br><small class="text-muted font-monospace">{{ payout.transaction_id[:15] }}...</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <h5 class="text-muted">No Payouts Yet</h5>
+                    <p class="text-muted">Your payouts will appear here once events featuring your food trucks are completed and approved.</p>
+                    <a href="{{ url_for('food_truck_dashboard') }}" class="btn btn-primary">Back to Dashboard</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Payout Information -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">💡 How Payouts Work</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">✅ <strong>Events must reach funding goals</strong> - Your truck only attends funded events</li>
+                        <li class="mb-2">💰 <strong>Guaranteed minimum sales</strong> - You earn at least your sales goal amount</li>
+                        <li class="mb-2">📊 <strong>9.5% processing fee</strong> - Platform fee deducted from gross earnings</li>
+                        <li class="mb-2">🏦 <strong>PayPal transfers</strong> - Money sent directly to your account</li>
+                        <li class="mb-2">⏱️ <strong>1-2 business day delivery</strong> - Funds typically arrive quickly</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">📞 Need Help?</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">Questions about payouts or missing payments?</p>
+                    <a href="mailto:support@foodtruckfundraiser.com" class="btn btn-outline-primary btn-sm">
+                        📧 Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
