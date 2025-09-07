@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-09-07T09:55:40.993016",
+  "timestamp": "2025-09-07T09:56:40.241816",
   "backup_type": "automatic",
   "event_count": 2,
   "events": [
@@ -35,7 +35,7 @@
       "markup_percentage": 15.0,
       "pledge_goal": 1500.0,
       "status": "pending",
-      "current_pledges": 5.0,
+      "current_pledges": 0.0,
       "approved_at": null,
       "created_at": "2025-09-07T09:51:14.585608",
       "organizer_fee_charged": true,
