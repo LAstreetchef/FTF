@@ -2,6 +2,7 @@ from flask import render_template, request, redirect, url_for, session, flash, j
 from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
 from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout, SupportConversation, SupportMessage, OrganizerPayout, FoodTruckPayout, OrganizerTier, AmbassadorChallenge, OrganizerChallengeProgress, PledgeMessage
+from sqlalchemy import text
 from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
 import stripe
 import os
@@ -1753,36 +1754,80 @@ def resend_transfer_confirmation(pledge_id):
         return jsonify({'success': False, 'error': f'Server error: {str(e)}'}), 500
 
 
-@app.route('/create-test-food-truck-owner-xyz789')
-def create_test_food_truck_owner():
-    """Create test food truck owner for production testing"""
+@app.route('/production-db-setup-xyz987')
+def production_database_setup():
+    """One-time production database setup - adds missing columns and test account"""
     try:
-        # Check if account already exists
+        results = []
+        
+        # Step 1: Add missing payout columns to production database
+        try:
+            # Check if columns already exist by trying a simple query
+            db.session.execute(text("SELECT payout_method FROM food_truck_owner LIMIT 1"))
+            results.append("✅ Payout columns already exist")
+        except Exception:
+            # Columns don't exist, add them
+            db.session.execute(text("""
+                ALTER TABLE food_truck_owner 
+                ADD COLUMN IF NOT EXISTS payout_method VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS payout_setup_completed BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS paypal_email VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS bank_account_holder VARCHAR(255),
+                ADD COLUMN IF NOT EXISTS bank_routing_number VARCHAR(9),
+                ADD COLUMN IF NOT EXISTS bank_account_number_last4 VARCHAR(4),
+                ADD COLUMN IF NOT EXISTS bank_account_type VARCHAR(50),
+                ADD COLUMN IF NOT EXISTS address_line1 VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS address_line2 VARCHAR(500),
+                ADD COLUMN IF NOT EXISTS city VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS state VARCHAR(100),
+                ADD COLUMN IF NOT EXISTS zip_code VARCHAR(20),
+                ADD COLUMN IF NOT EXISTS country VARCHAR(100) DEFAULT 'US',
+                ADD COLUMN IF NOT EXISTS payout_verified BOOLEAN DEFAULT FALSE,
+                ADD COLUMN IF NOT EXISTS verification_notes TEXT,
+                ADD COLUMN IF NOT EXISTS verified_at TIMESTAMP
+            """))
+            db.session.commit()
+            results.append("✅ Added missing payout columns to production database")
+        
+        # Step 2: Create test food truck owner account
         existing = FoodTruckOwner.query.filter_by(email='holeechowtruck@gmail.com').first()
         if existing:
-            return f"<h1>Food Truck Owner Already Exists</h1><p>Email: holeechowtruck@gmail.com<br>Created: {existing.created_at}<br>Status: {existing.status}</p><p><a href='/food-truck/login'>Go to Login</a></p>"
+            results.append(f"✅ Food truck owner already exists: {existing.email}")
+        else:
+            from werkzeug.security import generate_password_hash
+            
+            owner = FoodTruckOwner(
+                email='holeechowtruck@gmail.com',
+                name='Ho Lee Chow Test Owner',
+                phone='555-0123',
+                business_name='Ho Lee Chow Food Truck',
+                business_license='TEST-LICENSE-123',
+                password_hash=generate_password_hash('password123'),
+                status='approved'
+            )
+            
+            db.session.add(owner)
+            db.session.commit()
+            results.append("✅ Created test food truck owner account")
         
-        # Create test food truck owner
-        from werkzeug.security import generate_password_hash
+        # Step 3: Test database connection
+        count = FoodTruckOwner.query.count()
+        results.append(f"✅ Database working - {count} food truck owners total")
         
-        owner = FoodTruckOwner(
-            email='holeechowtruck@gmail.com',
-            name='Ho Lee Chow Test Owner',
-            phone='555-0123',
-            business_name='Ho Lee Chow Food Truck',
-            business_license='TEST-LICENSE-123',
-            password_hash=generate_password_hash('password123'),
-            status='approved'
-        )
-        
-        db.session.add(owner)
-        db.session.commit()
-        
-        return f"<h1>✅ Test Food Truck Owner Created</h1><p><strong>Login Details:</strong><br>Email: holeechowtruck@gmail.com<br>Password: password123</p><p><a href='/food-truck/login'>Go to Login</a></p>"
+        return f"""
+        <h1>🎯 Production Database Setup Complete</h1>
+        <ul>
+        {"".join([f"<li>{result}</li>" for result in results])}
+        </ul>
+        <p><strong>Login Details:</strong><br>
+        Email: holeechowtruck@gmail.com<br>
+        Password: password123</p>
+        <p><a href='/food-truck/login'>🚚 Go to Food Truck Login</a></p>
+        """
         
     except Exception as e:
         db.session.rollback()
-        return f"<h1>❌ Error</h1><p>Error creating food truck owner: {str(e)}</p>"
+        return f"<h1>❌ Setup Error</h1><p>Error: {str(e)}</p><p><a href='/'>Back to Home</a></p>"
 
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
