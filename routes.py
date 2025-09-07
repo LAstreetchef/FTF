@@ -6275,3 +6275,137 @@ def admin_create_food_truck_payouts():
         'message': f'Created {created_count} food truck payout records'
     })
 
+@app.route('/fix-phantom-pledges-xyz789')
+def fix_phantom_pledges():
+    """Comprehensive cleanup of phantom pledge data - identifies and fixes current_pledges mismatches"""
+    try:
+        fixes_applied = []
+        total_fixed = 0
+        
+        # Find all events and check for phantom data
+        all_events = Event.query.all()
+        
+        for event in all_events:
+            # Get actual pledges for this event
+            pledges = Pledge.query.filter_by(event_id=event.id).all()
+            actual_total = sum(p.amount for p in pledges if p.status in ['pending', 'charged'])
+            recorded_total = float(event.current_pledges or 0)
+            
+            # Check if there's a discrepancy (phantom data)
+            if abs(actual_total - recorded_total) > 0.01:
+                fixes_applied.append({
+                    'event_id': event.id,
+                    'event_name': event.name,
+                    'recorded_pledges': recorded_total,
+                    'actual_pledges': actual_total,
+                    'discrepancy': actual_total - recorded_total,
+                    'pledge_count': len(pledges),
+                    'phantom_amount': recorded_total - actual_total
+                })
+                
+                # Fix the current_pledges to match actual pledges
+                event.current_pledges = actual_total
+                total_fixed += 1
+        
+        if fixes_applied:
+            db.session.commit()
+        
+        # Generate HTML report
+        html_report = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Phantom Pledge Cleanup Report</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .summary {{ background: #e8f5e8; padding: 15px; margin-bottom: 20px; border-radius: 5px; }}
+                .event {{ background: #f8f9fa; padding: 15px; margin: 10px 0; border-left: 4px solid #007bff; }}
+                .phantom {{ background: #ffe6e6; border-left-color: #dc3545; }}
+                .fixed {{ background: #e8f5e8; border-left-color: #28a745; }}
+                .amount {{ font-weight: bold; color: #dc3545; }}
+                .success {{ color: #28a745; font-weight: bold; }}
+                table {{ width: 100%; border-collapse: collapse; margin-top: 15px; }}
+                th, td {{ padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }}
+                th {{ background-color: #f2f2f2; }}
+                .negative {{ color: #dc3545; }}
+                .positive {{ color: #28a745; }}
+            </style>
+        </head>
+        <body>
+            <h1>🔧 Phantom Pledge Cleanup Report</h1>
+            
+            <div class="summary">
+                <h2>Summary</h2>
+                <p><strong>Total Events Scanned:</strong> {len(all_events)}</p>
+                <p><strong>Events with Phantom Data:</strong> {len(fixes_applied)}</p>
+                <p><strong>Events Fixed:</strong> <span class="success">{total_fixed}</span></p>
+                <p><strong>Status:</strong> {'✅ Cleanup Complete - All phantom data removed!' if fixes_applied else '✅ No phantom data found - Database is clean!'}</p>
+            </div>
+        """
+        
+        if fixes_applied:
+            html_report += f"""
+            <h2>Fixed Events</h2>
+            <table>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Event ID</th>
+                    <th>Before (Phantom)</th>
+                    <th>After (Actual)</th>
+                    <th>Phantom Amount</th>
+                    <th>Real Pledges</th>
+                </tr>
+            """
+            
+            for fix in fixes_applied:
+                phantom_class = "negative" if fix['phantom_amount'] > 0 else "positive"
+                html_report += f"""
+                <tr>
+                    <td>{fix['event_name'][:50]}{'...' if len(fix['event_name']) > 50 else ''}</td>
+                    <td>{fix['event_id']}</td>
+                    <td class="negative">${fix['recorded_pledges']:.2f}</td>
+                    <td class="positive">${fix['actual_pledges']:.2f}</td>
+                    <td class="{phantom_class}">${fix['phantom_amount']:.2f}</td>
+                    <td>{fix['pledge_count']} pledges</td>
+                </tr>
+                """
+            
+            html_report += "</table>"
+        
+        html_report += f"""
+            <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                <h3>What This Fix Does:</h3>
+                <ul>
+                    <li>✅ Scans all events for current_pledges vs actual pledge mismatches</li>
+                    <li>✅ Fixes phantom amounts that show in progress displays</li>
+                    <li>✅ Corrects deletion blocks caused by ghost "charged pledges"</li>
+                    <li>✅ Safe to run multiple times - only fixes actual discrepancies</li>
+                    <li>✅ Works in both production and development environments</li>
+                </ul>
+                
+                <h3>Next Steps:</h3>
+                <p>Events that previously couldn't be deleted due to phantom pledges should now be deletable from the admin panel.</p>
+                
+                <p><a href="/admin/events" style="background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Back to Admin Events</a></p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        return html_report
+        
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Phantom pledge cleanup error: {str(e)}")
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Cleanup Error</title></head>
+        <body>
+            <h1>❌ Cleanup Failed</h1>
+            <p><strong>Error:</strong> {str(e)}</p>
+            <p><a href="/admin/events">Back to Admin Events</a></p>
+        </body>
+        </html>
+        """
+
