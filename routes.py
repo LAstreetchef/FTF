@@ -5510,16 +5510,22 @@ def request_payout():
         return jsonify({'error': 'Payout already requested for this event'}), 400
     
     # Calculate payout amount
-    amount = event.calculate_organizer_profit_if_goal_met()
+    gross_amount = event.calculate_organizer_profit_if_goal_met()
     
-    if amount <= 0:
+    if gross_amount <= 0:
         return jsonify({'error': 'No earnings to pay out for this event'}), 400
+    
+    # Calculate 4.5% processing fee and net amount
+    processing_fee = round(gross_amount * 0.045, 2)  # 4.5% processing fee
+    net_amount = round(gross_amount - processing_fee, 2)
     
     # Create payout request
     payout = OrganizerPayout(
         organizer_id=organizer_id,
         event_id=event_id,
-        amount=amount,
+        gross_amount=gross_amount,
+        processing_fee=processing_fee,
+        amount=net_amount,
         status='pending'
     )
     
@@ -5530,15 +5536,15 @@ def request_payout():
     try:
         send_email(
             'support@foodtruckfundraiser.com',
-            f'Payout Request: ${amount:.2f} for {organizer.name}',
-            f'Organizer {organizer.name} has requested a payout of ${amount:.2f} for event "{event.name}".\\n\\nEvent Details:\\nDate: {event.date}\\nLocation: {event.location}\\nTotal Raised: ${event.current_pledges:.2f}\\nOrganizer Profit: ${amount:.2f}\\n\\nPlease process this payout in the admin dashboard.'
+            f'Payout Request: ${net_amount:.2f} for {organizer.name}',
+            f'Organizer {organizer.name} has requested a payout for event "{event.name}".\\n\\nPayout Breakdown:\\nGross Markup Profit: ${gross_amount:.2f}\\nProcessing Fee (4.5%): ${processing_fee:.2f}\\nNet Payout Amount: ${net_amount:.2f}\\n\\nEvent Details:\\nDate: {event.date}\\nLocation: {event.location}\\nTotal Raised: ${event.current_pledges:.2f}\\n\\nPlease process this payout in the admin dashboard.'
         )
     except Exception:
         pass  # Continue even if email fails
     
     return jsonify({
         'success': True, 
-        'message': f'Payout request submitted for ${amount:.2f}',
+        'message': f'Payout request submitted for ${net_amount:.2f} (${gross_amount:.2f} gross - ${processing_fee:.2f} processing fee)',
         'payout_id': payout.id
     })
 
