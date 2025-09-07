@@ -1753,6 +1753,37 @@ def resend_transfer_confirmation(pledge_id):
         return jsonify({'success': False, 'error': f'Server error: {str(e)}'}), 500
 
 
+@app.route('/create-test-food-truck-owner-xyz789')
+def create_test_food_truck_owner():
+    """Create test food truck owner for production testing"""
+    try:
+        # Check if account already exists
+        existing = FoodTruckOwner.query.filter_by(email='holeechowtruck@gmail.com').first()
+        if existing:
+            return f"<h1>Food Truck Owner Already Exists</h1><p>Email: holeechowtruck@gmail.com<br>Created: {existing.created_at}<br>Status: {existing.status}</p><p><a href='/food-truck/login'>Go to Login</a></p>"
+        
+        # Create test food truck owner
+        from werkzeug.security import generate_password_hash
+        
+        owner = FoodTruckOwner(
+            email='holeechowtruck@gmail.com',
+            name='Ho Lee Chow Test Owner',
+            phone='555-0123',
+            business_name='Ho Lee Chow Food Truck',
+            business_license='TEST-LICENSE-123',
+            password_hash=generate_password_hash('password123'),
+            status='approved'
+        )
+        
+        db.session.add(owner)
+        db.session.commit()
+        
+        return f"<h1>✅ Test Food Truck Owner Created</h1><p><strong>Login Details:</strong><br>Email: holeechowtruck@gmail.com<br>Password: password123</p><p><a href='/food-truck/login'>Go to Login</a></p>"
+        
+    except Exception as e:
+        db.session.rollback()
+        return f"<h1>❌ Error</h1><p>Error creating food truck owner: {str(e)}</p>"
+
 @app.route('/auto-fix-all-menus-xyz123')
 def auto_fix_all_menus():
     """Emergency fix for all events and trucks - runs sync and menu fix together"""
