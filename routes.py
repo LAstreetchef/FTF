@@ -611,9 +611,9 @@ def admin_create_payout(event_id):
     event = Event.query.get_or_404(event_id)
     admin = Admin.query.get(session['admin_id'])
     
-    # Verify event is charged and doesn't already have a payout
-    if event.status != 'charged':
-        flash('Event must be charged before creating payout.', 'error')
+    # Verify event is approved and doesn't already have a payout
+    if event.status != 'approved':
+        flash('Event must be approved before creating payout.', 'error')
         return redirect(url_for('admin_payouts'))
     
     existing_payout = Payout.query.filter_by(event_id=event_id).first()
