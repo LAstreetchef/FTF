@@ -1908,15 +1908,15 @@ def fix_organizer_pledges():
             existing_pledge = Pledge.query.filter_by(
                 event_id=event.id,
                 email=event.organizer.email,
-                amount=5.00
+                amount=1.45
             ).first()
             
             if not existing_pledge:
-                # Create organizer's $5 pledge
+                # Create organizer's $1.45 pledge + $0.50 processing fee
                 organizer_pledge = Pledge(
                     email=event.organizer.email,
-                    amount=5.00,
-                    processing_fee=0.0,
+                    amount=1.45,
+                    processing_fee=0.50,
                     stripe_payment_intent_id=event.organizer_fee_payment_intent,
                     event_id=event.id,
                     status='charged',
@@ -3289,7 +3289,7 @@ def organizer_pay_fee(event_id):
             
             # Use fresh stripe instance with guaranteed live key
             payment_intent = stripe_fresh.PaymentIntent.create(
-                amount=500,  # $5.00 in cents
+                amount=195,  # $1.95 in cents ($1.45 base + $0.50 processing)
                 currency='usd',
                 metadata={
                     'type': 'organizer_pledge',

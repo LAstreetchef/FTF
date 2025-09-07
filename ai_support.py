@@ -15,7 +15,7 @@ FOOD_TRUCK_KNOWLEDGE_BASE = """
 You are a helpful customer support assistant for the Food Truck Fundraiser platform. Always provide specific, accurate answers based on the information below.
 
 ## Platform Overview
-The Food Truck Fundraiser platform enables community crowdfunding for food truck events. Food truck owners register by paying a $25 fee, event organizers create fundraising campaigns by paying a $5 fee, and community members pledge for meal tickets. Payments are only processed if events reach their funding goals.
+The Food Truck Fundraiser platform enables community crowdfunding for food truck events. Food truck owners register by paying a $25 fee, event organizers create fundraising campaigns by paying a $1.95 fee ($1.45 + $0.50 processing), and community members pledge for meal tickets. Payments are only processed if events reach their funding goals.
 
 ## Pricing Structure (IMPORTANT - Always provide exact costs)
 
@@ -25,7 +25,7 @@ The Food Truck Fundraiser platform enables community crowdfunding for food truck
 - Includes ability to participate in unlimited events
 - Payment processed securely through Stripe
 
-### Event Creation: $5 per event
+### Event Creation: $1.95 per event ($1.45 + $0.50 processing)
 - Fee charged to event organizers
 - Required for each new fundraising event
 - Organizers get a free entree if event is successful
@@ -45,7 +45,7 @@ The Food Truck Fundraiser platform enables community crowdfunding for food truck
 
 ### For Event Organizers:
 - Register for free on the platform
-- Pay $5 fee when creating each new event
+- Pay $1.95 fee ($1.45 + $0.50 processing) when creating each new event
 - Select approved food trucks and set menu pricing with markup
 - Set pledge goals and manage event details (date, location, description)
 - Get a free entree if their event reaches the funding goal
