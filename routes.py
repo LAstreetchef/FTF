@@ -872,14 +872,13 @@ def sync_data():
                 results.append(f"Updated: {truck_data['name']}")
             else:
                 # Create new truck
-                new_truck = FoodTruck(
-                    name=truck_data['name'],
-                    description=truck_data['description'],
-                    menu_items=json.dumps(truck_data['menu_items']),
-                    sales_goal=truck_data['sales_goal'],
-                    status='approved',  # Auto-approve for production
-                    registration_fee_charged=True  # Mark as paid for production
-                )
+                new_truck = FoodTruck()
+                new_truck.name = truck_data['name']
+                new_truck.description = truck_data['description']
+                new_truck.menu_items = json.dumps(truck_data['menu_items'])
+                new_truck.sales_goal = truck_data['sales_goal']
+                new_truck.status = 'approved'  # Auto-approve for production
+                new_truck.registration_fee_charged = True  # Mark as paid for production
                 db.session.add(new_truck)
                 results.append(f"Created: {truck_data['name']}")
         
@@ -1822,15 +1821,14 @@ def database_sync():
             if not existing:
                 from werkzeug.security import generate_password_hash
                 
-                owner = FoodTruckOwner(
-                    email=account['email'],
-                    name=account['name'],
-                    phone='555-0123',
-                    business_name=account['business_name'],
-                    business_license='TEST-LICENSE-123',
-                    password_hash=generate_password_hash(account['password']),
-                    status='approved'
-                )
+                owner = FoodTruckOwner()
+                owner.email = account['email']
+                owner.name = account['name']
+                owner.phone = '555-0123'
+                owner.business_name = account['business_name']
+                owner.business_license = 'TEST-LICENSE-123'
+                owner.password_hash = generate_password_hash(account['password'])
+                owner.status = 'approved'
                 
                 db.session.add(owner)
                 results.append(f"✅ Created food truck account: {account['email']}")
@@ -1890,13 +1888,12 @@ def production_setup_simple():
         existing = FoodTruckOwner.query.filter_by(email='holeechowtruck@gmail.com').first()
         if not existing:
             from werkzeug.security import generate_password_hash
-            owner = FoodTruckOwner(
-                email='holeechowtruck@gmail.com',
-                name='Ho Lee Chow Test',
-                business_name='Ho Lee Chow',
-                password_hash=generate_password_hash('password123'),
-                status='approved'
-            )
+            owner = FoodTruckOwner()
+            owner.email = 'holeechowtruck@gmail.com'
+            owner.name = 'Ho Lee Chow Test'
+            owner.business_name = 'Ho Lee Chow'
+            owner.password_hash = generate_password_hash('password123')
+            owner.status = 'approved'
             db.session.add(owner)
             db.session.commit()
             results.append("✅ Created test account")
@@ -1986,14 +1983,13 @@ def auto_fix_all_menus():
                 existing_truck.registration_fee_charged = True
                 sync_results.append(f"Updated: {truck_data['name']}")
             else:
-                new_truck = FoodTruck(
-                    name=truck_data['name'],
-                    description=truck_data['description'],
-                    menu_items=json.dumps(truck_data['menu_items']),
-                    sales_goal=truck_data['sales_goal'],
-                    status='approved',  # Auto-approve for production
-                    registration_fee_charged=True  # Mark as paid for production
-                )
+                new_truck = FoodTruck()
+                new_truck.name = truck_data['name']
+                new_truck.description = truck_data['description']
+                new_truck.menu_items = json.dumps(truck_data['menu_items'])
+                new_truck.sales_goal = truck_data['sales_goal']
+                new_truck.status = 'approved'  # Auto-approve for production
+                new_truck.registration_fee_charged = True  # Mark as paid for production
                 db.session.add(new_truck)
                 sync_results.append(f"Created: {truck_data['name']}")
         
@@ -2068,15 +2064,14 @@ def fix_organizer_pledges():
             
             if not existing_pledge:
                 # Create organizer's $1.45 pledge + $0.50 processing fee
-                organizer_pledge = Pledge(
-                    email=event.organizer.email,
-                    amount=1.45,
-                    processing_fee=0.50,
-                    stripe_payment_intent_id=event.organizer_fee_payment_intent,
-                    event_id=event.id,
-                    status='charged',
-                    charged_at=event.created_at
-                )
+                organizer_pledge = Pledge()
+                organizer_pledge.email = event.organizer.email
+                organizer_pledge.amount = 1.45
+                organizer_pledge.processing_fee = 0.50
+                organizer_pledge.stripe_payment_intent_id = event.organizer_fee_payment_intent
+                organizer_pledge.event_id = event.id
+                organizer_pledge.status = 'charged'
+                organizer_pledge.charged_at = event.created_at
                 
                 db.session.add(organizer_pledge)
                 
