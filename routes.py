@@ -3456,22 +3456,9 @@ def confirm_organizer_fee_payment(event_id):
             # Mark fee as paid and publish event
             event.organizer_fee_charged = True
             
-            # Create organizer's $1.95 pledge to show on event page
+            # Organizer fee is ONLY a fee - no pledge credit created
+            # This keeps the event at $0 pledges until real supporters contribute
             organizer = Organizer.query.get(organizer_id)
-            organizer_pledge = Pledge(
-                email=organizer.email,
-                amount=5.00,
-                processing_fee=0.0,  # No processing fee for organizer
-                stripe_payment_intent_id=event.organizer_fee_payment_intent,
-                event_id=event.id,
-                status='charged',  # Already paid
-                charged_at=datetime.utcnow()
-            )
-            
-            db.session.add(organizer_pledge)
-            
-            # Update event pledge total to include organizer's $5
-            event.update_pledge_total()
             
             db.session.commit()
             
@@ -3480,7 +3467,7 @@ def confirm_organizer_fee_payment(event_id):
             send_email(
                 'support@foodtruckfundraiser.com',
                 f"New Event Published: {event.name}",
-                f"A new event has been published (organizer pledge paid):\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {event.food_truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}\n\nOrganizer will receive a free entree when the event is successfully funded."
+                f"A new event has been published (organizer fee paid):\n\nEvent: {event.name}\nOrganizer: {organizer_name}\nFood Truck: {event.food_truck.name}\nDate: {event.date}\nLocation: {event.location}\nPledge Goal: ${event.pledge_goal:.2f}\n\nOrganizer will receive a free entree when the event is successfully funded."
             )
             
             return jsonify({'success': True, 'redirect': url_for('organizer_dashboard') + f'?auth_token={auth_token}' if auth_token else url_for('organizer_dashboard')})
