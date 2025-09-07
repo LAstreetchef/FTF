@@ -326,9 +326,6 @@ class Event(db.Model):
     # Relationships
     pledges = db.relationship('Pledge', foreign_keys='Pledge.event_id', backref='event', lazy=True)
     
-    # Add organizer relationship (missing relationship causing LSP errors)
-    organizer = db.relationship('Organizer', backref='events', lazy=True)
-    
     def get_selected_menu_items(self):
         """Parse selected menu items from JSON string"""
         try:
