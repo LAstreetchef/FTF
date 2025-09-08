@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+
+{% block title %}Food Trucks in Houston - Fundraiser in Houston | Community Events{% endblock %}
+
+{% block head %}
+<meta name="description" content="Find the best food trucks in Houston for your fundraiser. Organize community fundraising events in Houston with local food trucks. Perfect for schools, sports teams, and charities in Houston, Texas.">
+<meta name="keywords" content="food trucks Houston, fundraiser Houston, Houston food truck events, Houston community fundraising, food truck fundraising Houston, fundraising events Houston Texas">
+<link rel="canonical" href="https://foodtruckfundraiser.com/houston">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section - Houston Specific -->
+<div class="row">
+    <div class="col-12">
+        <div class="hero-section text-center" style="background: linear-gradient(135deg, #FF8C00, #FFB347, #FFA500); padding: 4rem 2rem; min-height: 70vh; display: flex; align-items: center;">
+            <div class="container position-relative">
+                <h1 class="display-2 mb-4 text-white" style="font-family: 'Dancing Script', cursive; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    🤠 Food Trucks in Houston 🌟
+                </h1>
+                <p class="lead fs-3 mb-5 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+                    The Best <strong>Fundraiser in Houston</strong> Platform
+                </p>
+                <p class="fs-5 mb-5 text-white">
+                    Connect with amazing food trucks across Houston - from Downtown to The Woodlands, Sugar Land to Katy. 
+                    Perfect for community fundraising events, school fundraisers, sports team fundraising, and charity events.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a class="btn btn-warning btn-lg shadow" href="{{ url_for('organizer_login') }}" role="button">
+                        <i data-feather="star" class="me-2"></i>
+                        Start Your Houston Fundraiser
+                    </a>
+                    <a class="btn btn-light btn-lg shadow" href="{{ url_for('events_list') }}" role="button">
+                        <i data-feather="search" class="me-2"></i>
+                        Browse Houston Food Truck Events
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Houston Neighborhoods Section -->
+<div class="row mb-5 mt-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5 display-6" style="color: var(--foodie-earth); font-weight: 700;">
+            🍖 Food Trucks Serving All of Houston 🌶️
+        </h2>
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="map-pin" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">Downtown Houston</h5>
+                        <p>Food truck fundraisers in the heart of Space City</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="home" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">Sugar Land</h5>
+                        <p>Sweet community food truck events in Fort Bend County</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="tree-pine" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">The Woodlands</h5>
+                        <p>Upscale food truck fundraisers in Montgomery County</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="shield" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">Katy</h5>
+                        <p>Family-friendly food truck fundraising in West Houston</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Why Choose Houston Food Truck Fundraisers -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-dark text-white">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-5">Why Choose Food Truck Fundraising in Houston?</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="users" style="color: #FFD700; width: 50px; height: 50px;"></i>
+                            <h4 class="mt-3">Texas-Sized Community</h4>
+                            <p>Houston has the strongest community spirit in Texas. Food truck fundraisers unite neighborhoods while supporting local causes.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="truck" style="color: #FFD700; width: 50px; height: 50px;"></i>
+                            <h4 class="mt-3">Diverse Food Scene</h4>
+                            <p>Houston's incredible diversity means amazing food trucks. From Tex-Mex to Vietnamese, BBQ to fusion cuisine.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="dollar-sign" style="color: #FFD700; width: 50px; height: 50px;"></i>
+                            <h4 class="mt-3">Easy Fundraising</h4>
+                            <p>No upfront costs, no inventory. Just organize, promote, and earn money for your cause when the event is funded.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Perfect For Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5 display-6" style="color: var(--foodie-earth); font-weight: 700;">
+            Perfect for Houston Organizations
+        </h2>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="icon-circle mx-auto mb-3">
+                            <i data-feather="book-open" style="color: #FF8C00; width: 30px; height: 30px;"></i>
+                        </div>
+                        <h5>Houston Schools</h5>
+                        <p class="text-muted small">PTA fundraisers, school events, student organizations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="icon-circle mx-auto mb-3">
+                            <i data-feather="zap" style="color: #FF8C00; width: 30px; height: 30px;"></i>
+                        </div>
+                        <h5>Sports Teams</h5>
+                        <p class="text-muted small">Youth sports, high school teams, adult leagues</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="icon-circle mx-auto mb-3">
+                            <i data-feather="heart" style="color: #FF8C00; width: 30px; height: 30px;"></i>
+                        </div>
+                        <h5>Charities</h5>
+                        <p class="text-muted small">Non-profits, community organizations, cause fundraising</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="icon-circle mx-auto mb-3">
+                            <i data-feather="home" style="color: #FF8C00; width: 30px; height: 30px;"></i>
+                        </div>
+                        <h5>HOAs & Communities</h5>
+                        <p class="text-muted small">Neighborhood events, community improvements</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Houston Areas We Serve -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-gradient text-white border-0">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-5">Houston Metro Areas We Serve</h2>
+                <div class="row g-3 text-center">
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Downtown</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>The Woodlands</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Sugar Land</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Katy</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Pearland</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Cypress</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Spring</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Pasadena</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Missouri City</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Friendswood</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Kingwood</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6">
+                        <div class="area-badge">
+                            <small>Humble</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Houston Food Truck Success Stories -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5 display-6" style="color: var(--foodie-earth); font-weight: 700;">
+            Houston Success Stories
+        </h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="success-icon me-3">
+                                <i data-feather="trending-up" style="color: #28a745; width: 24px; height: 24px;"></i>
+                            </div>
+                            <h5 class="mb-0">Westside High School</h5>
+                        </div>
+                        <p class="text-muted">"We raised $3,200 for our band program with a taco truck event. The whole community came out!"</p>
+                        <small class="text-success">✓ Goal exceeded by 160%</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="success-icon me-3">
+                                <i data-feather="award" style="color: #ffc107; width: 24px; height: 24px;"></i>
+                            </div>
+                            <h5 class="mb-0">Katy Youth Soccer</h5>
+                        </div>
+                        <p class="text-muted">"BBQ truck fundraiser helped us buy new uniforms and equipment. Easy process, great results!"</p>
+                        <small class="text-warning">✓ $2,850 raised in one week</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="success-icon me-3">
+                                <i data-feather="heart" style="color: #dc3545; width: 24px; height: 24px;"></i>
+                            </div>
+                            <h5 class="mb-0">Houston Pet Rescue</h5>
+                        </div>
+                        <p class="text-muted">"Food truck fundraising helped us save 15 more pets this month. Community support was amazing!"</p>
+                        <small class="text-danger">✓ 250+ supporters participated</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-warning">
+            <div class="card-body text-center p-5">
+                <h2 class="display-6 mb-4" style="color: #333; font-weight: 700;">
+                    Ready to Start Your Houston Food Truck Fundraiser?
+                </h2>
+                <p class="lead mb-4" style="color: #333;">
+                    Join hundreds of Houston organizations who've successfully raised money with food truck events.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a class="btn btn-dark btn-lg shadow" href="{{ url_for('organizer_login') }}" role="button">
+                        <i data-feather="rocket" class="me-2"></i>
+                        Start Your Fundraiser Now
+                    </a>
+                    <a class="btn btn-outline-dark btn-lg shadow" href="{{ url_for('events_list') }}" role="button">
+                        <i data-feather="calendar" class="me-2"></i>
+                        View Current Houston Events
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Houston Events -->
+{% if recent_events %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4" style="color: var(--foodie-earth); font-weight: 700;">Recent Houston Fundraising Events</h2>
+        <div class="row g-4">
+            {% for event in recent_events %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i data-feather="truck" class="me-1"></i>{{ event.food_truck.name }}
+                            </small><br>
+                            <small class="text-muted">
+                                <i data-feather="calendar" class="me-1"></i>{{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </small><br>
+                            <small class="text-muted">
+                                <i data-feather="map-pin" class="me-1"></i>{{ event.location }}
+                            </small>
+                        </p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress mb-2">
+                            <div class="progress-bar" role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                            </div>
+                        </div>
+                        <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} of ${{ "%.2f"|format(event.pledge_goal) }} goal</small>
+                        
+                        <div class="mt-3">
+                            <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary btn-sm">
+                                <i data-feather="eye" class="me-1"></i>
+                                View Details
+                            </a>
+                            {% if event.status == 'pending' or event.status == 'funded' %}
+                            <span class="badge bg-{{ 'success' if event.status == 'funded' else 'warning' }}">
+                                {{ event.status.title() }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<style>
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #FFF3E0, #FFE0B2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.area-badge {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 8px 12px;
+    margin: 5px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.success-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-section {
+    position: relative;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.3;0.1" dur="3s" repeatCount="indefinite"/></circle><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.15"><animate attributeName="opacity" values="0.15;0.4;0.15" dur="4s" repeatCount="indefinite"/></circle><circle cx="30" cy="70" r="2.5" fill="white" opacity="0.1"><animate attributeName="opacity" values="0.1;0.25;0.1" dur="5s" repeatCount="indefinite"/></circle><circle cx="70" cy="80" r="2" fill="white" opacity="0.12"><animate attributeName="opacity" values="0.12;0.35;0.12" dur="3.5s" repeatCount="indefinite"/></circle></svg>') repeat;
+    pointer-events: none;
+}
+</style>
+{% endblock %}

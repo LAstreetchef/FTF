@@ -137,6 +137,21 @@ def los_angeles_landing():
         logging.error(f"Los Angeles landing page error: {str(e)}")
         return render_template('los-angeles.html', recent_events=[])
 
+@app.route('/houston')
+def houston_landing():
+    """Houston landing page for local SEO targeting 'food trucks in Houston' and 'fundraiser in Houston'"""
+    try:
+        # Get recent events, preferably from Houston area
+        recent_events = Event.query.filter(
+            Event.status.in_(['pending', 'funded']),
+            Event.organizer_fee_charged == True
+        ).order_by(Event.created_at.desc()).limit(6).all()
+        
+        return render_template('houston.html', recent_events=recent_events)
+    except Exception as e:
+        logging.error(f"Houston landing page error: {str(e)}")
+        return render_template('houston.html', recent_events=[])
+
 # Removed deployment test route
 
 # PRODUCTION SECURITY: Test credentials route disabled for live deployment
