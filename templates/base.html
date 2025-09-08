@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" id="viewport-meta">
-    <title>{% block title %}Food Truck Fundraiser{% endblock %}</title>
+    <title>{% block title %}Food Truck Fundraiser Los Angeles - Community Fundraising Platform{% endblock %}</title>
     
     <!-- App Icons and Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
@@ -16,7 +16,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Food Truck">
     <meta name="theme-color" content="#FF8C00">
-    <meta name="description" content="Community crowdfunding for food truck events">
+    <meta name="description" content="Community food truck fundraiser in Los Angeles. Fund food trucks in LA through crowdfunding events. Support local food truck fundraising and community dining experiences.">
+    
+    <!-- Local SEO Meta Tags -->
+    <meta name="geo.region" content="US-CA">
+    <meta name="geo.placename" content="Los Angeles, California">
+    <meta name="geo.position" content="34.0522;-118.2437">
+    <meta name="ICBM" content="34.0522, -118.2437">
+    <meta name="keywords" content="food trucks Los Angeles, fundraiser Los Angeles, food truck fundraising LA, community fundraiser LA, crowdfunding food trucks California, Los Angeles food truck events">
     
     <!-- Page-specific head content -->
     {% block head %}{% endblock %}
