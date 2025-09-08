@@ -122,6 +122,21 @@ def index():
         current_lang = get_language_from_request()
         return render_template('index.html', recent_events=[], current_lang=current_lang)
 
+@app.route('/los-angeles')
+def los_angeles_landing():
+    """Los Angeles landing page for local SEO targeting 'food trucks in Los Angeles' and 'fundraiser in Los Angeles'"""
+    try:
+        # Get recent events, preferably from LA area
+        recent_events = Event.query.filter(
+            Event.status.in_(['pending', 'funded']),
+            Event.organizer_fee_charged == True
+        ).order_by(Event.created_at.desc()).limit(6).all()
+        
+        return render_template('los-angeles.html', recent_events=recent_events)
+    except Exception as e:
+        logging.error(f"Los Angeles landing page error: {str(e)}")
+        return render_template('los-angeles.html', recent_events=[])
+
 # Removed deployment test route
 
 # PRODUCTION SECURITY: Test credentials route disabled for live deployment

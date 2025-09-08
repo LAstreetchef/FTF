@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Food Trucks in Los Angeles - Fundraiser in Los Angeles | Community Events{% endblock %}
+
+{% block head %}
+<meta name="description" content="Find the best food trucks in Los Angeles for your fundraiser. Organize community fundraising events in LA with local food trucks. Perfect for schools, sports teams, and charities in Los Angeles.">
+<meta name="keywords" content="food trucks Los Angeles, fundraiser Los Angeles, LA food truck events, Los Angeles community fundraising, food truck fundraising LA, fundraising events Los Angeles">
+<link rel="canonical" href="https://foodtruckfundraiser.com/los-angeles">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section - Los Angeles Specific -->
+<div class="row">
+    <div class="col-12">
+        <div class="hero-section text-center" style="background: linear-gradient(135deg, #FF8C00, #FFB347, #FFA500); padding: 4rem 2rem;">
+            <div class="container position-relative">
+                <h1 class="display-2 mb-4 text-white" style="font-family: 'Dancing Script', cursive; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                    🌴 Food Trucks in Los Angeles 🌴
+                </h1>
+                <p class="lead fs-3 mb-5 text-white" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
+                    The Best <strong>Fundraiser in Los Angeles</strong> Platform
+                </p>
+                <p class="fs-5 mb-5 text-white">
+                    Connect with amazing food trucks across LA - from Downtown to Santa Monica, Venice Beach to Hollywood. 
+                    Perfect for community fundraising events, school fundraisers, sports team fundraising, and charity events.
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a class="btn btn-warning btn-lg shadow" href="{{ url_for('organizer_login') }}" role="button">
+                        <i data-feather="star" class="me-2"></i>
+                        Start Your LA Fundraiser
+                    </a>
+                    <a class="btn btn-light btn-lg shadow" href="{{ url_for('events_list') }}" role="button">
+                        <i data-feather="search" class="me-2"></i>
+                        Browse LA Food Truck Events
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LA Neighborhoods Section -->
+<div class="row mb-5 mt-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5 display-6" style="color: var(--foodie-earth); font-weight: 700;">
+            🍕 Food Trucks Serving All of Los Angeles 🌮
+        </h2>
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="map-pin" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">Downtown LA</h5>
+                        <p>Food truck fundraisers in the heart of Los Angeles</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="sun" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">Santa Monica</h5>
+                        <p>Beachside food truck events and community fundraising</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="camera" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">Hollywood</h5>
+                        <p>Glamorous food truck fundraisers in entertainment district</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i data-feather="waves" style="color: #FF8C00; width: 40px; height: 40px;"></i>
+                        <h5 class="mt-3">Venice Beach</h5>
+                        <p>Artistic community food truck fundraising events</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Why Choose LA Food Truck Fundraisers -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-dark text-white">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-5">Why Choose Food Truck Fundraising in Los Angeles?</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="users" style="color: #FFD700; width: 50px; height: 50px;"></i>
+                            <h4 class="mt-3">Community Focused</h4>
+                            <p>Los Angeles has amazing community spirit. Food truck fundraisers bring neighbors together while supporting local causes.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="truck" style="color: #FFD700; width: 50px; height: 50px;"></i>
+                            <h4 class="mt-3">Amazing Food Trucks</h4>
+                            <p>LA has the best food truck scene in the country. From Korean BBQ to gourmet burgers, there's something for everyone.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i data-feather="dollar-sign" style="color: #FFD700; width: 50px; height: 50px;"></i>
+                            <h4 class="mt-3">Easy Fundraising</h4>
+                            <p>No upfront costs, no inventory. Just organize, promote, and earn money for your cause when the event is funded.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Perfect For Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5 display-6" style="color: var(--foodie-earth); font-weight: 700;">
+            Perfect for Los Angeles Organizations
+        </h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-primary h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">🏫 Los Angeles Schools</h5>
+                        <ul class="list-unstyled">
+                            <li>• Elementary school fundraisers</li>
+                            <li>• Middle school events</li>
+                            <li>• High school fundraising</li>
+                            <li>• PTA and parent group fundraisers</li>
+                            <li>• After-school program funding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-success h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">⚽ LA Sports Teams</h5>
+                        <ul class="list-unstyled">
+                            <li>• Youth soccer leagues</li>
+                            <li>• Little League baseball</li>
+                            <li>• Basketball teams</li>
+                            <li>• Swimming teams</li>
+                            <li>• Tournament and equipment funding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-warning h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">💖 LA Charities</h5>
+                        <ul class="list-unstyled">
+                            <li>• Local charity organizations</li>
+                            <li>• Community support groups</li>
+                            <li>• Religious organizations</li>
+                            <li>• Non-profit fundraising</li>
+                            <li>• Cause-based fundraisers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-info h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">🏘️ LA Community Groups</h5>
+                        <ul class="list-unstyled">
+                            <li>• Neighborhood associations</li>
+                            <li>• Community centers</li>
+                            <li>• Local clubs and organizations</li>
+                            <li>• Volunteer groups</li>
+                            <li>• Special event funding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works in LA -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-gradient text-white">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-5">How Food Truck Fundraising Works in Los Angeles</h2>
+                <div class="row g-4">
+                    <div class="col-md-3 text-center">
+                        <div class="step-number">1</div>
+                        <h5 class="mt-3">Choose Your LA Food Truck</h5>
+                        <p>Select from the best food trucks in Los Angeles. Each truck has unique menus and specialties.</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="step-number">2</div>
+                        <h5 class="mt-3">Set Your Fundraising Goal</h5>
+                        <p>Decide how much you want to raise for your Los Angeles organization or cause.</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="step-number">3</div>
+                        <h5 class="mt-3">Promote in LA Community</h5>
+                        <p>Share with LA friends, family, and community members. Use social media, email, and word of mouth.</p>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="step-number">4</div>
+                        <h5 class="mt-3">Host Your Event</h5>
+                        <p>When funded, your chosen food truck comes to your Los Angeles location and serves delicious food!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent LA Events -->
+{% if recent_events %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5">Recent Food Truck Fundraisers in Los Angeles Area</h2>
+        <div class="row g-4">
+            {% for event in recent_events %}
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ event.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i data-feather="truck" class="me-1"></i>{{ event.food_truck.name }}
+                            </small><br>
+                            <small class="text-muted">
+                                <i data-feather="map-pin" class="me-1"></i>{{ event.location }}
+                            </small>
+                        </p>
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" style="width: {{ event.get_progress_percentage() }}%">
+                                {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                            </div>
+                        </div>
+                        <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-primary btn-sm">View Event</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Call to Action -->
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-warning">
+            <div class="card-body text-center p-5">
+                <h2 class="mb-4">Ready to Start Your Los Angeles Food Truck Fundraiser?</h2>
+                <p class="lead mb-4">
+                    Join hundreds of successful fundraisers across Los Angeles. No upfront costs, easy setup, and delicious results!
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="{{ url_for('organizer_login') }}" class="btn btn-dark btn-lg">
+                        <i data-feather="user-plus" class="me-2"></i>
+                        Create Your LA Fundraiser
+                    </a>
+                    <a href="{{ url_for('events_list') }}" class="btn btn-outline-dark btn-lg">
+                        <i data-feather="calendar" class="me-2"></i>
+                        Browse Food Truck Events
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.step-number {
+    background: #FFD700;
+    color: #000;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.local-feature h5 {
+    color: #FFD700;
+}
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}
