@@ -25,6 +25,75 @@
     <meta name="ICBM" content="34.0522, -118.2437">
     <meta name="keywords" content="food trucks Los Angeles, fundraiser Los Angeles, food truck fundraising LA, community fundraiser LA, crowdfunding food trucks California, Los Angeles food truck events">
     
+    <!-- JSON-LD Structured Data for Local SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": ["LocalBusiness", "Organization"],
+                "name": "Food Truck Fundraiser Los Angeles",
+                "description": "Community food truck fundraising platform connecting Los Angeles communities with local food trucks through crowdfunding events.",
+                "url": "https://foodtruckfundraiser.com",
+                "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Los Angeles",
+                    "addressRegion": "California",
+                    "addressCountry": "US",
+                    "postalCode": "90210"
+                },
+                "geo": {
+                    "@type": "GeoCoordinates",
+                    "latitude": 34.0522,
+                    "longitude": -118.2437
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Los Angeles",
+                    "sameAs": "https://en.wikipedia.org/wiki/Los_Angeles"
+                },
+                "serviceType": "Food Truck Fundraising",
+                "priceRange": "$",
+                "telephone": "+1-555-FOODTRUCK",
+                "openingHours": "Mo-Su 00:00-23:59",
+                "sameAs": [
+                    "https://foodtruckfundraiser.com"
+                ]
+            },
+            {
+                "@type": "Service",
+                "serviceType": "Community Fundraising",
+                "name": "Food Truck Fundraiser in Los Angeles",
+                "description": "Organize fundraising events with food trucks in Los Angeles. Perfect for schools, sports teams, charities, and community groups.",
+                "provider": {
+                    "@type": "Organization",
+                    "name": "Food Truck Fundraiser Los Angeles"
+                },
+                "areaServed": {
+                    "@type": "City",
+                    "name": "Los Angeles",
+                    "sameAs": "https://en.wikipedia.org/wiki/Los_Angeles"
+                },
+                "audience": {
+                    "@type": "Audience",
+                    "audienceType": "Community Groups, Schools, Charities, Sports Teams"
+                }
+            },
+            {
+                "@type": "WebSite",
+                "name": "Food Truck Fundraiser Los Angeles",
+                "url": "https://foodtruckfundraiser.com",
+                "description": "The best platform to organize food truck fundraising events in Los Angeles.",
+                "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://foodtruckfundraiser.com/events?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                }
+            }
+        ]
+    }
+    </script>
+
     <!-- Page-specific head content -->
     {% block head %}{% endblock %}
     
