@@ -5276,9 +5276,10 @@ def food_truck_edit_truck(truck_id):
     
     return render_template('food_truck/edit_truck.html', truck=truck, owner=owner)
 
-@app.route('/sync-production-trucks-abc789')
-def sync_production_trucks():
-    """Sync production database food trucks to match development approved trucks"""
+# SECURITY: Disabled sync route that bypassed registration fees
+# @app.route('/sync-production-trucks-abc789')
+def sync_production_trucks_DISABLED():
+    """DISABLED: This route bypassed truck registration fee verification"""
     try:
         # List of food trucks that should be approved and have registration fee charged
         production_trucks_to_approve = [
@@ -5319,9 +5320,10 @@ def sync_production_trucks():
         logging.error(f"Error syncing production trucks: {str(e)}")
         return f"Error syncing trucks: {str(e)}"
 
-@app.route('/sync-production-events-xyz456')
-def sync_production_events():
-    """Sync production database events status and visibility"""
+# SECURITY: Disabled dangerous sync route that bypassed payment verification
+# @app.route('/sync-production-events-xyz456')
+def sync_production_events_DISABLED():
+    """DISABLED: This route bypassed organizer fee payment verification"""
     try:
         # Get all events and ensure they have proper status
         events = Event.query.all()
@@ -5443,9 +5445,10 @@ def fix_duplicate_events():
         logging.error(f"Duplicate cleanup error: {str(e)}")
         return f"❌ Cleanup failed: {str(e)}"
 
-@app.route('/sync-production-database-xyz789')
-def sync_production_database():
-    """Smart bidirectional sync - preserves legitimate production data while fixing inconsistencies"""
+# SECURITY: Disabled dangerous sync route that bypassed payment verification
+# @app.route('/sync-production-database-xyz789')
+def sync_production_database_DISABLED():
+    """DISABLED: This route created events with organizer_fee_charged=True without payment verification"""
     try:
         updates_made = []
         
