@@ -1,7 +1,7 @@
 {
-  "timestamp": "2025-09-09T08:08:12.800400",
+  "timestamp": "2025-09-09T08:21:18.845016",
   "backup_type": "automatic",
-  "event_count": 2,
+  "event_count": 3,
   "events": [
     {
       "id": 1,
@@ -42,6 +42,26 @@
       "organizer_fee_payment_intent": "pi_3S4fFrBgt3ltA59n1PJP8iyK",
       "organizer_entree_claimed": true,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
+    },
+    {
+      "id": 3,
+      "name": "TEST - Should Not Appear",
+      "description": "Test event that should not show in public list",
+      "date": "2025-10-01T18:00:00",
+      "location": "Test Location",
+      "organizer_id": 1,
+      "food_truck_id": 1,
+      "selected_menu_items": null,
+      "markup_percentage": 0.0,
+      "pledge_goal": 1000.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-09T08:21:03.266707",
+      "organizer_fee_charged": false,
+      "organizer_fee_payment_intent": null,
+      "organizer_entree_claimed": false,
+      "markup_split_config": null
     }
   ]
 }
