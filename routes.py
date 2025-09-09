@@ -2118,48 +2118,6 @@ def fix_organizer_pledges():
         return f"Error: {str(e)}", 500
 
 
-@app.route('/admin/fix-event-35-goal-abc123')
-def fix_event_35_goal():
-    """Fix pledge goal calculation for event 35 - correct markup logic"""
-    if not session.get('admin_id'):
-        return "Access denied - Admin login required", 403
-    
-    try:
-        event = Event.query.get(35)
-        if not event:
-            return "Event 35 not found", 404
-        
-        food_truck = event.food_truck
-        if not food_truck:
-            return "Food truck not found", 404
-        
-        # Correct pledge goal calculation: base goal + markup percentage
-        base_goal = food_truck.sales_goal or 1000.0  # Default to $1000 if not set
-        markup_percentage = 20.0
-        correct_pledge_goal = base_goal * (1 + markup_percentage / 100)
-        
-        old_goal = event.pledge_goal
-        event.pledge_goal = round(correct_pledge_goal, 2)
-        
-        db.session.commit()
-        
-        return f"""
-        <h2>✅ Event 35 Pledge Goal Corrected</h2>
-        <p><strong>Event:</strong> {event.name}</p>
-        <p><strong>Food Truck:</strong> {food_truck.name}</p>
-        <p><strong>Food Truck Base Goal:</strong> ${base_goal:.2f}</p>
-        <p><strong>Markup:</strong> {markup_percentage}%</p>
-        <p><strong>Old (Incorrect) Goal:</strong> ${old_goal:.2f}</p>
-        <p><strong>New (Correct) Goal:</strong> ${event.pledge_goal:.2f}</p>
-        
-        <p><strong>✅ Pledge goal now correctly calculated as base goal + markup!</strong></p>
-        <p><a href="/events/35" target="_blank">→ View Corrected Event</a></p>
-        <p><a href="/admin">← Back to Admin</a></p>
-        """
-        
-    except Exception as e:
-        db.session.rollback()
-        return f"Error fixing event 35 goal: {str(e)}", 500
 
 @app.route('/admin/update-pledge-totals-xyz456')
 def update_pledge_totals():
