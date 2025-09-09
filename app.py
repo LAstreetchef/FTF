@@ -74,42 +74,81 @@ app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruc
 app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD_NEW', 'your-email-password')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
 
-# Configure Stripe - Smart mode switching (defaults to LIVE for production)
-# Set STRIPE_TEST_MODE=true environment variable to enable test mode
+# Configure Stripe - Smart mode switching with flexible key detection
+# Check for available keys first
+secret_key = os.environ.get('STRIPE_SECRET_KEY')
+publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
+live_publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+
+# Determine if we have live keys available
+has_live_keys = (secret_key and secret_key.startswith('sk_live_')) or (live_secret_key and live_secret_key.startswith('sk_live_'))
+has_test_keys = (secret_key and secret_key.startswith('sk_test_'))
+
+# Check test mode preference but override if we only have live keys
 STRIPE_TEST_MODE = os.environ.get('STRIPE_TEST_MODE', 'false').lower() == 'true'
 
-if STRIPE_TEST_MODE:
-    # Test mode - for development and testing
-    stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
-    app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+if STRIPE_TEST_MODE and has_test_keys:
+    # Test mode requested and test keys available
+    stripe.api_key = secret_key
+    app.config['STRIPE_PUBLISHABLE_KEY'] = publishable_key
     app.config['STRIPE_MODE'] = 'test'
     logging.info("🧪 STRIPE TEST MODE ENABLED - Using test keys (4242 cards will work)")
-else:
-    # Live mode - for real payment processing
-    live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
-    live_publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
+elif has_live_keys:
+    # Live mode - use live keys (prefer standard names, fallback to _LIVE suffix)
+    if secret_key and secret_key.startswith('sk_live_'):
+        # Live keys stored under standard names
+        live_secret = secret_key
+        live_pub = publishable_key
+    else:
+        # Live keys stored under _LIVE suffix
+        live_secret = live_secret_key
+        live_pub = live_publishable_key
     
-    if not live_secret_key or not live_publishable_key:
-        logging.error("❌ Live Stripe keys not found in environment variables")
-        raise ValueError("STRIPE_SECRET_KEY_LIVE and STRIPE_PUBLISHABLE_KEY_LIVE must be set for live mode")
+    if not live_secret or not live_pub:
+        logging.error("❌ Live mode detected but keys incomplete")
+        raise ValueError("Live Stripe keys are incomplete")
     
-    stripe.api_key = live_secret_key
-    app.config['STRIPE_PUBLISHABLE_KEY'] = live_publishable_key
+    stripe.api_key = live_secret
+    app.config['STRIPE_PUBLISHABLE_KEY'] = live_pub
     app.config['STRIPE_MODE'] = 'live'
-    logging.info(f"💳 STRIPE LIVE MODE ENABLED - Secret key: {live_secret_key[:20]}... Publishable key: {live_publishable_key[:20]}...")
+    logging.info(f"💳 STRIPE LIVE MODE ENABLED - Processing real payments")
+    logging.info(f"🔑 Using secret key: {live_secret[:7]}...{live_secret[-4:]}")
+    logging.info(f"🔑 Using publishable key: {live_pub[:7]}...{live_pub[-4:]}")
     
-    # Double-check the assignment worked (fix for mysterious test key persistence)
-    if stripe.api_key != live_secret_key:
-        logging.warning("🔧 Stripe key assignment failed, forcing direct assignment")
-        import stripe as stripe_module
-        stripe_module.api_key = live_secret_key
-    
-    # CRITICAL FIX: Force verification that live key is actually set
+    # Verification that live key is properly set
     if not stripe.api_key.startswith('sk_live_'):
-        logging.error("🚨 CRITICAL: Live key not properly set despite configuration!")
-        # Force override with live key
-        stripe.api_key = live_secret_key
-        logging.info("🔧 FORCED live key assignment completed")
+        logging.error("🚨 CRITICAL: Live key not properly set!")
+        stripe.api_key = live_secret
+        logging.info("🔧 Live key assignment corrected")
+elif STRIPE_TEST_MODE and has_live_keys:
+    # Test mode requested but only live keys available - override to live mode
+    if secret_key and secret_key.startswith('sk_live_'):
+        live_secret = secret_key
+        live_pub = publishable_key
+    else:
+        live_secret = live_secret_key
+        live_pub = live_publishable_key
+    
+    stripe.api_key = live_secret
+    app.config['STRIPE_PUBLISHABLE_KEY'] = live_pub
+    app.config['STRIPE_MODE'] = 'live'
+    logging.warning("⚠️  STRIPE_TEST_MODE=true requested but only live keys available")
+    logging.info("💳 STRIPE LIVE MODE ENABLED - Overriding test mode setting")
+    logging.info(f"🔑 Using secret key: {live_secret[:7]}...{live_secret[-4:] if live_secret else 'None'}")
+    logging.info(f"🔑 Using publishable key: {live_pub[:7]}...{live_pub[-4:] if live_pub else 'None'}")
+else:
+    # Fallback to test mode if test keys available
+    if secret_key and secret_key.startswith('sk_test_'):
+        stripe.api_key = secret_key
+        app.config['STRIPE_PUBLISHABLE_KEY'] = publishable_key
+        app.config['STRIPE_MODE'] = 'test'
+        logging.info("🧪 STRIPE TEST MODE (FALLBACK) - Using available test keys")
+    else:
+        logging.error("❌ No usable Stripe keys found")
+        logging.error(f"Secret key available: {bool(secret_key)} (starts with: {secret_key[:7] if secret_key else 'None'})")
+        logging.error(f"Publishable key available: {bool(publishable_key)}")
+        raise ValueError("No usable Stripe keys available")
 
 # Initialize extensions
 db.init_app(app)
