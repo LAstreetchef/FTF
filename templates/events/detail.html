@@ -188,16 +188,11 @@
                         {% endif %}
                     </p>
                     
-                    {% if event.status in ['pending', 'funded'] %}
+                    {% if event.status in ['pending', 'funded', 'approved', 'completed'] %}
                     <a href="{{ url_for('make_pledge', event_id=event.id) }}" class="btn btn-primary btn-lg w-100">
                         <i data-feather="heart" class="me-2"></i>
                         Support This Event
                     </a>
-                    {% elif event.status == 'approved' %}
-                    <div class="alert alert-success">
-                        <i data-feather="check-circle" class="me-2"></i>
-                        Event funded and approved! Food truck confirmed.
-                    </div>
                     {% else %}
                     <div class="alert alert-secondary">
                         This event is no longer accepting pledges.
