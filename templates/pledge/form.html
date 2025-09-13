@@ -45,11 +45,19 @@
             </div>
             <div class="card-body">
                 <!-- Important Notice -->
+                {% if event.is_goal_met() %}
+                <div class="alert alert-success">
+                    <i data-feather="check-circle" class="me-2"></i>
+                    <strong>Event Funded:</strong> Your payment will be charged immediately since this event has already reached its funding goal.
+                    Your e-ticket will be sent right away!
+                </div>
+                {% else %}
                 <div class="alert alert-info">
                     <i data-feather="info" class="me-2"></i>
                     <strong>Important:</strong> Your payment will only be charged if this event reaches its funding goal. 
                     If the goal isn't met, your pledge will be cancelled and you won't be charged.
                 </div>
+                {% endif %}
                 
                 <!-- Processing Fee Notice -->
                 <div class="alert alert-warning">
@@ -65,7 +73,11 @@
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control" id="email" name="email" required>
-                            <div class="form-text">We'll send your e-ticket to this email if the event is funded.</div>
+                            {% if event.is_goal_met() %}
+                            <div class="form-text text-success">We'll send your e-ticket to this email immediately after payment.</div>
+                            {% else %}
+                            <div class="form-text">We'll send your e-ticket to this email if the event reaches its funding goal.</div>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -124,7 +136,11 @@
                         {% if menu_items %}
                         <div class="card">
                             <div class="card-body">
+                                {% if event.is_goal_met() %}
+                                <p class="text-muted mb-3">Choose the items you'd like to order. You'll be charged immediately.</p>
+                                {% else %}
                                 <p class="text-muted mb-3">Choose the items you'd like to order. You'll only be charged if the event reaches its funding goal.</p>
+                                {% endif %}
                                 <div id="menu-items-container">
                                     {% for item in menu_items %}
                                     <div class="menu-item-quantity card mb-3" data-price="{{ '%.2f'|format(item.marked_up_price) }}">
@@ -182,7 +198,11 @@
                                     </div>
                                     <hr>
                                     <div class="d-flex justify-content-between align-items-center">
-                                        <strong class="text-primary">Total to be charged:</strong>
+                                        {% if event.is_goal_met() %}
+                                        <strong class="text-primary">Total to be charged now:</strong>
+                                        {% else %}
+                                        <strong class="text-primary">Total if goal is met:</strong>
+                                        {% endif %}
                                         <strong class="text-primary" id="total-amount">$0.00</strong>
                                     </div>
                                 </div>
@@ -201,9 +221,9 @@
                                     <label for="amount" class="form-label">Pledge Amount</label>
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
-                                        <input type="number" step="0.01" min="1.95" class="form-control" id="amount" name="amount" required>
+                                        <input type="number" step="0.01" min="5" class="form-control" id="amount" name="amount" required>
                                     </div>
-                                    <div class="form-text">Minimum pledge: $1.95</div>
+                                    <div class="form-text">Minimum pledge: $5.00</div>
                                 </div>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(10)">$10</button>
@@ -354,10 +374,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitButton.disabled = false;
                 const totalQuantity = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
                 const itemText = totalQuantity === 1 ? 'item' : 'items';
-                buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge ${totalQuantity} ${itemText} ($${subtotal.toFixed(2)})`;
-                if (typeof feather !== 'undefined') {
-                    feather.replace();
-                }
+                {% if event.is_goal_met() %}
+                buttonText.textContent = `Pay $${totalAmount.toFixed(2)} for ${totalQuantity} ${itemText}`;
+                {% else %}
+                buttonText.textContent = `Pledge ${totalQuantity} ${itemText} ($${subtotal.toFixed(2)})`;
+                {% endif %}
             }
         } catch (error) {
             console.error('Error in updateSelectionSummary:', error);
@@ -372,7 +393,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const newValue = Math.max(0, Math.min(20, currentValue + change));
             input.value = newValue;
             updateSelectionSummary();
-            feather.replace();
         }
     };
     
@@ -396,8 +416,6 @@ document.addEventListener('DOMContentLoaded', function() {
             recipientEmailInput.value = '';
             document.getElementById('gift-message').value = '';
         }
-        
-        feather.replace();
     };
     
     // Fallback amount input handling for events without menu items
@@ -410,9 +428,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (amount >= 5) {
                 const processingFee = amount * 0.045;
                 const totalAmount = amount + processingFee;
-                buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge $${amount.toFixed(2)}`;
+                {% if event.is_goal_met() %}
+                buttonText.textContent = `Pay $${totalAmount.toFixed(2)} now`;
+                {% else %}
+                buttonText.textContent = `Pledge $${amount.toFixed(2)}`;
+                {% endif %}
                 submitButton.disabled = false;
-                feather.replace();
             } else {
                 buttonText.textContent = 'Enter amount ($5 minimum)';
                 submitButton.disabled = true;
@@ -533,8 +554,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const amount = parseFloat(document.getElementById('amount').value) || 0;
         
         submitButton.disabled = false;
-        buttonText.innerHTML = `<i data-feather="heart" class="me-2"></i>Pledge $${amount.toFixed(2)}`;
-        feather.replace();
+        {% if event.is_goal_met() %}
+        const processingFee = amount * 0.045;
+        const totalAmount = amount + processingFee;
+        buttonText.textContent = `Pay $${totalAmount.toFixed(2)} now`;
+        {% else %}
+        buttonText.textContent = `Pledge $${amount.toFixed(2)}`;
+        {% endif %}
     }
 });
 
