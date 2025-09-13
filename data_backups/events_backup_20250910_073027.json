@@ -1,28 +1,8 @@
 {
-  "timestamp": "2025-09-09T08:33:28.877604",
+  "timestamp": "2025-09-10T07:30:27.838123",
   "backup_type": "automatic",
   "event_count": 2,
   "events": [
-    {
-      "id": 1,
-      "name": "Annual Tracy Austin Doubles Tennis Tournament 2025",
-      "description": "Join us for an exciting tennis tournament with delicious food truck cuisine!",
-      "date": "2025-09-15T12:00:00",
-      "location": "Rolling Hills Estates Tennis Club at Ernie Howlett Park - 25851 Hawthorne Blvd, Rolling Hills Estates, CA 90274",
-      "organizer_id": 1,
-      "food_truck_id": 1,
-      "selected_menu_items": "[{\"name\": \"Korean BBQ Bowl\", \"price\": 24.00}, {\"name\": \"Bulgogi Tacos\", \"price\": 18.00}]",
-      "markup_percentage": 20.0,
-      "pledge_goal": 1200.0,
-      "status": "pending",
-      "current_pledges": 0.0,
-      "approved_at": null,
-      "created_at": "2025-09-04T08:40:20.592995",
-      "organizer_fee_charged": false,
-      "organizer_fee_payment_intent": null,
-      "organizer_entree_claimed": false,
-      "markup_split_config": null
-    },
     {
       "id": 2,
       "name": "Culver Skate Park",
@@ -42,6 +22,26 @@
       "organizer_fee_payment_intent": "pi_3S4fFrBgt3ltA59n1PJP8iyK",
       "organizer_entree_claimed": true,
       "markup_split_config": "[{\"email\": \"kammiceli@gmail.com\", \"percentage\": 100.0, \"description\": \"Organizer\", \"is_organizer\": true}]"
+    },
+    {
+      "id": 1,
+      "name": "Annual Tracy Austin Doubles Tennis Tournament 2025",
+      "description": "Join us for an exciting tennis tournament with delicious food truck cuisine!",
+      "date": "2025-09-15T12:00:00",
+      "location": "Rolling Hills Estates Tennis Club at Ernie Howlett Park - 25851 Hawthorne Blvd, Rolling Hills Estates, CA 90274",
+      "organizer_id": 1,
+      "food_truck_id": 1,
+      "selected_menu_items": "[{\"name\": \"Korean BBQ Bowl\", \"price\": 24.00}, {\"name\": \"Bulgogi Tacos\", \"price\": 18.00}]",
+      "markup_percentage": 20.0,
+      "pledge_goal": 1200.0,
+      "status": "pending",
+      "current_pledges": 0.0,
+      "approved_at": null,
+      "created_at": "2025-09-04T08:40:20.592995",
+      "organizer_fee_charged": true,
+      "organizer_fee_payment_intent": null,
+      "organizer_entree_claimed": false,
+      "markup_split_config": null
     }
   ]
 }

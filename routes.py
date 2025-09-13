@@ -4036,7 +4036,7 @@ def event_detail(event_id):
         flash('This event is not yet available for pledges', 'error')
         return redirect(url_for('events_list'))
     
-    if event.status not in ['pending', 'funded']:
+    if event.status not in ['pending', 'funded', 'approved', 'completed']:
         flash('This event is no longer accepting pledges', 'info')
         return redirect(url_for('events_list'))
     
@@ -4052,7 +4052,7 @@ def make_pledge(event_id):
         flash('This event is not yet available for pledges', 'error')
         return redirect(url_for('events_list'))
     
-    if event.status not in ['pending', 'funded']:
+    if event.status not in ['pending', 'funded', 'approved', 'completed']:
         flash('This event is no longer accepting pledges', 'error')
         return redirect(url_for('event_detail', event_id=event_id))
     

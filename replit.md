@@ -7,6 +7,9 @@ A Flask-based web application that enables community crowdfunding for food truck
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+- **Ask, don't assume**: Always ask to clarify context (development vs. production, deployment status) rather than making assumptions
+- **Concise responses**: Keep answers brief and direct
+- **Environment clarity**: When discussing deployment, publishing, or environment-specific actions, explicitly ask which environment is being referenced
 
 ## Development Environment Notes
 
