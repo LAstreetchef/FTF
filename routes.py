@@ -10,6 +10,7 @@ import json
 import logging
 import secrets
 import time
+import uuid
 from datetime import datetime
 from translations import get_text, get_language_from_request
 
@@ -4138,28 +4139,117 @@ def make_pledge(event_id):
                 db.session.add(pledge)
                 db.session.commit()
                 
-                # Update event pledge total
+                # Update event pledge total and log the result
                 event.update_pledge_total()
+                logging.info(f"Event {event.id} pledge total updated: ${event.current_pledges:.2f} / ${event.get_total_goal_amount():.2f} (goal {'met' if event.is_goal_met() else 'not met'})")
                 
-                # Check if goal is met
-                if event.is_goal_met() and event.status == 'pending':
+                # Check if event is already funded - if so, charge immediately
+                if event.status in ['funded', 'approved', 'completed']:
+                    logging.info(f"Event {event.id} is already funded (status: {event.status}), charging pledge immediately")
+                    
+                    # Use proper utility function to charge the payment
+                    charge_result = charge_stripe_payment(payment_intent_id, amount, f"Food Truck Event: {event.name}")
+                    
+                    if charge_result['success']:
+                        # Update pledge to charged status
+                        pledge.status = 'charged'
+                        pledge.charged_at = datetime.utcnow()
+                        pledge.processing_fee = charge_result['processing_fee']
+                        
+                        # Generate ticket code using proper utility
+                        if not pledge.ticket_code:
+                            pledge.ticket_code = generate_ticket_code()
+                        
+                        # Save payment success to database first before email attempts
+                        db.session.commit()
+                        logging.info(f"Payment successfully charged for pledge {pledge.id}, total: ${charge_result['total_charged']:.2f}")
+                        
+                        # Now attempt email sending - separate from payment success
+                        try:
+                            ticket_link = f"{request.url_root}ticket/{pledge.ticket_code}"
+                            total_charged = charge_result['total_charged']
+                            processing_fee_charged = charge_result['processing_fee']
+                            
+                            if is_gift:
+                                # Send confirmation to gift giver
+                                send_email(
+                                    email,
+                                    f"Gift Meal Confirmed & Paid - {event.name}",
+                                    f"Your ${amount:.2f} gift meal for '{event.name}' has been processed immediately!\n\nThis event is already confirmed, so your payment was charged right away.\n\nGift Recipient: {recipient_name} ({recipient_email})\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee_charged:.2f}\nTotal Charged: ${total_charged:.2f}\n\nE-Ticket: {ticket_link}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYour recipient has been notified and received their e-ticket!"
+                                )
+                                # Send e-ticket to recipient
+                                gift_email_message = f"Your gift meal e-ticket for '{event.name}' is ready!\n\nFrom: {email}"
+                                if gift_message:
+                                    gift_email_message += f"\n\nPersonal message:\n\"{gift_message}\""
+                                gift_email_message += f"\n\nThis event is confirmed and your meal is secured!\n\nYour E-Ticket: {ticket_link}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nPresent this ticket code at the event: {pledge.ticket_code}\n\nEnjoy your meal, {recipient_name}!"
+                                send_email(
+                                    recipient_email,
+                                    f"Your E-Ticket Ready! - {event.name}",
+                                    gift_email_message
+                                )
+                            else:
+                                # Send immediate confirmation and e-ticket to pledger
+                                send_email(
+                                    email,
+                                    f"Payment Confirmed & E-Ticket Ready - {event.name}",
+                                    f"Your ${amount:.2f} pledge for '{event.name}' has been processed immediately!\n\nThis event is already confirmed, so your payment was charged right away.\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee_charged:.2f}\nTotal Charged: ${total_charged:.2f}\n\nYour E-Ticket: {ticket_link}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nPresent this ticket code at the event: {pledge.ticket_code}\n\nThank you for your support!"
+                                )
+                                
+                            # Mark e-ticket as sent
+                            pledge.ticket_sent = True
+                            db.session.commit()
+                            
+                        except Exception as email_error:
+                            # Email failure should not affect payment success
+                            logging.error(f"Email sending failed after successful payment for pledge {pledge.id}: {str(email_error)}")
+                            # Payment was successful, just notify user about email issue
+                        
+                        # Set flash message for successful payment (regardless of email status)
+                        if is_gift:
+                            flash(f'Gift meal purchased successfully! Payment of ${total_charged:.2f} has been charged immediately since this event is already confirmed. E-tickets have been sent.', 'success')
+                        else:
+                            flash(f'Payment processed successfully! ${total_charged:.2f} has been charged immediately since this event is already confirmed. Check your email for the e-ticket.', 'success')
+                        return redirect(url_for('pledge_success', pledge_id=pledge.id))
+                        
+                    else:
+                        # Payment failed - log the specific error and show user-friendly message
+                        error_msg = charge_result.get('error', 'Unknown payment error')
+                        logging.error(f"Failed to charge payment intent {payment_intent_id}: {error_msg}")
+                        flash('Payment processing failed. Please contact support if the issue persists.', 'error')
+                        return redirect(url_for('make_pledge', event_id=event_id))
+                
+                # Check if goal is met for unfunded events
+                elif event.is_goal_met() and event.status == 'pending':
+                    logging.info(f"FUNDING TRANSITION: Event {event.id} '{event.name}' reached goal (${event.current_pledges:.2f} >= ${event.get_total_goal_amount():.2f}), transitioning from 'pending' to 'funded'")
                     event.status = 'funded'
-                    db.session.commit()
+                    try:
+                        db.session.commit()
+                        logging.info(f"Successfully transitioned event {event.id} to 'funded' status")
+                    except Exception as db_error:
+                        logging.error(f"Database error during funding transition for event {event.id}: {str(db_error)}")
+                        db.session.rollback()
+                        flash('Event goal was met but there was an error updating the status. Please contact support.', 'error')
+                        return redirect(url_for('make_pledge', event_id=event_id))
                     
-                    # Send notification to admin
-                    send_email(
-                        'support@foodtruckfundraiser.com',
-                        f"Event Goal Met: {event.name}",
-                        f"The event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}. Please review and approve the event to charge all pledges."
-                    )
-                    
-                    # Send notification to food truck
-                    if event.food_truck.contact_email:
+                    # Send notifications about funding completion (handle email failures gracefully)
+                    try:
+                        # Send notification to admin
                         send_email(
-                            event.food_truck.contact_email,
-                            f"Event Funded: {event.name}",
-                            f"Congratulations! Your event '{event.name}' has reached its funding goal of ${event.pledge_goal:.2f}!\n\nTotal Raised: ${event.current_pledges:.2f}\nNumber of Pledgers: {len(event.pledges)}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYour event will be reviewed and approved soon. Once approved, all pledges will be charged and you'll receive your payout.\n\nThank you for participating in our platform!"
+                            'support@foodtruckfundraiser.com',
+                            f"Event Goal Met: {event.name}",
+                            f"The event '{event.name}' has reached its funding goal of ${event.get_total_goal_amount():.2f}. Please review and approve the event to charge all pledges.\n\nTotal Raised: ${event.current_pledges:.2f}\nPledge Goal: ${event.pledge_goal:.2f}\nMarkup: {event.markup_percentage:.1f}%"
                         )
+                        
+                        # Send notification to food truck
+                        if event.food_truck.contact_email:
+                            send_email(
+                                event.food_truck.contact_email,
+                                f"Event Funded: {event.name}",
+                                f"Congratulations! Your event '{event.name}' has reached its funding goal of ${event.get_total_goal_amount():.2f}!\n\nTotal Raised: ${event.current_pledges:.2f}\nNumber of Pledgers: {len(event.pledges)}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYour event will be reviewed and approved soon. Once approved, all pledges will be charged and you'll receive your payout.\n\nThank you for participating in our platform!"
+                            )
+                    except Exception as email_error:
+                        # Don't let email failures affect the funding transition
+                        logging.error(f"Failed to send funding notification emails for event {event.id}: {str(email_error)}")
                     
                     # Send goal reached confirmation to pledger
                     if is_gift:
@@ -4220,8 +4310,18 @@ def make_pledge(event_id):
                 flash('Error processing payment. Please try again.', 'error')
                 
         except Exception as e:
-            logging.error(f"Error creating pledge: {str(e)}")
-            flash('Error processing pledge. Please try again.', 'error')
+            import traceback
+            error_details = traceback.format_exc()
+            logging.error(f"Unexpected error creating pledge for event {event_id}: {str(e)}")
+            logging.error(f"Full traceback: {error_details}")
+            
+            # Ensure database session is cleaned up
+            try:
+                db.session.rollback()
+            except:
+                pass
+                
+            flash('An unexpected error occurred while processing your pledge. Please try again or contact support if the issue persists.', 'error')
     
     # Use the correct publishable key based on mode (respects test mode)
     stripe_publishable_key = app.config.get('STRIPE_PUBLISHABLE_KEY')
