@@ -39,7 +39,7 @@ def create_stripe_payment_intent(amount, customer_email, description):
         # Get the current stripe key that was configured in app.py based on test mode
         current_key = stripe.api_key
         mode = "TEST" if current_key and current_key.startswith('sk_test_') else "LIVE"
-        logging.info(f"Creating payment intent with {mode} key: {current_key[:20] if current_key else 'None'}...")
+        logging.info(f"Creating payment intent in {mode} mode")
         
         # Create PaymentIntent with current configured key
         intent = stripe.PaymentIntent.create(
@@ -80,7 +80,7 @@ def charge_stripe_payment(payment_intent_id, original_amount, description):
         total_amount_with_fee = calculate_total_with_processing_fee(original_amount)
         processing_fee = calculate_processing_fee(original_amount)
         
-        logging.info(f"Charging payment with {mode} key: {current_key[:20]}...")
+        logging.info(f"Charging payment in {mode} mode")
         
         # Retrieve the PaymentIntent
         intent = stripe.PaymentIntent.retrieve(payment_intent_id)

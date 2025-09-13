@@ -25,7 +25,29 @@ mail = Mail()
 
 # Create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
+
+# Enforce SESSION_SECRET in production - critical security requirement
+session_secret = os.environ.get("SESSION_SECRET")
+database_url = os.environ.get("DATABASE_URL")
+
+# Detect production environment based on database URL
+is_production = database_url and "ep-young-bush-adblwffc.c-2.us-east-1.aws.neon.tech" in database_url
+
+if is_production and not session_secret:
+    logging.error("🚨 CRITICAL SECURITY ERROR: SESSION_SECRET environment variable is required in production")
+    logging.error("🚨 Application startup FAILED due to missing session secret")
+    raise ValueError("SESSION_SECRET environment variable is required in production")
+elif not session_secret:
+    # Development fallback
+    logging.warning("⚠️  Using development session secret - not suitable for production")
+    app.secret_key = "dev-secret-key-change-in-production"
+else:
+    app.secret_key = session_secret
+    if is_production:
+        logging.info("✅ Production session secret configured")
+    else:
+        logging.info("✅ Development session secret configured")
+
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Configure session cookies for production security
@@ -112,9 +134,9 @@ elif has_live_keys:
     stripe.api_key = live_secret
     app.config['STRIPE_PUBLISHABLE_KEY'] = live_pub
     app.config['STRIPE_MODE'] = 'live'
-    logging.info(f"💳 STRIPE LIVE MODE ENABLED - Processing real payments")
-    logging.info(f"🔑 Using secret key: {live_secret[:7]}...{live_secret[-4:]}")
-    logging.info(f"🔑 Using publishable key: {live_pub[:7]}...{live_pub[-4:]}")
+    logging.info("💳 STRIPE LIVE MODE ENABLED - Processing real payments")
+    logging.info("🔑 Live keys configured successfully")
+    logging.info("⚠️  PRODUCTION MODE: Real charges will be processed")
     
     # Verification that live key is properly set
     if not stripe.api_key.startswith('sk_live_'):
@@ -135,8 +157,8 @@ elif STRIPE_TEST_MODE and has_live_keys:
     app.config['STRIPE_MODE'] = 'live'
     logging.warning("⚠️  STRIPE_TEST_MODE=true requested but only live keys available")
     logging.info("💳 STRIPE LIVE MODE ENABLED - Overriding test mode setting")
-    logging.info(f"🔑 Using secret key: {live_secret[:7]}...{live_secret[-4:] if live_secret else 'None'}")
-    logging.info(f"🔑 Using publishable key: {live_pub[:7]}...{live_pub[-4:] if live_pub else 'None'}")
+    logging.info("🔑 Live keys configured successfully")
+    logging.warning("⚠️  PRODUCTION MODE: Real charges will be processed despite test mode request")
 else:
     # Fallback to test mode if test keys available
     if secret_key and secret_key.startswith('sk_test_'):
@@ -146,8 +168,9 @@ else:
         logging.info("🧪 STRIPE TEST MODE (FALLBACK) - Using available test keys")
     else:
         logging.error("❌ No usable Stripe keys found")
-        logging.error(f"Secret key available: {bool(secret_key)} (starts with: {secret_key[:7] if secret_key else 'None'})")
+        logging.error(f"Secret key available: {bool(secret_key)}")
         logging.error(f"Publishable key available: {bool(publishable_key)}")
+        logging.error("ℹ️  Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY environment variables")
         raise ValueError("No usable Stripe keys available")
 
 # Initialize extensions

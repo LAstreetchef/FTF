@@ -14,8 +14,8 @@ import uuid
 from datetime import datetime
 from translations import get_text, get_language_from_request
 
-# Configure Stripe
-stripe.api_key = os.environ.get('STRIPE_SECRET_KEY', 'sk_test_...')
+# Stripe configuration is handled in app.py - DO NOT override here
+# stripe.api_key is configured in app.py with proper live/test mode handling
 
 def send_new_chat_notification(conversation, user_message, page_context):
     """Send email notification when a new chat conversation is started"""
@@ -110,9 +110,9 @@ def set_language(lang):
 def index():
     """Homepage with overview and navigation - optimized for performance"""
     try:
-        # Use more efficient query with timeout protection
+        # Use more efficient query with timeout protection - include all discoverable events
         recent_events = Event.query.filter(
-            Event.status.in_(['pending', 'funded']),
+            Event.status.in_(['pending', 'funded', 'approved', 'completed']),
             Event.organizer_fee_charged == True
         ).order_by(Event.created_at.desc()).limit(3).all()
         current_lang = get_language_from_request()
@@ -127,9 +127,9 @@ def index():
 def los_angeles_landing():
     """Los Angeles landing page for local SEO targeting 'food trucks in Los Angeles' and 'fundraiser in Los Angeles'"""
     try:
-        # Get recent events, preferably from LA area
+        # Get recent events, preferably from LA area - include all discoverable events
         recent_events = Event.query.filter(
-            Event.status.in_(['pending', 'funded']),
+            Event.status.in_(['pending', 'funded', 'approved', 'completed']),
             Event.organizer_fee_charged == True
         ).order_by(Event.created_at.desc()).limit(6).all()
         
@@ -142,9 +142,9 @@ def los_angeles_landing():
 def houston_landing():
     """Houston landing page for local SEO targeting 'food trucks in Houston' and 'fundraiser in Houston'"""
     try:
-        # Get recent events, preferably from Houston area
+        # Get recent events, preferably from Houston area - include all discoverable events
         recent_events = Event.query.filter(
-            Event.status.in_(['pending', 'funded']),
+            Event.status.in_(['pending', 'funded', 'approved', 'completed']),
             Event.organizer_fee_charged == True
         ).order_by(Event.created_at.desc()).limit(6).all()
         
@@ -3519,6 +3519,21 @@ def food_truck_pay_registration_fee(truck_id):
     
     if request.method == 'POST':
         try:
+            # Runtime assertion: Ensure Stripe is properly configured
+            current_secret_key = stripe.api_key
+            current_publishable_key = app.config.get('STRIPE_PUBLISHABLE_KEY')
+            mode = "TEST" if current_secret_key and current_secret_key.startswith('sk_test_') else "LIVE"
+            
+            if not current_secret_key or not current_publishable_key:
+                logging.error("CRITICAL: Stripe keys not configured for food truck registration")
+                return jsonify({'error': 'Payment system not configured'}), 500
+            
+            if not current_secret_key.startswith(('sk_test_', 'sk_live_')):
+                logging.error(f"CRITICAL: Invalid Stripe key format: {current_secret_key[:20]}...")
+                return jsonify({'error': 'Payment system misconfigured'}), 500
+            
+            logging.info(f"Creating food truck registration payment with {mode} key: {current_secret_key[:20]}...")
+            
             # Create Stripe payment intent for $25 registration fee
             payment_intent = stripe.PaymentIntent.create(
                 amount=2500,  # $25.00 in cents
@@ -3563,6 +3578,12 @@ def confirm_food_truck_registration_fee_payment(truck_id):
         return jsonify({'error': 'Access denied'}), 403
     
     try:
+        # Runtime assertion: Ensure Stripe is properly configured
+        current_secret_key = stripe.api_key
+        if not current_secret_key or not current_secret_key.startswith(('sk_test_', 'sk_live_')):
+            logging.error(f"CRITICAL: Invalid Stripe key for payment retrieval: {current_secret_key[:20] if current_secret_key else 'None'}...")
+            return jsonify({'error': 'Payment system misconfigured'}), 500
+        
         # Verify the payment intent was successful
         if not truck.registration_fee_payment_intent:
             return jsonify({'error': 'No payment intent found'}), 400
