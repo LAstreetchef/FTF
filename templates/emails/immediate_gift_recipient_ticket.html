@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Your E-Ticket Ready! - {{ event.name }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+    <div style="border-bottom: 3px solid #fd7e14; padding-bottom: 20px; margin-bottom: 20px;">
+        <h1 style="color: #fd7e14; margin: 0;">🎫 Your Gift Meal is Ready!</h1>
+        <p style="font-size: 18px; margin: 10px 0 0 0; color: #666;">{{ event.name }}</p>
+    </div>
+
+    <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <h3 style="color: #155724; margin: 0 0 10px 0;">🎁 This event is confirmed and your meal is secured!</h3>
+        <p style="margin: 0; color: #155724;">Your gift-giver's payment has been processed and your e-ticket is ready to use!</p>
+    </div>
+
+    <h2 style="color: #333;">Gift Details</h2>
+    <div style="background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <p><strong>🎁 From:</strong> {{ pledge.email }}</p>
+        <p><strong>💰 Gift Value:</strong> ${{ "%.2f"|format(pledge.amount) }}</p>
+        {% if pledge.gift_message %}
+        <div style="background-color: #e7f3ff; border-left: 4px solid #007bff; padding: 10px; margin: 10px 0;">
+            <p style="margin: 0;"><strong>Personal Message for You:</strong></p>
+            <p style="margin: 10px 0 0 0; font-style: italic;">"{{ pledge.gift_message }}"</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="background-color: #007bff; color: white; border-radius: 8px; padding: 20px; margin: 30px 0; text-align: center;">
+        <h2 style="margin: 0 0 15px 0;">🎫 Your E-Ticket</h2>
+        <div style="background-color: white; color: #333; border-radius: 5px; padding: 15px; margin: 10px 0;">
+            <p style="margin: 0; font-size: 18px; font-weight: bold;">{{ pledge.ticket_code }}</p>
+        </div>
+        <p style="margin: 15px 0 0 0;">Present this ticket code at the event to claim your meal!</p>
+        <div style="margin-top: 15px;">
+            <a href="{{ ticket_link }}" style="background-color: white; color: #007bff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">View Full Ticket</a>
+        </div>
+    </div>
+
+    <h2 style="color: #333;">Event Information</h2>
+    <div style="background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <p><strong>📅 Date:</strong> {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+        <p><strong>📍 Location:</strong> {{ event.location }}</p>
+        <p><strong>🚚 Food Truck:</strong> {{ event.food_truck.name }}</p>
+        {% if event.description %}
+        <p><strong>📝 Description:</strong> {{ event.description }}</p>
+        {% endif %}
+    </div>
+
+    <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <h3 style="color: #0c5460; margin: 0 0 10px 0;">📋 Important Reminders</h3>
+        <ul style="color: #0c5460; margin: 0;">
+            <li>Save this email or screenshot your ticket code</li>
+            <li>Arrive at the event with your ticket ready</li>
+            <li>Contact the organizer if you have any questions</li>
+            <li>Don't forget to thank your gift-giver!</li>
+        </ul>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+    
+    <p style="font-size: 14px; color: #666; text-align: center;">
+        Enjoy your gift meal and support local food trucks!<br>
+        <strong>Food Truck Fundraiser Team</strong>
+    </p>
+</body>
+</html>

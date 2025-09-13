@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>You've Got a Gift Meal Pledge! - {{ event.name }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+    <div style="border-bottom: 3px solid #fd7e14; padding-bottom: 20px; margin-bottom: 20px;">
+        <h1 style="color: #fd7e14; margin: 0;">🎁 You've Got a Gift Meal!</h1>
+        <p style="font-size: 18px; margin: 10px 0 0 0; color: #666;">{{ event.name }}</p>
+    </div>
+
+    <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <h3 style="color: #856404; margin: 0 0 10px 0;">⏳ Status: Waiting for Event to be Funded</h3>
+        <p style="margin: 0; color: #856404;">This event needs to reach its funding goal before your gift meal is confirmed. You'll get your e-ticket once the goal is met!</p>
+    </div>
+
+    <h2 style="color: #333;">Gift Details</h2>
+    <div style="background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <p><strong>🎁 From:</strong> {{ pledge.email }}</p>
+        <p><strong>💰 Gift Value:</strong> ${{ "%.2f"|format(pledge.amount) }}</p>
+        {% if pledge.gift_message %}
+        <div style="background-color: #e7f3ff; border-left: 4px solid #007bff; padding: 10px; margin: 10px 0;">
+            <p style="margin: 0;"><strong>Personal Message for You:</strong></p>
+            <p style="margin: 10px 0 0 0; font-style: italic;">"{{ pledge.gift_message }}"</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <h2 style="color: #333;">Event Progress</h2>
+    <div style="background-color: #f8f9fa; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <p><strong>Goal:</strong> ${{ "%.2f"|format(event.pledge_goal) }}</p>
+        <p><strong>Current Progress:</strong> ${{ "%.2f"|format(event.current_pledges) }}</p>
+        <p><strong>Still Needed:</strong> ${{ "%.2f"|format(event.pledge_goal - event.current_pledges) }}</p>
+        
+        <div style="background-color: #e9ecef; border-radius: 10px; height: 20px; margin: 10px 0;">
+            <div style="background-color: #fd7e14; height: 20px; border-radius: 10px; width: {{ "%.1f"|format(event.get_progress_percentage()) }}%;"></div>
+        </div>
+        <p style="text-align: center; margin: 5px 0 0 0; font-weight: bold;">{{ "%.1f"|format(event.get_progress_percentage()) }}% Complete</p>
+    </div>
+
+    <h2 style="color: #333;">Event Information</h2>
+    <p><strong>Date:</strong> {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}</p>
+    <p><strong>Location:</strong> {{ event.location }}</p>
+    <p><strong>Food Truck:</strong> {{ event.food_truck.name }}</p>
+    {% if event.description %}
+    <p><strong>Description:</strong> {{ event.description }}</p>
+    {% endif %}
+
+    <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <h3 style="color: #155724; margin: 0 0 10px 0;">🍽️ What Happens Next?</h3>
+        <ol style="color: #155724; margin: 0;">
+            <li>The event needs to reach its ${{ "%.2f"|format(event.pledge_goal) }} goal</li>
+            <li>Once funded, your gift-giver's payment will be processed</li>
+            <li>You'll receive your e-ticket via email</li>
+            <li>Present your ticket at the event to enjoy your meal!</li>
+        </ol>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+    
+    <p style="font-size: 14px; color: #666; text-align: center;">
+        What a thoughtful gift! We hope the event gets funded soon.<br>
+        <strong>Food Truck Fundraiser Team</strong>
+    </p>
+</body>
+</html>

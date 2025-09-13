@@ -4143,9 +4143,11 @@ def make_pledge(event_id):
                 event.update_pledge_total()
                 logging.info(f"Event {event.id} pledge total updated: ${event.current_pledges:.2f} / ${event.get_total_goal_amount():.2f} (goal {'met' if event.is_goal_met() else 'not met'})")
                 
-                # Check if event is already funded - if so, charge immediately
-                if event.status in ['funded', 'approved', 'completed']:
-                    logging.info(f"Event {event.id} is already funded (status: {event.status}), charging pledge immediately")
+                # Check if event is already approved - if so, charge immediately
+                # IMPORTANT: Only charge immediately for APPROVED events, not just 'funded' ones
+                # 'funded' means goal met but awaiting admin approval - still conditional
+                if event.status in ['approved', 'completed']:
+                    logging.info(f"Event {event.id} is already approved (status: {event.status}), charging pledge immediately")
                     
                     # Use proper utility function to charge the payment
                     charge_result = charge_stripe_payment(payment_intent_id, amount, f"Food Truck Event: {event.name}")
@@ -4166,38 +4168,14 @@ def make_pledge(event_id):
                         
                         # Now attempt email sending - separate from payment success
                         try:
-                            ticket_link = f"{request.url_root}ticket/{pledge.ticket_code}"
+                            from utils import send_immediate_payment_confirmation
                             total_charged = charge_result['total_charged']
-                            processing_fee_charged = charge_result['processing_fee']
                             
-                            if is_gift:
-                                # Send confirmation to gift giver
-                                send_email(
-                                    email,
-                                    f"Gift Meal Confirmed & Paid - {event.name}",
-                                    f"Your ${amount:.2f} gift meal for '{event.name}' has been processed immediately!\n\nThis event is already confirmed, so your payment was charged right away.\n\nGift Recipient: {recipient_name} ({recipient_email})\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee_charged:.2f}\nTotal Charged: ${total_charged:.2f}\n\nE-Ticket: {ticket_link}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYour recipient has been notified and received their e-ticket!"
-                                )
-                                # Send e-ticket to recipient
-                                gift_email_message = f"Your gift meal e-ticket for '{event.name}' is ready!\n\nFrom: {email}"
-                                if gift_message:
-                                    gift_email_message += f"\n\nPersonal message:\n\"{gift_message}\""
-                                gift_email_message += f"\n\nThis event is confirmed and your meal is secured!\n\nYour E-Ticket: {ticket_link}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nPresent this ticket code at the event: {pledge.ticket_code}\n\nEnjoy your meal, {recipient_name}!"
-                                send_email(
-                                    recipient_email,
-                                    f"Your E-Ticket Ready! - {event.name}",
-                                    gift_email_message
-                                )
-                            else:
-                                # Send immediate confirmation and e-ticket to pledger
-                                send_email(
-                                    email,
-                                    f"Payment Confirmed & E-Ticket Ready - {event.name}",
-                                    f"Your ${amount:.2f} pledge for '{event.name}' has been processed immediately!\n\nThis event is already confirmed, so your payment was charged right away.\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee_charged:.2f}\nTotal Charged: ${total_charged:.2f}\n\nYour E-Ticket: {ticket_link}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nPresent this ticket code at the event: {pledge.ticket_code}\n\nThank you for your support!"
-                                )
-                                
-                            # Mark e-ticket as sent
-                            pledge.ticket_sent = True
-                            db.session.commit()
+                            # Send templated immediate payment confirmation with e-ticket
+                            email_success = send_immediate_payment_confirmation(pledge, event, total_charged)
+                            
+                            if not email_success:
+                                logging.warning(f"Email sending failed for pledge {pledge.id}, but payment was successful")
                             
                         except Exception as email_error:
                             # Email failure should not affect payment success
@@ -4233,73 +4211,28 @@ def make_pledge(event_id):
                     
                     # Send notifications about funding completion (handle email failures gracefully)
                     try:
+                        from utils import send_admin_goal_reached_notification, send_food_truck_goal_reached_notification, send_goal_reached_notification
+                        
                         # Send notification to admin
-                        send_email(
-                            'support@foodtruckfundraiser.com',
-                            f"Event Goal Met: {event.name}",
-                            f"The event '{event.name}' has reached its funding goal of ${event.get_total_goal_amount():.2f}. Please review and approve the event to charge all pledges.\n\nTotal Raised: ${event.current_pledges:.2f}\nPledge Goal: ${event.pledge_goal:.2f}\nMarkup: {event.markup_percentage:.1f}%"
-                        )
+                        send_admin_goal_reached_notification(event)
                         
                         # Send notification to food truck
-                        if event.food_truck.contact_email:
-                            send_email(
-                                event.food_truck.contact_email,
-                                f"Event Funded: {event.name}",
-                                f"Congratulations! Your event '{event.name}' has reached its funding goal of ${event.get_total_goal_amount():.2f}!\n\nTotal Raised: ${event.current_pledges:.2f}\nNumber of Pledgers: {len(event.pledges)}\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYour event will be reviewed and approved soon. Once approved, all pledges will be charged and you'll receive your payout.\n\nThank you for participating in our platform!"
-                            )
+                        send_food_truck_goal_reached_notification(event)
+                        
+                        # Send goal reached confirmation to pledger using templated emails
+                        send_goal_reached_notification(pledge, event)
+                        
                     except Exception as email_error:
                         # Don't let email failures affect the funding transition
                         logging.error(f"Failed to send funding notification emails for event {event.id}: {str(email_error)}")
-                    
-                    # Send goal reached confirmation to pledger
-                    if is_gift:
-                        # Send notification to the gift giver
-                        send_email(
-                            email,
-                            f"Gift Meal Event Funded! - {event.name}",
-                            f"Great news! Your gift meal pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nGift Recipient: {recipient_name} ({recipient_email})\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal Charged: ${total_amount:.2f}\n\nYour gift recipient will receive their e-ticket soon!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your generosity!"
-                        )
-                        # Send notification to the gift recipient
-                        gift_email_message = f"You've received a gift meal for '{event.name}'!\n\nFrom: {email}"
-                        if gift_message:
-                            gift_email_message += f"\n\nPersonal message:\n\"{gift_message}\""
-                        gift_email_message += f"\n\nThe event has reached its funding goal and your meal is confirmed!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nYou'll receive your e-ticket soon. Thank you {recipient_name}!"
-                        send_email(
-                            recipient_email,
-                            f"Gift Meal Confirmed! - {event.name}",
-                            gift_email_message
-                        )
-                    else:
-                        send_email(
-                            email,
-                            f"Event Funded! - {event.name}",
-                            f"Great news! Your pledge of ${amount:.2f} for '{event.name}' helped reach the funding goal!\n\nEvent Goal: ${event.pledge_goal:.2f}\nTotal Raised: ${event.current_pledges:.2f}\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal Charged: ${total_amount:.2f}\n\nPayments will be processed soon and you'll receive your e-ticket.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you for your support!"
-                        )
                 else:
-                    # Send regular pledge confirmation
-                    if is_gift:
-                        # Send confirmation to gift giver
-                        send_email(
-                            email,
-                            f"Gift Meal Pledge Confirmation - {event.name}",
-                            f"Thank you for your ${amount:.2f} gift meal pledge for '{event.name}'!\n\nGift Recipient: {recipient_name} ({recipient_email})\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal to be charged: ${total_amount:.2f}\n\nYour payment will only be charged if the event reaches its funding goal. Once funded, your gift recipient will receive their e-ticket!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
-                        )
-                        # Send initial gift notification to recipient
-                        gift_email_message = f"You've received a gift meal pledge for '{event.name}'!\n\nFrom: {email}"
-                        if gift_message:
-                            gift_email_message += f"\n\nPersonal message:\n\"{gift_message}\""
-                        gift_email_message += f"\n\nThis event needs ${event.pledge_goal - event.current_pledges:.2f} more to reach its goal of ${event.pledge_goal:.2f}. If the goal is reached, you'll receive your meal e-ticket!\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nThank you {recipient_name}!"
-                        send_email(
-                            recipient_email,
-                            f"Gift Meal Pledge - {event.name}",
-                            gift_email_message
-                        )
-                    else:
-                        send_email(
-                            email,
-                            f"Pledge Confirmation - {event.name}",
-                            f"Thank you for your ${amount:.2f} pledge for '{event.name}'!\n\nEvent Goal: ${event.pledge_goal:.2f}\nCurrent Progress: ${event.current_pledges:.2f} (${event.pledge_goal - event.current_pledges:.2f} remaining)\n\nPayment Details:\nPledge Amount: ${amount:.2f}\nProcessing Fee (4.5%): ${processing_fee:.2f}\nTotal to be charged: ${total_amount:.2f}\n\nYour payment will only be charged if the event reaches its funding goal.\n\nEvent Details:\nDate: {event.date}\nLocation: {event.location}\n\nWe'll keep you updated on the progress!"
-                        )
+                    # Send regular conditional pledge confirmation using templated emails
+                    try:
+                        from utils import send_conditional_pledge_confirmation
+                        send_conditional_pledge_confirmation(pledge, event)
+                    except Exception as email_error:
+                        logging.error(f"Failed to send conditional pledge confirmation for pledge {pledge.id}: {str(email_error)}")
+                        # Don't fail the pledge creation if email fails
                 
                 if is_gift:
                     flash(f'Gift meal pledge created successfully! Both you and {recipient_name} will be notified when the event reaches its goal.', 'success')

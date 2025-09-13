@@ -4,7 +4,8 @@ import stripe
 import secrets
 import string
 from flask_mail import Message
-from app import mail
+from flask import render_template, request
+from app import mail, db
 from datetime import datetime
 
 def send_email(recipient, subject, body, html=None):
@@ -126,3 +127,281 @@ def calculate_total_with_processing_fee(amount):
     """Calculate total amount including 4.5% processing fee"""
     processing_fee = calculate_processing_fee(amount)
     return amount + processing_fee
+
+# ===== TEMPLATED EMAIL FUNCTIONS =====
+
+def log_email_sent(recipient, subject, email_type, pledge_id=None, event_id=None):
+    """Log that an email was sent to prevent duplicates"""
+    try:
+        from models import EmailLog
+        email_log = EmailLog(
+            recipient=recipient,
+            subject=subject,
+            status='sent',
+            sent_at=datetime.utcnow()
+        )
+        # Add metadata for deduplication
+        if pledge_id or event_id:
+            email_log.body = f"pledge_id:{pledge_id}, event_id:{event_id}, type:{email_type}"
+        
+        db.session.add(email_log)
+        db.session.commit()
+        logging.info(f"Email logged: {recipient} - {subject}")
+    except Exception as e:
+        logging.error(f"Failed to log email: {str(e)}")
+
+def check_email_already_sent(recipient, email_type, pledge_id=None, event_id=None):
+    """Check if a specific email type was already sent to prevent duplicates"""
+    try:
+        from models import EmailLog
+        
+        # Check for existing email log with same type and identifiers
+        query = EmailLog.query.filter_by(recipient=recipient, status='sent')
+        
+        if pledge_id or event_id:
+            search_text = f"pledge_id:{pledge_id}, event_id:{event_id}, type:{email_type}"
+            existing = query.filter(EmailLog.body.contains(search_text)).first()
+            return existing is not None
+        
+        return False
+    except Exception as e:
+        logging.error(f"Failed to check email log: {str(e)}")
+        return False
+
+def send_templated_email(template_path, recipient, subject, context, email_type, pledge_id=None, event_id=None):
+    """Send a templated email with idempotency checks"""
+    try:
+        # Check if already sent
+        if check_email_already_sent(recipient, email_type, pledge_id, event_id):
+            logging.info(f"Email {email_type} already sent to {recipient} - skipping")
+            return True
+        
+        # Render template
+        html_content = render_template(template_path, **context)
+        
+        # Send email
+        success = send_email(recipient, subject, None, html=html_content)
+        
+        if success:
+            # Log the email
+            log_email_sent(recipient, subject, email_type, pledge_id, event_id)
+        
+        return success
+        
+    except Exception as e:
+        logging.error(f"Failed to send templated email {template_path} to {recipient}: {str(e)}")
+        return False
+
+def send_conditional_pledge_confirmation(pledge, event):
+    """Send confirmation for conditional pledge (not charged yet)"""
+    try:
+        ticket_link = f"{request.url_root}ticket/{pledge.ticket_code}" if pledge.ticket_code else None
+        
+        context = {
+            'pledge': pledge,
+            'event': event,
+            'ticket_link': ticket_link
+        }
+        
+        if pledge.is_gift:
+            # Send to gift giver
+            giver_success = send_templated_email(
+                'emails/conditional_gift_pledge_confirmation.html',
+                pledge.email,
+                f"Gift Meal Pledge Confirmation - {event.name}",
+                context,
+                'conditional_gift_pledge',
+                pledge_id=pledge.id
+            )
+            
+            # Send to gift recipient
+            recipient_success = send_templated_email(
+                'emails/conditional_gift_recipient_notification.html',
+                pledge.recipient_email,
+                f"Gift Meal Pledge - {event.name}",
+                context,
+                'conditional_gift_recipient',
+                pledge_id=pledge.id
+            )
+            
+            return giver_success and recipient_success
+        else:
+            return send_templated_email(
+                'emails/conditional_pledge_confirmation.html',
+                pledge.email,
+                f"Pledge Confirmation - {event.name}",
+                context,
+                'conditional_pledge',
+                pledge_id=pledge.id
+            )
+    except Exception as e:
+        logging.error(f"Failed to send conditional pledge confirmation for pledge {pledge.id}: {str(e)}")
+        return False
+
+def send_immediate_payment_confirmation(pledge, event, total_charged):
+    """Send confirmation for immediate payment with e-ticket"""
+    try:
+        # Don't send if already sent to prevent duplicates
+        if pledge.ticket_sent:
+            logging.info(f"E-ticket already sent for pledge {pledge.id} - skipping")
+            return True
+        
+        ticket_link = f"{request.url_root}ticket/{pledge.ticket_code}"
+        
+        context = {
+            'pledge': pledge,
+            'event': event,
+            'ticket_link': ticket_link,
+            'total_charged': total_charged
+        }
+        
+        if pledge.is_gift:
+            # Send to gift giver
+            giver_success = send_templated_email(
+                'emails/immediate_gift_payment_confirmation.html',
+                pledge.email,
+                f"Gift Meal Confirmed & Paid - {event.name}",
+                context,
+                'immediate_gift_payment',
+                pledge_id=pledge.id
+            )
+            
+            # Send e-ticket to gift recipient
+            recipient_success = send_templated_email(
+                'emails/immediate_gift_recipient_ticket.html',
+                pledge.recipient_email,
+                f"Your E-Ticket Ready! - {event.name}",
+                context,
+                'immediate_gift_ticket',
+                pledge_id=pledge.id
+            )
+            
+            success = giver_success and recipient_success
+        else:
+            success = send_templated_email(
+                'emails/immediate_payment_confirmation.html',
+                pledge.email,
+                f"Payment Confirmed & E-Ticket Ready - {event.name}",
+                context,
+                'immediate_payment',
+                pledge_id=pledge.id
+            )
+        
+        # Mark e-ticket as sent if successful
+        if success:
+            pledge.ticket_sent = True
+            db.session.commit()
+        
+        return success
+        
+    except Exception as e:
+        logging.error(f"Failed to send immediate payment confirmation for pledge {pledge.id}: {str(e)}")
+        return False
+
+def send_goal_reached_notification(pledge, event):
+    """Send notification when event reaches its funding goal"""
+    try:
+        context = {
+            'pledge': pledge,
+            'event': event
+        }
+        
+        if pledge.is_gift:
+            # Send to gift giver
+            giver_success = send_templated_email(
+                'emails/goal_reached_gift_notification.html',
+                pledge.email,
+                f"Gift Meal Event Funded! - {event.name}",
+                context,
+                'goal_reached_gift',
+                pledge_id=pledge.id,
+                event_id=event.id
+            )
+            
+            # Send to gift recipient
+            recipient_success = send_templated_email(
+                'emails/goal_reached_gift_recipient_notification.html',
+                pledge.recipient_email,
+                f"Gift Meal Confirmed! - {event.name}",
+                context,
+                'goal_reached_gift_recipient',
+                pledge_id=pledge.id,
+                event_id=event.id
+            )
+            
+            return giver_success and recipient_success
+        else:
+            return send_templated_email(
+                'emails/goal_reached_notification.html',
+                pledge.email,
+                f"Event Funded! - {event.name}",
+                context,
+                'goal_reached',
+                pledge_id=pledge.id,
+                event_id=event.id
+            )
+    except Exception as e:
+        logging.error(f"Failed to send goal reached notification for pledge {pledge.id}: {str(e)}")
+        return False
+
+def send_admin_goal_reached_notification(event):
+    """Send notification to admin when an event reaches its goal"""
+    try:
+        context = {
+            'event': event,
+            'pledge_count': len(event.pledges)
+        }
+        
+        body = f"""The event '{event.name}' has reached its funding goal of ${event.get_total_goal_amount():.2f}.
+
+Event Details:
+- Total Raised: ${event.current_pledges:.2f}
+- Pledge Goal: ${event.pledge_goal:.2f}
+- Markup: {event.markup_percentage:.1f}%
+- Number of Pledgers: {len(event.pledges)}
+- Event Date: {event.date.strftime('%B %d, %Y at %I:%M %p')}
+- Location: {event.location}
+
+Please review and approve the event to charge all pledges.
+
+View Event: {request.url_root}admin/events"""
+        
+        return send_email(
+            'support@foodtruckfundraiser.com',
+            f"Event Goal Met: {event.name}",
+            body
+        )
+    except Exception as e:
+        logging.error(f"Failed to send admin notification for event {event.id}: {str(e)}")
+        return False
+
+def send_food_truck_goal_reached_notification(event):
+    """Send notification to food truck when event reaches its goal"""
+    try:
+        if not event.food_truck or not event.food_truck.contact_email:
+            logging.info(f"No food truck contact email for event {event.id}")
+            return True
+        
+        body = f"""Congratulations! Your event '{event.name}' has reached its funding goal of ${event.get_total_goal_amount():.2f}!
+
+Event Details:
+- Total Raised: ${event.current_pledges:.2f}
+- Number of Pledgers: {len(event.pledges)}
+- Event Date: {event.date.strftime('%B %d, %Y at %I:%M %p')}
+- Location: {event.location}
+
+Your event will be reviewed and approved soon. Once approved, all pledges will be charged and you'll receive your payout.
+
+Thank you for participating in our platform!
+
+Best regards,
+The Food Truck Fundraiser Team"""
+        
+        return send_email(
+            event.food_truck.contact_email,
+            f"Event Funded: {event.name}",
+            body
+        )
+    except Exception as e:
+        logging.error(f"Failed to send food truck notification for event {event.id}: {str(e)}")
+        return False
