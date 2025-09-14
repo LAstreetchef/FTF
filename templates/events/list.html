@@ -36,6 +36,12 @@
             Completed ({{ completed_events|length }})
         </button>
     </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="past-tab" data-bs-toggle="pill" data-bs-target="#past-events" type="button" role="tab">
+            <i data-feather="archive" class="me-2"></i>
+            Past Events ({{ past_events|length }})
+        </button>
+    </li>
 </ul>
 
 <div class="tab-content" id="eventTabsContent">
@@ -267,6 +273,87 @@
             <i data-feather="check-circle" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
             <h4 class="text-muted">No Completed Events</h4>
             <p class="text-muted">No events have been successfully funded yet.</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Past Events Tab -->
+    <div class="tab-pane fade" id="past-events" role="tabpanel">
+        {% if past_events %}
+        <div class="row g-4">
+            {% for event in past_events %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header bg-secondary text-white">
+                        <i data-feather="archive" class="me-2"></i>
+                        Past Event
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3">
+                            <h5 class="card-title">{{ event.name }}</h5>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="truck" class="me-1"></i>
+                                {{ event.food_truck.name }}
+                            </p>
+                            <p class="text-muted small mb-2">
+                                <i data-feather="calendar" class="me-1"></i>
+                                {{ event.date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </p>
+                            <p class="text-muted small">
+                                <i data-feather="map-pin" class="me-1"></i>
+                                {{ event.location }}
+                            </p>
+                        </div>
+                        
+                        {% if event.description %}
+                        <p class="card-text">{{ event.description[:100] }}{% if event.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <div class="progress mb-2">
+                                {% if event.status == 'approved' %}
+                                <div class="progress-bar bg-success" 
+                                     role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                    {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                                </div>
+                                {% else %}
+                                <div class="progress-bar bg-secondary" 
+                                     role="progressbar" style="width: {{ event.get_progress_percentage() }}%">
+                                    {{ "%.0f"|format(event.get_progress_percentage()) }}%
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">${{ "%.2f"|format(event.current_pledges) }} raised</small>
+                                <small class="text-muted">Goal: ${{ "%.2f"|format(event.pledge_goal) }}</small>
+                            </div>
+                            
+                            {% if event.status == 'approved' %}
+                            <small class="text-success">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }} - Event completed successfully!</small>
+                            {% else %}
+                            <small class="text-muted">{{ event.pledges|length }} supporter{{ 's' if event.pledges|length != 1 else '' }} - Goal not reached</small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('event_detail', event_id=event.id) }}" class="btn btn-outline-secondary">
+                                    <i data-feather="eye" class="me-2"></i>
+                                    View Archive
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i data-feather="archive" class="text-muted mb-3" style="width: 48px; height: 48px;"></i>
+            <h4 class="text-muted">No Past Events</h4>
+            <p class="text-muted">No events have concluded yet. Check back later!</p>
         </div>
         {% endif %}
     </div>

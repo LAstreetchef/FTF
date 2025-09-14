@@ -4017,25 +4017,41 @@ def pledge_transfer_consent(token):
 @app.route('/events')
 def events_list():
     """Public page listing all events by status with performance optimization"""
+    from datetime import datetime
     # Add pagination to prevent timeout issues
     page = request.args.get('page', 1, type=int)
     per_page = 12  # Show 12 events per page for better mobile experience
     
+    # Get current datetime for filtering past vs current/future events
+    now = datetime.utcnow()
+    
     # Get events by different status categories - ONLY show events where organizer paid the $1.95 fee
-    # Limit initial queries to prevent timeouts
+    # Filter by date: current/future vs past events
+    
+    # Active events: pending/funded events that haven't happened yet
     active_events = Event.query.filter(
         Event.status.in_(['pending', 'funded']),
-        Event.organizer_fee_charged == True
-    ).order_by(Event.created_at.desc()).limit(20).all()  # Show only recent 20 active events
+        Event.organizer_fee_charged == True,
+        Event.date >= now  # Only current and future events
+    ).order_by(Event.created_at.desc()).limit(20).all()
     
+    # Completed events: approved events that haven't happened yet
     completed_events = Event.query.filter(
         Event.status == 'approved',
-        Event.organizer_fee_charged == True
-    ).order_by(Event.created_at.desc()).limit(20).all()  # Show only recent 20 completed events
+        Event.organizer_fee_charged == True,
+        Event.date >= now  # Only current and future events
+    ).order_by(Event.created_at.desc()).limit(20).all()
     
-    # All events with pagination
+    # Past events: all events that have already happened (date < now)
+    past_events = Event.query.filter(
+        Event.organizer_fee_charged == True,
+        Event.date < now  # Only past events
+    ).order_by(Event.date.desc()).limit(20).all()  # Order by event date descending
+    
+    # All events with pagination (current and future only)
     all_events_pagination = Event.query.filter(
-        Event.organizer_fee_charged == True
+        Event.organizer_fee_charged == True,
+        Event.date >= now  # Only current and future events
     ).order_by(Event.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
@@ -4044,6 +4060,7 @@ def events_list():
     return render_template('events/list.html', 
                          active_events=active_events, 
                          completed_events=completed_events,
+                         past_events=past_events,
                          all_events=all_events,
                          pagination=all_events_pagination)
 
