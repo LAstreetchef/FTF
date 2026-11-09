@@ -44,6 +44,9 @@ def test_csv_import_and_green_truck_page(client):
     assert b"Northwind Labs" in body and b"Holiday Truck Day" in body
     assert b"GTLA" in body
     assert b"A note from Kam" in body
+    assert b"Mother Trucker" in body
+    assert b"Minimum $1,750 + tip" in body
+    assert b"Request a date" in body
     assert b"Coachella" in body
     assert b"Malibu" in body
     assert b"fetchpriority=\"high\"" in body

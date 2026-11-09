@@ -147,7 +147,7 @@ Railway and Fly are the same shape: a Python web process running the Procfile co
 
 ## Holiday campaign pages
 
-Green Truck uses `/c/<slug>` as the first page a prospect sees from a December 2026 email. Each page is Green Truck only: the truck in their lot, or a drop-off, a note from Kam, and a quote form. There is no truck picker. Quote requests are stored for admin. If `CAMPAIGN_NOTIFY_EMAIL` (or `ADMIN_EMAIL`) is set and SMTP is configured, Kam also gets an email. With mail suppressed, the request still shows under Admin → Holiday campaigns.
+Green Truck uses `/c/<slug>` as the first page a prospect sees from a December 2026 email. The page is three full-bleed chapters: the truck with Kam’s note, the classic menu, and a short photo strip (Malibu cabin, events, the Truck Stop). Request a date opens one sheet on a photograph: date, headcount, and send. Name and email are filled from the campaign row. The minimum is `GREEN_TRUCK_MINIMUM` (default $1,750) plus tip. Nothing is charged. The classic menu text is `green_truck_menu.py`. The public site menu could not be copied (that page is still placeholder text), so the names there are only dishes named in the photo captions, with a TODO for the exact wording. Quote requests are stored for admin. If `CAMPAIGN_NOTIFY_EMAIL` (or `ADMIN_EMAIL`) is set and SMTP is configured, Kam also gets an email.
 
 Create the pages from a CSV. In `/admin/campaigns`, upload a file with this header:
 

@@ -17,6 +17,7 @@ from datetime import datetime
 from flask import abort, flash, redirect, render_template, request, send_from_directory, session, url_for
 from sqlalchemy import func
 from app import app, db
+from green_truck_menu import CLASSIC_MENU, minimum_label
 from models import CampaignPage, CampaignView, QuoteRequest
 from utils import send_email
 
@@ -241,7 +242,10 @@ def _send_quote_email(page, quote):
     recipient = _notify_email()
     if not recipient or app.config.get("MAIL_SUPPRESS_SEND"):
         return False
-    format_label = "Truck in the lot" if quote.service_format == "truck" else "Drop-off catering"
+    format_label = {
+        "truck": "Truck in the lot",
+        "dropoff": "Drop-off catering",
+    }.get(quote.service_format, "Classic menu")
     give = "No"
     if quote.give_back:
         give = f"Yes — {quote.give_back_percent or 10}% for {quote.cause or 'a cause they will name'}"
@@ -347,6 +351,8 @@ def campaign_page(slug):
         saved=saved,
         form={},
         errors=[],
+        classic_menu=CLASSIC_MENU,
+        minimum_label=minimum_label(),
     )
 
 
@@ -361,7 +367,7 @@ def campaign_quote(slug):
     form = {
         "organizer_name": (request.form.get("organizer_name") or "").strip(),
         "organizer_email": (request.form.get("organizer_email") or "").strip(),
-        "service_format": (request.form.get("service_format") or "").strip(),
+        "service_format": (request.form.get("service_format") or "classic").strip(),
         "event_date": (request.form.get("event_date") or "").strip(),
         "headcount": (request.form.get("headcount") or "").strip(),
         "location": (request.form.get("location") or "").strip(),
@@ -376,8 +382,8 @@ def campaign_quote(slug):
         errors.append("Add your name.")
     if "@" not in form["organizer_email"] or "." not in form["organizer_email"].split("@")[-1]:
         errors.append("Add a real email so Kam can reply.")
-    if form["service_format"] not in {"truck", "dropoff"}:
-        errors.append("Choose the truck in your lot, or a drop-off.")
+    if form["service_format"] not in {"truck", "dropoff", "classic"}:
+        form["service_format"] = "classic"
     if not form["event_date"]:
         errors.append("Pick a date, or type one in.")
     try:
@@ -387,8 +393,6 @@ def campaign_quote(slug):
     except ValueError:
         headcount = None
         errors.append("Add a headcount.")
-    if not form["location"]:
-        errors.append("Where should the truck park, or the food land?")
     percent = None
     if form["give_back"]:
         try:
@@ -408,6 +412,8 @@ def campaign_quote(slug):
             saved=False,
             form=form,
             errors=errors,
+            classic_menu=CLASSIC_MENU,
+            minimum_label=minimum_label(),
         ), 400
 
     quote = QuoteRequest(
@@ -417,7 +423,7 @@ def campaign_quote(slug):
         service_format=form["service_format"],
         event_date=form["event_date"][:40],
         headcount=headcount,
-        location=form["location"][:240],
+        location=(form["location"] or "Not specified")[:240],
         notes=form["notes"][:2000],
         give_back=form["give_back"],
         cause=(form["cause"] or page.give_back_cause or "")[:200] if form["give_back"] else "",
