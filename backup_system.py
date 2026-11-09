@@ -5,10 +5,14 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 class FileBackupSystem:
-    """File-based backup system that survives Replit deployments"""
-    
-    def __init__(self, backup_dir: str = "data_backups"):
+    """File backup of events. New files go in instance/backups, which is not committed.
+
+    The historical snapshot committed under data_backups/ is still readable.
+    """
+
+    def __init__(self, backup_dir: str = "instance/backups", archive_dir: str = "data_backups"):
         self.backup_dir = backup_dir
+        self.archive_dir = archive_dir
         self.ensure_backup_directory()
     
     def ensure_backup_directory(self):
@@ -48,38 +52,47 @@ class FileBackupSystem:
             return None
     
     def get_latest_backup(self) -> Optional[Dict]:
-        """Get the most recent backup data"""
-        latest_filepath = os.path.join(self.backup_dir, "events_backup_latest.json")
-        
+        """Get the most recent backup, preferring instance/backups over the committed archive."""
+        for directory in (self.backup_dir, self.archive_dir):
+            data = self._read_latest_in(directory)
+            if data:
+                return data
+        logging.info("No backup files found")
+        return None
+
+    def _read_latest_in(self, directory: str) -> Optional[Dict]:
+        latest_filepath = os.path.join(directory, "events_backup_latest.json")
         if os.path.exists(latest_filepath):
             try:
-                with open(latest_filepath, 'r') as f:
+                with open(latest_filepath, "r") as f:
                     backup_data = json.load(f)
-                logging.info(f"Found latest backup with {backup_data.get('event_count', 0)} events")
+                logging.info(
+                    "Found latest backup in %s with %s events",
+                    directory,
+                    backup_data.get("event_count", 0),
+                )
                 return backup_data
             except Exception as e:
-                logging.error(f"Failed to read latest backup: {e}")
-        
-        # Fallback: find the most recent timestamped backup
-        return self._find_most_recent_backup()
-    
-    def _find_most_recent_backup(self) -> Optional[Dict]:
+                logging.error(f"Failed to read latest backup in {directory}: {e}")
+        return self._find_most_recent_backup(directory)
+
+    def _find_most_recent_backup(self, directory: Optional[str] = None) -> Optional[Dict]:
         """Find the most recent timestamped backup file"""
-        if not os.path.exists(self.backup_dir):
+        directory = directory or self.backup_dir
+        if not os.path.exists(directory):
             return None
-        
-        backup_files = [f for f in os.listdir(self.backup_dir) 
-                       if f.startswith('events_backup_') and f.endswith('.json') 
+
+        backup_files = [f for f in os.listdir(directory)
+                       if f.startswith('events_backup_') and f.endswith('.json')
                        and 'latest' not in f]
-        
+
         if not backup_files:
-            logging.info("No backup files found")
             return None
-        
+
         # Sort by filename (timestamp) to get the most recent
         backup_files.sort(reverse=True)
         most_recent = backup_files[0]
-        filepath = os.path.join(self.backup_dir, most_recent)
+        filepath = os.path.join(directory, most_recent)
         
         try:
             with open(filepath, 'r') as f:

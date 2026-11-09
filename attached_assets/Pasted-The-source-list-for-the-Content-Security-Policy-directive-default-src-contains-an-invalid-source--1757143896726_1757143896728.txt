@@ -1997,7 +1997,7 @@ Mt.forEach.n.<computed> @ VM692 eruda.js:2
 e @ VM716:1
 (anonymous) @ VM716:1
 (anonymous) @ VM716:1
-VM692 eruda.js:2 🔧 Pledge form initialized with Stripe key: pk_live_wJhaKra0GF97...
+VM692 eruda.js:2 🔧 Pledge form initialized with Stripe key: pk_live_REDACTED...
 VM747 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
 VM798 eruda.js:2 Running in iframe from: 82635105-5ab9-42fa-a407-e74e377a47ed-00-1lbmhxuxfbpgr.worf.replit.dev
 25:595 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'target')

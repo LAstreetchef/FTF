@@ -1,224 +1,270 @@
-import os
 import logging
-import stripe
-from flask import Flask, request, render_template
-from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
-from sqlalchemy.orm import DeclarativeBase
-from werkzeug.middleware.proxy_fix import ProxyFix
-from translations import get_text, get_language_from_request
+import os
+import re
 
-# Configure logging for production
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s %(levelname)s: %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-    ]
-)
+import stripe
+from dotenv import load_dotenv
+from flask import Flask, abort, render_template, request
+from flask_mail import Mail
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.pool import StaticPool
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+load_dotenv()
+
+
+def _env_flag(name, default=False):
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _app_env():
+    value = (os.environ.get("APP_ENV") or os.environ.get("FLASK_ENV") or "development").strip().lower()
+    if value == "dev":
+        return "development"
+    return value
+
+
+def _normalize_database_url(url):
+    if url.startswith("postgres://"):
+        return "postgresql://" + url[len("postgres://"):]
+    return url
+
+
+def _database_target(url):
+    """Return a log-safe description of the database. Never include credentials."""
+    if url.startswith("sqlite"):
+        return "sqlite"
+    without_scheme = url.split("://", 1)[-1]
+    if "@" in without_scheme:
+        host = without_scheme.split("@", 1)[1].split("/", 1)[0]
+        return f"postgresql host {host}"
+    return "postgresql"
+
 
 class Base(DeclarativeBase):
     pass
 
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s: %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+
 db = SQLAlchemy(model_class=Base)
 mail = Mail()
-
-# Create the app
 app = Flask(__name__)
 
-# Enforce SESSION_SECRET in production - critical security requirement
+APP_ENV = _app_env()
+IS_PRODUCTION = APP_ENV == "production"
+IS_TESTING = APP_ENV == "testing"
+app.config["APP_ENV"] = APP_ENV
+
 session_secret = os.environ.get("SESSION_SECRET")
-database_url = os.environ.get("DATABASE_URL")
-
-# Detect production environment based on database URL
-is_production = database_url and "ep-young-bush-adblwffc.c-2.us-east-1.aws.neon.tech" in database_url
-
-if is_production and not session_secret:
-    logging.error("🚨 CRITICAL SECURITY ERROR: SESSION_SECRET environment variable is required in production")
-    logging.error("🚨 Application startup FAILED due to missing session secret")
-    raise ValueError("SESSION_SECRET environment variable is required in production")
-elif not session_secret:
-    # Development fallback
-    logging.warning("⚠️  Using development session secret - not suitable for production")
-    app.secret_key = "dev-secret-key-change-in-production"
-else:
-    app.secret_key = session_secret
-    if is_production:
-        logging.info("✅ Production session secret configured")
-    else:
-        logging.info("✅ Development session secret configured")
+if IS_PRODUCTION and not session_secret:
+    raise ValueError("SESSION_SECRET is required when APP_ENV=production")
+if not session_secret:
+    session_secret = "dev-insecure-change-me"
+    logging.warning(
+        "SESSION_SECRET is not set. Using an insecure development key. "
+        "Set SESSION_SECRET before sharing this process with anyone else."
+    )
+app.secret_key = session_secret
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configure session cookies for production security
+iframe_embed = _env_flag("IFRAME_EMBED", False)
+secure_cookies = _env_flag("SESSION_COOKIE_SECURE", IS_PRODUCTION or iframe_embed)
+samesite = "None" if iframe_embed else os.environ.get("SESSION_COOKIE_SAMESITE", "Lax")
+if iframe_embed:
+    secure_cookies = True
+
 app.config.update(
-    SESSION_COOKIE_SECURE=True,      # Require HTTPS
-    SESSION_COOKIE_HTTPONLY=True,    # Prevent XSS attacks
-    SESSION_COOKIE_SAMESITE='Lax',   # CSRF protection while maintaining functionality
-    SESSION_COOKIE_DOMAIN=None,      # Don't restrict domain
-    SESSION_COOKIE_PATH='/',         # Available on all paths
-    PERMANENT_SESSION_LIFETIME=3600  # 1 hour for production security
+    SESSION_COOKIE_SECURE=secure_cookies,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE=samesite,
+    SESSION_COOKIE_DOMAIN=None,
+    SESSION_COOKIE_PATH="/",
+    PERMANENT_SESSION_LIFETIME=3600,
+    PREFERRED_URL_SCHEME="https" if IS_PRODUCTION else "http",
 )
 
-# Configure the database with proper environment separation
-database_url = os.environ.get("DATABASE_URL")
-
+database_url = os.environ.get("DATABASE_URL", "").strip()
 if database_url:
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-    # Determine if this is production or development based on database URL
-    if "ep-young-bush-adblwffc.c-2.us-east-1.aws.neon.tech" in database_url:
-        logging.info("Database configured (PRODUCTION): ep-young-bush-adblwffc.c-2.us-east-1.aws.neon.tech")
-    else:
-        logging.info(f"Database configured (DEVELOPMENT): {database_url.split('@')[1].split('/')[0] if '@' in database_url else 'local'}")
+    database_url = _normalize_database_url(database_url)
+elif IS_PRODUCTION:
+    raise ValueError("DATABASE_URL is required when APP_ENV=production")
 else:
-    # Fallback for local development
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
-    logging.info("Database configured (LOCAL): SQLite fallback")
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
-    "pool_recycle": 300,
-    "pool_pre_ping": True,
-    "pool_timeout": 10,  # Add connection timeout
-    "connect_args": {
-        "connect_timeout": 10,  # PostgreSQL connection timeout
-        "application_name": "food_truck_app",
-        "options": "-c statement_timeout=30000"  # 30 second statement timeout (proper format)
+    os.makedirs(app.instance_path, exist_ok=True)
+    database_url = "sqlite:///" + os.path.join(app.instance_path, "app.db")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+logging.info("Database configured (%s): %s", APP_ENV, _database_target(database_url))
+
+if database_url.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+    engine_options = {"connect_args": connect_args}
+    if database_url.endswith(":memory:") or database_url.rsplit("/", 1)[-1] == ":memory:":
+        engine_options["poolclass"] = StaticPool
+else:
+    engine_options = {
+        "pool_recycle": 300,
+        "pool_pre_ping": True,
+        "pool_timeout": 10,
+        "connect_args": {
+            "connect_timeout": 10,
+            "application_name": "food_truck_fundraiser",
+            "options": "-c statement_timeout=30000",
+        },
     }
-}
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_options
 
-# Configure Flask-Mail for Network Solutions (2024 updated settings)
-# Try multiple server configurations for maximum compatibility
-# First try the updated 2024 server
-app.config['MAIL_SERVER'] = 'netsol-smtp-oxcs.hostingplatform.com'
-app.config['MAIL_PORT'] = 587  # Back to TLS port
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
-app.config['MAIL_PASSWORD'] = os.environ.get('EMAIL_PASSWORD_NEW', 'your-email-password')
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('EMAIL_USERNAME', 'support@foodtruckfundraiser.com')
-
-# Configure Stripe - Smart mode switching with flexible key detection
-# Check for available keys first
-secret_key = os.environ.get('STRIPE_SECRET_KEY')
-publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY')
-live_secret_key = os.environ.get('STRIPE_SECRET_KEY_LIVE')
-live_publishable_key = os.environ.get('STRIPE_PUBLISHABLE_KEY_LIVE')
-
-# Determine if we have live keys available
-has_live_keys = (secret_key and secret_key.startswith('sk_live_')) or (live_secret_key and live_secret_key.startswith('sk_live_'))
-has_test_keys = (secret_key and secret_key.startswith('sk_test_'))
-
-# Check test mode preference but override if we only have live keys
-STRIPE_TEST_MODE = os.environ.get('STRIPE_TEST_MODE', 'false').lower() == 'true'
-
-if STRIPE_TEST_MODE and has_test_keys:
-    # Test mode requested and test keys available
-    stripe.api_key = secret_key
-    app.config['STRIPE_PUBLISHABLE_KEY'] = publishable_key
-    app.config['STRIPE_MODE'] = 'test'
-    logging.info("🧪 STRIPE TEST MODE ENABLED - Using test keys (4242 cards will work)")
-elif has_live_keys:
-    # Live mode - use live keys (prefer standard names, fallback to _LIVE suffix)
-    if secret_key and secret_key.startswith('sk_live_'):
-        # Live keys stored under standard names
-        live_secret = secret_key
-        live_pub = publishable_key
-    else:
-        # Live keys stored under _LIVE suffix
-        live_secret = live_secret_key
-        live_pub = live_publishable_key
-    
-    if not live_secret or not live_pub:
-        logging.error("❌ Live mode detected but keys incomplete")
-        raise ValueError("Live Stripe keys are incomplete")
-    
-    stripe.api_key = live_secret
-    app.config['STRIPE_PUBLISHABLE_KEY'] = live_pub
-    app.config['STRIPE_MODE'] = 'live'
-    logging.info("💳 STRIPE LIVE MODE ENABLED - Processing real payments")
-    logging.info("🔑 Live keys configured successfully")
-    logging.info("⚠️  PRODUCTION MODE: Real charges will be processed")
-    
-    # Verification that live key is properly set
-    if not stripe.api_key.startswith('sk_live_'):
-        logging.error("🚨 CRITICAL: Live key not properly set!")
-        stripe.api_key = live_secret
-        logging.info("🔧 Live key assignment corrected")
-elif STRIPE_TEST_MODE and has_live_keys:
-    # Test mode requested but only live keys available - override to live mode
-    if secret_key and secret_key.startswith('sk_live_'):
-        live_secret = secret_key
-        live_pub = publishable_key
-    else:
-        live_secret = live_secret_key
-        live_pub = live_publishable_key
-    
-    stripe.api_key = live_secret
-    app.config['STRIPE_PUBLISHABLE_KEY'] = live_pub
-    app.config['STRIPE_MODE'] = 'live'
-    logging.warning("⚠️  STRIPE_TEST_MODE=true requested but only live keys available")
-    logging.info("💳 STRIPE LIVE MODE ENABLED - Overriding test mode setting")
-    logging.info("🔑 Live keys configured successfully")
-    logging.warning("⚠️  PRODUCTION MODE: Real charges will be processed despite test mode request")
+mail_username = os.environ.get("MAIL_USERNAME") or os.environ.get("EMAIL_USERNAME") or ""
+mail_password = (
+    os.environ.get("MAIL_PASSWORD")
+    or os.environ.get("EMAIL_PASSWORD")
+    or os.environ.get("EMAIL_PASSWORD_NEW")
+    or ""
+)
+mail_sender = os.environ.get("MAIL_DEFAULT_SENDER") or mail_username or "noreply@localhost"
+app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "localhost")
+app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", "587"))
+app.config["MAIL_USE_TLS"] = _env_flag("MAIL_USE_TLS", True)
+app.config["MAIL_USE_SSL"] = _env_flag("MAIL_USE_SSL", False)
+app.config["MAIL_USERNAME"] = mail_username or None
+app.config["MAIL_PASSWORD"] = mail_password or None
+app.config["MAIL_DEFAULT_SENDER"] = mail_sender
+app.config["MAIL_SUPPRESS_SEND"] = _env_flag(
+    "MAIL_SUPPRESS_SEND",
+    IS_TESTING or not (mail_username and mail_password),
+)
+if app.config["MAIL_SUPPRESS_SEND"]:
+    logging.info("Email sending is suppressed (set MAIL_USERNAME and MAIL_PASSWORD to send mail)")
 else:
-    # Fallback to test mode if test keys available
-    if secret_key and secret_key.startswith('sk_test_'):
-        stripe.api_key = secret_key
-        app.config['STRIPE_PUBLISHABLE_KEY'] = publishable_key
-        app.config['STRIPE_MODE'] = 'test'
-        logging.info("🧪 STRIPE TEST MODE (FALLBACK) - Using available test keys")
-    else:
-        logging.error("❌ No usable Stripe keys found")
-        logging.error(f"Secret key available: {bool(secret_key)}")
-        logging.error(f"Publishable key available: {bool(publishable_key)}")
-        logging.error("ℹ️  Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY environment variables")
-        raise ValueError("No usable Stripe keys available")
+    logging.info("Email configured via %s", app.config["MAIL_SERVER"])
 
-# Initialize extensions
+
+def configure_payments():
+    """Select Stripe test mode, live mode, or a local simulation.
+
+    Test mode is the default. Live charges require STRIPE_TEST_MODE=false and live keys.
+    Outside production, missing keys keep the app usable with a clearly labeled simulation.
+    """
+    secret = (os.environ.get("STRIPE_SECRET_KEY") or "").strip()
+    publishable = (os.environ.get("STRIPE_PUBLISHABLE_KEY") or "").strip()
+    live_secret = (os.environ.get("STRIPE_SECRET_KEY_LIVE") or "").strip()
+    live_publishable = (os.environ.get("STRIPE_PUBLISHABLE_KEY_LIVE") or "").strip()
+    test_mode = _env_flag("STRIPE_TEST_MODE", True)
+
+    app.config["STRIPE_PUBLISHABLE_KEY"] = None
+    app.config["STRIPE_MODE"] = "unconfigured"
+    app.config["PAYMENTS_MODE"] = "disabled"
+    stripe.api_key = None
+
+    if test_mode:
+        if secret.startswith("sk_test_") and publishable.startswith("pk_test_"):
+            stripe.api_key = secret
+            app.config["STRIPE_PUBLISHABLE_KEY"] = publishable
+            app.config["STRIPE_MODE"] = "test"
+            app.config["PAYMENTS_MODE"] = "stripe"
+            logging.info("Stripe test mode enabled")
+            return
+        live_key_present = secret.startswith("sk_live_") or live_secret.startswith("sk_live_")
+        if live_key_present:
+            message = (
+                "STRIPE_TEST_MODE is on, but a live secret key is configured. "
+                "Refusing to charge real cards. Set STRIPE_TEST_MODE=false only when you intend to take live payments."
+            )
+            if IS_PRODUCTION:
+                raise ValueError(message)
+            logging.error(message)
+            return
+        message = (
+            "Stripe test keys are not set. Provide STRIPE_SECRET_KEY (sk_test_...) and "
+            "STRIPE_PUBLISHABLE_KEY (pk_test_...)."
+        )
+        if IS_PRODUCTION:
+            raise ValueError(message + " Both are required when APP_ENV=production.")
+        logging.warning(message + " Local payment simulation is enabled.")
+        app.config["PAYMENTS_MODE"] = "simulate"
+        return
+
+    if secret.startswith("sk_live_") and publishable.startswith("pk_live_"):
+        chosen_secret, chosen_pub = secret, publishable
+    elif live_secret.startswith("sk_live_") and live_publishable.startswith("pk_live_"):
+        chosen_secret, chosen_pub = live_secret, live_publishable
+    else:
+        raise ValueError(
+            "STRIPE_TEST_MODE=false requires live keys in STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY, "
+            "or in STRIPE_SECRET_KEY_LIVE and STRIPE_PUBLISHABLE_KEY_LIVE."
+        )
+    stripe.api_key = chosen_secret
+    app.config["STRIPE_PUBLISHABLE_KEY"] = chosen_pub
+    app.config["STRIPE_MODE"] = "live"
+    app.config["PAYMENTS_MODE"] = "stripe"
+    logging.warning("Stripe live mode enabled. Real charges will be processed.")
+
+
+configure_payments()
+
 db.init_app(app)
 mail.init_app(app)
 
-# Configure app for iframe embedding
+_MAINTENANCE_ROUTES = re.compile(
+    r"/(?:force-template-refresh-xyz123|sync-data-xyz123|fix-menu-items-xyz123|"
+    r"database-sync-admin-xyz456|clear-cache-and-refresh-xyz789|fix-database-integrity-xyz999|"
+    r"database-sync-xyz456|production-setup-abc999|auto-fix-all-menus-xyz123|"
+    r"admin/fix-organizer-pledges-xyz789|admin/update-pledge-totals-xyz456|"
+    r"login-admin-direct-xyz123|fix-duplicate-events-abc123|fix-phantom-pledges-xyz789|"
+    r"remove-organizer-pledges-abc123|admin/create-missing-payouts-xyz456|"
+    r"setup-admin-secret-xyz123|debug-admin-login|quick-admin-login|quick-organizer-login|"
+    r"test-credentials|iframe-debug)(?:/|$)"
+)
+
+_IFRAME_ORIGINS = {
+    "https://www.thefoodtruckstop.com",
+    "https://thefoodtruckstop.com",
+}
+
+
+@app.before_request
+def block_legacy_maintenance_routes():
+    """Old Replit repair URLs created accounts and bypassed auth. They stay disabled."""
+    if _MAINTENANCE_ROUTES.search(request.path):
+        abort(404)
+
+
 @app.after_request
 def after_request(response):
-    # Allow embedding in iframes from your custom domain
-    response.headers['X-Frame-Options'] = 'ALLOWALL'
-    # Minimal CSP for iframe compatibility only
-    response.headers['Content-Security-Policy'] = "frame-ancestors 'self' https://www.thefoodtruckstop.com https://thefoodtruckstop.com *.squarespace.com *.sqsp.com *.squarespace-cdn.com"
-    
-    # Configure ALL cookies for iframe/cross-origin use
-    if 'Set-Cookie' in response.headers:
-        cookies = response.headers.getlist('Set-Cookie')
-        response.headers['Set-Cookie'] = []
-        for cookie in cookies:
-            # Ensure all cookies have the right attributes for iframe embedding
-            if 'SameSite' not in cookie and 'Secure' not in cookie:
-                # Add both Secure and SameSite=None for iframe compatibility
-                cookie = cookie.rstrip('; ')  # Remove trailing semicolons
-                cookie += '; Secure; SameSite=None'
-            elif 'SameSite' not in cookie:
-                cookie = cookie.rstrip('; ')
-                cookie += '; SameSite=None'
-            elif 'Secure' not in cookie:
-                cookie = cookie.rstrip('; ')
-                cookie += '; Secure'
-            response.headers.add('Set-Cookie', cookie)
-    
-    # Add CORS headers for cross-origin requests
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Allow-Origin'] = 'https://www.thefoodtruckstop.com'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
-    
+    if iframe_embed:
+        response.headers["Content-Security-Policy"] = (
+            "frame-ancestors 'self' https://www.thefoodtruckstop.com "
+            "https://thefoodtruckstop.com *.squarespace.com *.sqsp.com *.squarespace-cdn.com"
+        )
+        origin = request.headers.get("Origin")
+        if origin in _IFRAME_ORIGINS:
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+            response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+    else:
+        response.headers["X-Frame-Options"] = "SAMEORIGIN"
     return response
 
-# Global error handlers for production
+
 @app.errorhandler(404)
 def not_found_error(error):
-    logging.warning(f"404 error: {request.url}")
+    logging.warning("404 error: %s", request.url)
     try:
-        return render_template('404.html'), 404
+        return render_template("404.html"), 404
     except Exception:
-        return '<h1>Page Not Found</h1><p>The requested page could not be found.</p>', 404
+        return "<h1>Page Not Found</h1><p>The requested page could not be found.</p>", 404
+
 
 @app.errorhandler(500)
 def internal_error(error):
@@ -226,132 +272,199 @@ def internal_error(error):
         db.session.rollback()
     except Exception:
         pass
-    logging.error(f"500 error: {str(error)}", exc_info=True)
+    logging.error("500 error: %s", error, exc_info=True)
     try:
-        return render_template('500.html'), 500
+        return render_template("500.html"), 500
     except Exception:
-        return '<h1>Internal Server Error</h1><p>An internal error has occurred.</p>', 500
+        return "<h1>Internal Server Error</h1><p>An internal error has occurred.</p>", 500
+
 
 @app.errorhandler(Exception)
 def handle_exception(e):
-    # Log the error
-    logging.error(f"Unhandled exception: {str(e)}", exc_info=True)
-    
-    # If it's an HTTP exception, return it
-    if hasattr(e, 'code'):
+    logging.error("Unhandled exception: %s", e, exc_info=True)
+    if hasattr(e, "code"):
         return e
-    
-    # Otherwise, return a generic 500 error
     try:
         db.session.rollback()
     except Exception:
         pass
     try:
-        return render_template('500.html'), 500
+        return render_template("500.html"), 500
     except Exception:
-        return '<h1>Internal Server Error</h1><p>An unexpected error has occurred.</p>', 500
+        return "<h1>Internal Server Error</h1><p>An unexpected error has occurred.</p>", 500
+
+
+def _seed_admin():
+    from models import Admin
+    from werkzeug.security import generate_password_hash
+
+    admin_email = (os.environ.get("ADMIN_EMAIL") or "").strip()
+    admin_password = os.environ.get("ADMIN_PASSWORD") or ""
+    if not admin_email or not admin_password:
+        logging.info("ADMIN_EMAIL or ADMIN_PASSWORD is unset; no admin account was created")
+        return
+    admin = Admin.query.filter_by(username=admin_email).first()
+    if admin:
+        return
+    admin = Admin(username=admin_email, password_hash=generate_password_hash(admin_password))
+    db.session.add(admin)
+    db.session.commit()
+    logging.info("Admin account created for %s", admin_email)
+
+
+def _seed_demo_content():
+    """Optional local sample truck, organizer, and event. Never runs in production."""
+    if not _env_flag("SEED_DEMO_DATA"):
+        return
+    if IS_PRODUCTION:
+        logging.warning("SEED_DEMO_DATA is ignored when APP_ENV=production")
+        return
+
+    from datetime import datetime, timedelta
+
+    from models import Event, FoodTruck, FoodTruckOwner, Organizer
+    from werkzeug.security import generate_password_hash
+
+    owner_email = (os.environ.get("DEMO_OWNER_EMAIL") or "owner@example.com").strip()
+    owner_password = os.environ.get("DEMO_OWNER_PASSWORD") or ""
+    organizer_email = (os.environ.get("DEMO_ORGANIZER_EMAIL") or "organizer@example.com").strip()
+    organizer_password = os.environ.get("DEMO_ORGANIZER_PASSWORD") or ""
+    if not owner_password or not organizer_password:
+        logging.warning(
+            "SEED_DEMO_DATA is set but DEMO_OWNER_PASSWORD or DEMO_ORGANIZER_PASSWORD is missing; skipping demo data"
+        )
+        return
+
+    owner = FoodTruckOwner.query.filter_by(email=owner_email).first()
+    if not owner:
+        owner = FoodTruckOwner(
+            email=owner_email,
+            name="Demo Truck Owner",
+            phone="310-555-0100",
+            business_name="Green Truck",
+            business_license="DEMO-LICENSE",
+            password_hash=generate_password_hash(owner_password),
+            status="approved",
+        )
+        db.session.add(owner)
+        db.session.flush()
+
+    truck = FoodTruck.query.filter_by(owner_id=owner.id).first()
+    if not truck:
+        truck = FoodTruck(
+            name="Green Truck",
+            description="Sample organic food truck used for local development.",
+            owner_id=owner.id,
+            cuisine_type="Organic",
+            contact_email=owner_email,
+            contact_phone=owner.phone,
+            sales_goal=500.0,
+            status="approved",
+            registration_fee_charged=True,
+            approved_at=datetime.utcnow(),
+        )
+        truck.set_menu_items([
+            {"name": "Carnitas Taco", "price": 4.5, "description": "Organic carnitas, onion, cilantro"},
+            {"name": "Veggie Bowl", "price": 11.0, "description": "Seasonal vegetables and grains"},
+        ])
+        db.session.add(truck)
+        db.session.flush()
+
+    organizer = Organizer.query.filter_by(email=organizer_email).first()
+    if not organizer:
+        organizer = Organizer(
+            email=organizer_email,
+            name="Demo Organizer",
+            password_hash=generate_password_hash(organizer_password),
+        )
+        db.session.add(organizer)
+        db.session.flush()
+
+    if Event.query.count() == 0:
+        event = Event(
+            name="Sample Community Lunch",
+            description="Local sample fundraiser so you can browse events and try a pledge.",
+            date=datetime.utcnow() + timedelta(days=30),
+            location="Culver City, CA",
+            organizer_id=organizer.id,
+            food_truck_id=truck.id,
+            markup_percentage=15.0,
+            pledge_goal=truck.sales_goal or 500.0,
+            status="pending",
+            organizer_fee_charged=True,
+        )
+        selected_items = []
+        for item in truck.get_menu_items():
+            price = float(item.get("price") or 0)
+            selected_items.append({
+                **item,
+                "original_price": price,
+                "marked_up_price": round(price * (1 + (event.markup_percentage or 0) / 100), 2),
+            })
+        event.set_selected_menu_items(selected_items)
+        db.session.add(event)
+
+    db.session.commit()
+    logging.info("Demo owner, organizer, truck, and sample event are ready")
+
+
+def _maybe_restore_events():
+    if not _env_flag("RESTORE_EVENT_BACKUP"):
+        return
+    from datetime import datetime
+
+    from backup_system import restore_events_from_file
+    from models import Event
+
+    if Event.query.count() > 0:
+        return
+    restored_events = restore_events_from_file()
+    if not restored_events:
+        logging.info("RESTORE_EVENT_BACKUP is set, but no backup file was found")
+        return
+    restored_count = 0
+    for event_data in restored_events:
+        event = Event()
+        for key, value in event_data.items():
+            if key == "id" or not hasattr(event, key):
+                continue
+            if key in {"date", "created_at", "approved_at"} and isinstance(value, str) and value:
+                setattr(event, key, datetime.fromisoformat(value.replace("Z", "+00:00")))
+            else:
+                setattr(event, key, value)
+        db.session.add(event)
+        restored_count += 1
+    db.session.commit()
+    logging.info("Restored %s events from the JSON backup", restored_count)
+
 
 with app.app_context():
+    from translations import get_language_from_request, get_text
+
+    app.jinja_env.globals.update(
+        get_text=get_text,
+        get_language_from_request=get_language_from_request,
+    )
+
+    import models  # noqa: F401
+    import routes  # noqa: F401
+
     try:
-        # Make translation functions available in templates
-        app.jinja_env.globals.update(get_text=get_text)
-        app.jinja_env.globals.update(get_language_from_request=get_language_from_request)
-        
-        import models
-        import routes
-        
-        # Test database connection quickly for startup
-        logging.info("Testing database connection...")
-        db.session.execute(db.text('SELECT 1'))
+        db.session.execute(db.text("SELECT 1"))
         logging.info("Database connection successful")
-        
-        # Quick database info (minimal queries for faster startup)
-        try:
-            result = db.session.execute(db.text("SELECT current_database()")).fetchone()
-            db_name = result[0] if result else "unknown"
-            logging.info(f"Connected to database: {db_name}")
-        except Exception as e:
-            logging.warning(f"Database verification failed: {str(e)}")
-        
-        # File-based backup system that survives deployments
-        try:
-            # First, create all tables
-            db.create_all()
-            logging.info("Database tables created/verified")
-            
-            # Import models and backup system
-            from models import Event
-            from backup_system import backup_events_to_file, restore_events_from_file
-            from datetime import datetime
-            
-            # Check if Event table has data
-            event_count = Event.query.count()
-            logging.info(f"Event table has {event_count} events")
-            
-            if event_count == 0:
-                # Try to restore from file backup
-                logging.info("Event table is empty - checking for file backup...")
-                
-                restored_events = restore_events_from_file()
-                if restored_events:
-                    logging.info(f"Found file backup with {len(restored_events)} events - restoring...")
-                    
-                    try:
-                        restored_count = 0
-                        
-                        for event_data in restored_events:
-                            # Create new event from backup data
-                            event = Event()
-                            for key, value in event_data.items():
-                                if key != 'id' and hasattr(event, key):
-                                    if key in ['date', 'created_at', 'approved_at'] and value:
-                                        # Handle datetime fields
-                                        if isinstance(value, str):
-                                            setattr(event, key, datetime.fromisoformat(value.replace('Z', '+00:00')))
-                                        else:
-                                            setattr(event, key, value)
-                                    else:
-                                        setattr(event, key, value)
-                            
-                            db.session.add(event)
-                            restored_count += 1
-                        
-                        db.session.commit()
-                        logging.info(f"✅ RESTORED {restored_count} events from file backup!")
-                        
-                    except Exception as restore_error:
-                        logging.error(f"File restore failed: {restore_error}")
-                        db.session.rollback()
-                else:
-                    logging.info("No file backup found - starting with empty Event table")
-            
-            # Always create a fresh file backup of current data
-            events = Event.query.all()
-            if events:
-                logging.info(f"Creating file backup of {len(events)} events")
-                backup_events_to_file(events)
-                logging.info("✅ File backup created for future deployments")
-                
-        except Exception as e:
-            # Fallback - still create tables
-            logging.error(f"File backup system failed ({e}) - creating basic tables")
-            db.create_all()
-        
-        # Create default admin if not exists
-        from models import Admin
-        from werkzeug.security import generate_password_hash
-        
-        admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
-        if not admin:
-            admin = Admin()
-            admin.username = 'support@foodtruckfundraiser.com'
-            admin.password_hash = generate_password_hash('password')
-            db.session.add(admin)
-            db.session.commit()
-            logging.info("Default admin created")
-        
-        logging.info("Application initialization completed successfully")
-        
-    except Exception as e:
-        logging.error(f"Application initialization failed: {str(e)}", exc_info=True)
+    except Exception as exc:
+        db.session.rollback()
+        logging.error("Database connection failed: %s", exc)
+        raise
+
+    try:
+        db.create_all()
+        logging.info("Database tables created or verified")
+        _maybe_restore_events()
+        _seed_demo_content()
+        _seed_admin()
+        logging.info("Application initialization completed")
+    except Exception:
+        db.session.rollback()
+        logging.error("Application initialization failed", exc_info=True)
         raise

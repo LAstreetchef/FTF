@@ -97,7 +97,7 @@
                                             <div class="d-grid">
                                                 <form method="POST" action="{{ url_for('admin_create_payout', event_id=event.id) }}">
                                                     <button type="submit" class="btn btn-primary w-100" 
-                                                            onclick="return confirm('Create payout of ${{ \"%.2f\"|format(payout_amount) }} for {{ event.food_truck.name if event.food_truck else \"this food truck\" }}?')">
+                                                            onclick="return confirm('Create payout of ${{ '%.2f'|format(payout_amount) }} for {{ event.food_truck.name if event.food_truck else 'this food truck' }}?')">
                                                         💰 Create Payout<br>
                                                         <small>${{ "%.2f"|format(payout_amount) }}</small>
                                                     </button>
@@ -151,7 +151,7 @@
                                     <div class="col-md-4 text-end">
                                         <form method="POST" action="{{ url_for('admin_complete_payout', payout_id=payout.id) }}" style="display: inline;">
                                             <button type="submit" class="btn btn-success w-100" 
-                                                    onclick="return confirm('Mark payout of ${{ \"%.2f\"|format(payout.amount) }} as completed?')">
+                                                    onclick="return confirm('Mark payout of ${{ '%.2f'|format(payout.amount) }} as completed?')">
                                                 ✅ Mark as Paid
                                             </button>
                                         </form>

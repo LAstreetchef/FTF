@@ -68,6 +68,15 @@
                         <small class="text-muted">One-time pledge per event</small>
                     </div>
 
+                    {% if config.get('PAYMENTS_MODE') == 'simulate' %}
+                    <div class="alert alert-warning">
+                        Stripe test keys are not configured. This records the $1.95 fee as paid so the event can be published locally. No card is charged.
+                    </div>
+                    <form method="POST" action="{{ url_for('confirm_organizer_fee_payment', event_id=event.id) }}{% if auth_token %}?auth_token={{ auth_token }}{% endif %}">
+                        <input type="hidden" name="simulate" value="1">
+                        <button type="submit" class="btn btn-primary btn-lg">Publish event (local simulation)</button>
+                    </form>
+                    {% else %}
                     <!-- Payment Form -->
                     <form id="payment-form">
                         <div class="form-group mb-3">
@@ -85,6 +94,7 @@
                             </button>
                         </div>
                     </form>
+                    {% endif %}
                 </div>
             </div>
 
@@ -106,6 +116,7 @@
     </div>
 </div>
 
+{% if config.get('PAYMENTS_MODE') != 'simulate' %}
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 // Initialize Stripe with potential live key override
@@ -254,4 +265,5 @@ form.addEventListener('submit', async (event) => {
     }
 });
 </script>
+{% endif %}
 {% endblock %}

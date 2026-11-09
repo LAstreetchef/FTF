@@ -244,11 +244,23 @@
                     <!-- Payment Info -->
                     <div class="mb-4">
                         <h5>Payment Information</h5>
+                        {% if payments_mode == 'simulate' %}
+                        <div class="alert alert-warning">
+                            <strong>Local simulation.</strong> Stripe test keys are not configured, so this pledge is saved without charging a card.
+                            Add <code>STRIPE_SECRET_KEY</code> and <code>STRIPE_PUBLISHABLE_KEY</code> (<code>sk_test_</code> / <code>pk_test_</code>) to use Stripe test mode. Card <code>4242 4242 4242 4242</code> works there.
+                        </div>
+                        {% elif payments_mode == 'disabled' %}
+                        <div class="alert alert-danger">
+                            Payments are turned off. Live Stripe keys were found while test mode is still on, so nothing will be charged.
+                        </div>
+                        {% else %}
                         <div class="alert alert-warning">
                             <i data-feather="shield" class="me-2"></i>
-                            <strong>Secure Payment:</strong> Payment details are processed securely by Stripe. 
+                            <strong>Secure Payment:</strong> Payment details are processed securely by Stripe.
+                            {% if payments_mode == 'stripe' %}Test mode is on. Use card 4242 4242 4242 4242.{% endif %}
                             We never store your full card information.
                         </div>
+                        {% endif %}
                         
                         <!-- Stripe Elements will be inserted here -->
                         <div id="payment-element" class="mb-3">
@@ -276,24 +288,27 @@
 {% endblock %}
 
 {% block scripts %}
+{% if payments_mode == 'stripe' and stripe_publishable_key %}
 <script src="https://js.stripe.com/v3/"></script>
+{% endif %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Stripe with potential live key override (same fix as organizer payments)
-    {% if stripe_publishable_key %}
-    let stripePublishableKey = '{{ stripe_publishable_key }}';
-    const stripe = Stripe(stripePublishableKey);
-    console.log('🔧 Pledge form initialized with Stripe key:', stripePublishableKey.substring(0, 20) + '...');
-    {% else %}
-    // Stripe not properly configured - show error
-    document.getElementById('payment-errors').innerHTML = '<div class="alert alert-danger">Payment system not available</div>';
-    return;
-    {% endif %}
+    const simulatePayments = {{ 'true' if payments_mode == 'simulate' else 'false' }};
+    let stripe = null;
     let elements;
     let paymentElement;
+    {% if payments_mode == 'stripe' and stripe_publishable_key %}
+    stripe = Stripe('{{ stripe_publishable_key }}');
+    {% elif payments_mode != 'simulate' %}
+    const paymentErrors = document.getElementById('payment-errors');
+    if (paymentErrors) {
+        paymentErrors.innerHTML = '<div class="alert alert-danger">Payment system not available. Add Stripe test keys to the environment.</div>';
+    }
+    {% endif %}
     
-    // Initialize payment form
-    initializePaymentForm();
+    if (stripe) {
+        initializePaymentForm();
+    }
     
     // Menu item selection handling
     const quantityInputs = document.querySelectorAll('.menu-item-quantity-input');
@@ -477,7 +492,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     async function handleSubmit(event) {
+        if (simulatePayments) {
+            return;
+        }
         event.preventDefault();
+        if (!stripe || !paymentElement) {
+            displayError({message: 'Payment system is not configured.'});
+            return;
+        }
         
         const submitButton = document.getElementById('submit-button');
         const buttonText = document.getElementById('button-text');
