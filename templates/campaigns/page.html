@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ possessive_name }} Holiday Truck Day — Green Truck</title>
+    <meta name="description" content="Green Truck holiday catering for {{ page.company_name }}. The truck cooks in your lot, or we drop a holiday lunch at the office.">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#f7f5f2">
+    <link rel="icon" href="{{ url_for('static', filename='images/gtla-mark.svg') }}">
+    {% set hero = photos['truck-exterior-02.jpg'] %}
+    {% if hero.webp_srcset %}
+    <link rel="preload" as="image" href="{{ hero.src }}" imagesrcset="{{ hero.webp_srcset }}" imagesizes="100vw" type="image/webp" fetchpriority="high">
+    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@420;520;600&family=Newsreader:ital,opsz,wght@0,6..72,420;0,6..72,520;1,6..72,420&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gtla.css') }}">
+</head>
+<body class="gt-page">
+    <a class="gt-skip" href="#book">Skip to the date request</a>
+
+    {% macro frame(name, sizes='(max-width: 700px) 100vw, 33vw', eager=False, klass='') %}
+    {% set photo = photos[name] %}
+    <figure class="gt-shot {{ klass }}{% if photo.vintage %} gt-vintage{% endif %}">
+        {% if photo.src %}
+        <picture>
+            {% if photo.webp_srcset %}
+            <source type="image/webp" srcset="{{ photo.webp_srcset }}" sizes="{{ sizes }}">
+            {% endif %}
+            <img src="{{ photo.src }}"
+                 {% if photo.srcset %}srcset="{{ photo.srcset }}" sizes="{{ sizes }}"{% endif %}
+                 alt="{{ photo.alt }}"
+                 width="{{ photo.width }}" height="{{ photo.height }}"
+                 {% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                 decoding="async">
+        </picture>
+        {% else %}
+        <div class="gt-ph" role="img" aria-label="Green Truck photograph unavailable">Photograph</div>
+        {% endif %}
+    </figure>
+    {% endmacro %}
+
+    <header class="gt-bar">
+        <a class="gt-lockup" href="#top">
+            <img src="{{ url_for('static', filename='images/gtla-mark.svg') }}" alt="" width="36" height="22">
+            <span>Green Truck</span>
+        </a>
+        <div class="gt-bar-side">
+            {% if page.logo_url %}
+            <img class="gt-company-logo" src="{{ page.logo_url }}" alt="{{ page.company_name }}" height="36" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+            {% else %}
+            <span class="gt-company-name">{{ page.company_name }}</span>
+            {% endif %}
+        </div>
+    </header>
+
+    <section class="gt-hero" id="top">
+        {{ frame('truck-exterior-02.jpg', '100vw', True) }}
+        <div class="gt-hero-copy">
+            <p class="gt-kicker">Holiday 2026 · Culver City</p>
+            <h1>{{ possessive_name }} Holiday Truck Day</h1>
+            <p class="gt-lede">Green Truck cooks organic food for the office. The truck parks in the lot and takes orders, or we pack a holiday lunch and drop it at the door.</p>
+            <p class="gt-where">Silicon Beach — Santa Monica, Venice, Playa Vista, Culver City, Marina del Rey, El Segundo.</p>
+            <a class="gt-button" href="#book">Request a date</a>
+        </div>
+    </section>
+
+    <section class="gt-note">
+        <div class="gt-wrap">
+            <p class="gt-kicker">A note from Kam</p>
+            <blockquote>
+                <p>{{ page.personal_note }}</p>
+                <footer>— Kam Miceli, Green Truck</footer>
+            </blockquote>
+            {% if date_choices %}
+            <div class="gt-dates" aria-label="Suggested December dates">
+                {% for iso, label in date_choices %}<span>{{ label }}</span>{% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="gt-gallery" aria-label="The truck">
+        <div class="gt-wrap gt-pair">
+            {{ frame('truck-exterior-01.jpg', '(max-width: 800px) 100vw, 50vw') }}
+            {{ frame('truck-exterior-03.jpg', '(max-width: 800px) 100vw, 50vw') }}
+        </div>
+    </section>
+
+    <section class="gt-formats" id="formats">
+        <div class="gt-wrap">
+            <p class="gt-kicker">Two ways</p>
+            <h2>The truck comes to you.</h2>
+            <div class="gt-format-grid">
+                <article class="gt-format-card">
+                    {{ frame('truck-exterior-04.jpg', '(max-width: 800px) 100vw, 50vw') }}
+                    <p class="gt-index">01</p>
+                    <h3>In the lot</h3>
+                    <p>Green Truck parks at the office and cooks to order. People come out when they want. It feels like lunch, not a buffet line.</p>
+                </article>
+                <article class="gt-format-card">
+                    {{ frame('food-tacos-avocado-01.jpg', '(max-width: 800px) 100vw, 50vw') }}
+                    <p class="gt-index">02</p>
+                    <h3>Drop-off</h3>
+                    <p>Holiday lunch, an office party, or a thank-you for the staff. Packed in Culver City and left where you tell us.</p>
+                </article>
+            </div>
+            <p class="gt-one-truck">One truck. Green Truck. No menu of other kitchens.</p>
+        </div>
+    </section>
+
+    <section class="gt-gallery" aria-label="Green Truck food">
+        <div class="gt-wrap gt-gallery-intro">
+            <p class="gt-kicker">The food</p>
+            <h2>Organic, cooked to order.</h2>
+            <p>Bowls, burgers, tacos, and a cilantro-lime fresca. The same kitchen whether the window is down in your lot or the trays show up at the door.</p>
+        </div>
+        <div class="gt-wrap gt-mosaic">
+            {{ frame('food-paleo-bowl-01.jpg') }}
+            {{ frame('food-bowl-kale-yeah-01.jpg') }}
+            {{ frame('food-burger-mother-trucker-01.jpg') }}
+            {{ frame('food-burger-chipotle-cheddar-01.jpg') }}
+            {{ frame('food-sandwich-chicken-pesto-01.jpg') }}
+            {{ frame('food-bowl-takeout-01.jpg') }}
+            {{ frame('food-bowl-avocado-quinoa-01.jpg') }}
+            {{ frame('food-sliders-01.jpg') }}
+            {{ frame('food-bowl-truck-branding-01.jpg') }}
+            {{ frame('food-chili-burger-01.jpg') }}
+            {{ frame('food-drink-cilantro-lime-01.jpg') }}
+            {{ frame('brand-menu-plants-01.jpg') }}
+        </div>
+    </section>
+
+    <section class="gt-band" aria-label="Where Green Truck started">
+        <div class="gt-wrap">
+            <div class="gt-origin-grid">
+                {{ frame('cabin-dining-room-01.jpg', '(max-width: 800px) 100vw, 58vw', False, 'gt-origin-hero') }}
+                <div class="gt-origin-copy">
+                    <p class="gt-kicker">Malibu · December 6, 2006</p>
+                    <h2>Born in a cabin.</h2>
+                    <p>Green Truck started in a Malibu cabin on December 6, 2006. The long table, the kitchenette, the porch light — that room is still the idea. Twenty years later the truck parks at offices instead of only at the cabin door.</p>
+                    <div class="gt-vintage-row">
+                        {{ frame('truck-desert-vintage-01.jpg', '160px', False, 'gt-vintage') }}
+                        <p class="gt-since">The 2008 truck, kept small. It is a low-resolution archive shot, a since-2006 note, not a hero.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="gt-pair gt-origin-more">
+                {{ frame('cabin-common-room-01.jpg', '(max-width: 800px) 100vw, 50vw') }}
+                {{ frame('cabin-kitchenette-01.jpg', '(max-width: 800px) 100vw, 50vw') }}
+            </div>
+        </div>
+    </section>
+
+    <section class="gt-gallery" aria-label="Green Truck with people">
+        <div class="gt-wrap gt-gallery-intro">
+            <p class="gt-kicker">Out in the world</p>
+            <h2>Festivals, sets, and a line at the window.</h2>
+            <p>Coachella, a film set, an evening service, and the crew plating for a room. Office lunches are the quieter version of the same truck.</p>
+        </div>
+        <div class="gt-wrap gt-events">
+            {{ frame('coachella-crowd-01.jpg', '(max-width: 700px) 100vw, 50vw') }}
+            {{ frame('event-evening-crowd-01.jpg') }}
+            {{ frame('event-film-set-01.jpg') }}
+            {{ frame('crew-jimmy-kimmel-01.jpg') }}
+            {{ frame('cabin-serving-01.jpg') }}
+            {{ frame('cabin-serving-02.jpg') }}
+            {{ frame('cabin-counter-serving-01.jpg') }}
+            {{ frame('cabin-dining-crowd-01.jpg') }}
+            {{ frame('cabin-toast-crowd-01.jpg') }}
+        </div>
+    </section>
+
+    <section class="gt-homebase">
+        <div class="gt-wrap">
+            <p class="gt-kicker">Home base</p>
+            <h2>The Truck Stop, Los Angeles.</h2>
+            <div class="gt-home-row">
+                {{ frame('truckstop-exterior-01.jpg', '(max-width: 800px) 100vw, 50vw') }}
+                <div class="gt-home-copy">
+                    {{ frame('truckstop-exterior-02.jpg', '(max-width: 800px) 100vw, 40vw') }}
+                    <p>When the truck is not in a lot, this is the kitchen’s front door.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="gt-book" id="book">
+        <div class="gt-wrap gt-book-grid">
+            <div>
+                <p class="gt-kicker">The date</p>
+                <h2>Tell Kam the day, the headcount, and the door.</h2>
+                <p>This is the whole ask. A quote comes back by email. Nothing is charged on this page.</p>
+            </div>
+            <div>
+                {% if saved %}
+                <div class="gt-saved" role="status">
+                    <h3>Request received.</h3>
+                    <p>It’s saved for Kam. If mail is turned on, the Green Truck inbox has it too.</p>
+                </div>
+                {% endif %}
+                {% if errors %}
+                <div class="gt-errors" role="alert">
+                    {% for error in errors %}<p>{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+                <form class="gt-form" method="post" action="{{ url_for('campaign_quote', slug=page.slug) }}">
+                    <p class="gt-honeypot"><label>Website <input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></p>
+                    <fieldset>
+                        <legend>Format</legend>
+                        <div class="gt-choices">
+                            <label class="gt-choice">
+                                <input type="radio" name="service_format" value="truck" {% if form.get('service_format') == 'truck' %}checked{% endif %} required>
+                                <span><strong>Truck in the lot</strong><em>Cooked to order, on site.</em></span>
+                            </label>
+                            <label class="gt-choice">
+                                <input type="radio" name="service_format" value="dropoff" {% if form.get('service_format') == 'dropoff' %}checked{% endif %}>
+                                <span><strong>Drop-off catering</strong><em>Holiday lunch or a staff party.</em></span>
+                            </label>
+                        </div>
+                    </fieldset>
+                    <div class="gt-field">
+                        <label for="event_date">Date</label>
+                        {% if date_choices %}
+                        <div class="gt-chips" role="group" aria-label="Suggested dates">
+                            {% for iso, label in date_choices %}
+                            <button type="button" class="gt-chip" data-date="{{ iso }}">{{ label }}</button>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <input id="event_date" name="event_date" type="date" min="2026-12-01" max="2026-12-31" value="{{ form.get('event_date', '') }}" required>
+                    </div>
+                    <div class="gt-split">
+                        <div class="gt-field">
+                            <label for="headcount">Headcount</label>
+                            <input id="headcount" name="headcount" type="number" inputmode="numeric" min="1" max="5000" placeholder="80" value="{{ form.get('headcount', '') }}" required>
+                        </div>
+                        <div class="gt-field">
+                            <label for="organizer_name">Your name</label>
+                            <input id="organizer_name" name="organizer_name" type="text" autocomplete="name" value="{{ form.get('organizer_name', page.contact_name or '') }}" required>
+                        </div>
+                    </div>
+                    <div class="gt-field">
+                        <label for="organizer_email">Email</label>
+                        <input id="organizer_email" name="organizer_email" type="email" autocomplete="email" value="{{ form.get('organizer_email', page.contact_email or '') }}" required>
+                    </div>
+                    <div class="gt-field">
+                        <label for="location">Lot or drop-off address</label>
+                        <input id="location" name="location" type="text" autocomplete="street-address" placeholder="Where the truck parks, or the floor we deliver to" value="{{ form.get('location', '') }}" required>
+                    </div>
+                    <div class="gt-field">
+                        <label for="notes">Anything else</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="Dietary notes, a loading dock, a time window.">{{ form.get('notes', '') }}</textarea>
+                    </div>
+                    <details class="gt-give" {% if form.get('give_back') %}open{% endif %}>
+                        <summary>Optional give-back</summary>
+                        <p>Set a portion aside for a cause the company picks. Booking the truck does not depend on this. If you want the team to pre-order meals toward that goal, say so — pledges are only charged if the goal is met.</p>
+                        <label class="gt-check">
+                            <input type="checkbox" name="give_back" {% if form.get('give_back') %}checked{% endif %}>
+                            Include a give-back{% if page.give_back_cause %} · suggested: {{ page.give_back_cause }}{% endif %}
+                        </label>
+                        <div class="gt-split">
+                            <div class="gt-field">
+                                <label for="cause">Cause</label>
+                                <input id="cause" name="cause" type="text" value="{{ form.get('cause', page.give_back_cause or '') }}">
+                            </div>
+                            <div class="gt-field">
+                                <label for="give_back_percent">Percent</label>
+                                <input id="give_back_percent" name="give_back_percent" type="number" min="1" max="100" value="{{ form.get('give_back_percent', '10') }}">
+                            </div>
+                        </div>
+                        <label class="gt-check">
+                            <input type="checkbox" name="preorder" {% if form.get('preorder') %}checked{% endif %}>
+                            Open a private pre-order so people can pledge meals
+                        </label>
+                    </details>
+                    <button class="gt-button gt-button-full" type="submit">Request a quote</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="gt-years">
+        <div class="gt-wrap">
+            <p class="gt-kicker">December 6, 2026</p>
+            <h2>Twenty years.</h2>
+            <p>Green Truck turns 20 on December 6. It started on December 6, 2006, in a cabin in Malibu.</p>
+        </div>
+    </section>
+
+    <footer class="gt-site-footer">
+        <div class="gt-wrap">
+            <strong>GTLA</strong>
+            <span>Culver City · Organic · Since 2006</span>
+        </div>
+    </footer>
+    <script>
+    (function () {
+        var input = document.getElementById("event_date");
+        document.querySelectorAll(".gt-chip").forEach(function (chip) {
+            chip.addEventListener("click", function () {
+                if (!input) return;
+                input.value = chip.getAttribute("data-date");
+                document.querySelectorAll(".gt-chip").forEach(function (other) { other.classList.remove("is-on"); });
+                chip.classList.add("is-on");
+            });
+        });
+    })();
+    </script>
+</body>
+</html>

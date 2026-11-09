@@ -145,6 +145,22 @@ Railway and Fly are the same shape: a Python web process running the Procfile co
 - Tables are created with `db.create_all()` on boot. That adds missing tables. It does not migrate columns that already exist. There is no Alembic history yet.
 - `.replit`, `replit.md`, and the Squarespace HTML files are leftover from the Replit deploy. The embed snippets still point at a dead `worf.replit.dev` host. Point them at the new URL before using the embed, and set `IFRAME_EMBED=true` only on that HTTPS deployment.
 
+## Holiday campaign pages
+
+Green Truck uses `/c/<slug>` as the first page a prospect sees from a December 2026 email. Each page is Green Truck only: the truck in their lot, or a drop-off, a note from Kam, and a quote form. There is no truck picker. Quote requests are stored for admin. If `CAMPAIGN_NOTIFY_EMAIL` (or `ADMIN_EMAIL`) is set and SMTP is configured, Kam also gets an email. With mail suppressed, the request still shows under Admin → Holiday campaigns.
+
+Create the pages from a CSV. In `/admin/campaigns`, upload a file with this header:
+
+```
+company,contact_name,contact_email,personal_note,logo_url,suggested_dates,give_back_cause,slug
+```
+
+`company` is required. Dates are `YYYY-MM-DD` separated by `|`. `logo_url` must be `https` if you set it. Re-uploading the same `slug` updates the page and keeps its view count. A sample download on that screen uses fictional companies (`@northwind.example` and similar). Do not commit a CSV of real clients. This repository is public.
+
+Photographs live in `static/images/green-truck/`. `manifest.json` lists each file, a category, and a one-line description. `img/` holds the JPEGs plus responsive WebP (`name-800.webp`, `name-1600.webp`). The 2008 desert shot, `truck-desert-vintage-01.jpg`, is only the small “since 2006” frame. Gallery images use `loading="lazy"`; the hero is preloaded. To swap a picture, replace the file (keep the filename) or upload a replacement in the admin screen. Uploads go to `instance/campaign_photos/` and are not committed. On Render, prefer files in the repo so they survive a new deploy. Set `CAMPAIGN_NOTIFY_EMAIL` on the web service when you want quote mail.
+
+Local demo companies (Northwind Labs, Harbor & Pine, Lumen Desk) are fiction, seeded only when `SEED_DEMO_DATA=true`.
+
 ## Suggested next steps
 
 - Put the real Green Truck menu in through `/food-truck/register` instead of the demo seed.

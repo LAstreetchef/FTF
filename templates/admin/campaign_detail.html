@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.company_name }} campaign — GTLA{% endblock %}
+
+{% block content %}
+<div class="gt-admin">
+    <p class="gt-kicker"><a href="{{ url_for('admin_campaigns') }}">Holiday campaigns</a></p>
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-3">
+        <h1 class="mb-0">{{ page.company_name }}</h1>
+        <a class="btn btn-dark" href="{{ url_for('campaign_page', slug=page.slug, preview=1) }}">Open page</a>
+    </div>
+    <p class="text-secondary mb-4">{{ view_count }} views · {{ unique_count }} unique · {{ quotes|length }} quote request{{ '' if quotes|length == 1 else 's' }}</p>
+    <p><strong>Link</strong> <code>{{ url_for('campaign_page', slug=page.slug, _external=True) }}</code></p>
+    {% if page.personal_note %}
+    <blockquote class="my-4">{{ page.personal_note }}</blockquote>
+    {% endif %}
+
+    <h2 class="h4 mt-5">Quote requests</h2>
+    {% if quotes %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>When</th>
+                    <th>Who</th>
+                    <th>Format</th>
+                    <th>Date</th>
+                    <th>People</th>
+                    <th>Where</th>
+                    <th>Give-back</th>
+                    <th>Mail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for quote in quotes %}
+                <tr>
+                    <td>{{ quote.created_at.strftime('%b %-d, %-I:%M %p') if quote.created_at else '' }}</td>
+                    <td>{{ quote.organizer_name }}<div class="small">{{ quote.organizer_email }}</div></td>
+                    <td>{{ 'Truck in the lot' if quote.service_format == 'truck' else 'Drop-off' }}</td>
+                    <td>{{ quote.event_date }}</td>
+                    <td>{{ quote.headcount }}</td>
+                    <td>{{ quote.location }}{% if quote.notes %}<div class="small text-secondary">{{ quote.notes }}</div>{% endif %}</td>
+                    <td>
+                        {% if quote.give_back %}
+                        {{ quote.give_back_percent }}% {{ quote.cause }}
+                        {% if quote.preorder_requested %}<div class="small">Pre-order requested</div>{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ 'Sent' if quote.email_notified else 'In admin only' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No requests yet. When someone uses the form, it shows up here{% if not quotes %} even if email is off{% endif %}.</p>
+    {% endif %}
+
+    <h2 class="h4 mt-5">Recent opens</h2>
+    <ul class="list-unstyled">
+        {% for view in recent_views %}
+        <li class="mb-1">{{ view.viewed_at.strftime('%b %-d, %-I:%M %p') if view.viewed_at else '' }}
+            <span class="text-secondary">{{ view.referrer or 'direct' }}</span>
+        </li>
+        {% else %}
+        <li>No opens recorded.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

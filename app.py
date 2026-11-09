@@ -448,6 +448,7 @@ with app.app_context():
 
     import models  # noqa: F401
     import routes  # noqa: F401
+    import campaigns  # noqa: F401
 
     try:
         db.session.execute(db.text("SELECT 1"))
@@ -463,6 +464,8 @@ with app.app_context():
         _maybe_restore_events()
         _seed_demo_content()
         _seed_admin()
+        from campaigns import seed_demo_campaigns
+        seed_demo_campaigns()
         logging.info("Application initialization completed")
     except Exception:
         db.session.rollback()

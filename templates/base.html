@@ -182,14 +182,18 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@420;520;600&family=Newsreader:opsz,wght@6..72,450&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gtla.css') }}">
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-light gt-nav">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i data-feather="truck" class="me-2"></i>
-                {{ get_text('site_title', get_language_from_request()) }}
+                <img src="{{ url_for('static', filename='images/gtla-mark.svg') }}" alt="" width="28" height="18">
+                GTLA
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -270,15 +274,15 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
+    <footer class="gt-public-footer mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Food Truck Fundraiser</h5>
-                    <p class="text-muted">Connecting communities with great food through crowdfunding.</p>
+                    <h5>GTLA</h5>
+                    <p class="gt-muted">Culver City. Organic food, and community fundraisers.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="text-muted">&copy; 2025 Food Truck Fundraiser. All rights reserved.</p>
+                    <p class="gt-muted">&copy; 2026 GTLA</p>
                 </div>
             </div>
         </div>
