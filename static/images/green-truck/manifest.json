@@ -95,21 +95,21 @@
     {
       "filename": "food-burger-mother-trucker-01.jpg",
       "category": "food",
-      "description": "Mother Trucker vegan burger with pink sauce, pickles, and tomato",
+      "description": "MotherTrucker Vegan Burger",
       "width": 2000,
       "height": 1500
     },
     {
       "filename": "food-bowl-kale-yeah-01.jpg",
       "category": "food",
-      "description": "Kale Yeah bowl with quinoa, beets, carrots, mushrooms, and goddess dressing",
+      "description": "Organic Kale Yeah Bowl",
       "width": 2000,
       "height": 1500
     },
     {
       "filename": "food-drink-cilantro-lime-01.jpg",
       "category": "food",
-      "description": "Three mason jars of cilantro lime fresca on a weathered tree stump",
+      "description": "Cilantro-lime Fresca (seasonal)",
       "width": 2000,
       "height": 1500
     },
@@ -123,7 +123,7 @@
     {
       "filename": "food-sandwich-chicken-pesto-01.jpg",
       "category": "food",
-      "description": "Chicken pesto sandwich with roasted red peppers and arugula on ciabatta",
+      "description": "Organic Chicken Pesto Sandwich",
       "width": 2000,
       "height": 1500
     },
