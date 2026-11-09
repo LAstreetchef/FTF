@@ -1,5 +1,5 @@
 {
-  "note": "Green Truck photographs. filename matches a file in img/. WebP siblings (name-800.webp, name-1600.webp) are the responsive sources. truck-desert-vintage-01 is a 2008 low-res archive and is displayed small.",
+  "note": "Green Truck photographs. filename matches a file in img/. WebP siblings (name-800.webp and, when the original is wide enough, name-1600.webp) are the responsive sources. truck-desert-vintage-01 is a 2008 low-res archive and is displayed small. Drive file ids are not stored here.",
   "images": [
     {
       "filename": "truck-exterior-01.jpg",
@@ -224,6 +224,160 @@
       "description": "Truck Stop Los Angeles facade with Market Deli Food Trucks awning and pin logo",
       "width": 1500,
       "height": 2000
+    },
+    {
+      "filename": "cabin-dining-table-01.jpg",
+      "category": "cabin",
+      "description": "Empty long communal dining table in the Malibu cabin with red pendant lights",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-dining-lights-01.jpg",
+      "category": "cabin",
+      "description": "Cabin dining room with red pendant lights and wood table ready for service",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-outdoor-planter-01.jpg",
+      "category": "cabin",
+      "description": "Cabin exterior planter wall with chalkboard and potted herbs",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-dining-crowd-02.jpg",
+      "category": "cabin",
+      "description": "Guests dining at the Malibu cabin communal table with bowls and juices",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-toast-crowd-02.jpg",
+      "category": "cabin",
+      "description": "Cabin dinner toast with packed communal table of guests",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-dining-crowd-03.jpg",
+      "category": "cabin",
+      "description": "Guests eating gourmet burgers and salads at cabin table",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-bar-counter-01.jpg",
+      "category": "cabin",
+      "description": "Two guests at the cabin pass-through bar counter",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "truck-service-window-01.jpg",
+      "category": "truck",
+      "description": "Green Truck service window with guest reviewing Fish Tacos and burger menus",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truck-santa-monica-pier-01.jpg",
+      "category": "truck",
+      "description": "Early Green Truck cart on Santa Monica Pier with Pacific Park coaster behind",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truck-exterior-side-01.jpg",
+      "category": "truck",
+      "description": "Full side wrap ORGANIC sustainable LOCAL with open service windows and solar",
+      "width": 1800,
+      "height": 1012
+    },
+    {
+      "filename": "truck-night-event-01.jpg",
+      "category": "truck",
+      "description": "Green Truck at night outdoor event with solar panels and prayer flags",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "fleet-commissary-yard-01.jpg",
+      "category": "truckstop",
+      "description": "Aerial view of Green Truck fleet with solar panels at Truck Stop commissary yard",
+      "width": 1800,
+      "height": 1012
+    },
+    {
+      "filename": "truckstop-coming-soon-01.jpg",
+      "category": "truckstop",
+      "description": "The Truck Stop storefront with Coming Soon window graphics and red awnings",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truckstop-windows-branding-01.jpg",
+      "category": "truckstop",
+      "description": "Truck Stop window vinyl branding mockup spanning storefront glass",
+      "width": 1800,
+      "height": 1388
+    },
+    {
+      "filename": "crew-owner-hq-01.jpg",
+      "category": "crew",
+      "description": "Kam at Truck Stop HQ giving peace sign above Green Truck fleet and solar roof",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truck-union-square-01.jpg",
+      "category": "truck",
+      "description": "Early Eat Green / Green Truck cart on city street (Union Square era)",
+      "width": 800,
+      "height": 600
+    },
+    {
+      "filename": "food-ultimate-mother-burger-01.jpg",
+      "category": "food",
+      "description": "Ultimate Mother sprout burger close-up on toasted bun",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "food-juice-bar-spread-01.jpg",
+      "category": "food",
+      "description": "Catering juice bar spread with citrus, cilantro, radishes, and fresh-pressed juices",
+      "width": 720,
+      "height": 703
+    },
+    {
+      "filename": "food-berry-cups-01.jpg",
+      "category": "food",
+      "description": "Four cups of mixed berries with Green Truck sticker",
+      "width": 800,
+      "height": 1200
+    },
+    {
+      "filename": "event-festival-crowd-01.jpg",
+      "category": "crowd",
+      "description": "Dense festival crowd gathered around Green Truck under palm trees",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "event-city-hall-night-01.jpg",
+      "category": "crowd",
+      "description": "Green Truck at dusk beneath lit Beaux-Arts civic dome (Pasadena City Hall area)",
+      "width": 600,
+      "height": 800
+    },
+    {
+      "filename": "press-jamie-oliver-01.jpg",
+      "category": "brand",
+      "description": "Beach Reporter clipping: Jamie Oliver goes GREEN featuring Green Truck",
+      "width": 688,
+      "height": 1022
     }
   ]
 }
