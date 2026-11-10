@@ -43,7 +43,9 @@ def test_csv_import_and_green_truck_page(client):
     body = page.data
     assert b"Northwind Labs" in body and b"Holiday Truck Day" in body
     assert b"GTLA" in body
-    assert b"A note from Kam" in body
+    assert b"A note from Green Truck" in body
+    assert b"Kam" not in body
+    assert b"Miceli" not in body
     assert b"MotherTrucker Vegan Burger" in body
     assert b"Golden Rounds" in body
     assert b"Super-Food Salad Bowl" in body

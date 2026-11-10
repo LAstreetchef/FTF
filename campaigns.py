@@ -1469,7 +1469,7 @@ def campaign_quote(slug):
     if not form["organizer_name"]:
         errors.append("Add your name.")
     if "@" not in form["organizer_email"] or "." not in form["organizer_email"].split("@")[-1]:
-        errors.append("Add a real email so Kam can reply.")
+        errors.append("Add a real email so we can reply.")
     if form["service_format"] not in {"truck", "dropoff", "classic"}:
         form["service_format"] = "classic"
     if not form["event_date"]:
@@ -1576,7 +1576,7 @@ def admin_campaign_sample_csv():
         "company": "Northwind Labs",
         "contact_name": "Avery Chen",
         "contact_email": "avery@northwind.example",
-        "personal_note": "A short note from Kam. This row is fake sample data.",
+        "personal_note": "A short note from Green Truck. This row is fake sample data.",
         "logo_url": "",
         "suggested_dates": "2026-12-04|2026-12-09|2026-12-11",
         "give_back_cause": "a local school garden",
