@@ -131,22 +131,32 @@ mail_password = (
     or os.environ.get("EMAIL_PASSWORD_NEW")
     or ""
 )
-mail_sender = os.environ.get("MAIL_DEFAULT_SENDER") or mail_username or "noreply@localhost"
+mail_sender = (os.environ.get("MAIL_DEFAULT_SENDER") or mail_username or "").strip()
+resend_key = (os.environ.get("RESEND_API_KEY") or "").strip()
+smtp_ready = bool(mail_username and mail_password)
 app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "localhost")
 app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", "587"))
 app.config["MAIL_USE_TLS"] = _env_flag("MAIL_USE_TLS", True)
 app.config["MAIL_USE_SSL"] = _env_flag("MAIL_USE_SSL", False)
 app.config["MAIL_USERNAME"] = mail_username or None
 app.config["MAIL_PASSWORD"] = mail_password or None
-app.config["MAIL_DEFAULT_SENDER"] = mail_sender
+app.config["MAIL_DEFAULT_SENDER"] = mail_sender or "noreply@localhost"
+app.config["RESEND_API_KEY"] = resend_key or None
 app.config["MAIL_SUPPRESS_SEND"] = _env_flag(
     "MAIL_SUPPRESS_SEND",
-    IS_TESTING or not (mail_username and mail_password),
+    IS_TESTING or not (resend_key or smtp_ready),
 )
 if app.config["MAIL_SUPPRESS_SEND"]:
-    logging.info("Email sending is suppressed (set MAIL_USERNAME and MAIL_PASSWORD to send mail)")
+    logging.info(
+        "Email sending is suppressed. Set RESEND_API_KEY and MAIL_DEFAULT_SENDER "
+        "(or MAIL_USERNAME and MAIL_PASSWORD) to send mail."
+    )
+elif resend_key and not mail_sender:
+    logging.warning("RESEND_API_KEY is set, but MAIL_DEFAULT_SENDER is missing. Mail will not send.")
+elif resend_key:
+    logging.info("Email configured via Resend HTTP")
 else:
-    logging.info("Email configured via %s", app.config["MAIL_SERVER"])
+    logging.info("Email configured via SMTP %s", app.config["MAIL_SERVER"])
 
 
 def configure_payments():
@@ -481,10 +491,11 @@ with app.app_context():
         _maybe_restore_events()
         _seed_demo_content()
         _seed_admin()
-        from campaigns import ensure_anon_check, ensure_desk_check, seed_demo_campaigns
+        from campaigns import ensure_anon_check, ensure_desk_check, ensure_e2e_checks, seed_demo_campaigns
         seed_demo_campaigns()
         ensure_desk_check()
         ensure_anon_check()
+        ensure_e2e_checks()
         logging.info("Application initialization completed")
     except Exception:
         db.session.rollback()

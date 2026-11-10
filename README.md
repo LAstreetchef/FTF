@@ -91,7 +91,8 @@ Every variable is listed in [`.env.example`](.env.example). The ones that matter
 | `STRIPE_COMBO_PRICE_ID` | no | Office combo Price. Test mode defaults to `price_1UaEDhBgt3ltA59nFLiZXZ2E` ($18). The app reads `unit_amount` from Stripe and does not create Prices. `COMBO_PRICE` is the fallback |
 | `CAMPAIGN_SWEEP_TOKEN` | no | Shared secret for `POST /campaigns/sweep`. Set it in the host dashboard. A Render cron should call that URL because the free plan sleeps |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | to create an admin | Seeded once if the account does not exist |
-| `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER` | to send mail | SMTP. Blank credentials skip sending |
+| `RESEND_API_KEY`, `MAIL_DEFAULT_SENDER` | to send mail on Render | HTTPS via Resend. The sender must be a verified Resend domain. Blank skips sending |
+| `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD` | SMTP alternative | Used only when `RESEND_API_KEY` is empty. Render free often blocks port 587 |
 | `OPENAI_API_KEY` | no | Support chat only |
 | `PAYPAL_CLIENT_ID` / `PAYPAL_CLIENT_SECRET` | no | Admin PayPal payout buttons |
 | `SEED_DEMO_DATA` and `DEMO_*` | no | Local sample truck and event. Ignored in production |
@@ -126,7 +127,7 @@ This is the smallest production path: one web service and one managed Postgres d
    - `ADMIN_EMAIL` and `ADMIN_PASSWORD`
    - `SEED_DEMO_DATA` = `false`
    - `RESTORE_EVENT_BACKUP` = `false`
-5. Add SMTP when you want real mail (`MAIL_SERVER`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER`). SendGrid, Amazon SES, or any TLS SMTP server works. The old Network Solutions host is not assumed.
+5. Add mail when you want the start note, pledge confirmation, e-ticket, and booking note delivered. On Render set `RESEND_API_KEY` and `MAIL_DEFAULT_SENDER` (a verified sender, such as `Green Truck <hello@yourdomain>`). Leave both empty and mail is logged only. SMTP (`MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SERVER`) is the fallback when `RESEND_API_KEY` is empty.
 6. Deploy. Open `/health` and expect `{"status":"healthy"}`. Log in at `/admin/login` with `ADMIN_EMAIL`.
 7. Run a pledge with the Stripe test card on a published event. In the Stripe test dashboard you should see a PaymentIntent in `requires_capture` (manual capture). Do not set `STRIPE_TEST_MODE=false` until that path is correct and you are ready to charge real cards. Live mode needs `sk_live_` / `pk_live_` keys and `STRIPE_TEST_MODE=false`.
 
@@ -138,7 +139,7 @@ Railway and Fly are the same shape: a Python web process running the Procfile co
 
 - **Stripe** account. Use test keys until a real event is ready. Webhooks are not required for the current pledge flow; capture is done by the app when a goal is met or an admin approves the event.
 - **Postgres** such as Render Postgres, Neon, Railway, or Fly Postgres. SQLite is only for local development.
-- **SMTP** provider for pledge confirmations, goal emails, and e-tickets. Optional for a first boot.
+- **Resend** API key for pledge confirmations, goal emails, and e-tickets. Optional for a first boot. `RESEND_API_KEY` plus `MAIL_DEFAULT_SENDER`. SMTP is the fallback.
 - **OpenAI** only if you want the support chat to answer.
 - **PayPal** REST app only if admins will send PayPal payouts from the dashboard. Bank payouts in this app are records, not automated transfers.
 - An **admin password** you choose via `ADMIN_PASSWORD`. The app no longer creates `support@foodtruckfundraiser.com` / `password`.

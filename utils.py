@@ -9,7 +9,19 @@ from app import mail, db
 from datetime import datetime
 
 def send_email(recipient, subject, body, html=None):
-    """Send email using Flask-Mail with Gmail SMTP"""
+    """Send mail through Resend's HTTPS API, or SMTP when that is what is configured.
+
+    Render's free web service can open HTTPS. It often cannot open SMTP ports.
+    """
+    if not recipient:
+        return False
+    from app import app
+    if app.config.get("MAIL_SUPPRESS_SEND"):
+        logging.info("Email suppressed for %s: %s", recipient, subject)
+        return False
+    resend_key = (os.environ.get("RESEND_API_KEY") or app.config.get("RESEND_API_KEY") or "").strip()
+    if resend_key:
+        return _send_resend(resend_key, recipient, subject, body, html)
     try:
         msg = Message(
             subject=subject,
@@ -18,11 +30,43 @@ def send_email(recipient, subject, body, html=None):
             html=html if html else body
         )
         mail.send(msg)
-        logging.info(f"Email sent to {recipient}: {subject}")
+        logging.info("Email sent via SMTP to %s: %s", recipient, subject)
         return True
     except Exception as e:
-        logging.error(f"Failed to send email to {recipient}: {str(e)}")
+        logging.error("Failed to send email to %s: %s", recipient, e)
         return False
+
+
+def _send_resend(api_key, recipient, subject, body, html):
+    import requests
+    from app import app
+    sender = (os.environ.get("MAIL_DEFAULT_SENDER") or app.config.get("MAIL_DEFAULT_SENDER") or "").strip()
+    if not sender or sender == "noreply@localhost":
+        logging.error("MAIL_DEFAULT_SENDER is required before Resend can send")
+        return False
+    payload = {"from": sender, "to": [recipient], "subject": subject or ""}
+    if html:
+        payload["html"] = html
+    text = body or ""
+    if text:
+        payload["text"] = text
+    elif not html:
+        payload["text"] = " "
+    try:
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json=payload,
+            timeout=15,
+        )
+    except Exception as exc:
+        logging.error("Resend request failed for %s: %s", recipient, exc)
+        return False
+    if response.status_code >= 400:
+        logging.error("Resend rejected email to %s: HTTP %s", recipient, response.status_code)
+        return False
+    logging.info("Email sent via Resend to %s: %s", recipient, subject)
+    return True
 
 def generate_ticket_code():
     """Generate a unique e-ticket code"""
@@ -82,8 +126,8 @@ def release_stripe_hold(payment_intent_id):
         logging.info("No Stripe key; hold %s will expire on its own", payment_intent_id)
         return False
     try:
-        stripe.PaymentIntent.cancel(payment_intent_id)
-        logging.info("Released hold %s", payment_intent_id)
+        canceled = stripe.PaymentIntent.cancel(payment_intent_id)
+        logging.info("Released hold %s status %s", payment_intent_id, getattr(canceled, "status", "canceled"))
         return True
     except Exception as exc:
         logging.error("Could not release hold %s: %s", payment_intent_id, exc)

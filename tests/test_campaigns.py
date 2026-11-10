@@ -317,6 +317,34 @@ def test_anonymous_sponsor_is_unnamed_on_the_page(client):
     assert b"Name off the page" in detail.data
 
 
+def test_e2e_fund_goal_is_two_combos(client):
+    from models import Event
+
+    with app.app_context():
+        db.session.add(CampaignPage(
+            slug="e2e-fund",
+            company_name="E2E Fund",
+            contact_name="Pat Example",
+            contact_email="pat@e2e-fund.example",
+            personal_note="Not a customer.",
+        ))
+        db.session.commit()
+    started = client.post("/c/e2e-fund/start", data={
+        "organizer_name": "Pat Example",
+        "organizer_email": "pat@e2e-fund.example",
+        "office_address": "100 Example Ave, Culver City",
+        "guest_count": "4",
+        "weekday": "fri",
+    }, follow_redirects=True)
+    assert started.status_code == 200
+    with app.app_context():
+        page = CampaignPage.query.filter_by(slug="e2e-fund").one()
+        event = Event.query.get(page.event_id)
+        assert event.pledge_goal == 36
+    assert client.get("/c/northwind-labs/test-payments").status_code == 404
+    assert client.post("/c/northwind-labs/test-release").status_code == 404
+
+
 def test_deadline_releases_uncaptured_holds(client):
     from datetime import datetime, timedelta
 

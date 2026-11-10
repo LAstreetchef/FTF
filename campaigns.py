@@ -369,6 +369,42 @@ def ensure_anon_check():
     db.session.commit()
 
 
+E2E_SLUGS = {"e2e-fund", "e2e-miss"}
+E2E_FUND_GOAL = 36.0
+
+
+def ensure_e2e_checks():
+    """Two fictional offices for a Stripe test-card walk. Not customers."""
+    if os.environ.get("APP_ENV") == "testing":
+        return
+    samples = (
+        ("e2e-fund", "E2E Fund", "pat@e2e-fund.example", "This sample funds on two test combos. It is not a customer."),
+        ("e2e-miss", "E2E Miss", "pat@e2e-miss.example", "This sample is released before the goal. It is not a customer."),
+    )
+    for slug, company, email, note in samples:
+        if CampaignPage.query.filter_by(slug=slug).first():
+            continue
+        page = CampaignPage(
+            slug=slug,
+            company_name=company,
+            contact_name="Pat Example",
+            contact_email=email,
+            personal_note=note,
+        )
+        page.set_suggested_dates(["2026-12-04", "2026-12-11", "2026-12-18"])
+        db.session.add(page)
+    db.session.commit()
+
+
+def _e2e_page(slug):
+    if slug not in E2E_SLUGS:
+        return None
+    page = CampaignPage.query.filter_by(slug=slug).first()
+    if not page or not (page.contact_email or "").endswith(".example"):
+        return None
+    return page
+
+
 def seed_demo_campaigns():
     """Fictional prospects only. Never real customer names or inboxes."""
     if os.environ.get("APP_ENV") == "production":
@@ -789,7 +825,8 @@ def office_snapshot(page):
     price = combo_price()
     raised = float(event.current_pledges or 0) if event else 0.0
     meals = int(round(raised / price)) if price else 0
-    needed = combos_needed()
+    goal_amount = float(event.pledge_goal) if event and event.pledge_goal else float(minimum_amount())
+    needed = max(1, math.ceil(goal_amount / price)) if price else combos_needed()
     gap = max(0, needed - meals)
     pledges = _event_pledges(page.event_id)
     team_meals = 0
@@ -826,9 +863,9 @@ def office_snapshot(page):
         "started": event is not None,
         "host": _is_host(page),
         "raised": raised,
-        "to_go": max(0, minimum_amount() - raised),
+        "to_go": max(0, goal_amount - raised),
         "meals": meals,
-        "goal": minimum_amount(),
+        "goal": goal_amount,
         "needed": needed,
         "gap": gap,
         "team_meals": team_meals,
@@ -892,6 +929,34 @@ def _notify_goal(page, event):
     page.goal_notified = True
 
 
+def _ticket_body(page, event, pledge, total):
+    subtotal = pledge.amount or 0
+    fee = pledge.processing_fee or 0
+    rate_label = f"{campaign_fee_rate() * 100:.1f}".rstrip("0").rstrip(".")
+    host_label = "Your office's host" if page.sponsor_anonymous else (page.contact_name or "Your office's host")
+    return (
+        f"Thank you for your pledge! Your payment has been processed.\n\n"
+        f"PAYMENT BREAKDOWN:\nCombos: ${subtotal:.2f}\n"
+        f"Service fee ({rate_label}%): ${fee:.2f}\nTotal Charged: ${total:.2f}\n\n"
+        f"Host: {host_label}\n\n"
+        f"E-TICKET CODE: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\n"
+        f"Location: {event.location}\n\nShow this code at the food truck to redeem your meal."
+    )
+
+
+def _send_ticket(page, event, pledge, total):
+    subject = f"Your E-Ticket for {event.name}"
+    body = _ticket_body(page, event, pledge, total)
+    sent = False
+    if pledge.email and not app.config.get("MAIL_SUPPRESS_SEND"):
+        sent = bool(send_email(pledge.email, subject, body))
+    else:
+        logging.info("E-ticket logged, not sent, for pledge %s", pledge.id)
+    _log_campaign_email(pledge.email, subject, body, sent)
+    pledge.ticket_sent = sent
+    return sent
+
+
 def _capture_pending(page, event):
     """Capture authorized pledges once the office has reached the goal."""
     pending = Pledge.query.filter_by(event_id=event.id, status="pending").all()
@@ -902,6 +967,7 @@ def _capture_pending(page, event):
             pledge.charged_at = datetime.utcnow()
             pledge.ticket_code = pledge.ticket_code or generate_ticket_code()
             logging.info("Simulated capture for pledge %s on event %s", pledge.id, event.id)
+            _send_ticket(page, event, pledge, (pledge.amount or 0) + (pledge.processing_fee or 0))
             continue
         result = charge_stripe_payment(intent_id, pledge.amount, f"Food Truck Event: {event.name}")
         if not result.get("success"):
@@ -910,22 +976,9 @@ def _capture_pending(page, event):
         pledge.status = "charged"
         pledge.charged_at = datetime.utcnow()
         pledge.ticket_code = pledge.ticket_code or generate_ticket_code()
-        subtotal = pledge.amount or 0
-        fee = pledge.processing_fee or 0
-        total = result.get("total_charged") or (subtotal + fee)
-        rate_label = f"{campaign_fee_rate() * 100:.1f}".rstrip("0").rstrip(".")
-        host_label = "Your office's host" if page.sponsor_anonymous else (page.contact_name or "Your office's host")
-        send_email(
-            pledge.email,
-            f"Your E-Ticket for {event.name}",
-            f"Thank you for your pledge! Your payment has been processed.\n\n"
-            f"PAYMENT BREAKDOWN:\nCombos: ${subtotal:.2f}\n"
-            f"Service fee ({rate_label}%): ${fee:.2f}\nTotal Charged: ${total:.2f}\n\n"
-            f"Host: {host_label}\n\n"
-            f"E-TICKET CODE: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\n"
-            f"Location: {event.location}\n\nShow this code at the food truck to redeem your meal.",
-        )
-        pledge.ticket_sent = True
+        total = result.get("total_charged") or ((pledge.amount or 0) + (pledge.processing_fee or 0))
+        logging.info("Captured %s for %s total %s", intent_id, page.slug, total)
+        _send_ticket(page, event, pledge, total)
     if event.status == "pending":
         event.status = "funded"
     _notify_goal(page, event)
@@ -1135,7 +1188,7 @@ def campaign_start(slug):
         organizer_id=organizer.id,
         food_truck_id=truck.id,
         markup_percentage=0,
-        pledge_goal=float(minimum_amount()),
+        pledge_goal=E2E_FUND_GOAL if page.slug == "e2e-fund" else float(minimum_amount()),
         status="pending",
         organizer_fee_charged=True,
     )
@@ -1247,6 +1300,7 @@ def campaign_pledge(slug):
             return _render_campaign(page, form=form, errors=["The card could not be authorized."], open_sheet=True), 400
         if not intent_id:
             return _render_campaign(page, form=form, errors=["The card could not be authorized."], open_sheet=True), 400
+        logging.info("Campaign %s authorized %s status %s", page.slug, intent_id, intent_status)
         if intent_status not in {"requires_capture", "succeeded"}:
             return _render_campaign(page, form=form, errors=["The card could not be authorized."], open_sheet=True), 400
         token = payment_method
@@ -1325,6 +1379,52 @@ def campaign_book(slug):
     _log_campaign_email(recipient, subject, body, sent)
     db.session.commit()
     return redirect(url_for("campaign_page", slug=slug))
+
+
+@app.route("/c/<slug>/test-payments")
+def campaign_test_payments(slug):
+    """Stripe status for the fictional end-to-end slugs only."""
+    page = _e2e_page(slug)
+    if not page or not page.event:
+        abort(404)
+    import stripe
+    rows = []
+    for pledge in Pledge.query.filter_by(event_id=page.event_id).all():
+        intent_id = pledge.stripe_payment_intent_id or ""
+        stripe_status = None
+        if intent_id and not intent_id.startswith("sim_") and stripe.api_key:
+            try:
+                stripe_status = stripe.PaymentIntent.retrieve(intent_id).status
+            except Exception as exc:
+                stripe_status = f"error:{exc.__class__.__name__}"
+        rows.append({
+            "id": intent_id,
+            "pledge_status": pledge.status,
+            "stripe_status": stripe_status,
+            "amount": pledge.amount,
+        })
+    event = page.event
+    return {
+        "slug": slug,
+        "event_status": event.status,
+        "goal": event.pledge_goal,
+        "raised": event.current_pledges,
+        "payments": rows,
+    }
+
+
+@app.route("/c/<slug>/test-release", methods=["POST"])
+def campaign_test_release(slug):
+    """Cancel leftover test-card holds on the fictional miss slug."""
+    page = _e2e_page(slug)
+    if not page or not page.event:
+        abort(404)
+    event = page.event
+    release_and_notify_pledgers(event)
+    event.status = "cancelled"
+    db.session.commit()
+    logging.info("Released test holds for %s", slug)
+    return campaign_test_payments(slug)
 
 
 @app.route("/campaigns/sweep", methods=["GET", "POST"])
