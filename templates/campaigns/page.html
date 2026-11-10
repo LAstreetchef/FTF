@@ -121,10 +121,21 @@
                     {% for name in story %}
                     {{ frame(name, '(max-width: 700px) 78vw, 42vw') }}
                     {% endfor %}
-                    {% for filename, photo in photos.items() %}
-                    {% if filename not in story and filename != 'truck-exterior-02.jpg' and filename != 'food-burger-mother-trucker-01.jpg' and filename != 'cabin-dining-room-01.jpg' %}
-                    {{ frame(filename, '(max-width: 700px) 78vw, 42vw') }}
-                    {% endif %}
+                    {% for name in [
+                        'brand-classic-menu-board-01.jpg',
+                        'food-avocado-toast-herbs-01.jpg',
+                        'brand-inspiration-card-01.jpg',
+                        'brand-breakfast-popup-card-01.jpg',
+                        'event-string-lights-crowd-01.jpg',
+                        'cabin-wine-toast-01.jpg',
+                        'food-mother-trucker-graphic-01.jpg',
+                        'press-peta-award-01.jpg',
+                        'truck-field-solar-01.jpg',
+                        'food-burger-magenta-studio-01.jpg',
+                        'food-veggie-burger-chips-01.jpg',
+                        'food-paleo-bowl-egg-02.jpg'
+                    ] %}
+                    {{ frame(name, '(max-width: 700px) 78vw, 42vw') }}
                     {% endfor %}
                 </div>
                 <footer class="gt-site-footer"><strong>GTLA</strong><span>Culver City · Since 2006</span></footer>

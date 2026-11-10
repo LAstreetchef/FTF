@@ -378,6 +378,90 @@
       "description": "Beach Reporter clipping: Jamie Oliver goes GREEN featuring Green Truck",
       "width": 688,
       "height": 1022
+    },
+    {
+      "filename": "brand-classic-menu-board-01.jpg",
+      "category": "brand",
+      "description": "Classic seasonal menu board: Cilantro Lime Fresca, Golden Rounds, Mother Trucker Vegan Burger, Chipotle Cheddar Burger, Chicken Pesto Sandwich, Super-Food Bowl or Wrap, Kale Yeah Bowl, and Paleo Bowl, with plant illustration",
+      "width": 1704,
+      "height": 1242
+    },
+    {
+      "filename": "food-avocado-toast-herbs-01.jpg",
+      "category": "food",
+      "description": "Rustic outdoor still life: mason jars of dried herbs and seeds, avocado toast on a wood slice, and a glass of fresh herbs against a corrugated metal backdrop",
+      "width": 640,
+      "height": 426
+    },
+    {
+      "filename": "brand-inspiration-card-01.jpg",
+      "category": "brand",
+      "description": "Our Inspiration / Craft Cuisine Anywhere promo card with a plated breakfast of eggs, salsa, and greens",
+      "width": 1056,
+      "height": 816
+    },
+    {
+      "filename": "brand-breakfast-popup-card-01.jpg",
+      "category": "brand",
+      "description": "Breakfast Pop-Up / Rise n' Shine With Us promo card: guests at an outdoor table holding colorful breakfast and acai bowls",
+      "width": 1056,
+      "height": 816
+    },
+    {
+      "filename": "event-string-lights-crowd-01.jpg",
+      "category": "event",
+      "description": "Evening outdoor service: the olive-green Green Truck with a large crowd queued under string lights",
+      "width": 2000,
+      "height": 1498
+    },
+    {
+      "filename": "cabin-wine-toast-01.jpg",
+      "category": "cabin",
+      "description": "Guests toasting with wine around a packed indoor dining table, artwork on the wall behind them",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "food-mother-trucker-graphic-01.jpg",
+      "category": "food",
+      "description": "Stacked Mother Trucker burger held up in front of a Did Somebody Say Mother Trucker graphic",
+      "width": 1280,
+      "height": 960
+    },
+    {
+      "filename": "press-peta-award-01.jpg",
+      "category": "press",
+      "description": "Framed PETA Vegan-Friendly Food Truck Award certificate presented to Green Truck, 2017 honorable mention",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "truck-field-solar-01.jpg",
+      "category": "truck",
+      "description": "Green Truck parked in a golden-hour field with roof solar panels and a chalkboard sign in front",
+      "width": 801,
+      "height": 601
+    },
+    {
+      "filename": "food-burger-magenta-studio-01.jpg",
+      "category": "food",
+      "description": "Studio shot of a veggie burger on a white paper plate held against a solid magenta background",
+      "width": 2000,
+      "height": 2000
+    },
+    {
+      "filename": "food-veggie-burger-chips-01.jpg",
+      "category": "food",
+      "description": "Close-up veggie burger with tomato and greens, sweet potato chips on the side, on a green background",
+      "width": 2000,
+      "height": 2000
+    },
+    {
+      "filename": "food-paleo-bowl-egg-02.jpg",
+      "category": "food",
+      "description": "Overhead paleo bowl with a sunny-side egg, avocado, pico, seasoned meat, and greens on a rustic wood surface",
+      "width": 2000,
+      "height": 1500
     }
   ]
 }

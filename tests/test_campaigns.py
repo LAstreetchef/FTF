@@ -57,9 +57,24 @@ def test_csv_import_and_green_truck_page(client):
     assert b"gt-vintage" in body
     assert b"Food Truck Login" not in body
     assert b"Choose a food truck" not in body
-    manifest = json.loads(open("static/images/green-truck/manifest.json").read())
-    for item in manifest["images"]:
-        assert item["filename"].encode() in body
+    footer = [
+        b"brand-classic-menu-board-01.jpg",
+        b"food-avocado-toast-herbs-01.jpg",
+        b"brand-inspiration-card-01.jpg",
+        b"brand-breakfast-popup-card-01.jpg",
+        b"event-string-lights-crowd-01.jpg",
+        b"cabin-wine-toast-01.jpg",
+        b"food-mother-trucker-graphic-01.jpg",
+        b"press-peta-award-01.jpg",
+        b"truck-field-solar-01.jpg",
+        b"food-burger-magenta-studio-01.jpg",
+        b"food-veggie-burger-chips-01.jpg",
+        b"food-paleo-bowl-egg-02.jpg",
+    ]
+    for name in footer:
+        assert name in body
+    # The rest of the library stays in the manifest but is not dumped into the strip.
+    assert b"food-sliders-01.jpg" not in body
 
     with app.app_context():
         record = CampaignPage.query.filter_by(slug="northwind-labs").one()
