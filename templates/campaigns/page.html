@@ -63,7 +63,7 @@
         <a href="#menu" aria-label="Classic menu"></a>
         <a href="#proof" aria-label="Story"></a>
     </nav>
-    <button class="gt-sticky-cta" type="button" data-open-office>{% if office.started %}Our progress{% else %}Start our truck day{% endif %}</button>
+    <button class="gt-sticky-cta" type="button" data-open-office>{% if office.started %}Your order{% else %}Start our truck day{% endif %}</button>
 
     <main class="gt-chapters">
         <section class="gt-chapter" id="hero">
@@ -79,7 +79,7 @@
                     <p>{{ page.personal_note }}</p>
                     <footer>— Kam Miceli</footer>
                 </blockquote>
-                <button class="gt-button" type="button" data-open-office>{% if office.started %}Our progress{% else %}Start our truck day{% endif %}</button>
+                <button class="gt-button" type="button" data-open-office>{% if office.started %}Your order{% else %}Start our truck day{% endif %}</button>
             </div>
         </section>
 
@@ -383,7 +383,7 @@
             var started = cardEl && (cardEl.querySelector("[data-share]") || cardEl.querySelector("#pledge-form") || cardEl.querySelector("[data-book]") || cardEl.querySelector(".gt-confirm"));
             if (!started) return;
             document.querySelectorAll("[data-open-office]").forEach(function (button) {
-                button.textContent = "Our progress";
+                button.textContent = "Your order";
             });
         }
         function swap(html) {
