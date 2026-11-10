@@ -77,6 +77,17 @@ if not session_secret:
 app.secret_key = session_secret
 
 
+class CaptureOriginalHost:
+    """Remember the browser Host before ProxyFix replaces it."""
+
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        environ["greentruck.original_host"] = environ.get("HTTP_HOST", "")
+        return self.wsgi_app(environ, start_response)
+
+
 class PublicHostMiddleware:
     """Prefer PUBLIC_BASE_URL for absolute links, and 301 GET traffic onto it."""
 
@@ -89,27 +100,32 @@ class PublicHostMiddleware:
             return self.wsgi_app(environ, start_response)
         parsed = urlparse(base)
         public_host = (parsed.netloc or "").split(":")[0].lower()
-        incoming = (environ.get("HTTP_HOST") or "").split(":")[0].lower()
+        incoming = (
+            environ.get("greentruck.original_host") or environ.get("HTTP_HOST") or ""
+        ).split(":")[0].lower()
         path = environ.get("PATH_INFO") or "/"
         if not public_host:
             return self.wsgi_app(environ, start_response)
         if parsed.scheme:
             environ["wsgi.url_scheme"] = parsed.scheme
-        if incoming == public_host or _exempt_from_host_redirect(path):
-            return self.wsgi_app(environ, start_response)
-        if (environ.get("REQUEST_METHOD") or "GET").upper() == "GET":
-            query = environ.get("QUERY_STRING") or ""
-            location = base + path + (f"?{query}" if query else "")
-            start_response("301 MOVED PERMANENTLY", [
-                ("Location", location),
-                ("Content-Length", "0"),
-            ])
-            return [b""]
-        environ["HTTP_HOST"] = parsed.netloc
+        if incoming != public_host and not _exempt_from_host_redirect(path):
+            if (environ.get("REQUEST_METHOD") or "GET").upper() == "GET":
+                query = environ.get("QUERY_STRING") or ""
+                location = base + path + (f"?{query}" if query else "")
+                start_response("301 MOVED PERMANENTLY", [
+                    ("Location", location),
+                    ("Content-Length", "0"),
+                ])
+                return [b""]
+            environ["HTTP_HOST"] = parsed.netloc
+        elif incoming == public_host:
+            environ["HTTP_HOST"] = parsed.netloc
         return self.wsgi_app(environ, start_response)
 
 
-app.wsgi_app = ProxyFix(PublicHostMiddleware(app.wsgi_app), x_proto=1, x_host=1)
+app.wsgi_app = CaptureOriginalHost(
+    ProxyFix(PublicHostMiddleware(app.wsgi_app), x_proto=1, x_host=1)
+)
 
 iframe_embed = _env_flag("IFRAME_EMBED", False)
 secure_cookies = _env_flag("SESSION_COOKIE_SECURE", IS_PRODUCTION or iframe_embed)

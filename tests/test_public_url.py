@@ -31,6 +31,14 @@ def test_public_base_url_redirects_get_and_rewrites_links(client):
         kept = client.get("/c/public-host-check?thanks=1", headers={"Host": OLD_HOST})
         assert kept.headers["Location"] == f"{BASE}/c/public-host-check?thanks=1"
 
+        forwarded = client.get("/c/public-host-check", headers={
+            "Host": OLD_HOST,
+            "X-Forwarded-Host": "events.greentruckonthego.com",
+            "X-Forwarded-Proto": "https",
+        })
+        assert forwarded.status_code == 301
+        assert forwarded.headers["Location"] == f"{BASE}/c/public-host-check"
+
         health = client.get("/health", headers={"Host": OLD_HOST})
         assert health.status_code == 200
 
