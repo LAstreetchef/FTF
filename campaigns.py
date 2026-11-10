@@ -328,6 +328,24 @@ def _require_admin():
     return None
 
 
+def ensure_desk_check():
+    """One fictional office so the event page has a public URL. Not a customer."""
+    if os.environ.get("APP_ENV") == "testing":
+        return
+    if CampaignPage.query.filter_by(slug="desk-check").first():
+        return
+    page = CampaignPage(
+        slug="desk-check",
+        company_name="Desk Check",
+        contact_name="Pat Example",
+        contact_email="pat@desk-check.example",
+        personal_note="Pat — this sample page is for the office event layout. It is not a customer.",
+    )
+    page.set_suggested_dates(["2026-12-04", "2026-12-11", "2026-12-18"])
+    db.session.add(page)
+    db.session.commit()
+
+
 def seed_demo_campaigns():
     """Fictional prospects only. Never real customer names or inboxes."""
     if os.environ.get("APP_ENV") == "production":
@@ -524,9 +542,9 @@ def _countdown_label(closes_at):
         return "Closed"
     days = int(seconds // 86400)
     hours = int((seconds % 86400) // 3600)
-    if days:
-        return f"{days}d {hours}h left"
     minutes = int((seconds % 3600) // 60)
+    if days:
+        return f"{days}d {hours}h {minutes}m left"
     return f"{hours}h {minutes}m left"
 
 
@@ -586,37 +604,161 @@ def _office_dates(page):
     return weekday_dates(page.preferred_weekday)
 
 
+def office_city(address):
+    parts = [part.strip() for part in (address or "").split(",") if part.strip()]
+    if len(parts) < 2:
+        return ""
+    city = parts[1]
+    if len(city) <= 2 and city.isalpha():
+        return ""
+    return city
+
+
+def _pledge_meta(pledge):
+    items = pledge.get_selected_menu_items()
+    return items[0] if items else {}
+
+
+def _public_name(full):
+    parts = [part for part in (full or "").split() if part]
+    if not parts:
+        return ""
+    if len(parts) == 1:
+        return parts[0]
+    return f"{parts[0]} {parts[-1][:1].upper()}."
+
+
+def _event_pledges(event_id):
+    if not event_id:
+        return []
+    return Pledge.query.filter_by(event_id=event_id).order_by(Pledge.created_at.desc()).all()
+
+
+def _find_by_code(event_id, code):
+    if not code:
+        return None
+    for pledge in _event_pledges(event_id):
+        if _pledge_meta(pledge).get("referral_code") == code and pledge.status != "cancelled":
+            return pledge
+    return None
+
+
+def _referred_meals(event_id, code):
+    total = 0
+    price = combo_price() or 1
+    for pledge in _event_pledges(event_id):
+        meta = _pledge_meta(pledge)
+        if meta.get("referred_by") != code or pledge.status == "cancelled":
+            continue
+        qty = meta.get("quantity")
+        total += int(qty) if isinstance(qty, int) else int(round((pledge.amount or 0) / price))
+    return total
+
+
+def _qr_markup(text):
+    import segno
+    from markupsafe import Markup
+    buffer = io.BytesIO()
+    segno.make(text, error="m").save(buffer, kind="svg", xmldecl=False, nl=False, scale=3, border=1, dark="#111111")
+    return Markup(buffer.getvalue().decode())
+
+
+def _share_pack(url, company, remaining, when):
+    text = (
+        f"We're {remaining} combos from a Green Truck day at {company} on {when}. "
+        f"${combo_price()} entree+side+drink, only charged if we hit the goal: {url}"
+    )
+    return {
+        "url": url,
+        "text": text,
+        "mailto": "mailto:?subject=" + quote(f"Green Truck at {company}") + "&body=" + quote(text),
+        "sms": "sms:?&body=" + quote(text),
+        "qr": _qr_markup(url),
+    }
+
+
+def _milestone(percent):
+    if percent >= 100:
+        return "The office made it."
+    if percent >= 75:
+        return "Almost there."
+    if percent >= 50:
+        return "Halfway there."
+    if percent >= 25:
+        return "A quarter of the way."
+    return "The first combos count."
+
+
+def _urgent_label(closes_at, gap):
+    seconds = max(0, (closes_at - datetime.utcnow()).total_seconds())
+    total_minutes = int(seconds // 60)
+    return f"Ends in {total_minutes // 60:02d}:{total_minutes % 60:02d}. {gap} combos to go or nobody eats."
+
+
 def office_snapshot(page):
     event = page.event
     price = combo_price()
     raised = float(event.current_pledges or 0) if event else 0.0
     meals = int(round(raised / price)) if price else 0
+    needed = combos_needed()
+    gap = max(0, needed - meals)
+    pledges = _event_pledges(page.event_id)
+    team_meals = 0
+    wall = []
+    for pledge in pledges:
+        if pledge.status == "cancelled":
+            continue
+        meta = _pledge_meta(pledge)
+        qty = meta.get("quantity")
+        count = int(qty) if isinstance(qty, int) else int(round((pledge.amount or 0) / (price or 1)))
+        if meta.get("team"):
+            team_meals += count
+        label = _public_name(meta.get("supporter") or "")
+        if label and len(wall) < 5:
+            wall.append({"name": label, "count": count, "team": bool(meta.get("team"))})
+    weekday = _WEEKDAY_NAME.get(page.preferred_weekday or "", "")
+    when = format_date(page.booked_date) if page.booked_date else (f"{weekday} in December 2026" if weekday else "December 2026")
     share_url = url_for("campaign_page", slug=page.slug, _external=True)
-    share_text = (
-        f"{page.company_name} is bringing Green Truck. {combo_label()}. "
-        f"Help reach ${minimum_amount():,}. {share_url}"
-    )
+    share = _share_pack(share_url, page.company_name, gap, when)
+    percent = round(event.get_progress_percentage(), 1) if event else 0
+    closes = None
+    urgent = False
+    countdown = ""
+    if event and event.created_at and event.status == "pending" and not event.is_goal_met():
+        closes = campaign_closes_at(event)
+        urgent = (closes - datetime.utcnow()).total_seconds() <= 48 * 3600
+        countdown = _urgent_label(closes, gap) if urgent else _countdown_label(closes)
     return {
         "started": event is not None,
         "host": _is_host(page),
         "raised": raised,
         "meals": meals,
         "goal": minimum_amount(),
-        "needed": combos_needed(),
-        "percent": round(event.get_progress_percentage(), 1) if event else 0,
+        "needed": needed,
+        "gap": gap,
+        "team_meals": team_meals,
+        "wall": wall,
+        "percent": min(100, percent),
+        "milestone": _milestone(percent),
         "goal_met": bool(event and event.is_goal_met()),
         "booked": bool(page.booked_date and event and event.organizer_entree_claimed),
         "booked_label": format_date(page.booked_date) if page.booked_date else "",
+        "when": when,
+        "city": office_city(page.office_address),
         "dates": [(item, format_date(item)) for item in _office_dates(page)],
         "status": _status_label(page),
-        "share_url": share_url,
-        "share_text": share_text,
-        "mailto": "mailto:?subject=" + quote(f"{page.company_name} truck day") + "&body=" + quote(share_text),
-        "weekday_label": _WEEKDAY_NAME.get(page.preferred_weekday or "", ""),
+        "share_url": share["url"],
+        "share_text": share["text"],
+        "mailto": share["mailto"],
+        "sms": share["sms"],
+        "qr": share["qr"],
+        "weekday_label": weekday,
         "free_meal": bool(event and event.organizer_entree_claimed),
         "cancelled": bool(event and event.status == "cancelled"),
-        "closes_at": campaign_closes_at(event).strftime("%Y-%m-%dT%H:%M:%SZ") if event and event.created_at and event.status == "pending" and not event.is_goal_met() else "",
-        "countdown": _countdown_label(campaign_closes_at(event)) if event and event.created_at and event.status == "pending" and not event.is_goal_met() else "",
+        "closes_at": closes.strftime("%Y-%m-%dT%H:%M:%SZ") if closes else "",
+        "countdown": countdown,
+        "urgent": urgent,
+        "close_gap": bool(event and _is_host(page) and percent >= 75 and not event.is_goal_met() and gap > 0),
     }
 
 
@@ -691,9 +833,40 @@ def _settle(page, event, pledge):
         _capture_pending(page, event)
         return
     try:
+        gift = pledge.is_gift
+        if gift and not pledge.recipient_email:
+            pledge.is_gift = False
         send_conditional_pledge_confirmation(pledge, event)
+        pledge.is_gift = gift
     except Exception:
         logging.exception("Conditional pledge email failed for pledge %s", pledge.id)
+
+
+def _thanks_view(page):
+    code = (request.args.get("thanks") or "").strip()
+    if not code or not page.event_id:
+        return None
+    pledge = _find_by_code(page.event_id, code)
+    if not pledge:
+        return None
+    meta = _pledge_meta(pledge)
+    url = url_for("campaign_page", slug=page.slug, r=code, _external=True)
+    weekday = _WEEKDAY_NAME.get(page.preferred_weekday or "", "")
+    when = format_date(page.booked_date) if page.booked_date else (f"{weekday} in December 2026" if weekday else "December 2026")
+    gap = max(0, combos_needed() - int(round((page.event.current_pledges or 0) / (combo_price() or 1))))
+    pack = _share_pack(url, page.company_name, gap, when)
+    return {
+        "url": pack["url"],
+        "text": pack["text"],
+        "mailto": pack["mailto"],
+        "sms": pack["sms"],
+        "qr": pack["qr"],
+        "brought": _referred_meals(page.event_id, code),
+        "ticket": pledge.ticket_code or "",
+        "gift": bool(pledge.is_gift),
+        "recipient": pledge.recipient_name or "",
+        "quantity": int(meta.get("quantity") or 1),
+    }
 
 
 def _render_campaign(page, form=None, errors=None, open_sheet=None):
@@ -717,6 +890,8 @@ def _render_campaign(page, form=None, errors=None, open_sheet=None):
         open_sheet=open_sheet,
         stripe_key=app.config.get("STRIPE_PUBLISHABLE_KEY") or "",
         payments_mode=app.config.get("PAYMENTS_MODE"),
+        thanks=_thanks_view(page),
+        open_pledge=request.endpoint == "campaign_pledge" and bool(errors),
     )
 
 
@@ -726,12 +901,49 @@ def campaign_page(slug):
     if not page:
         abort(404)
     token = (request.args.get("host") or "").strip()
+    ref = (request.args.get("r") or "").strip()
     if token and page.host_token and token == page.host_token:
         _remember_host(page)
+    if ref:
+        refs = session.get("campaign_refs") or {}
+        if not isinstance(refs, dict):
+            refs = {}
+        refs[page.slug] = ref[:32]
+        session["campaign_refs"] = refs
+        session.modified = True
+    if (token or ref) and not request.args.get("thanks"):
         return redirect(url_for("campaign_page", slug=slug))
     sweep_campaign_deadlines(page)
     _record_view(page)
     return _render_campaign(page)
+
+
+@app.route("/c/<slug>/card.png")
+def campaign_card(slug):
+    page = CampaignPage.query.filter_by(slug=slug).first()
+    if not page:
+        abort(404)
+    office = office_snapshot(page)
+    from PIL import Image, ImageDraw, ImageFont
+    card = Image.new("RGB", (1200, 630), (17, 17, 17))
+    board = os.path.join(static_photo_dir(), "img", "brand-classic-menu-board-01.jpg")
+    if os.path.isfile(board):
+        photo = Image.open(board).convert("RGB")
+        photo.thumbnail((560, 630))
+        card.paste(photo, (1200 - photo.width, 0))
+    draw = ImageDraw.Draw(card)
+    font = ImageFont.load_default(size=54)
+    small = ImageFont.load_default(size=32)
+    draw.text((48, 70), f"Green Truck X {page.company_name}"[:42], fill="white", font=font)
+    draw.text((48, 170), f"{office['meals']} of {office['needed']} combos", fill="white", font=small)
+    draw.text((48, 230), office["milestone"], fill=(255, 220, 180), font=small)
+    draw.rounded_rectangle((48, 320, 620, 356), radius=18, fill=(255, 255, 255, ))
+    fill_to = 48 + int(572 * (office["percent"] / 100))
+    draw.rounded_rectangle((48, 320, max(66, fill_to), 356), radius=18, fill=(196, 122, 48))
+    out = io.BytesIO()
+    card.save(out, format="PNG")
+    out.seek(0)
+    return app.response_class(out.getvalue(), mimetype="image/png")
 
 
 @app.route("/c/<slug>/start", methods=["POST"])
@@ -840,6 +1052,14 @@ def campaign_pledge(slug):
     entree_names = {item["name"] for item in ENTREES}
     if form["entree"] and form["entree"] not in entree_names:
         form["entree"] = ""
+    is_gift = request.form.get("gift") == "on"
+    recipient = (request.form.get("recipient_name") or "").strip()
+    recipient_email = (request.form.get("recipient_email") or "").strip()
+    team = request.form.get("team_pool") == "1" and quantity in {5, 10, 20}
+    if is_gift and not recipient:
+        errors.append("Add the recipient's name.")
+    if recipient_email and ("@" not in recipient_email or "." not in recipient_email.split("@")[-1]):
+        errors.append("That recipient email does not look right.")
     if errors:
         return _render_campaign(page, form=form, errors=errors, open_sheet=True), 400
 
@@ -885,6 +1105,13 @@ def campaign_pledge(slug):
     else:
         intent_id = f"sim_{uuid.uuid4().hex}"
 
+    referred_by = ""
+    refs = session.get("campaign_refs") or {}
+    prior_code = refs.get(page.slug) if isinstance(refs, dict) else ""
+    prior = _find_by_code(event.id, prior_code)
+    if prior and prior.email.lower() != email.lower():
+        referred_by = prior_code
+    referral_code = secrets.token_hex(4)
     pledge = Pledge(
         email=email[:120],
         amount=amount,
@@ -893,6 +1120,10 @@ def campaign_pledge(slug):
         stripe_payment_intent_id=intent_id,
         event_id=event.id,
         status="pending",
+        is_gift=is_gift,
+        recipient_name=recipient[:120] if is_gift else None,
+        recipient_email=recipient_email[:120] if is_gift and recipient_email else None,
+        ticket_code=generate_ticket_code() if is_gift else None,
     )
     pledge.set_selected_menu_items([{
         "name": form["entree"] or "Combo",
@@ -900,11 +1131,15 @@ def campaign_pledge(slug):
         "price": combo_price(),
         "quantity": quantity,
         "supporter": form["supporter_name"][:120],
+        "entree": form["entree"],
+        "team": team,
+        "referral_code": referral_code,
+        "referred_by": referred_by,
     }])
     db.session.add(pledge)
     db.session.commit()
     _settle(page, event, pledge)
-    return redirect(url_for("campaign_page", slug=slug))
+    return redirect(url_for("campaign_page", slug=slug, thanks=referral_code))
 
 
 @app.route("/c/<slug>/book", methods=["POST"])

@@ -174,6 +174,17 @@ def configure_payments():
             app.config["PAYMENTS_MODE"] = "stripe"
             logging.info("Stripe test mode enabled")
             return
+        if secret.startswith("sk_test_"):
+            # The secret can read the combo Price. Card entry stays simulated
+            # until STRIPE_PUBLISHABLE_KEY is set.
+            stripe.api_key = secret
+            app.config["STRIPE_MODE"] = "test"
+            app.config["PAYMENTS_MODE"] = "simulate"
+            logging.warning(
+                "Stripe test secret is set, but STRIPE_PUBLISHABLE_KEY is missing. "
+                "The combo price is read from Stripe. The pledge form stays in simulation."
+            )
+            return
         live_key_present = secret.startswith("sk_live_") or live_secret.startswith("sk_live_")
         if live_key_present:
             message = (
@@ -470,8 +481,9 @@ with app.app_context():
         _maybe_restore_events()
         _seed_demo_content()
         _seed_admin()
-        from campaigns import seed_demo_campaigns
+        from campaigns import ensure_desk_check, seed_demo_campaigns
         seed_demo_campaigns()
+        ensure_desk_check()
         logging.info("Application initialization completed")
     except Exception:
         db.session.rollback()
