@@ -205,7 +205,9 @@
     inset: 0;
     width: 100%;
     height: 100%;
+    max-width: 100%;
     object-fit: cover;
+    object-position: center 42%;
 }
 .gt-fade-slide img {
     transform: scale(1) translate3d(0, 0, 0);
@@ -368,6 +370,27 @@
 .gt-errors { margin-bottom: .7rem; }
 .gt-errors p { margin: 0; }
 
+@media (max-width: 768px) {
+    .gt-fade {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        min-height: 0;
+        aspect-ratio: 16 / 10;
+        max-height: 42vh;
+        max-height: 42dvh;
+        scroll-snap-align: end;
+        scroll-snap-stop: normal;
+    }
+}
+
+@media (max-width: 480px) {
+    .gt-fade {
+        max-height: 40vh;
+        max-height: 40dvh;
+    }
+}
+
 @media (max-width: 700px) {
     .gt-sheet { width: calc(100vw - .6rem); height: calc(100svh - .6rem); }
     .gt-form { margin: .7rem; max-height: calc(100% - 1.4rem); overflow: auto; }
@@ -375,7 +398,14 @@
 }
 
 @media (min-width: 800px) {
-    .gt-fade { min-height: 85vh; }
+    .gt-fade {
+        height: 100%;
+        min-height: 85vh;
+        max-height: none;
+        aspect-ratio: auto;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+    }
     .gt-split { grid-template-columns: 1fr 1fr; }
     .gt-overlay { margin-left: 3rem; margin-bottom: 3.2rem; }
     .gt-dots { right: 1.4rem; }
