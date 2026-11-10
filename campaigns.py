@@ -10,6 +10,7 @@ import hashlib
 import io
 import json
 import logging
+import math
 import os
 import re
 import secrets
@@ -516,8 +517,8 @@ def _green_truck():
     return truck
 
 
-def _sponsor_organizer(page, name):
-    email = (page.contact_email or f"sponsor-{page.slug}@example.com").strip()[:120]
+def _sponsor_organizer(page, name, email=None):
+    email = (email or page.contact_email or f"sponsor-{page.slug}@example.com").strip()[:120]
     organizer = Organizer.query.filter_by(email=email).first()
     if organizer:
         if name:
@@ -721,9 +722,10 @@ def _sponsor_paste(page, url):
     )
 
 
-def _share_pack(url, company, remaining, when, lead=""):
+def _share_pack(url, company, remaining, when, lead="", percent_label=""):
+    progress = f"{percent_label}. " if percent_label else ""
     text = (
-        f"{lead} We're {remaining} combos from a Green Truck day at {company} on {when}. "
+        f"{lead} {progress}We're {remaining} combos from a Green Truck day at {company} on {when}. "
         f"${combo_price()} entree+side+drink, only charged if we hit the goal: {url}"
     ).strip()
     return {
@@ -742,6 +744,26 @@ def _when_label(page, event):
     if weekday:
         return f"{weekday} · date set when the goal is met"
     return "Date set when the goal is met"
+
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _valid_email(value):
+    text = (value or "").strip()
+    return bool(text) and len(text) <= 120 and _EMAIL_RE.match(text)
+
+
+def _progress_percent(raised, goal, goal_met):
+    """Whole-number progress. Floor it, and never say 100% before the goal is met."""
+    if goal_met:
+        return 100, "100%"
+    if not goal or raised <= 0:
+        return 0, "0%"
+    whole = math.floor((float(raised) / float(goal)) * 100)
+    if whole < 1:
+        return 0, "<1%"
+    return min(whole, 99), f"{min(whole, 99)}%"
 
 
 def _milestone(percent):
@@ -786,8 +808,13 @@ def office_snapshot(page):
     weekday = _WEEKDAY_NAME.get(page.preferred_weekday or "", "")
     when = _when_label(page, event)
     share_url = url_for("campaign_page", slug=page.slug, _external=True)
-    share = _share_pack(share_url, page.company_name, gap, when, _host_line(page))
-    percent = round(event.get_progress_percentage(), 1) if event else 0
+    if event:
+        percent, percent_label = _progress_percent(
+            raised, event.get_total_goal_amount(), event.is_goal_met()
+        )
+    else:
+        percent, percent_label = 0, "0%"
+    share = _share_pack(share_url, page.company_name, gap, when, _host_line(page), percent_label)
     closes = None
     urgent = False
     countdown = ""
@@ -806,7 +833,8 @@ def office_snapshot(page):
         "gap": gap,
         "team_meals": team_meals,
         "wall": wall,
-        "percent": min(100, percent),
+        "percent": percent,
+        "percent_label": percent_label,
         "milestone": _milestone(percent),
         "goal_met": bool(event and event.is_goal_met()),
         "booked": bool(page.booked_date and event and event.organizer_entree_claimed),
@@ -930,7 +958,12 @@ def _thanks_view(page):
     url = url_for("campaign_page", slug=page.slug, r=code, _external=True)
     when = _when_label(page, page.event)
     gap = max(0, combos_needed() - int(round((page.event.current_pledges or 0) / (combo_price() or 1))))
-    pack = _share_pack(url, page.company_name, gap, when)
+    _, percent_label = _progress_percent(
+        page.event.current_pledges or 0,
+        page.event.get_total_goal_amount(),
+        page.event.is_goal_met(),
+    )
+    pack = _share_pack(url, page.company_name, gap, when, percent_label=percent_label)
     return {
         "url": pack["url"],
         "text": pack["text"],
@@ -1062,6 +1095,7 @@ def campaign_start(slug):
         return redirect(url_for("campaign_page", slug=slug))
     form = {
         "organizer_name": (request.form.get("organizer_name") or "").strip(),
+        "organizer_email": (request.form.get("organizer_email") or "").strip(),
         "office_address": (request.form.get("office_address") or "").strip(),
         "guest_count": (request.form.get("guest_count") or "").strip(),
         "weekday": (request.form.get("weekday") or "").strip(),
@@ -1070,6 +1104,10 @@ def campaign_start(slug):
     errors = []
     if not form["organizer_name"]:
         errors.append("Add your name.")
+    if not form["organizer_email"]:
+        errors.append("Add your email.")
+    elif not _valid_email(form["organizer_email"]):
+        errors.append("That email doesn't look right.")
     if not form["office_address"]:
         errors.append("Add the office address.")
     try:
@@ -1087,7 +1125,7 @@ def campaign_start(slug):
         _remember_host(page)
         return redirect(url_for("campaign_page", slug=slug))
 
-    organizer = _sponsor_organizer(page, form["organizer_name"])
+    organizer = _sponsor_organizer(page, form["organizer_name"], form["organizer_email"])
     truck = _green_truck()
     event = Event(
         name=f"{page.company_name} Holiday Truck Day"[:200],
@@ -1112,6 +1150,7 @@ def campaign_start(slug):
     db.session.flush()
     page.event_id = event.id
     page.contact_name = form["organizer_name"][:120]
+    page.contact_email = form["organizer_email"][:120]
     page.office_address = form["office_address"][:240]
     page.guest_count = guests
     page.preferred_weekday = form["weekday"]

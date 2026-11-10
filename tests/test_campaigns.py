@@ -94,6 +94,7 @@ def test_office_reaches_the_goal_and_books_a_day(client):
     _import_sample(client)
     started = client.post("/c/northwind-labs/start", data={
         "organizer_name": "Avery Chen",
+        "organizer_email": "avery.chen@example.com",
         "office_address": "100 Example Ave, Culver City",
         "guest_count": "40",
         "weekday": "fri",
@@ -101,6 +102,8 @@ def test_office_reaches_the_goal_and_books_a_day(client):
     assert started.status_code == 200
     assert b"Share" in started.data
     assert b"0 of 98 combos" in started.data
+    assert b"0%" in started.data
+    assert b"0.0%" not in started.data
     assert b"left" in started.data
 
     with app.app_context():
@@ -111,6 +114,8 @@ def test_office_reaches_the_goal_and_books_a_day(client):
         assert event.organizer_fee_payment_intent is None
         assert event.status == "pending"
         assert page.preferred_weekday == "fri"
+        assert page.contact_email == "avery.chen@example.com"
+        assert event.organizer.email == "avery.chen@example.com"
         campaign_id = page.id
 
     intent = MagicMock()
@@ -194,6 +199,7 @@ def test_office_reaches_the_goal_and_books_a_day(client):
     detail = client.get(f"/admin/campaigns/{campaign_id}")
     assert detail.status_code == 200
     assert b"100 Example Ave, Culver City" in detail.data
+    assert b"avery.chen@example.com" in detail.data
     assert b"booked" in detail.data
     assert b"Your meal is on us" in detail.data
     assert b"logged" in detail.data
@@ -202,11 +208,97 @@ def test_office_reaches_the_goal_and_books_a_day(client):
     assert b"booked" in listing.data
 
 
+def test_sponsor_email_is_required_and_stored(client):
+    from models import EmailLog
+
+    _login_admin(client)
+    _import_sample(client)
+    missing = client.post("/c/northwind-labs/start", data={
+        "organizer_name": "Avery Chen",
+        "office_address": "100 Example Ave, Culver City",
+        "guest_count": "40",
+        "weekday": "fri",
+    })
+    assert missing.status_code == 400
+    assert b"Add your email." in missing.data
+    assert b'type="email"' in missing.data
+    bad = client.post("/c/northwind-labs/start", data={
+        "organizer_name": "Avery Chen",
+        "organizer_email": "not-an-email",
+        "office_address": "100 Example Ave, Culver City",
+        "guest_count": "40",
+        "weekday": "fri",
+    })
+    assert bad.status_code == 400
+    assert b"look right." in bad.data
+    with app.app_context():
+        assert CampaignPage.query.filter_by(slug="northwind-labs").one().event_id is None
+
+    started = client.post("/c/northwind-labs/start", data={
+        "organizer_name": "Avery Chen",
+        "organizer_email": "avery.chen@example.com",
+        "office_address": "100 Example Ave, Culver City",
+        "guest_count": "40",
+        "weekday": "fri",
+    }, follow_redirects=True)
+    assert started.status_code == 200
+    with app.app_context():
+        page = CampaignPage.query.filter_by(slug="northwind-labs").one()
+        assert page.contact_email == "avery.chen@example.com"
+        note = EmailLog.query.filter_by(recipient="avery.chen@example.com").one()
+        assert "How it works for you" in note.body
+        page_id = page.id
+    detail = client.get(f"/admin/campaigns/{page_id}")
+    assert b"avery.chen@example.com" in detail.data
+    listing = client.get("/admin/campaigns")
+    assert b"avery.chen@example.com" in listing.data
+
+
+def test_progress_percent_is_a_whole_number(client):
+    from models import Event
+
+    _login_admin(client)
+    _import_sample(client)
+    assert client.post("/c/northwind-labs/start", data={
+        "organizer_name": "Avery Chen",
+        "organizer_email": "avery.chen@example.com",
+        "office_address": "100 Example Ave, Culver City",
+        "guest_count": "40",
+        "weekday": "fri",
+    }, follow_redirects=True).status_code == 200
+
+    def show(amount):
+        with app.app_context():
+            page = CampaignPage.query.filter_by(slug="northwind-labs").one()
+            event = Event.query.get(page.event_id)
+            event.current_pledges = amount
+            event.status = "pending"
+            db.session.commit()
+        body = client.get("/c/northwind-labs").data
+        assert b"0.0%" not in body
+        return body
+
+    def meter(body, label):
+        shown = label.replace("<", "&lt;")
+        return f"to go · {shown}".encode() in body
+
+    assert meter(show(0), "0%")
+    tiny = show(1)
+    assert meter(tiny, "<1%")
+    assert meter(show(220), "12%")
+    assert not meter(show(220), "13%")
+    almost = show(1749)
+    assert meter(almost, "99%")
+    assert not meter(almost, "100%")
+    assert meter(show(1750), "100%")
+
+
 def test_anonymous_sponsor_is_unnamed_on_the_page(client):
     _login_admin(client)
     _import_sample(client)
     response = client.post("/c/harbor-and-pine/start", data={
         "organizer_name": "Jordan Hale",
+        "organizer_email": "jordan.hale@example.com",
         "office_address": "50 Example St, Playa Vista",
         "guest_count": "20",
         "weekday": "tue",
@@ -234,6 +326,7 @@ def test_deadline_releases_uncaptured_holds(client):
     _import_sample(client)
     assert client.post("/c/northwind-labs/start", data={
         "organizer_name": "Avery Chen",
+        "organizer_email": "avery.chen@example.com",
         "office_address": "100 Example Ave, Culver City",
         "guest_count": "40",
         "weekday": "fri",
