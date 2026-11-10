@@ -826,6 +826,8 @@ def office_snapshot(page):
     raised = float(event.current_pledges or 0) if event else 0.0
     meals = int(round(raised / price)) if price else 0
     goal_amount = float(event.pledge_goal) if event and event.pledge_goal else float(minimum_amount())
+    if goal_amount == int(goal_amount):
+        goal_amount = int(goal_amount)
     needed = max(1, math.ceil(goal_amount / price)) if price else combos_needed()
     gap = max(0, needed - meals)
     pledges = _event_pledges(page.event_id)
