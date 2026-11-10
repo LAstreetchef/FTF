@@ -121,24 +121,43 @@
                     {% for name in story %}
                     {{ frame(name, '(max-width: 700px) 78vw, 42vw') }}
                     {% endfor %}
-                    {% for name in [
-                        'brand-classic-menu-board-01.jpg',
-                        'food-avocado-toast-herbs-01.jpg',
-                        'brand-inspiration-card-01.jpg',
-                        'brand-breakfast-popup-card-01.jpg',
-                        'event-string-lights-crowd-01.jpg',
-                        'cabin-wine-toast-01.jpg',
-                        'food-mother-trucker-graphic-01.jpg',
-                        'press-peta-award-01.jpg',
-                        'truck-field-solar-01.jpg',
-                        'food-burger-magenta-studio-01.jpg',
-                        'food-veggie-burger-chips-01.jpg',
-                        'food-paleo-bowl-egg-02.jpg'
-                    ] %}
-                    {{ frame(name, '(max-width: 700px) 78vw, 42vw') }}
-                    {% endfor %}
                 </div>
                 <footer class="gt-site-footer"><strong>GTLA</strong><span>Culver City · Since 2006</span></footer>
+            </div>
+        </section>
+
+        <section class="gt-fade" id="footer-show" aria-roledescription="carousel" aria-label="More Green Truck photographs">
+            <div class="gt-fade-stage">
+                {% for name in [
+                    'brand-classic-menu-board-01.jpg',
+                    'food-avocado-toast-herbs-01.jpg',
+                    'brand-inspiration-card-01.jpg',
+                    'brand-breakfast-popup-card-01.jpg',
+                    'event-string-lights-crowd-01.jpg',
+                    'cabin-wine-toast-01.jpg',
+                    'food-mother-trucker-graphic-01.jpg',
+                    'press-peta-award-01.jpg',
+                    'truck-field-solar-01.jpg',
+                    'food-burger-magenta-studio-01.jpg',
+                    'food-veggie-burger-chips-01.jpg',
+                    'food-paleo-bowl-egg-02.jpg'
+                ] %}
+                {% set photo = photos[name] %}
+                <figure class="gt-fade-slide{% if loop.first %} is-active{% endif %}">
+                    <picture>
+                        {% if photo.webp_srcset %}
+                        <source type="image/webp" sizes="100vw" {% if loop.index0 < 2 %}srcset="{{ photo.webp_srcset }}"{% else %}data-srcset="{{ photo.webp_srcset }}"{% endif %}>
+                        {% endif %}
+                        <img {% if loop.index0 < 2 %}src="{{ photo.src }}"{% if photo.srcset %} srcset="{{ photo.srcset }}" sizes="100vw"{% endif %} loading="eager"{% else %}data-src="{{ photo.src }}"{% if photo.srcset %} data-srcset="{{ photo.srcset }}"{% endif %} loading="lazy"{% endif %}
+                             alt="{{ photo.alt }}" width="{{ photo.width }}" height="{{ photo.height }}" decoding="async">
+                    </picture>
+                </figure>
+                {% endfor %}
+            </div>
+            <div class="gt-fade-dots">
+                {% for _ in range(12) %}
+                <button type="button" data-fade="{{ loop.index0 }}" aria-label="Photograph {{ loop.index }} of 12"{% if loop.first %} class="is-on"{% endif %}></button>
+                {% endfor %}
             </div>
         </section>
     </main>
@@ -256,6 +275,115 @@
                 });
             });
         }
+    })();
+    (function () {
+        var root = document.getElementById("footer-show");
+        if (!root) return;
+        var slides = Array.prototype.slice.call(root.querySelectorAll(".gt-fade-slide"));
+        var dots = Array.prototype.slice.call(root.querySelectorAll(".gt-fade-dots button"));
+        var index = 0;
+        var timer = null;
+        var hovering = false;
+        var holding = false;
+        var visible = false;
+        var startX = 0;
+        var startY = 0;
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function load(slide) {
+            if (!slide) return;
+            var source = slide.querySelector("source");
+            var img = slide.querySelector("img");
+            if (source) {
+                var webp = source.getAttribute("data-srcset");
+                if (webp && !source.getAttribute("srcset")) source.setAttribute("srcset", webp);
+            }
+            if (!img) return;
+            var src = img.getAttribute("data-src");
+            if (src && !img.getAttribute("src")) img.setAttribute("src", src);
+            var set = img.getAttribute("data-srcset");
+            if (set && !img.getAttribute("srcset")) {
+                img.setAttribute("srcset", set);
+                img.setAttribute("sizes", "100vw");
+            }
+        }
+        function warm(i) {
+            var neighbors = [i, i + 1];
+            if (i !== 0) neighbors.push(i - 1);
+            neighbors.forEach(function (n) {
+                load(slides[(n + slides.length) % slides.length]);
+            });
+        }
+        function show(i) {
+            index = (i + slides.length) % slides.length;
+            slides.forEach(function (slide, n) {
+                slide.classList.toggle("is-active", n === index);
+            });
+            dots.forEach(function (dot, n) {
+                dot.classList.toggle("is-on", n === index);
+            });
+            warm(index);
+        }
+        function arm() {
+            clearInterval(timer);
+            timer = null;
+            if (reduce || hovering || holding || !visible) return;
+            timer = setInterval(function () { show(index + 1); }, 5000);
+        }
+        dots.forEach(function (dot) {
+            dot.addEventListener("click", function (event) {
+                event.stopPropagation();
+                show(parseInt(dot.getAttribute("data-fade"), 10));
+                arm();
+            });
+        });
+        root.addEventListener("pointerdown", function (event) {
+            if (event.target.closest(".gt-fade-dots")) return;
+            if (event.button && event.button !== 0) return;
+            holding = true;
+            startX = event.clientX;
+            startY = event.clientY;
+            if (root.setPointerCapture) {
+                try { root.setPointerCapture(event.pointerId); } catch (err) {}
+            }
+            arm();
+        });
+        root.addEventListener("pointerup", function (event) {
+            if (!holding) return;
+            holding = false;
+            if (!event.target.closest(".gt-fade-dots")) {
+                var dx = event.clientX - startX;
+                var dy = event.clientY - startY;
+                if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 18) {
+                    /* vertical scroll of the chapter strip */
+                } else if (dx <= -36) show(index + 1);
+                else if (dx >= 36) show(index - 1);
+                else if (Math.abs(dx) < 14 && Math.abs(dy) < 14) show(index + 1);
+            }
+            arm();
+        });
+        root.addEventListener("pointercancel", function () { holding = false; arm(); });
+        root.addEventListener("pointerenter", function (event) {
+            if (event.pointerType !== "mouse") return;
+            hovering = true;
+            arm();
+        });
+        root.addEventListener("pointerleave", function (event) {
+            if (event.pointerType !== "mouse") return;
+            hovering = false;
+            arm();
+        });
+        if ("IntersectionObserver" in window) {
+            var watcher = new IntersectionObserver(function (entries) {
+                visible = entries[0].isIntersecting;
+                arm();
+            }, { threshold: 0.35 });
+            watcher.observe(root);
+        } else {
+            visible = true;
+        }
+        warm(0);
+        arm();
     })();
     </script>
 </body>

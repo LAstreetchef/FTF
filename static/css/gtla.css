@@ -177,6 +177,65 @@
 .gt-strip img, .gt-strip picture { width: 100%; height: 100%; display: block; }
 .gt-strip img { object-fit: cover; }
 .gt-strip .gt-vintage { flex-basis: 168px; }
+
+.gt-fade {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 80vh;
+    background: #111;
+    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    touch-action: pan-y;
+}
+.gt-fade-stage { position: absolute; inset: 0; }
+.gt-fade-slide {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    z-index: 0;
+    transition: opacity 1.2s ease;
+}
+.gt-fade-slide.is-active { opacity: 1; z-index: 1; }
+.gt-fade-slide picture,
+.gt-fade-slide img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.gt-fade-slide img {
+    transform: scale(1) translate3d(0, 0, 0);
+    transition: transform 7s linear;
+}
+.gt-fade-slide.is-active img { transform: scale(1.07) translate3d(-1.2%, -0.6%, 0); }
+.gt-fade-dots {
+    position: absolute;
+    z-index: 2;
+    left: 1rem;
+    bottom: 1.15rem;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    width: max-content;
+    max-width: calc(100% - 11rem);
+    padding: .4rem .55rem;
+    border-radius: 99px;
+    background: rgba(0, 0, 0, .32);
+}
+.gt-fade-dots button {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, .55);
+    cursor: pointer;
+}
+.gt-fade-dots button.is-on { width: 22px; background: #fff; }
 .gt-site-footer {
     display: flex;
     justify-content: space-between;
@@ -246,6 +305,7 @@
 }
 
 @media (min-width: 800px) {
+    .gt-fade { min-height: 85vh; }
     .gt-split { grid-template-columns: 1fr 1fr; }
     .gt-overlay { margin-left: 3rem; margin-bottom: 3.2rem; }
     .gt-dots { right: 1.4rem; }
@@ -254,6 +314,9 @@
 @media (prefers-reduced-motion: reduce) {
     .gt-chapters { scroll-behavior: auto; }
     .gt-ken img { animation: none; }
+    .gt-fade-slide,
+    .gt-fade-slide img { transition: none; }
+    .gt-fade-slide img { transform: none; }
 }
 
 /* Public FTF chrome. Not used on the campaign page. */
