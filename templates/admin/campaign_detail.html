@@ -28,12 +28,17 @@
     {% if pledges %}
     <div class="table-responsive">
         <table class="table">
-            <thead><tr><th>Who</th><th>Amount</th><th>Status</th><th>Ticket</th></tr></thead>
+            <thead><tr><th>Who</th><th>Combos</th><th>Entree</th><th>Gift</th><th>Team</th><th>Referral</th><th>Status</th><th>Ticket</th></tr></thead>
             <tbody>
                 {% for pledge in pledges %}
+                {% set meta = (pledge.get_selected_menu_items() or [{}])[0] %}
                 <tr>
-                    <td>{{ pledge.email }}</td>
-                    <td>${{ "{:,.0f}".format(pledge.amount) }}</td>
+                    <td>{{ meta.get('supporter') or pledge.email }}<div class="small">{{ pledge.email }}</div></td>
+                    <td>{{ meta.get('quantity') or '' }} · ${{ "{:,.0f}".format(pledge.amount) }}</td>
+                    <td>{{ meta.get('entree') or "—" }}</td>
+                    <td>{% if pledge.is_gift %}{{ pledge.recipient_name or "Gift" }}{% if pledge.recipient_email %}<div class="small">{{ pledge.recipient_email }}</div>{% endif %}{% else %}—{% endif %}</td>
+                    <td>{{ "Team pool" if meta.get('team') else "—" }}</td>
+                    <td>{{ meta.get('referral_code') or "—" }}{% if meta.get('referred_by') %}<div class="small">via {{ meta.get('referred_by') }}</div>{% endif %}</td>
                     <td>{{ pledge.status }}</td>
                     <td>{{ pledge.ticket_code or "—" }}</td>
                 </tr>
