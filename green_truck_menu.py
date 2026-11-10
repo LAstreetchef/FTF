@@ -65,6 +65,24 @@ def minimum_label():
     return f"Minimum ${minimum_amount():,}"
 
 
+def campaign_fee_rate():
+    raw = (os.environ.get("CAMPAIGN_FEE_RATE") or "0.045").strip()
+    try:
+        rate = float(raw)
+    except ValueError:
+        rate = 0.045
+    if rate < 0:
+        rate = 0.045
+    return rate
+
+
+def combo_charge(quantity):
+    """Return subtotal, fee, and total in cents. Fee is round(subtotal × rate)."""
+    subtotal = combo_unit_cents() * int(quantity)
+    fee = int(round(subtotal * campaign_fee_rate()))
+    return subtotal, fee, subtotal + fee
+
+
 def _fallback_unit_cents():
     raw = (os.environ.get("COMBO_PRICE") or "18").strip()
     try:

@@ -51,7 +51,7 @@ def test_csv_import_and_green_truck_page(client):
     assert b"Combo $18" in body
     assert b"Start our truck day" in body
     assert b"See the menu" in body
-    assert b"only be charged if this event reaches its funding goal" in body
+    assert b"only be charged if this event reaches its funding goal" not in body
     assert b"Coachella" in body
     assert b"Malibu" in body
     assert b"fetchpriority=\"high\"" in body
@@ -147,7 +147,10 @@ def test_office_reaches_the_goal_and_books_a_day(client):
         assert confirm_intent.called
         created = create_intent.call_args.kwargs
         assert created["capture_method"] == "manual"
-        assert created["amount"] == 1800
+        assert created["amount"] == 1881
+        assert created["metadata"]["subtotal"] == "18.00"
+        assert created["metadata"]["fee"] == "0.81"
+        assert created["metadata"]["fee_rate"] == "0.045"
         assert created["payment_method_types"] == ["card"]
         assert created["metadata"]["price_id"] == "price_1UaEDhBgt3ltA59nFLiZXZ2E"
         assert created["metadata"]["product_id"] == "prod_VbR57kEpMXLiP4"
@@ -159,6 +162,7 @@ def test_office_reaches_the_goal_and_books_a_day(client):
             pledge = Pledge.query.filter_by(email="sam.coworker@example.com").one()
             assert pledge.status == "pending"
             assert pledge.amount == 18
+            assert abs(pledge.processing_fee - 0.81) < 0.001
         second = client.post("/c/northwind-labs/pledge", data={
             "supporter_name": "Sam Coworker",
             "supporter_email": "sam.coworker@example.com",

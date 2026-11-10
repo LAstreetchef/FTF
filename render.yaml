@@ -39,6 +39,8 @@ services:
         value: "18"
       - key: CAMPAIGN_DAYS
         value: "7"
+      - key: CAMPAIGN_FEE_RATE
+        value: "0.045"
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD

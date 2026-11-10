@@ -24,6 +24,8 @@ from app import app, db
 from green_truck_menu import (
     CLASSIC_MENU,
     ENTREES,
+    campaign_fee_rate,
+    combo_charge,
     combo_description,
     combo_label,
     campaign_days,
@@ -677,6 +679,15 @@ def _share_pack(url, company, remaining, when):
     }
 
 
+def _when_label(page, event):
+    weekday = _WEEKDAY_NAME.get(page.preferred_weekday or "", "")
+    if page.booked_date and event and getattr(event, "date", None):
+        return event.date.strftime("%a, %b %-d, %Y · %-I:%M %p")
+    if weekday:
+        return f"{weekday} · date set when the goal is met"
+    return "Date set when the goal is met"
+
+
 def _milestone(percent):
     if percent >= 100:
         return "The office made it."
@@ -686,7 +697,7 @@ def _milestone(percent):
         return "Halfway there."
     if percent >= 25:
         return "A quarter of the way."
-    return "The first combos count."
+    return ""
 
 
 def _urgent_label(closes_at, gap):
@@ -717,7 +728,7 @@ def office_snapshot(page):
         if label and len(wall) < 5:
             wall.append({"name": label, "count": count, "team": bool(meta.get("team"))})
     weekday = _WEEKDAY_NAME.get(page.preferred_weekday or "", "")
-    when = format_date(page.booked_date) if page.booked_date else (f"{weekday} in December 2026" if weekday else "December 2026")
+    when = _when_label(page, event)
     share_url = url_for("campaign_page", slug=page.slug, _external=True)
     share = _share_pack(share_url, page.company_name, gap, when)
     percent = round(event.get_progress_percentage(), 1) if event else 0
@@ -732,6 +743,7 @@ def office_snapshot(page):
         "started": event is not None,
         "host": _is_host(page),
         "raised": raised,
+        "to_go": max(0, minimum_amount() - raised),
         "meals": meals,
         "goal": minimum_amount(),
         "needed": needed,
@@ -808,15 +820,17 @@ def _capture_pending(page, event):
             continue
         pledge.status = "charged"
         pledge.charged_at = datetime.utcnow()
-        pledge.processing_fee = result.get("processing_fee", pledge.processing_fee)
         pledge.ticket_code = pledge.ticket_code or generate_ticket_code()
-        total = result.get("total_charged") or (pledge.amount + (pledge.processing_fee or 0))
+        subtotal = pledge.amount or 0
+        fee = pledge.processing_fee or 0
+        total = result.get("total_charged") or (subtotal + fee)
+        rate_label = f"{campaign_fee_rate() * 100:.1f}".rstrip("0").rstrip(".")
         send_email(
             pledge.email,
             f"Your E-Ticket for {event.name}",
             f"Thank you for your pledge! Your payment has been processed.\n\n"
-            f"PAYMENT BREAKDOWN:\nPledge Amount: ${pledge.amount:.2f}\n"
-            f"Processing Fee (4.5%): ${pledge.processing_fee:.2f}\nTotal Charged: ${total:.2f}\n\n"
+            f"PAYMENT BREAKDOWN:\nCombos: ${subtotal:.2f}\n"
+            f"Service fee ({rate_label}%): ${fee:.2f}\nTotal Charged: ${total:.2f}\n\n"
             f"E-TICKET CODE: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\n"
             f"Location: {event.location}\n\nShow this code at the food truck to redeem your meal.",
         )
@@ -851,8 +865,7 @@ def _thanks_view(page):
         return None
     meta = _pledge_meta(pledge)
     url = url_for("campaign_page", slug=page.slug, r=code, _external=True)
-    weekday = _WEEKDAY_NAME.get(page.preferred_weekday or "", "")
-    when = format_date(page.booked_date) if page.booked_date else (f"{weekday} in December 2026" if weekday else "December 2026")
+    when = _when_label(page, page.event)
     gap = max(0, combos_needed() - int(round((page.event.current_pledges or 0) / (combo_price() or 1))))
     pack = _share_pack(url, page.company_name, gap, when)
     return {
@@ -883,6 +896,8 @@ def _render_campaign(page, form=None, errors=None, open_sheet=None):
         minimum_label=minimum_label(),
         combo_label=combo_label(),
         combo_price=combo_price(),
+        unit_cents=combo_unit_cents(),
+        fee_rate=campaign_fee_rate(),
         weekdays=WEEKDAYS,
         office=office,
         form=form or {},
@@ -1063,11 +1078,9 @@ def campaign_pledge(slug):
     if errors:
         return _render_campaign(page, form=form, errors=errors, open_sheet=True), 400
 
-    unit_cents = combo_unit_cents()
-    amount_cents = unit_cents * quantity
-    amount = amount_cents / 100.0
-    # The Stripe Price is the authorized amount. The older 4.5% add-on stays on the event pledge form.
-    processing_fee = 0.0
+    subtotal_cents, fee_cents, total_cents = combo_charge(quantity)
+    amount = subtotal_cents / 100.0
+    processing_fee = fee_cents / 100.0
     payment_method = (request.form.get("stripe_payment_method") or "").strip()
     intent_id = None
     token = "simulated"
@@ -1078,19 +1091,22 @@ def campaign_pledge(slug):
         "quantity": quantity,
         "campaign_slug": page.slug,
         "event_id": event.id,
+        "subtotal": f"{amount:.2f}",
+        "fee": f"{processing_fee:.2f}",
+        "fee_rate": f"{campaign_fee_rate():.3f}",
     }
     if app.config.get("PAYMENTS_MODE") == "stripe":
         if not payment_method:
             return _render_campaign(page, form=form, errors=["Add a card."], open_sheet=True), 400
         try:
             intent_id, intent_status = authorize_card(
-                amount,
+                amount + processing_fee,
                 email,
                 description,
                 payment_method,
                 request.url_root,
                 metadata=metadata,
-                amount_cents=amount_cents,
+                amount_cents=total_cents,
             )
         except Exception:
             logging.exception("Could not authorize pledge for %s", page.slug)

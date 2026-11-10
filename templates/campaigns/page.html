@@ -71,7 +71,7 @@
                 {{ frame('truck-exterior-02.jpg', '100vw', True) }}
             </div>
             <div class="gt-overlay">
-                <p class="gt-kicker">Holiday 2026 · Culver City</p>
+                <p class="gt-kicker">Holiday 2026{% if office.city %} · {{ office.city }}{% endif %}</p>
                 <h1>{{ possessive_name }} Holiday Truck Day</h1>
                 <p class="gt-lede">The classic menu, cooked for {{ page.company_name }}. Coworkers pre-order until ${{ "{:,}".format(office.goal) }}.</p>
                 <p class="gt-kicker">A note from Kam</p>
@@ -189,29 +189,34 @@
                     <p>{{ thanks.quantity }} combo{{ '' if thanks.quantity == 1 else 's' }}{% if thanks.gift %} for {{ thanks.recipient }}{% endif %}.</p>
                     {% if thanks.ticket %}<p>Ticket {{ thanks.ticket }}</p>{% endif %}
                     <p>You brought in {{ thanks.brought }} combos.</p>
-                    <p class="gt-share-text">{{ thanks.text }}</p>
-                    <div class="gt-share-actions">
-                        <button class="gt-button gt-button-dark" type="button" data-share="{{ thanks.url }}" data-share-text="{{ thanks.text }}">Share</button>
-                        <button class="gt-button" type="button" data-copy="{{ thanks.url }}">Copy link</button>
-                        <button class="gt-button" type="button" data-copy="{{ thanks.text }}">Slack</button>
-                        <a class="gt-button" href="{{ thanks.mailto }}">Email</a>
-                        <a class="gt-button" href="{{ thanks.sms }}">Text</a>
+                    <button class="gt-button" type="button" data-open-share data-share-personal data-share-url="{{ thanks.url }}" data-share-text="{{ thanks.text }}" data-share-mail="{{ thanks.mailto }}" data-share-sms="{{ thanks.sms }}">Share</button>
+                    <div id="thanks-qr" hidden>{{ thanks.qr }}</div>
+                </div>
+                {% endif %}
+                <header class="gt-event-head">
+                    <h2>Green Truck X {{ page.company_name }}</h2>
+                    <p>{{ office.when }}{% if office.city %} · {{ office.city }}{% endif %}</p>
+                </header>
+                <aside class="gt-event-side">
+                    <p><strong>${{ "{:,.0f}".format(office.raised) }}</strong> raised · ${{ "{:,.0f}".format(office.to_go) }} to go · {{ office.percent }}%</p>
+                    <p>{{ office.meals }} of {{ office.needed }} combos · {{ office.gap }} combos to go{% if office.team_meals %} · {{ office.team_meals }} team combos{% endif %}</p>
+                    <div class="gt-meter" aria-hidden="true">
+                        <span style="width: {{ office.percent }}%"></span>
+                        <i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i><i style="left:100%"></i>
                     </div>
-                    <div class="gt-qr">{{ thanks.qr }}</div>
-                </div>
-                {% endif %}
-                <p class="gt-kicker">Green Truck X {{ page.company_name }}</p>
-                <h2>Green Truck X {{ page.company_name }}</h2>
-                <p>{{ office.when }}{% if office.city %} · {{ office.city }}{% endif %}</p>
-                <p>{{ office.meals }} of {{ office.needed }} combos · {{ office.gap }} combos to go{% if office.team_meals %} · {{ office.team_meals }} team combos{% endif %}</p>
-                <div class="gt-meter" aria-hidden="true">
-                    <span style="width: {{ office.percent }}%"></span>
-                    <i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i><i style="left:100%"></i>
-                </div>
-                <p>{{ office.milestone }}</p>
-                {% if office.countdown %}
-                <p class="gt-countdown{% if office.urgent %} is-urgent{% endif %}" data-deadline="{{ office.closes_at }}" {% if office.urgent %}data-urgent="1" data-gap="{{ office.gap }}"{% endif %}>{{ office.countdown }}</p>
-                {% endif %}
+                    {% if office.milestone %}<p>{{ office.milestone }}</p>{% endif %}
+                    {% if office.countdown %}
+                    <p class="gt-countdown{% if office.urgent %} is-urgent{% endif %}" data-deadline="{{ office.closes_at }}" {% if office.urgent %}data-urgent="1" data-gap="{{ office.gap }}"{% endif %}>{{ office.countdown }}</p>
+                    {% endif %}
+                    {% if office.wall %}
+                    <div class="gt-ticker">
+                        {% for person in office.wall %}
+                        <span>{{ person.name }} · {{ person.count }}{% if person.team %} team{% endif %}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </aside>
+                <div class="gt-event-actions">
                 {% if office.booked %}
                 <p>Booked {{ office.booked_label }}. Your meal is on us.</p>
                 {% elif office.host and office.goal_met %}
@@ -224,37 +229,26 @@
                         {% endfor %}
                     </div>
                     <input type="hidden" name="event_date" id="book-date" required>
-                    <button class="gt-button gt-button-dark" type="submit">Book this day</button>
+                    <button class="gt-button gt-button-primary" type="submit">Book this day</button>
                 </form>
                 {% else %}
-                <button class="gt-button gt-button-dark gt-cta" type="button" data-open-pledge>Get my combo — ${{ combo_price }}</button>
+                <button class="gt-button gt-button-primary gt-cta" type="button" data-open-pledge>Get my combo — ${{ combo_price }}</button>
                 {% endif %}
                 {% if office.close_gap %}
                 <button class="gt-button" type="button" data-open-pledge data-qty="{{ office.gap }}">Close the gap — {{ office.gap }} combos</button>
                 {% endif %}
-                <p>Sponsor eats free once booked.</p>
+                {% if office.host %}<p>Sponsor eats free once booked.</p>{% endif %}
                 {% set board = photos['brand-classic-menu-board-01.jpg'] %}
                 <button class="gt-menu-chip" type="button" data-open-menu>
                     <img src="{{ board.src }}" alt="{{ board.alt }}" width="72" height="72">
                     <span>See the menu</span>
                 </button>
-                {% if office.wall %}
-                <div class="gt-ticker">
-                    {% for person in office.wall %}
-                    <span>{{ person.name }} · {{ person.count }}{% if person.team %} team{% endif %}</span>
+                <ul class="gt-menu gt-menu-readable">
+                    {% for item in classic_menu %}
+                    <li><strong>{{ item.name }}</strong>{% if item.detail %}<span>{{ item.detail }}</span>{% endif %}</li>
                     {% endfor %}
-                </div>
-                {% endif %}
-                <div class="gt-share-panel">
-                    <p class="gt-share-text">{{ office.share_text }}</p>
-                    <div class="gt-share-actions">
-                        <button class="gt-button gt-button-dark" type="button" data-share="{{ office.share_url }}" data-share-text="{{ office.share_text }}">Share</button>
-                        <button class="gt-button" type="button" data-copy="{{ office.share_url }}">Copy link</button>
-                        <button class="gt-button" type="button" data-copy="{{ office.share_text }}">Slack</button>
-                        <a class="gt-button" href="{{ office.mailto }}">Email</a>
-                        <a class="gt-button" href="{{ office.sms }}">Text</a>
-                    </div>
-                    <div class="gt-qr">{{ office.qr }}</div>
+                </ul>
+                <button class="gt-button" type="button" data-open-share data-share-url="{{ office.share_url }}" data-share-text="{{ office.share_text }}" data-share-mail="{{ office.mailto }}" data-share-sms="{{ office.sms }}">Share</button>
                 </div>
             </div>
             {% else %}
@@ -262,7 +256,6 @@
                 <p class="gt-kicker">{{ page.company_name }}</p>
                 <h2>Start our truck day</h2>
                 <p class="gt-price">{{ combo_label }}</p>
-                <p class="gt-note"><strong>Important:</strong> Your payment will only be charged if this event reaches its funding goal. If the goal isn't met, your pledge will be cancelled and you won't be charged.</p>
                 <button class="gt-button" type="button" data-open-menu>See the menu</button>
                 {% if errors %}<div class="gt-errors" role="alert">{% for error in errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
                 <p class="gt-honeypot"><label>Website <input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></p>
@@ -287,7 +280,7 @@
                     </div>
                     <input type="hidden" name="weekday" id="weekday" value="{{ form.get('weekday', '') }}" required>
                 </div>
-                <button class="gt-button gt-button-dark" type="submit">Start our truck day</button>
+                <button class="gt-button gt-button-primary" type="submit">Start our truck day</button>
             </form>
             {% endif %}
         </div>
@@ -297,17 +290,24 @@
     <dialog class="gt-sheet" id="pledge-sheet" {% if open_pledge %}open{% endif %}>
         <div class="gt-sheet-photo" aria-hidden="true">{{ frame('truck-exterior-04.jpg', '100vw') }}</div>
         <button class="gt-sheet-close" type="button" data-close-pledge>Close</button>
-        <form id="pledge-form" class="gt-form" method="post" action="{{ url_for('campaign_pledge', slug=page.slug) }}">
+        <form id="pledge-form" class="gt-form" method="post" action="{{ url_for('campaign_pledge', slug=page.slug) }}" data-fee-rate="{{ fee_rate }}">
             <p class="gt-kicker">{{ page.company_name }}</p>
             <h2>Get my combo</h2>
+            <p class="gt-recap">{{ office.when }}{% if office.city %} · {{ office.city }}{% endif %}</p>
+            <p class="gt-recap">${{ "{:,.0f}".format(office.raised) }} of ${{ "{:,}".format(office.goal) }} · {{ office.percent }}% · {{ office.meals }} of {{ office.needed }} combos</p>
             <p class="gt-honeypot"><label>Website <input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></p>
             {% if errors and open_pledge %}<div class="gt-errors" role="alert">{% for error in errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
             <div class="gt-qty">
                 <button type="button" data-qty="-1" aria-label="Fewer combos">−</button>
                 <input id="combo-qty" name="quantity" type="number" min="1" max="200" value="{{ form.get('quantity', '1') }}" inputmode="numeric">
                 <button type="button" data-qty="1" aria-label="More combos">+</button>
-                <strong id="combo-total" data-price="{{ combo_price }}">${{ combo_price }}</strong>
+                <strong id="combo-total" data-unit-cents="{{ unit_cents }}" data-fee-rate="{{ fee_rate }}">${{ "%.2f"|format(unit_cents / 100) }}</strong>
             </div>
+            <ul class="gt-fee-lines">
+                <li><span>Combos × <span id="fee-qty">1</span></span><span id="fee-subtotal"></span></li>
+                <li><span>Service fee {{ "%.1f"|format(fee_rate * 100) }}%</span><span id="fee-amount"></span></li>
+                <li><strong>Total</strong><strong id="fee-total"></strong></li>
+            </ul>
             <div class="gt-chips">
                 <button type="button" class="gt-chip" data-team-qty="5">5 for the team</button>
                 <button type="button" class="gt-chip" data-team-qty="10">10 for the team</button>
@@ -347,10 +347,26 @@
             <div id="card-element" class="gt-card"></div>
             <input type="hidden" name="stripe_payment_method" id="stripe-method">
             {% endif %}
-            <button class="gt-button gt-button-dark" type="submit">Pledge</button>
+            <button class="gt-button gt-button-primary" id="pledge-submit" type="submit">Pledge</button>
         </form>
     </dialog>
     {% endif %}
+
+    <dialog class="gt-share-dialog" id="share-sheet">
+        <button class="gt-sheet-close" type="button" data-close-share>Close</button>
+        <div class="gt-form">
+            <h2>Share</h2>
+            <p id="share-preview" class="gt-share-text"></p>
+            <div class="gt-share-actions">
+                <button class="gt-button" type="button" id="share-copy">Copy link</button>
+                <button class="gt-button" type="button" id="share-slack">Slack</button>
+                <a class="gt-button" id="share-email">Email</a>
+                <a class="gt-button" id="share-sms">Text</a>
+            </div>
+            <div class="gt-qr" id="share-qr-office">{{ office.qr }}</div>
+            <div class="gt-qr" id="share-qr-personal" hidden></div>
+        </div>
+    </dialog>
 
     <dialog class="gt-menu-board" id="menu-board">
         <button class="gt-sheet-close" type="button" data-close-menu>Close</button>
@@ -380,7 +396,7 @@
         }
         function refreshSticky() {
             var cardEl = document.getElementById("office-card");
-            var started = cardEl && (cardEl.querySelector("[data-share]") || cardEl.querySelector("#pledge-form") || cardEl.querySelector("[data-book]") || cardEl.querySelector(".gt-confirm"));
+            var started = cardEl && (cardEl.querySelector("[data-open-share]") || cardEl.querySelector("[data-book]") || cardEl.querySelector(".gt-confirm"));
             if (!started) return;
             document.querySelectorAll("[data-open-office]").forEach(function (button) {
                 button.textContent = "Your order";
@@ -413,15 +429,30 @@
             show(dialog("office-sheet"));
         }
         mountCard();
+        function money(cents) { return "$" + (cents / 100).toFixed(2); }
         function setQty(next, team) {
             var input = document.getElementById("combo-qty");
             var total = document.getElementById("combo-total");
             var pool = document.getElementById("team-pool");
             if (!input || !total) return;
-            var price = parseInt(total.getAttribute("data-price"), 10) || 0;
+            var unit = parseInt(total.getAttribute("data-unit-cents"), 10) || 0;
+            var rate = parseFloat(total.getAttribute("data-fee-rate")) || 0;
             next = Math.max(1, Math.min(200, next));
             input.value = String(next);
-            total.textContent = "$" + (price * next);
+            var subtotal = unit * next;
+            var fee = Math.round(subtotal * rate);
+            var all = subtotal + fee;
+            total.textContent = money(subtotal);
+            var qtyLabel = document.getElementById("fee-qty");
+            var subLabel = document.getElementById("fee-subtotal");
+            var feeLabel = document.getElementById("fee-amount");
+            var allLabel = document.getElementById("fee-total");
+            var submit = document.getElementById("pledge-submit");
+            if (qtyLabel) qtyLabel.textContent = String(next);
+            if (subLabel) subLabel.textContent = money(subtotal);
+            if (feeLabel) feeLabel.textContent = money(fee);
+            if (allLabel) allLabel.textContent = money(all);
+            if (submit) submit.textContent = "Pledge " + money(all) + " · only charged if goal met";
             if (pool) pool.value = team ? "1" : "";
         }
         function tick() {
@@ -445,7 +476,16 @@
             });
         }
         tick();
+        setQty(parseInt((document.getElementById("combo-qty") || {}).value, 10) || 1, false);
         setInterval(tick, 30000);
+        var heroButton = document.querySelector("#hero [data-open-office]");
+        var stickyButton = document.querySelector(".gt-sticky-cta");
+        var chapterScroller = document.querySelector(".gt-chapters");
+        if (heroButton && stickyButton && chapterScroller && "IntersectionObserver" in window) {
+            new IntersectionObserver(function (entries) {
+                stickyButton.hidden = entries[0].isIntersecting;
+            }, { root: chapterScroller, threshold: 0.5 }).observe(heroButton);
+        }
         document.addEventListener("click", function (event) {
             var target = event.target.closest("button, a");
             if (!target) return;
@@ -497,14 +537,44 @@
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(copied).then(function () { target.textContent = "Copied"; });
                 }
-            } else if (target.hasAttribute("data-share")) {
-                var url = target.getAttribute("data-share");
-                var text = target.getAttribute("data-share-text") || url;
+            } else if (target.hasAttribute("data-open-share")) {
+                event.preventDefault();
+                var shareUrl = target.getAttribute("data-share-url");
+                var shareText = target.getAttribute("data-share-text") || shareUrl;
                 if (navigator.share) {
-                    navigator.share({ title: "Green Truck", text: text, url: url }).catch(function () {});
-                } else if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(text).then(function () { target.textContent = "Link copied"; });
+                    navigator.share({ title: "Green Truck", text: shareText, url: shareUrl }).catch(function () {});
+                    return;
                 }
+                var preview = document.getElementById("share-preview");
+                if (preview) preview.textContent = shareText;
+                var copy = document.getElementById("share-copy");
+                var slack = document.getElementById("share-slack");
+                if (copy) copy.onclick = function () {
+                    if (navigator.clipboard) navigator.clipboard.writeText(shareUrl);
+                    copy.textContent = "Copied";
+                };
+                if (slack) slack.onclick = function () {
+                    if (navigator.clipboard) navigator.clipboard.writeText(shareText);
+                    slack.textContent = "Copied";
+                };
+                var mail = document.getElementById("share-email");
+                var sms = document.getElementById("share-sms");
+                if (mail) mail.href = target.getAttribute("data-share-mail") || "#";
+                if (sms) sms.href = target.getAttribute("data-share-sms") || "#";
+                var personal = document.getElementById("share-qr-personal");
+                var officeQr = document.getElementById("share-qr-office");
+                var source = document.getElementById("thanks-qr");
+                if (personal && source && target.hasAttribute("data-share-personal")) {
+                    personal.innerHTML = source.innerHTML;
+                    personal.hidden = false;
+                    if (officeQr) officeQr.hidden = true;
+                } else {
+                    if (personal) personal.hidden = true;
+                    if (officeQr) officeQr.hidden = false;
+                }
+                show(dialog("share-sheet"));
+            } else if (target.hasAttribute("data-close-share")) {
+                hide(dialog("share-sheet"));
             }
         });
         document.addEventListener("change", function (event) {
