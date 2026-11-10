@@ -82,6 +82,7 @@ Every variable is listed in [`.env.example`](.env.example). The ones that matter
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
+| `PUBLIC_BASE_URL` | when the custom domain is live | Customer links and a GET-only 301 off the Render hostname. Example: `https://events.greentruckonthego.com`. Leave empty until that URL returns HTTPS 200 |
 | `APP_ENV` | yes in production | `development`, `testing`, or `production` |
 | `SESSION_SECRET` | yes in production | Signs session cookies |
 | `DATABASE_URL` | yes in production | Postgres URL. Empty locally uses SQLite at `instance/app.db` |

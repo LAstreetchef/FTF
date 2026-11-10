@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+from urllib.parse import urlparse
 
 import stripe
 from dotenv import load_dotenv
@@ -75,7 +76,40 @@ if not session_secret:
     )
 app.secret_key = session_secret
 
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+
+class PublicHostMiddleware:
+    """Prefer PUBLIC_BASE_URL for absolute links, and 301 GET traffic onto it."""
+
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        base = public_base_url()
+        if not base:
+            return self.wsgi_app(environ, start_response)
+        parsed = urlparse(base)
+        public_host = (parsed.netloc or "").split(":")[0].lower()
+        incoming = (environ.get("HTTP_HOST") or "").split(":")[0].lower()
+        path = environ.get("PATH_INFO") or "/"
+        if not public_host:
+            return self.wsgi_app(environ, start_response)
+        if parsed.scheme:
+            environ["wsgi.url_scheme"] = parsed.scheme
+        if incoming == public_host or _exempt_from_host_redirect(path):
+            return self.wsgi_app(environ, start_response)
+        if (environ.get("REQUEST_METHOD") or "GET").upper() == "GET":
+            query = environ.get("QUERY_STRING") or ""
+            location = base + path + (f"?{query}" if query else "")
+            start_response("301 MOVED PERMANENTLY", [
+                ("Location", location),
+                ("Content-Length", "0"),
+            ])
+            return [b""]
+        environ["HTTP_HOST"] = parsed.netloc
+        return self.wsgi_app(environ, start_response)
+
+
+app.wsgi_app = ProxyFix(PublicHostMiddleware(app.wsgi_app), x_proto=1, x_host=1)
 
 iframe_embed = _env_flag("IFRAME_EMBED", False)
 secure_cookies = _env_flag("SESSION_COOKIE_SECURE", IS_PRODUCTION or iframe_embed)
@@ -257,6 +291,25 @@ _IFRAME_ORIGINS = {
     "https://www.thefoodtruckstop.com",
     "https://thefoodtruckstop.com",
 }
+
+
+def public_base_url():
+    """Origin for links a customer can open. Empty means the request host."""
+    raw = (os.environ.get("PUBLIC_BASE_URL") or "").strip()
+    if not raw:
+        return ""
+    if "://" not in raw:
+        raw = "https://" + raw
+    return raw.rstrip("/")
+
+
+_REDIRECT_EXEMPT = ("/health", "/readiness", "/liveness")
+
+
+def _exempt_from_host_redirect(path):
+    if path in _REDIRECT_EXEMPT or any(path.startswith(item + "/") for item in _REDIRECT_EXEMPT):
+        return True
+    return path == "/webhook" or path.startswith("/webhook/") or path.startswith("/stripe/webhook")
 
 
 @app.before_request

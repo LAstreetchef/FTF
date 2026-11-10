@@ -9,6 +9,8 @@ services:
     envVars:
       - key: APP_ENV
         value: production
+      - key: PUBLIC_BASE_URL
+        sync: false
       - key: PYTHON_VERSION
         value: 3.12.3
       - key: STRIPE_TEST_MODE
