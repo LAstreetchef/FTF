@@ -29,21 +29,33 @@ def generate_ticket_code():
     characters = string.ascii_uppercase + string.digits
     return ''.join(secrets.choice(characters) for _ in range(8))
 
-def create_stripe_payment_intent(amount, customer_email, description):
-    """Create a Stripe PaymentIntent for future charging"""
+def create_stripe_payment_intent(amount, customer_email, description, metadata=None, amount_cents=None):
+    """Create a Stripe PaymentIntent for future charging.
+
+    Cards only. Apple Pay and Google Pay may arrive as a card PaymentMethod.
+    Do not add Cash App Pay.
+    """
     try:
-        # Use the correct Stripe key based on current mode configuration
-        # Convert amount to cents
-        amount_cents = int(amount * 100)
+        # Convert amount to cents unless the caller already passed the Price total.
+        cents = int(amount_cents) if amount_cents is not None else int(amount * 100)
         
         # Get the current stripe key that was configured in app.py based on test mode
         current_key = stripe.api_key
         mode = "TEST" if current_key and current_key.startswith('sk_test_') else "LIVE"
         logging.info(f"Creating payment intent in {mode} mode")
+
+        meta = {
+            "customer_email": (customer_email or "")[:500],
+            "description": (description or "")[:500],
+        }
+        for key, value in (metadata or {}).items():
+            if value is None:
+                continue
+            meta[str(key)[:40]] = str(value)[:500]
         
         # Create PaymentIntent with current configured key
         intent = stripe.PaymentIntent.create(
-            amount=amount_cents,
+            amount=cents,
             currency='usd',
             capture_method='manual',  # Don't charge immediately
             receipt_email=customer_email,
@@ -52,10 +64,7 @@ def create_stripe_payment_intent(amount, customer_email, description):
             # Do not add cashapp or other redirect methods.
             payment_method_types=['card'],
             automatic_payment_methods={'enabled': False},
-            metadata={
-                'customer_email': customer_email,
-                'description': description
-            }
+            metadata=meta,
         )
         
         logging.info(f"Created PaymentIntent {intent.id} for ${amount}")

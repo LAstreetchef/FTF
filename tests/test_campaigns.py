@@ -125,10 +125,16 @@ def test_office_reaches_the_goal_and_books_a_day(client):
         created.amount = amount_cents
         return created
 
-    with patch("utils.stripe.PaymentIntent.create", side_effect=lambda **kwargs: _intent_for(kwargs["amount"])) as create_intent, \
+    catalog_price = MagicMock(unit_amount=1800, currency="usd", product="prod_VbR57kEpMXLiP4")
+    with patch("green_truck_menu.stripe.Price.retrieve", return_value=catalog_price) as read_price, \
+         patch("utils.stripe.PaymentIntent.create", side_effect=lambda **kwargs: _intent_for(kwargs["amount"])) as create_intent, \
          patch("payments.stripe.PaymentIntent.confirm", side_effect=lambda intent_id, **kwargs: _intent_for(intent.amount)) as confirm_intent, \
          patch("utils.stripe.PaymentIntent.retrieve", side_effect=lambda intent_id: _intent_for(1881)), \
          patch("utils.stripe.PaymentIntent.capture", side_effect=lambda intent_id: _intent_for(1881)):
+        from green_truck_menu import refresh_combo_price
+        loaded = refresh_combo_price()
+        assert loaded["source"] == "stripe"
+        assert read_price.called
         first = client.post("/c/northwind-labs/pledge", data={
             "supporter_name": "Sam Coworker",
             "supporter_email": "sam.coworker@example.com",
@@ -139,7 +145,16 @@ def test_office_reaches_the_goal_and_books_a_day(client):
         assert first.status_code == 200, first.data[:400]
         assert create_intent.called
         assert confirm_intent.called
-        assert create_intent.call_args.kwargs["capture_method"] == "manual"
+        created = create_intent.call_args.kwargs
+        assert created["capture_method"] == "manual"
+        assert created["amount"] == 1800
+        assert created["payment_method_types"] == ["card"]
+        assert created["metadata"]["price_id"] == "price_1UaEDhBgt3ltA59nFLiZXZ2E"
+        assert created["metadata"]["product_id"] == "prod_VbR57kEpMXLiP4"
+        assert created["metadata"]["quantity"] == "1"
+        assert created["metadata"]["campaign_slug"] == "northwind-labs"
+        assert created["metadata"]["event_id"]
+        assert created["description"] == "Green Truck Office Combo x1 - Northwind Labs"
         with app.app_context():
             pledge = Pledge.query.filter_by(email="sam.coworker@example.com").one()
             assert pledge.status == "pending"

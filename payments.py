@@ -15,9 +15,15 @@ from utils import charge_stripe_payment, create_stripe_payment_intent, release_s
 PROVIDER = "stripe"
 
 
-def authorize_card(amount, email, description, payment_method, return_url):
+def authorize_card(amount, email, description, payment_method, return_url, metadata=None, amount_cents=None):
     """Authorize a card and leave it uncaptured. Returns (intent id, status)."""
-    intent_id = create_stripe_payment_intent(amount, email, description)
+    intent_id = create_stripe_payment_intent(
+        amount,
+        email,
+        description,
+        metadata=metadata,
+        amount_cents=amount_cents,
+    )
     if not intent_id:
         return None, None
     intent = stripe.PaymentIntent.confirm(

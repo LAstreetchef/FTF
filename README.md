@@ -88,6 +88,8 @@ Every variable is listed in [`.env.example`](.env.example). The ones that matter
 | `STRIPE_SECRET_KEY` | yes in production | `sk_test_...` or, only with test mode off, `sk_live_...` |
 | `STRIPE_PUBLISHABLE_KEY` | yes in production | Matching `pk_test_...` or `pk_live_...` |
 | `STRIPE_TEST_MODE` | recommended | Defaults to `true` |
+| `STRIPE_COMBO_PRICE_ID` | no | Office combo Price. Test mode defaults to `price_1UaEDhBgt3ltA59nFLiZXZ2E` ($18). The app reads `unit_amount` from Stripe and does not create Prices. `COMBO_PRICE` is the fallback |
+| `CAMPAIGN_SWEEP_TOKEN` | no | Shared secret for `POST /campaigns/sweep`. Set it in the host dashboard. A Render cron should call that URL because the free plan sleeps |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | to create an admin | Seeded once if the account does not exist |
 | `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER` | to send mail | SMTP. Blank credentials skip sending |
 | `OPENAI_API_KEY` | no | Support chat only |
@@ -118,6 +120,8 @@ This is the smallest production path: one web service and one managed Postgres d
    - `STRIPE_TEST_MODE` = `true`
    - `STRIPE_SECRET_KEY` = `sk_test_...`
    - `STRIPE_PUBLISHABLE_KEY` = `pk_test_...`
+   - `STRIPE_COMBO_PRICE_ID` = the test Price id (optional while test mode is on; the default is `price_1UaEDhBgt3ltA59nFLiZXZ2E`)
+   - `CAMPAIGN_SWEEP_TOKEN` = a long random string, then a daily cron `POST /campaigns/sweep?token=...` so card holds are released if nobody visits
    - `SESSION_COOKIE_SECURE` = `true`
    - `ADMIN_EMAIL` and `ADMIN_PASSWORD`
    - `SEED_DEMO_DATA` = `false`

@@ -212,6 +212,12 @@ def configure_payments():
 
 configure_payments()
 
+try:
+    from green_truck_menu import refresh_combo_price
+    refresh_combo_price()
+except Exception:
+    logging.exception("Combo price lookup failed at startup")
+
 db.init_app(app)
 mail.init_app(app)
 

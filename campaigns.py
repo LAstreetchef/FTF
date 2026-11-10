@@ -28,6 +28,9 @@ from green_truck_menu import (
     combo_label,
     campaign_days,
     combo_price,
+    combo_price_id,
+    combo_product_id,
+    combo_unit_cents,
     combos_needed,
     minimum_amount,
     minimum_label,
@@ -840,18 +843,34 @@ def campaign_pledge(slug):
     if errors:
         return _render_campaign(page, form=form, errors=errors, open_sheet=True), 400
 
-    amount = float(combo_price() * quantity)
-    processing_fee = round(amount * 0.045, 2)
+    unit_cents = combo_unit_cents()
+    amount_cents = unit_cents * quantity
+    amount = amount_cents / 100.0
+    # The Stripe Price is the authorized amount. The older 4.5% add-on stays on the event pledge form.
+    processing_fee = 0.0
     payment_method = (request.form.get("stripe_payment_method") or "").strip()
     intent_id = None
     token = "simulated"
+    description = f"Green Truck Office Combo x{quantity} - {page.company_name}"
+    metadata = {
+        "product_id": combo_product_id(),
+        "price_id": combo_price_id(),
+        "quantity": quantity,
+        "campaign_slug": page.slug,
+        "event_id": event.id,
+    }
     if app.config.get("PAYMENTS_MODE") == "stripe":
         if not payment_method:
             return _render_campaign(page, form=form, errors=["Add a card."], open_sheet=True), 400
-        total = amount + processing_fee
         try:
             intent_id, intent_status = authorize_card(
-                total, email, f"Combo pledge for {event.name}", payment_method, request.url_root,
+                amount,
+                email,
+                description,
+                payment_method,
+                request.url_root,
+                metadata=metadata,
+                amount_cents=amount_cents,
             )
         except Exception:
             logging.exception("Could not authorize pledge for %s", page.slug)

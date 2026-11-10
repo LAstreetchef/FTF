@@ -29,6 +29,16 @@ services:
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
         sync: false
+      - key: STRIPE_COMBO_PRICE_ID
+        sync: false
+      - key: CAMPAIGN_SWEEP_TOKEN
+        sync: false
+      - key: GREEN_TRUCK_MINIMUM
+        value: "1750"
+      - key: COMBO_PRICE
+        value: "18"
+      - key: CAMPAIGN_DAYS
+        value: "7"
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
