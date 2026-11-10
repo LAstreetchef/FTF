@@ -172,7 +172,7 @@
             {{ frame('truck-exterior-04.jpg', '100vw') }}
         </div>
         <button class="gt-sheet-close" type="button" data-close-office>Close</button>
-        <div id="office-card">
+        <div id="office-card" class="gt-sheet-scroll">
             {% if office.cancelled %}
             <div class="gt-confirm" role="status">
                 <p class="gt-kicker">{{ page.company_name }}</p>
@@ -309,7 +309,7 @@
     <dialog class="gt-sheet" id="pledge-sheet" {% if open_pledge %}open{% endif %}>
         <div class="gt-sheet-photo" aria-hidden="true">{{ frame('truck-exterior-04.jpg', '100vw') }}</div>
         <button class="gt-sheet-close" type="button" data-close-pledge>Close</button>
-        <form id="pledge-form" class="gt-form" method="post" action="{{ url_for('campaign_pledge', slug=page.slug) }}" data-fee-rate="{{ fee_rate }}">
+        <form id="pledge-form" class="gt-form gt-sheet-scroll" method="post" action="{{ url_for('campaign_pledge', slug=page.slug) }}" data-fee-rate="{{ fee_rate }}">
             <p class="gt-kicker">{{ page.company_name }}</p>
             <h2>Get my combo</h2>
             <p class="gt-recap">{{ office.when }}{% if office.city %} · {{ office.city }}{% endif %}</p>
@@ -373,7 +373,7 @@
 
     <dialog class="gt-share-dialog" id="share-sheet">
         <button class="gt-sheet-close" type="button" data-close-share>Close</button>
-        <div class="gt-form">
+        <div class="gt-form gt-sheet-scroll">
             <h2>Share</h2>
             <p id="share-preview" class="gt-share-text"></p>
             <div class="gt-share-actions">
@@ -400,6 +400,17 @@
         var card = null;
         var stripeKey = {{ stripe_key|tojson }};
         function dialog(id) { return document.getElementById(id); }
+        document.querySelectorAll("dialog").forEach(function (el) {
+            el.addEventListener("wheel", function (event) {
+                var scroller = event.target.closest && event.target.closest(".gt-sheet-scroll");
+                if (scroller) return;
+                scroller = el.querySelector(".gt-sheet-scroll");
+                if (!scroller || scroller.scrollHeight <= scroller.clientHeight + 1) return;
+                var max = scroller.scrollHeight - scroller.clientHeight;
+                scroller.scrollTop = Math.max(0, Math.min(max, scroller.scrollTop + event.deltaY));
+                event.preventDefault();
+            }, { passive: false });
+        });
         function show(el) {
             if (el && el.showModal && !el.open) el.showModal();
         }
