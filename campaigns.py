@@ -342,6 +342,9 @@ def campaign_page(slug):
         abort(404)
     _record_view(page)
     saved = request.args.get("requested") == "1"
+    recap = {}
+    if saved:
+        recap = (session.get("campaign_quote_recaps") or {}).get(page.slug) or {}
     return render_template(
         "campaigns/page.html",
         page=page,
@@ -353,6 +356,8 @@ def campaign_page(slug):
         errors=[],
         classic_menu=CLASSIC_MENU,
         minimum_label=minimum_label(),
+        confirm_name=recap.get("first_name") or "",
+        confirm_recap=recap.get("line") or "",
     )
 
 
@@ -414,6 +419,8 @@ def campaign_quote(slug):
             errors=errors,
             classic_menu=CLASSIC_MENU,
             minimum_label=minimum_label(),
+            confirm_name="",
+            confirm_recap="",
         ), 400
 
     quote = QuoteRequest(
@@ -439,6 +446,14 @@ def campaign_quote(slug):
     except Exception:
         logging.exception("Campaign notification failed for %s", page.slug)
         db.session.rollback()
+    first_name = (form["organizer_name"].split() or [""])[0][:40]
+    recap_line = " · ".join(
+        bit for bit in (format_date(form["event_date"]), f"{headcount} people") if bit
+    )
+    recaps = session.get("campaign_quote_recaps") or {}
+    recaps[slug] = {"first_name": first_name, "line": recap_line}
+    session["campaign_quote_recaps"] = recaps
+    session.modified = True
     logging.info("Campaign quote saved for %s", page.slug)
     return redirect(url_for("campaign_page", slug=slug, requested=1))
 

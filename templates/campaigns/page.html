@@ -169,9 +169,10 @@
         {% if saved %}
         <div class="gt-confirm" role="status">
             <p class="gt-kicker">{{ page.company_name }}</p>
-            <h2>Request received.</h2>
-            <p>It’s saved for Kam. {{ minimum_label }}. Nothing is charged here.</p>
-            <button class="gt-button gt-button-dark" type="button" data-close-request>Close</button>
+            <h2>You’re on the list.</h2>
+            <p>{% if confirm_name %}Thanks, {{ confirm_name }}. {% endif %}Kam will confirm your date and send a quote within one business day.</p>
+            {% if confirm_recap %}<p class="gt-recap">{{ confirm_recap }}</p>{% endif %}
+            <button class="gt-button gt-button-dark" type="button" data-close-request data-back-menu>Back to the menu</button>
         </div>
         {% else %}
         <form class="gt-form" method="post" action="{{ url_for('campaign_quote', slug=page.slug) }}">
@@ -228,12 +229,26 @@
         function closeSheet() {
             if (sheet && sheet.close) sheet.close();
         }
+        function bindClose(scope) {
+            (scope || document).querySelectorAll("[data-close-request]").forEach(function (button) {
+                if (button.dataset.bound) return;
+                button.dataset.bound = "1";
+                button.addEventListener("click", function () {
+                    closeSheet();
+                    if (!button.hasAttribute("data-back-menu")) return;
+                    var menu = document.getElementById("menu");
+                    if (menu && menu.scrollIntoView) menu.scrollIntoView({ block: "start" });
+                });
+            });
+        }
+        if (sheet && sheet.hasAttribute("open") && sheet.showModal) {
+            sheet.close();
+            sheet.showModal();
+        }
         document.querySelectorAll("[data-open-request]").forEach(function (button) {
             button.addEventListener("click", openSheet);
         });
-        document.querySelectorAll("[data-close-request]").forEach(function (button) {
-            button.addEventListener("click", closeSheet);
-        });
+        bindClose(document);
         document.querySelectorAll(".gt-chip").forEach(function (chip) {
             chip.addEventListener("click", function () {
                 if (!dateInput) return;
@@ -256,13 +271,15 @@
                 }).then(function (response) {
                     return response.text();
                 }).then(function (html) {
-                    if (html.indexOf("Request received") !== -1) {
-                        sheet.innerHTML = '<div class="gt-confirm" role="status"><p class="gt-kicker">{{ page.company_name }}</p><h2>Request received.</h2><p>It’s saved for Kam. {{ minimum_label }}. Nothing is charged here.</p><button class="gt-button gt-button-dark" type="button" data-close-request>Close</button></div>';
-                        var closer = sheet.querySelector("[data-close-request]");
-                        if (closer) closer.addEventListener("click", closeSheet);
+                    var next = document.createElement("div");
+                    next.innerHTML = html;
+                    var confirm = next.querySelector(".gt-confirm");
+                    if (confirm) {
+                        var card = sheet.querySelector(".gt-form");
+                        if (card) card.replaceWith(confirm);
+                        else sheet.appendChild(confirm);
+                        bindClose(sheet);
                     } else {
-                        var next = document.createElement("div");
-                        next.innerHTML = html;
                         var errors = next.querySelector(".gt-errors");
                         var slot = form.querySelector(".gt-errors");
                         if (errors) {

@@ -271,6 +271,17 @@
     background: rgba(10, 10, 10, .62);
     border-radius: 18px;
 }
+.gt-confirm {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    width: min(26rem, calc(100% - 2.5rem));
+    max-height: calc(100% - 2.5rem);
+    overflow: auto;
+}
+.gt-recap { margin: 0 0 1rem; color: rgba(255, 255, 255, .82); font-size: .95rem; }
 .gt-form h2, .gt-confirm h2 { font-family: Newsreader, Georgia, serif; font-weight: 450; letter-spacing: -.03em; margin: 0 0 .4rem; }
 .gt-field { display: grid; gap: .35rem; margin-bottom: .75rem; }
 .gt-field label { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; }
@@ -301,7 +312,8 @@
 
 @media (max-width: 700px) {
     .gt-sheet { width: calc(100vw - .6rem); height: calc(100svh - .6rem); }
-    .gt-form, .gt-confirm { margin: .7rem; max-height: calc(100% - 1.4rem); overflow: auto; }
+    .gt-form { margin: .7rem; max-height: calc(100% - 1.4rem); overflow: auto; }
+    .gt-confirm { width: min(26rem, calc(100% - 1.6rem)); }
 }
 
 @media (min-width: 800px) {

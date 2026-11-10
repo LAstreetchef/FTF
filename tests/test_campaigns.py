@@ -98,7 +98,11 @@ def test_quote_is_stored_without_sending_mail(client):
         "preorder": "on",
     }, follow_redirects=True)
     assert response.status_code == 200
-    assert b"Request received" in response.data
+    assert b"You\xe2\x80\x99re on the list." in response.data
+    assert b"Thanks, Riley." in response.data
+    assert b"60 people" in response.data
+    assert b"saved for Kam" not in response.data
+    assert b"Nothing is charged here." not in response.data
 
     with app.app_context():
         quote = QuoteRequest.query.filter_by(organizer_email="riley@northwind.example").one()
