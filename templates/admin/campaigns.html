@@ -72,6 +72,7 @@
                     {% set office = offices.get(page.id) %}
                     <td>
                         {{ page.contact_name or "—" }}
+                        {% if page.sponsor_anonymous %}<div class="small">Name off the page</div>{% endif %}
                         {% if page.contact_email %}<div class="small text-secondary">{{ page.contact_email }}</div>{% endif %}
                     </td>
                     <td>{{ page.office_address or "—" }}</td>

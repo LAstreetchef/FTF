@@ -68,6 +68,7 @@ CSV_FIELDS = [
     "suggested_dates",
     "give_back_cause",
     "slug",
+    "sponsor_anonymous",
 ]
 
 DEMO_CAMPAIGNS = [
@@ -348,6 +349,25 @@ def ensure_desk_check():
     db.session.commit()
 
 
+def ensure_anon_check():
+    """Fictional anonymous-sponsor page. Not a customer."""
+    if os.environ.get("APP_ENV") == "testing":
+        return
+    if CampaignPage.query.filter_by(slug="anon-check").first():
+        return
+    page = CampaignPage(
+        slug="anon-check",
+        company_name="Anon Check",
+        contact_name="Alex Example",
+        contact_email="alex@anon-check.example",
+        personal_note="This sample page checks the unnamed host. It is not a customer.",
+        sponsor_anonymous=True,
+    )
+    page.set_suggested_dates(["2026-12-02", "2026-12-09", "2026-12-16"])
+    db.session.add(page)
+    db.session.commit()
+
+
 def seed_demo_campaigns():
     """Fictional prospects only. Never real customer names or inboxes."""
     if os.environ.get("APP_ENV") == "production":
@@ -399,6 +419,8 @@ def upsert_campaign_row(row):
     page.logo_url = safe_logo(logo)
     page.give_back_cause = (row.get("give_back_cause") or "")[:200]
     page.set_suggested_dates(parse_dates(row.get("suggested_dates") or ""))
+    if "sponsor_anonymous" in row:
+        page.sponsor_anonymous = (row.get("sponsor_anonymous") or "").strip().lower() in {"1", "true", "yes", "on"}
     return page, None
 
 
@@ -428,6 +450,7 @@ def ensure_campaign_columns():
         "available_dates": "TEXT",
         "host_token": "VARCHAR(64)",
         "goal_notified": "BOOLEAN",
+        "sponsor_anonymous": "BOOLEAN NOT NULL DEFAULT false" if db.engine.dialect.name == "postgresql" else "BOOLEAN DEFAULT 0",
     }
     changed = False
     for name, column_type in additions.items():
@@ -665,11 +688,44 @@ def _qr_markup(text):
     return Markup(buffer.getvalue().decode())
 
 
-def _share_pack(url, company, remaining, when):
-    text = (
-        f"We're {remaining} combos from a Green Truck day at {company} on {when}. "
-        f"${combo_price()} entree+side+drink, only charged if we hit the goal: {url}"
+def _public_host(page):
+    """Name the public page may use. Anonymous sponsors stay unnamed."""
+    if page.sponsor_anonymous:
+        return "A coworker"
+    name = (page.contact_name or "").strip()
+    return name or "A coworker"
+
+
+def _host_line(page):
+    office = page.company_name
+    if page.sponsor_anonymous or not (page.contact_name or "").strip():
+        return f"A coworker is bringing Green Truck to {office}."
+    return f"{_public_host(page)} is bringing Green Truck to {office}."
+
+
+def _sponsor_paste(page, url):
+    goal = f"${minimum_amount():,}"
+    days = campaign_days()
+    price = combo_price()
+    if page.sponsor_anonymous:
+        return (
+            f"We're bringing Green Truck to the office for the holidays. "
+            f"${price} combo — entree, side, and drink. "
+            f"Nobody is charged unless we hit {goal} in {days} days. {url}"
+        )
+    return (
+        f"I'm bringing Green Truck to the office for the holidays. "
+        f"${price} combo — entree, side, and drink. "
+        f"Nobody is charged unless we hit {goal} in {days} days. "
+        f"Then I pick the date, and my meal is on us. {url}"
     )
+
+
+def _share_pack(url, company, remaining, when, lead=""):
+    text = (
+        f"{lead} We're {remaining} combos from a Green Truck day at {company} on {when}. "
+        f"${combo_price()} entree+side+drink, only charged if we hit the goal: {url}"
+    ).strip()
     return {
         "url": url,
         "text": text,
@@ -730,7 +786,7 @@ def office_snapshot(page):
     weekday = _WEEKDAY_NAME.get(page.preferred_weekday or "", "")
     when = _when_label(page, event)
     share_url = url_for("campaign_page", slug=page.slug, _external=True)
-    share = _share_pack(share_url, page.company_name, gap, when)
+    share = _share_pack(share_url, page.company_name, gap, when, _host_line(page))
     percent = round(event.get_progress_percentage(), 1) if event else 0
     closes = None
     urgent = False
@@ -771,6 +827,11 @@ def office_snapshot(page):
         "countdown": countdown,
         "urgent": urgent,
         "close_gap": bool(event and _is_host(page) and percent >= 75 and not event.is_goal_met() and gap > 0),
+        "host_line": _host_line(page) if event else "",
+        "paste": _sponsor_paste(page, share_url) if event else "",
+        "days": campaign_days(),
+        "anonymous": bool(page.sponsor_anonymous),
+        "ticket_host": "Your office's host" if page.sponsor_anonymous else _public_host(page),
     }
 
 
@@ -825,12 +886,14 @@ def _capture_pending(page, event):
         fee = pledge.processing_fee or 0
         total = result.get("total_charged") or (subtotal + fee)
         rate_label = f"{campaign_fee_rate() * 100:.1f}".rstrip("0").rstrip(".")
+        host_label = "Your office's host" if page.sponsor_anonymous else (page.contact_name or "Your office's host")
         send_email(
             pledge.email,
             f"Your E-Ticket for {event.name}",
             f"Thank you for your pledge! Your payment has been processed.\n\n"
             f"PAYMENT BREAKDOWN:\nCombos: ${subtotal:.2f}\n"
             f"Service fee ({rate_label}%): ${fee:.2f}\nTotal Charged: ${total:.2f}\n\n"
+            f"Host: {host_label}\n\n"
             f"E-TICKET CODE: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\n"
             f"Location: {event.location}\n\nShow this code at the food truck to redeem your meal.",
         )
@@ -907,6 +970,7 @@ def _render_campaign(page, form=None, errors=None, open_sheet=None):
         payments_mode=app.config.get("PAYMENTS_MODE"),
         thanks=_thanks_view(page),
         open_pledge=request.endpoint == "campaign_pledge" and bool(errors),
+        just_started=request.args.get("started") == "1",
     )
 
 
@@ -950,7 +1014,8 @@ def campaign_card(slug):
     font = ImageFont.load_default(size=54)
     small = ImageFont.load_default(size=32)
     draw.text((48, 70), f"Green Truck X {page.company_name}"[:42], fill="white", font=font)
-    draw.text((48, 170), f"{office['meals']} of {office['needed']} combos", fill="white", font=small)
+    draw.text((48, 150), (office.get("host_line") or "")[:64], fill=(255, 244, 230), font=small)
+    draw.text((48, 200), f"{office['meals']} of {office['needed']} combos", fill="white", font=small)
     draw.text((48, 230), office["milestone"], fill=(255, 220, 180), font=small)
     draw.rounded_rectangle((48, 320, 620, 356), radius=18, fill=(255, 255, 255, ))
     fill_to = 48 + int(572 * (office["percent"] / 100))
@@ -959,6 +1024,33 @@ def campaign_card(slug):
     card.save(out, format="PNG")
     out.seek(0)
     return app.response_class(out.getvalue(), mimetype="image/png")
+
+
+def _send_sponsor_started(page):
+    """Mail the host their steps. Logged for admin when SMTP is off."""
+    url = url_for("campaign_page", slug=page.slug, _external=True)
+    paste = _sponsor_paste(page, url)
+    subject = f"You started a Green Truck day for {page.company_name}"
+    body = (
+        f"{_host_line(page)}\n\n"
+        "You're bringing the truck in for the holidays. Coworkers each chip in for a combo. "
+        f"Nobody is charged unless the office hits ${minimum_amount():,} in {campaign_days()} days. "
+        "Then you pick the date, and your meal is on us.\n\n"
+        "How it works for you\n"
+        "1. Share your link in Slack, email, or the group chat.\n"
+        "2. Watch the meter. Nudge people before the countdown ends.\n"
+        "3. When it hits the goal, pick your date.\n"
+        "4. We confirm and show up.\n\n"
+        f"Paste this:\n{paste}\n"
+    )
+    recipient = (page.contact_email or "")[:120]
+    sent = False
+    if recipient and not app.config.get("MAIL_SUPPRESS_SEND"):
+        sent = bool(send_email(recipient, subject, body))
+    else:
+        logging.info("Sponsor start email logged, not sent, for %s", page.slug)
+    _log_campaign_email(recipient, subject, body, sent)
+    db.session.commit()
 
 
 @app.route("/c/<slug>/start", methods=["POST"])
@@ -973,6 +1065,7 @@ def campaign_start(slug):
         "office_address": (request.form.get("office_address") or "").strip(),
         "guest_count": (request.form.get("guest_count") or "").strip(),
         "weekday": (request.form.get("weekday") or "").strip(),
+        "sponsor_anonymous": request.form.get("sponsor_anonymous") == "1",
     }
     errors = []
     if not form["organizer_name"]:
@@ -1025,10 +1118,12 @@ def campaign_start(slug):
     page.host_token = secrets.token_urlsafe(24)
     page.booked_date = None
     page.goal_notified = False
+    page.sponsor_anonymous = bool(form["sponsor_anonymous"])
     db.session.commit()
     _remember_host(page)
+    _send_sponsor_started(page)
     logging.info("Campaign %s started as event %s without the organizer fee", page.slug, event.id)
-    return redirect(url_for("campaign_page", slug=slug))
+    return redirect(url_for("campaign_page", slug=slug, started=1))
 
 
 @app.route("/c/<slug>/pledge", methods=["POST"])

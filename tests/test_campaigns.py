@@ -202,6 +202,29 @@ def test_office_reaches_the_goal_and_books_a_day(client):
     assert b"booked" in listing.data
 
 
+def test_anonymous_sponsor_is_unnamed_on_the_page(client):
+    _login_admin(client)
+    _import_sample(client)
+    response = client.post("/c/harbor-and-pine/start", data={
+        "organizer_name": "Jordan Hale",
+        "office_address": "50 Example St, Playa Vista",
+        "guest_count": "20",
+        "weekday": "tue",
+        "sponsor_anonymous": "1",
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    assert b"A coworker is bringing Green Truck to Harbor" in response.data
+    assert b"How it works for you" in response.data
+    assert b"Copy message" in response.data
+    with app.app_context():
+        page = CampaignPage.query.filter_by(slug="harbor-and-pine").one()
+        assert page.sponsor_anonymous is True
+        assert page.contact_name == "Jordan Hale"
+    detail = client.get(f"/admin/campaigns/{page.id}")
+    assert b"Jordan Hale" in detail.data
+    assert b"Name off the page" in detail.data
+
+
 def test_deadline_releases_uncaptured_holds(client):
     from datetime import datetime, timedelta
 

@@ -481,9 +481,10 @@ with app.app_context():
         _maybe_restore_events()
         _seed_demo_content()
         _seed_admin()
-        from campaigns import ensure_desk_check, seed_demo_campaigns
+        from campaigns import ensure_anon_check, ensure_desk_check, seed_demo_campaigns
         seed_demo_campaigns()
         ensure_desk_check()
+        ensure_anon_check()
         logging.info("Application initialization completed")
     except Exception:
         db.session.rollback()

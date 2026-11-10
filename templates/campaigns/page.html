@@ -6,7 +6,7 @@
     <title>{{ possessive_name }} Holiday Truck Day — Green Truck</title>
     <meta name="description" content="Green Truck classic menu for {{ page.company_name }}.">
     <meta property="og:title" content="Green Truck X {{ page.company_name }}">
-    <meta property="og:description" content="{{ office.meals }} of {{ office.needed }} combos. {{ combo_label }}.">
+    <meta property="og:description" content="{{ office.host_line }} {{ office.meals }} of {{ office.needed }} combos. {{ combo_label }}.">
     <meta property="og:image" content="{{ url_for('campaign_card', slug=page.slug, _external=True) }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="robots" content="noindex">
@@ -195,7 +195,20 @@
                 {% endif %}
                 <header class="gt-event-head">
                     <h2>Green Truck X {{ page.company_name }}</h2>
+                    <p>{{ office.host_line }}</p>
                     <p>{{ office.when }}{% if office.city %} · {{ office.city }}{% endif %}</p>
+                    {% if office.host %}
+                    {% if just_started %}<p class="gt-kicker">You're the host</p>{% endif %}
+                    <p class="gt-kicker">How it works for you</p>
+                    <ol class="gt-steps">
+                        <li>Share your link in Slack, email, or the group chat.</li>
+                        <li>Watch the meter. Nudge people before the countdown ends.</li>
+                        <li>When it hits the goal, pick your date.</li>
+                        <li>We confirm and show up.</li>
+                    </ol>
+                    <p class="gt-share-text">{{ office.paste }}</p>
+                    <button class="gt-button" type="button" data-copy="{{ office.paste }}">Copy message</button>
+                    {% endif %}
                 </header>
                 <aside class="gt-event-side">
                     <p><strong>${{ "{:,.0f}".format(office.raised) }}</strong> raised · ${{ "{:,.0f}".format(office.to_go) }} to go · {{ office.percent }}%</p>
@@ -254,7 +267,8 @@
             {% else %}
             <form class="gt-form" method="post" action="{{ url_for('campaign_start', slug=page.slug) }}">
                 <p class="gt-kicker">{{ page.company_name }}</p>
-                <h2>Start our truck day</h2>
+                <h2>Bring the truck to your office</h2>
+                <p>You start it. Coworkers each chip in for an ${{ combo_price }} combo. Nobody is charged unless the office hits ${{ "{:,}".format(office.goal) }} in {{ office.days or 7 }} days. Then you pick the date, and your meal is on us.</p>
                 <p class="gt-price">{{ combo_label }}</p>
                 <button class="gt-button" type="button" data-open-menu>See the menu</button>
                 {% if errors %}<div class="gt-errors" role="alert">{% for error in errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
@@ -280,6 +294,7 @@
                     </div>
                     <input type="hidden" name="weekday" id="weekday" value="{{ form.get('weekday', '') }}" required>
                 </div>
+                <label class="gt-check"><input type="checkbox" name="sponsor_anonymous" value="1" {% if form.get('sponsor_anonymous') %}checked{% endif %}> Keep my name off the page</label>
                 <button class="gt-button gt-button-primary" type="submit">Start our truck day</button>
             </form>
             {% endif %}

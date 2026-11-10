@@ -918,6 +918,7 @@ class CampaignPage(db.Model):
     available_dates = db.Column(db.Text)
     host_token = db.Column(db.String(64))
     goal_notified = db.Column(db.Boolean, default=False)
+    sponsor_anonymous = db.Column(db.Boolean, default=False)
 
     views = db.relationship("CampaignView", backref="campaign", lazy=True)
     quote_requests = db.relationship("QuoteRequest", backref="campaign", lazy=True)

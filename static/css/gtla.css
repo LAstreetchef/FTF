@@ -406,6 +406,8 @@
 .gt-share-actions .gt-button { text-decoration: none; }
 .gt-qr svg { width: 148px; height: 148px; background: #fff; border-radius: 12px; }
 .gt-check { display: flex; gap: .5rem; align-items: center; margin: .2rem 0 .8rem; }
+.gt-steps { margin: .2rem 0 .8rem; padding-left: 1.2rem; }
+.gt-steps li { margin: .25rem 0; }
 .gt-thanks { position: relative; left: auto; top: auto; transform: none; width: auto; margin: 0 0 1rem; grid-column: 1 / -1; }
 .gt-share-dialog {
     width: min(24rem, calc(100% - 1.5rem));
