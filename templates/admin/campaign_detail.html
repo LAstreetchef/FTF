@@ -9,8 +9,52 @@
         <h1 class="mb-0">{{ page.company_name }}</h1>
         <a class="btn btn-dark" href="{{ url_for('campaign_page', slug=page.slug, preview=1) }}">Open page</a>
     </div>
-    <p class="text-secondary mb-4">{{ view_count }} views · {{ unique_count }} unique · {{ quotes|length }} quote request{{ '' if quotes|length == 1 else 's' }}</p>
+    <p class="text-secondary mb-4">{{ view_count }} views · {{ unique_count }} unique · {{ office.status or "not started" }}</p>
     <p><strong>Link</strong> <code>{{ url_for('campaign_page', slug=page.slug, _external=True) }}</code></p>
+    <p>{{ page.contact_name or "—" }}{% if page.contact_email %} · {{ page.contact_email }}{% endif %}</p>
+    <p>{{ page.office_address or "No address yet" }} · {{ page.guest_count if page.guest_count is not none else "—" }} guests · {{ office.weekday_label or "no weekday" }}</p>
+    <p>${{ "{:,.0f}".format(office.raised) }} raised · {{ office.meals }} / {{ office.needed }} combos{% if office.free_meal %} · Your meal is on us{% endif %}</p>
+    {% if office.booked_label %}<p>Booked {{ office.booked_label }}</p>{% endif %}
+
+    <h2 class="h4 mt-5">Available dates</h2>
+    <p class="small text-secondary">One ISO date per line. Leave this blank to use every {{ office.weekday_label or "weekday" }} from December 1 through 19, 2026.</p>
+    <form method="post" action="{{ url_for('admin_campaign_dates', campaign_id=page.id) }}">
+        <textarea class="form-control mb-2" name="available_dates" rows="5">{% for iso in date_choices %}{{ iso }}
+{% endfor %}</textarea>
+        <button class="btn btn-dark" type="submit">Save dates</button>
+    </form>
+
+    <h2 class="h4 mt-5">Combos</h2>
+    {% if pledges %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>Who</th><th>Amount</th><th>Status</th><th>Ticket</th></tr></thead>
+            <tbody>
+                {% for pledge in pledges %}
+                <tr>
+                    <td>{{ pledge.email }}</td>
+                    <td>${{ "{:,.0f}".format(pledge.amount) }}</td>
+                    <td>{{ pledge.status }}</td>
+                    <td>{{ pledge.ticket_code or "—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No combos yet.</p>
+    {% endif %}
+
+    <h2 class="h4 mt-5">Mail</h2>
+    {% if goal_mail %}
+    <ul class="list-unstyled">
+        {% for message in goal_mail %}
+        <li class="mb-2"><strong>{{ message.status }}</strong> {{ message.subject }}<div class="small text-secondary">{{ message.body }}</div></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No campaign mail yet. If SMTP is off, the goal note is logged here instead of sent.</p>
+    {% endif %}
     {% if page.personal_note %}
     <blockquote class="my-4">{{ page.personal_note }}</blockquote>
     {% endif %}

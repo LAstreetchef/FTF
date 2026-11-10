@@ -12,14 +12,44 @@ import json
 import logging
 import os
 import re
-from datetime import datetime
+import secrets
+import uuid
+from datetime import date, datetime, timedelta
+from urllib.parse import quote
 
 from flask import abort, flash, redirect, render_template, request, send_from_directory, session, url_for
-from sqlalchemy import func
+from sqlalchemy import func, inspect
+from werkzeug.security import generate_password_hash
 from app import app, db
-from green_truck_menu import CLASSIC_MENU, minimum_label
-from models import CampaignPage, CampaignView, QuoteRequest
-from utils import send_email
+from green_truck_menu import (
+    CLASSIC_MENU,
+    ENTREES,
+    combo_description,
+    combo_label,
+    campaign_days,
+    combo_price,
+    combos_needed,
+    minimum_amount,
+    minimum_label,
+)
+from models import (
+    CampaignPage,
+    CampaignView,
+    EmailLog,
+    Event,
+    FoodTruck,
+    Organizer,
+    Pledge,
+    QuoteRequest,
+)
+from payments import authorize_card
+from utils import (
+    charge_stripe_payment,
+    generate_ticket_code,
+    release_and_notify_pledgers,
+    send_conditional_pledge_confirmation,
+    send_email,
+)
 
 HERO_FILE = "truck-exterior-02.jpg"
 VINTAGE_FILE = "truck-desert-vintage-01.jpg"
@@ -63,7 +93,31 @@ DEMO_CAMPAIGNS = [
         "suggested_dates": ["2026-12-03", "2026-12-07", "2026-12-14", "2026-12-18"],
         "give_back_cause": "",
     },
+    {
+        "slug": "preview",
+        "company_name": "Preview Office",
+        "contact_name": "Pat Example",
+        "contact_email": "pat@preview.example",
+        "personal_note": "Pat — this sample page is for trying the truck day. Share it with the office. Nothing here is a real customer.",
+        "suggested_dates": ["2026-12-04", "2026-12-11", "2026-12-18"],
+        "give_back_cause": "",
+    },
 ]
+
+WEEKDAYS = (
+    ("mon", "Mon"),
+    ("tue", "Tue"),
+    ("wed", "Wed"),
+    ("thu", "Thu"),
+    ("fri", "Fri"),
+)
+_WEEKDAY_NAME = {
+    "mon": "Monday",
+    "tue": "Tuesday",
+    "wed": "Wednesday",
+    "thu": "Thursday",
+    "fri": "Friday",
+}
 
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
 
@@ -335,30 +389,553 @@ def _campaign_counts():
     return views, unique, requests
 
 
-@app.route("/c/<slug>")
-def campaign_page(slug):
-    page = CampaignPage.query.filter_by(slug=slug).first()
-    if not page:
-        abort(404)
-    _record_view(page)
-    saved = request.args.get("requested") == "1"
-    recap = {}
-    if saved:
-        recap = (session.get("campaign_quote_recaps") or {}).get(page.slug) or {}
+def ensure_campaign_columns():
+    """Add sponsor fields on databases created before this flow."""
+    try:
+        columns = {col["name"] for col in inspect(db.engine).get_columns("campaign_page")}
+    except Exception:
+        db.session.rollback()
+        return
+    additions = {
+        "event_id": "INTEGER",
+        "office_address": "VARCHAR(240)",
+        "guest_count": "INTEGER",
+        "preferred_weekday": "VARCHAR(3)",
+        "booked_date": "VARCHAR(10)",
+        "available_dates": "TEXT",
+        "host_token": "VARCHAR(64)",
+        "goal_notified": "BOOLEAN",
+    }
+    changed = False
+    for name, column_type in additions.items():
+        if name in columns:
+            continue
+        db.session.execute(db.text(f"ALTER TABLE campaign_page ADD COLUMN {name} {column_type}"))
+        changed = True
+    if changed:
+        db.session.commit()
+
+
+def weekday_dates(weekday):
+    """Every matching weekday from Dec 1 through Dec 19, 2026."""
+    target = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4}.get(weekday)
+    if target is None:
+        return []
+    cursor = date(2026, 12, 1)
+    last = date(2026, 12, 19)
+    found = []
+    while cursor <= last:
+        if cursor.weekday() == target:
+            found.append(cursor.isoformat())
+        cursor += timedelta(days=1)
+    return found
+
+
+def _host_map():
+    hosts = session.get("campaign_hosts")
+    return hosts if isinstance(hosts, dict) else {}
+
+
+def _remember_host(page):
+    hosts = _host_map()
+    hosts[page.slug] = page.host_token
+    session["campaign_hosts"] = hosts
+    session.modified = True
+
+
+def _is_host(page):
+    token = _host_map().get(page.slug)
+    return bool(page.host_token and token and token == page.host_token)
+
+
+def _green_truck():
+    truck = FoodTruck.query.filter_by(name="Green Truck").first()
+    if truck:
+        return truck
+    truck = FoodTruck(
+        name="Green Truck",
+        description="Classic menu. Combo is an entree, a side, and a drink.",
+        sales_goal=float(minimum_amount()),
+        status="approved",
+        registration_fee_charged=True,
+        approved_at=datetime.utcnow(),
+    )
+    truck.set_menu_items([{
+        "name": "Combo",
+        "price": combo_price(),
+        "description": combo_description(),
+    }])
+    db.session.add(truck)
+    db.session.flush()
+    return truck
+
+
+def _sponsor_organizer(page, name):
+    email = (page.contact_email or f"sponsor-{page.slug}@example.com").strip()[:120]
+    organizer = Organizer.query.filter_by(email=email).first()
+    if organizer:
+        if name:
+            organizer.name = name[:100]
+        return organizer
+    organizer = Organizer(
+        email=email,
+        name=(name or page.company_name)[:100],
+        password_hash=generate_password_hash(secrets.token_urlsafe(24)),
+    )
+    db.session.add(organizer)
+    db.session.flush()
+    return organizer
+
+
+def _status_label(page):
+    event = page.event
+    if not event:
+        return ""
+    if event.status == "cancelled":
+        return "cancelled"
+    if page.booked_date and event.organizer_entree_claimed:
+        return "booked"
+    if page.booked_date:
+        return "date picked"
+    if event.is_goal_met():
+        return "goal met"
+    return "started"
+
+
+def campaign_closes_at(event):
+    """When this office campaign must be captured or released.
+
+    Stripe card holds last about seven days. Close two hours before that
+    so a sleeping host still beats capture_before.
+    """
+    started = event.created_at or datetime.utcnow()
+    configured = started + timedelta(days=campaign_days())
+    hold_limit = started + timedelta(days=7) - timedelta(hours=2)
+    return min(configured, hold_limit)
+
+
+def _countdown_label(closes_at):
+    remaining = closes_at - datetime.utcnow()
+    seconds = remaining.total_seconds()
+    if seconds <= 0:
+        return "Closed"
+    days = int(seconds // 86400)
+    hours = int((seconds % 86400) // 3600)
+    if days:
+        return f"{days}d {hours}h left"
+    minutes = int((seconds % 3600) // 60)
+    return f"{hours}h {minutes}m left"
+
+
+def _cancel_for_deadline(page, event):
+    release_and_notify_pledgers(event)
+    event.status = "cancelled"
+    recipient = (page.contact_email or (event.organizer.email if event.organizer else ""))[:120]
+    subject = f"{page.company_name} truck day ended"
+    body = (
+        f"{page.company_name} did not reach ${minimum_amount():,} in {campaign_days()} days. "
+        "Card holds were released. No one was charged."
+    )
+    sent = False
+    if recipient and not app.config.get("MAIL_SUPPRESS_SEND"):
+        sent = bool(send_email(recipient, subject, body))
+    else:
+        logging.info("Deadline email logged, not sent, for %s", page.slug)
+    if event.organizer and event.organizer.email and event.organizer.email != recipient:
+        send_email(
+            event.organizer.email,
+            f"Event Cancelled: {event.name}",
+            f"Your event '{event.name}' has been cancelled.\n\nPending card holds were released. No one was charged.",
+        )
+    _log_campaign_email(recipient, subject, body, sent)
+    db.session.commit()
+    logging.info("Campaign %s cancelled at the deadline", page.slug)
+
+
+def sweep_campaign_deadlines(only_page=None):
+    """Capture a met goal, or cancel and release holds once the window closes.
+
+    Render's free plan sleeps, so this also runs on campaign and admin views.
+    A cron hit to /campaigns/sweep is what covers a week when nobody visits.
+    """
+    query = CampaignPage.query.filter(CampaignPage.event_id.isnot(None))
+    if only_page is not None:
+        query = query.filter(CampaignPage.id == only_page.id)
+    closed = 0
+    now = datetime.utcnow()
+    for page in query.all():
+        event = page.event
+        if not event or event.status != "pending":
+            continue
+        if event.is_goal_met():
+            _capture_pending(page, event)
+            continue
+        if now >= campaign_closes_at(event):
+            _cancel_for_deadline(page, event)
+            closed += 1
+    return closed
+
+
+def _office_dates(page):
+    chosen = page.get_available_dates()
+    if chosen:
+        return chosen
+    return weekday_dates(page.preferred_weekday)
+
+
+def office_snapshot(page):
+    event = page.event
+    price = combo_price()
+    raised = float(event.current_pledges or 0) if event else 0.0
+    meals = int(round(raised / price)) if price else 0
+    share_url = url_for("campaign_page", slug=page.slug, _external=True)
+    share_text = (
+        f"{page.company_name} is bringing Green Truck. {combo_label()}. "
+        f"Help reach ${minimum_amount():,}. {share_url}"
+    )
+    return {
+        "started": event is not None,
+        "host": _is_host(page),
+        "raised": raised,
+        "meals": meals,
+        "goal": minimum_amount(),
+        "needed": combos_needed(),
+        "percent": round(event.get_progress_percentage(), 1) if event else 0,
+        "goal_met": bool(event and event.is_goal_met()),
+        "booked": bool(page.booked_date and event and event.organizer_entree_claimed),
+        "booked_label": format_date(page.booked_date) if page.booked_date else "",
+        "dates": [(item, format_date(item)) for item in _office_dates(page)],
+        "status": _status_label(page),
+        "share_url": share_url,
+        "share_text": share_text,
+        "mailto": "mailto:?subject=" + quote(f"{page.company_name} truck day") + "&body=" + quote(share_text),
+        "weekday_label": _WEEKDAY_NAME.get(page.preferred_weekday or "", ""),
+        "free_meal": bool(event and event.organizer_entree_claimed),
+        "cancelled": bool(event and event.status == "cancelled"),
+        "closes_at": campaign_closes_at(event).strftime("%Y-%m-%dT%H:%M:%SZ") if event and event.created_at and event.status == "pending" and not event.is_goal_met() else "",
+        "countdown": _countdown_label(campaign_closes_at(event)) if event and event.created_at and event.status == "pending" and not event.is_goal_met() else "",
+    }
+
+
+def _log_campaign_email(recipient, subject, body, sent):
+    db.session.add(EmailLog(
+        recipient=(recipient or "unconfigured")[:120],
+        subject=subject[:200],
+        body=body,
+        status="sent" if sent else "logged",
+        sent_at=datetime.utcnow() if sent else None,
+    ))
+
+
+def _notify_goal(page, event):
+    if page.goal_notified:
+        return
+    recipient = (page.contact_email or (event.organizer.email if event.organizer else ""))[:120]
+    subject = f"{page.company_name} reached the Green Truck goal"
+    body = (
+        f"{page.company_name} reached ${minimum_amount():,}. "
+        f"Pick one {office_snapshot(page)['weekday_label'] or 'day'} in December.\n"
+        f"{url_for('campaign_page', slug=page.slug, _external=True)}"
+    )
+    sent = False
+    if recipient and not app.config.get("MAIL_SUPPRESS_SEND"):
+        sent = bool(send_email(recipient, subject, body))
+    else:
+        logging.info("Goal email logged, not sent, for %s to %s", page.slug, recipient or "nobody")
+    _log_campaign_email(recipient, subject, body, sent)
+    page.goal_notified = True
+
+
+def _capture_pending(page, event):
+    """Capture authorized pledges once the office has reached the goal."""
+    pending = Pledge.query.filter_by(event_id=event.id, status="pending").all()
+    for pledge in pending:
+        intent_id = pledge.stripe_payment_intent_id or ""
+        if intent_id.startswith("sim_") or pledge.stripe_token == "simulated":
+            pledge.status = "charged"
+            pledge.charged_at = datetime.utcnow()
+            pledge.ticket_code = pledge.ticket_code or generate_ticket_code()
+            logging.info("Simulated capture for pledge %s on event %s", pledge.id, event.id)
+            continue
+        result = charge_stripe_payment(intent_id, pledge.amount, f"Food Truck Event: {event.name}")
+        if not result.get("success"):
+            logging.error("Capture failed for pledge %s: %s", pledge.id, result.get("error"))
+            continue
+        pledge.status = "charged"
+        pledge.charged_at = datetime.utcnow()
+        pledge.processing_fee = result.get("processing_fee", pledge.processing_fee)
+        pledge.ticket_code = pledge.ticket_code or generate_ticket_code()
+        total = result.get("total_charged") or (pledge.amount + (pledge.processing_fee or 0))
+        send_email(
+            pledge.email,
+            f"Your E-Ticket for {event.name}",
+            f"Thank you for your pledge! Your payment has been processed.\n\n"
+            f"PAYMENT BREAKDOWN:\nPledge Amount: ${pledge.amount:.2f}\n"
+            f"Processing Fee (4.5%): ${pledge.processing_fee:.2f}\nTotal Charged: ${total:.2f}\n\n"
+            f"E-TICKET CODE: {pledge.ticket_code}\n\nEvent: {event.name}\nDate: {event.date}\n"
+            f"Location: {event.location}\n\nShow this code at the food truck to redeem your meal.",
+        )
+        pledge.ticket_sent = True
+    if event.status == "pending":
+        event.status = "funded"
+    _notify_goal(page, event)
+    db.session.commit()
+
+
+def _settle(page, event, pledge):
+    event.update_pledge_total()
+    if event.is_goal_met():
+        _capture_pending(page, event)
+        return
+    try:
+        send_conditional_pledge_confirmation(pledge, event)
+    except Exception:
+        logging.exception("Conditional pledge email failed for pledge %s", pledge.id)
+
+
+def _render_campaign(page, form=None, errors=None, open_sheet=None):
+    office = office_snapshot(page)
+    if open_sheet is None:
+        open_sheet = bool(office["started"] or errors)
     return render_template(
         "campaigns/page.html",
         page=page,
         photos=photo_library(),
         possessive_name=possessive(page.company_name),
-        date_choices=[(item, format_date(item)) for item in page.get_suggested_dates()],
-        saved=saved,
-        form={},
-        errors=[],
         classic_menu=CLASSIC_MENU,
+        entrees=ENTREES,
         minimum_label=minimum_label(),
-        confirm_name=recap.get("first_name") or "",
-        confirm_recap=recap.get("line") or "",
+        combo_label=combo_label(),
+        combo_price=combo_price(),
+        weekdays=WEEKDAYS,
+        office=office,
+        form=form or {},
+        errors=errors or [],
+        open_sheet=open_sheet,
+        stripe_key=app.config.get("STRIPE_PUBLISHABLE_KEY") or "",
+        payments_mode=app.config.get("PAYMENTS_MODE"),
     )
+
+
+@app.route("/c/<slug>")
+def campaign_page(slug):
+    page = CampaignPage.query.filter_by(slug=slug).first()
+    if not page:
+        abort(404)
+    token = (request.args.get("host") or "").strip()
+    if token and page.host_token and token == page.host_token:
+        _remember_host(page)
+        return redirect(url_for("campaign_page", slug=slug))
+    sweep_campaign_deadlines(page)
+    _record_view(page)
+    return _render_campaign(page)
+
+
+@app.route("/c/<slug>/start", methods=["POST"])
+def campaign_start(slug):
+    page = CampaignPage.query.filter_by(slug=slug).first()
+    if not page:
+        abort(404)
+    if (request.form.get("company_website") or "").strip():
+        return redirect(url_for("campaign_page", slug=slug))
+    form = {
+        "organizer_name": (request.form.get("organizer_name") or "").strip(),
+        "office_address": (request.form.get("office_address") or "").strip(),
+        "guest_count": (request.form.get("guest_count") or "").strip(),
+        "weekday": (request.form.get("weekday") or "").strip(),
+    }
+    errors = []
+    if not form["organizer_name"]:
+        errors.append("Add your name.")
+    if not form["office_address"]:
+        errors.append("Add the office address.")
+    try:
+        guests = int(form["guest_count"])
+        if guests < 1 or guests > 5000:
+            raise ValueError
+    except ValueError:
+        guests = None
+        errors.append("Add an approximate guest count.")
+    if form["weekday"] not in _WEEKDAY_NAME:
+        errors.append("Pick a weekday.")
+    if errors:
+        return _render_campaign(page, form=form, errors=errors, open_sheet=True), 400
+    if page.event_id:
+        _remember_host(page)
+        return redirect(url_for("campaign_page", slug=slug))
+
+    organizer = _sponsor_organizer(page, form["organizer_name"])
+    truck = _green_truck()
+    event = Event(
+        name=f"{page.company_name} Holiday Truck Day"[:200],
+        description=combo_label(),
+        date=datetime(2026, 12, 31, 18, 0),
+        location=form["office_address"][:200],
+        organizer_id=organizer.id,
+        food_truck_id=truck.id,
+        markup_percentage=0,
+        pledge_goal=float(minimum_amount()),
+        status="pending",
+        organizer_fee_charged=True,
+    )
+    event.set_selected_menu_items([{
+        "name": "Combo",
+        "price": combo_price(),
+        "original_price": combo_price(),
+        "marked_up_price": combo_price(),
+        "description": combo_description(),
+    }])
+    db.session.add(event)
+    db.session.flush()
+    page.event_id = event.id
+    page.contact_name = form["organizer_name"][:120]
+    page.office_address = form["office_address"][:240]
+    page.guest_count = guests
+    page.preferred_weekday = form["weekday"]
+    page.host_token = secrets.token_urlsafe(24)
+    page.booked_date = None
+    page.goal_notified = False
+    db.session.commit()
+    _remember_host(page)
+    logging.info("Campaign %s started as event %s without the organizer fee", page.slug, event.id)
+    return redirect(url_for("campaign_page", slug=slug))
+
+
+@app.route("/c/<slug>/pledge", methods=["POST"])
+def campaign_pledge(slug):
+    page = CampaignPage.query.filter_by(slug=slug).first()
+    if not page or not page.event:
+        abort(404)
+    if (request.form.get("company_website") or "").strip():
+        return redirect(url_for("campaign_page", slug=slug))
+    sweep_campaign_deadlines(page)
+    event = page.event
+    if event.status == "cancelled":
+        return _render_campaign(page, errors=["This truck day ended before the goal. Cards were not charged."], open_sheet=True), 400
+    if event.status not in {"pending", "funded", "approved", "completed"}:
+        return _render_campaign(page, errors=["This truck day is no longer taking combos."], open_sheet=True), 400
+
+    form = {
+        "supporter_name": (request.form.get("supporter_name") or "").strip(),
+        "supporter_email": (request.form.get("supporter_email") or "").strip(),
+        "quantity": (request.form.get("quantity") or "1").strip(),
+        "entree": (request.form.get("entree") or "").strip(),
+    }
+    errors = []
+    if not form["supporter_name"]:
+        errors.append("Add your name.")
+    email = form["supporter_email"]
+    if "@" not in email or "." not in email.split("@")[-1]:
+        errors.append("Add your email.")
+    try:
+        quantity = int(form["quantity"])
+        if quantity < 1 or quantity > 200:
+            raise ValueError
+    except ValueError:
+        quantity = 1
+        errors.append("Choose how many combos.")
+    entree_names = {item["name"] for item in ENTREES}
+    if form["entree"] and form["entree"] not in entree_names:
+        form["entree"] = ""
+    if errors:
+        return _render_campaign(page, form=form, errors=errors, open_sheet=True), 400
+
+    amount = float(combo_price() * quantity)
+    processing_fee = round(amount * 0.045, 2)
+    payment_method = (request.form.get("stripe_payment_method") or "").strip()
+    intent_id = None
+    token = "simulated"
+    if app.config.get("PAYMENTS_MODE") == "stripe":
+        if not payment_method:
+            return _render_campaign(page, form=form, errors=["Add a card."], open_sheet=True), 400
+        total = amount + processing_fee
+        try:
+            intent_id, intent_status = authorize_card(
+                total, email, f"Combo pledge for {event.name}", payment_method, request.url_root,
+            )
+        except Exception:
+            logging.exception("Could not authorize pledge for %s", page.slug)
+            return _render_campaign(page, form=form, errors=["The card could not be authorized."], open_sheet=True), 400
+        if not intent_id:
+            return _render_campaign(page, form=form, errors=["The card could not be authorized."], open_sheet=True), 400
+        if intent_status not in {"requires_capture", "succeeded"}:
+            return _render_campaign(page, form=form, errors=["The card could not be authorized."], open_sheet=True), 400
+        token = payment_method
+    elif app.config.get("PAYMENTS_MODE") != "simulate":
+        return _render_campaign(page, form=form, errors=["Payments are not configured."], open_sheet=True), 400
+    else:
+        intent_id = f"sim_{uuid.uuid4().hex}"
+
+    pledge = Pledge(
+        email=email[:120],
+        amount=amount,
+        processing_fee=processing_fee,
+        stripe_token=token,
+        stripe_payment_intent_id=intent_id,
+        event_id=event.id,
+        status="pending",
+    )
+    pledge.set_selected_menu_items([{
+        "name": form["entree"] or "Combo",
+        "description": combo_description(),
+        "price": combo_price(),
+        "quantity": quantity,
+        "supporter": form["supporter_name"][:120],
+    }])
+    db.session.add(pledge)
+    db.session.commit()
+    _settle(page, event, pledge)
+    return redirect(url_for("campaign_page", slug=slug))
+
+
+@app.route("/c/<slug>/book", methods=["POST"])
+def campaign_book(slug):
+    page = CampaignPage.query.filter_by(slug=slug).first()
+    if not page or not page.event:
+        abort(404)
+    if not _is_host(page):
+        abort(403)
+    chosen = (request.form.get("event_date") or "").strip()
+    allowed = set(_office_dates(page))
+    if chosen not in allowed or not page.event.is_goal_met():
+        return _render_campaign(page, errors=["Pick one of the open days."], open_sheet=True), 400
+    event = page.event
+    event.date = datetime.strptime(chosen, "%Y-%m-%d").replace(hour=11)
+    event.status = "approved"
+    event.approved_at = datetime.utcnow()
+    event.organizer_entree_claimed = True
+    page.booked_date = chosen
+    _capture_pending(page, event)
+    recipient = (page.contact_email or event.organizer.email or "")[:120]
+    subject = f"Your meal is on us — {page.company_name}"
+    body = (
+        f"{page.company_name} is booked for {format_date(chosen)}. "
+        "Your meal is on us.\n"
+        f"{url_for('campaign_page', slug=page.slug, _external=True)}"
+    )
+    sent = False
+    if recipient and not app.config.get("MAIL_SUPPRESS_SEND"):
+        sent = bool(send_email(recipient, subject, body))
+    else:
+        logging.info("Booking email logged, not sent, for %s", page.slug)
+    _log_campaign_email(recipient, subject, body, sent)
+    db.session.commit()
+    return redirect(url_for("campaign_page", slug=slug))
+
+
+@app.route("/campaigns/sweep", methods=["GET", "POST"])
+def campaign_sweep():
+    """Release holds on campaigns whose window has closed.
+
+    Page views and the admin list already run this. A Render cron should
+    also call it, because the free plan sleeps and card holds expire.
+    """
+    expected = (os.environ.get("CAMPAIGN_SWEEP_TOKEN") or "").strip()
+    supplied = (request.args.get("token") or request.headers.get("X-Sweep-Token") or "").strip()
+    if not session.get("admin_id") and not (expected and supplied == expected):
+        abort(403)
+    closed = sweep_campaign_deadlines()
+    return {"closed": closed}
 
 
 @app.route("/c/<slug>/quote", methods=["POST"])
@@ -408,20 +985,7 @@ def campaign_quote(slug):
             errors.append("Give-back percent should be between 1 and 100.")
 
     if errors:
-        return render_template(
-            "campaigns/page.html",
-            page=page,
-            photos=photo_library(),
-            possessive_name=possessive(page.company_name),
-            date_choices=[(item, format_date(item)) for item in page.get_suggested_dates()],
-            saved=False,
-            form=form,
-            errors=errors,
-            classic_menu=CLASSIC_MENU,
-            minimum_label=minimum_label(),
-            confirm_name="",
-            confirm_recap="",
-        ), 400
+        return _render_campaign(page, form=form, errors=errors, open_sheet=True), 400
 
     quote = QuoteRequest(
         campaign_id=page.id,
@@ -474,8 +1038,10 @@ def admin_campaigns():
     blocked = _require_admin()
     if blocked:
         return blocked
+    sweep_campaign_deadlines()
     pages = CampaignPage.query.order_by(CampaignPage.created_at.desc()).all()
     views, unique, requests = _campaign_counts()
+    offices = {page.id: office_snapshot(page) for page in pages}
     slots = photo_list()
     filled = sum(1 for slot in slots if not slot["placeholder"])
     return render_template(
@@ -488,6 +1054,7 @@ def admin_campaigns():
         photos_filled=filled,
         photos_total=len(slots),
         csv_fields=CSV_FIELDS,
+        offices=offices,
     )
 
 
@@ -560,6 +1127,7 @@ def admin_campaign_detail(campaign_id):
     if blocked:
         return blocked
     page = CampaignPage.query.get_or_404(campaign_id)
+    sweep_campaign_deadlines(page)
     quotes = QuoteRequest.query.filter_by(campaign_id=page.id).order_by(QuoteRequest.created_at.desc()).all()
     recent_views = (
         CampaignView.query.filter_by(campaign_id=page.id)
@@ -573,14 +1141,51 @@ def admin_campaign_detail(campaign_id):
         .scalar()
         or 0
     )
+    pledges = []
+    if page.event_id:
+        pledges = Pledge.query.filter_by(event_id=page.event_id).order_by(Pledge.created_at.desc()).all()
+    goal_mail = []
+    if page.contact_email:
+        goal_mail = (
+            EmailLog.query.filter_by(recipient=page.contact_email[:120])
+            .order_by(EmailLog.created_at.desc())
+            .limit(8)
+            .all()
+        )
     return render_template(
         "admin/campaign_detail.html",
         page=page,
         quotes=quotes,
+        pledges=pledges,
+        goal_mail=goal_mail,
+        office=office_snapshot(page),
         recent_views=recent_views,
         view_count=CampaignView.query.filter_by(campaign_id=page.id).count(),
         unique_count=unique,
+        date_choices=_office_dates(page),
     )
+
+
+@app.route("/admin/campaigns/<int:campaign_id>/dates", methods=["POST"])
+def admin_campaign_dates(campaign_id):
+    blocked = _require_admin()
+    if blocked:
+        return blocked
+    page = CampaignPage.query.get_or_404(campaign_id)
+    raw = request.form.get("available_dates") or ""
+    chosen = []
+    for line in raw.splitlines():
+        item = line.strip()
+        if not item:
+            continue
+        try:
+            chosen.append(datetime.strptime(item, "%Y-%m-%d").date().isoformat())
+        except ValueError:
+            flash(f"Skipped {item}. Dates look like 2026-12-04.", "error")
+    page.set_available_dates(chosen)
+    db.session.commit()
+    flash("Available dates saved." if chosen else "Cleared the date list. The weekday defaults apply.", "success")
+    return redirect(url_for("admin_campaign_detail", campaign_id=page.id))
 
 
 @app.route("/admin/campaigns/photos", methods=["POST"])
@@ -631,3 +1236,10 @@ def admin_campaign_photo_upload():
         json.dump(overrides, handle)
     flash(f"Photograph saved in the {slot_id} frame. It is stored on the server, not in git.", "success")
     return redirect(url_for("admin_campaigns"))
+
+
+try:
+    ensure_campaign_columns()
+except Exception:
+    db.session.rollback()
+    logging.exception("Could not add campaign sponsor columns")

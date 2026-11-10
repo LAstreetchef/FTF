@@ -47,8 +47,11 @@ def test_csv_import_and_green_truck_page(client):
     assert b"MotherTrucker Vegan Burger" in body
     assert b"Golden Rounds" in body
     assert b"Super-Food Salad Bowl" in body
-    assert b"Minimum $1,750 + tip" in body
-    assert b"Request a date" in body
+    assert b"$1,750" in body
+    assert b"Combo $18" in body
+    assert b"Start our truck day" in body
+    assert b"See the menu" in body
+    assert b"only be charged if this event reaches its funding goal" in body
     assert b"Coachella" in body
     assert b"Malibu" in body
     assert b"fetchpriority=\"high\"" in body
@@ -81,42 +84,143 @@ def test_csv_import_and_green_truck_page(client):
         assert CampaignView.query.filter_by(campaign_id=record.id).count() == 1
 
 
-def test_quote_is_stored_without_sending_mail(client):
+def test_office_reaches_the_goal_and_books_a_day(client):
+    from datetime import datetime
+    from unittest.mock import MagicMock, patch
+
+    from models import Event, Pledge
+
     _login_admin(client)
     _import_sample(client)
-    response = client.post("/c/northwind-labs/quote", data={
-        "organizer_name": "Riley Quinn",
-        "organizer_email": "riley@northwind.example",
-        "service_format": "truck",
-        "event_date": "2026-12-09",
-        "headcount": "60",
-        "location": "1200 Example Ave, Culver City",
-        "notes": "Loading dock on the west side.",
-        "give_back": "on",
-        "cause": "a local school garden",
-        "give_back_percent": "10",
-        "preorder": "on",
+    started = client.post("/c/northwind-labs/start", data={
+        "organizer_name": "Avery Chen",
+        "office_address": "100 Example Ave, Culver City",
+        "guest_count": "40",
+        "weekday": "fri",
     }, follow_redirects=True)
-    assert response.status_code == 200
-    assert b"You\xe2\x80\x99re on the list." in response.data
-    assert b"Thanks, Riley." in response.data
-    assert b"60 people" in response.data
-    assert b"saved for Kam" not in response.data
-    assert b"Nothing is charged here." not in response.data
+    assert started.status_code == 200
+    assert b"Share" in started.data
+    assert b"0 of 98 combos" in started.data
+    assert b"left" in started.data
 
     with app.app_context():
-        quote = QuoteRequest.query.filter_by(organizer_email="riley@northwind.example").one()
-        assert quote.service_format == "truck"
-        assert quote.headcount == 60
-        assert quote.give_back is True
-        assert quote.preorder_requested is True
-        assert quote.email_notified is False
-        campaign_id = quote.campaign_id
+        page = CampaignPage.query.filter_by(slug="northwind-labs").one()
+        event = Event.query.get(page.event_id)
+        assert event.pledge_goal == 1750
+        assert event.organizer_fee_charged is True
+        assert event.organizer_fee_payment_intent is None
+        assert event.status == "pending"
+        assert page.preferred_weekday == "fri"
+        campaign_id = page.id
+
+    intent = MagicMock()
+    intent.id = "pi_test_combo"
+    intent.status = "requires_capture"
+    intent.amount = 1881
+
+    def _intent_for(amount_cents):
+        created = MagicMock()
+        created.id = f"pi_{amount_cents}"
+        created.status = "requires_capture"
+        created.amount = amount_cents
+        return created
+
+    with patch("utils.stripe.PaymentIntent.create", side_effect=lambda **kwargs: _intent_for(kwargs["amount"])) as create_intent, \
+         patch("payments.stripe.PaymentIntent.confirm", side_effect=lambda intent_id, **kwargs: _intent_for(intent.amount)) as confirm_intent, \
+         patch("utils.stripe.PaymentIntent.retrieve", side_effect=lambda intent_id: _intent_for(1881)), \
+         patch("utils.stripe.PaymentIntent.capture", side_effect=lambda intent_id: _intent_for(1881)):
+        first = client.post("/c/northwind-labs/pledge", data={
+            "supporter_name": "Sam Coworker",
+            "supporter_email": "sam.coworker@example.com",
+            "quantity": "1",
+            "entree": "MotherTrucker Vegan Burger",
+            "stripe_payment_method": "pm_card_visa",
+        }, follow_redirects=True)
+        assert first.status_code == 200, first.data[:400]
+        assert create_intent.called
+        assert confirm_intent.called
+        assert create_intent.call_args.kwargs["capture_method"] == "manual"
+        with app.app_context():
+            pledge = Pledge.query.filter_by(email="sam.coworker@example.com").one()
+            assert pledge.status == "pending"
+            assert pledge.amount == 18
+        second = client.post("/c/northwind-labs/pledge", data={
+            "supporter_name": "Sam Coworker",
+            "supporter_email": "sam.coworker@example.com",
+            "quantity": "97",
+            "stripe_payment_method": "pm_card_visa",
+        }, follow_redirects=True)
+        assert second.status_code == 200
+
+    with app.app_context():
+        page = CampaignPage.query.filter_by(slug="northwind-labs").one()
+        event = Event.query.get(page.event_id)
+        assert event.is_goal_met()
+        assert event.status == "funded"
+        assert Pledge.query.filter_by(event_id=event.id, status="pending").count() == 0
+        assert Pledge.query.filter_by(event_id=event.id, status="charged").count() == 2
+
+    booked = client.post("/c/northwind-labs/book", data={"event_date": "2026-12-04"}, follow_redirects=True)
+    assert booked.status_code == 200
+    assert b"Your meal is on us" in booked.data
+
+    with app.app_context():
+        page = CampaignPage.query.filter_by(slug="northwind-labs").one()
+        event = Event.query.get(page.event_id)
+        assert page.booked_date == "2026-12-04"
+        assert event.organizer_entree_claimed is True
+        assert event.status == "approved"
+        assert event.date == datetime(2026, 12, 4, 11, 0)
 
     detail = client.get(f"/admin/campaigns/{campaign_id}")
     assert detail.status_code == 200
-    assert b"Riley Quinn" in detail.data
-    assert b"In admin only" in detail.data
+    assert b"100 Example Ave, Culver City" in detail.data
+    assert b"booked" in detail.data
+    assert b"Your meal is on us" in detail.data
+    assert b"logged" in detail.data
+    listing = client.get("/admin/campaigns")
+    assert b"Friday" in listing.data
+    assert b"booked" in listing.data
+
+
+def test_deadline_releases_uncaptured_holds(client):
+    from datetime import datetime, timedelta
+
+    from models import Event, Pledge
+
+    _login_admin(client)
+    _import_sample(client)
+    assert client.post("/c/northwind-labs/start", data={
+        "organizer_name": "Avery Chen",
+        "office_address": "100 Example Ave, Culver City",
+        "guest_count": "40",
+        "weekday": "fri",
+    }, follow_redirects=True).status_code == 200
+    with app.app_context():
+        page = CampaignPage.query.filter_by(slug="northwind-labs").one()
+        event = Event.query.get(page.event_id)
+        event.created_at = datetime.utcnow() - timedelta(days=8)
+        event.current_pledges = 18
+        db.session.add(Pledge(
+            email="late@example.com",
+            amount=18,
+            processing_fee=0.81,
+            stripe_token="simulated",
+            stripe_payment_intent_id="sim_deadline",
+            event_id=event.id,
+            status="pending",
+        ))
+        db.session.commit()
+
+    missed = client.get("/c/northwind-labs")
+    assert missed.status_code == 200
+    assert b"Cards were not charged" in missed.data
+    with app.app_context():
+        page = CampaignPage.query.filter_by(slug="northwind-labs").one()
+        event = Event.query.get(page.event_id)
+        pledge = Pledge.query.filter_by(stripe_payment_intent_id="sim_deadline").one()
+        assert event.status == "cancelled"
+        assert pledge.status == "cancelled"
 
 
 def test_admin_preview_does_not_count_as_a_view(client):

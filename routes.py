@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
 from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout, SupportConversation, SupportMessage, OrganizerPayout, FoodTruckPayout, OrganizerTier, AmbassadorChallenge, OrganizerChallengeProgress, PledgeMessage
 from sqlalchemy import text
-from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
+from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment, release_and_notify_pledgers
 import stripe
 import os
 import json
@@ -2715,17 +2715,10 @@ def admin_delete_event(event_id):
         flash(f'Cannot delete event "{event.name}" - it has {len(charged_pledges)} charged pledges. Contact customers first.', 'error')
         return redirect(url_for('admin_events'))
     
-    # For events with pending pledges, notify users about cancellation
+    # For events with pending pledges, release the card hold and notify them.
     if pledges:
         try:
-            # Send cancellation emails to pledgers
-            for pledge in pledges:
-                send_email(
-                    pledge.email,
-                    f"Event Cancelled: {event.name}",
-                    f"We regret to inform you that the event '{event.name}' scheduled for {event.date.strftime('%B %d, %Y at %I:%M %p')} has been cancelled.\n\nYour pledge of ${pledge.amount:.2f} has not been charged and no payment was processed.\n\nWe apologize for any inconvenience."
-                )
-            
+            release_and_notify_pledgers(event)
             # Send notification to organizer
             if event.organizer:
                 send_email(

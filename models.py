@@ -909,9 +909,19 @@ class CampaignPage(db.Model):
     suggested_dates = db.Column(db.Text)  # JSON list of YYYY-MM-DD strings
     give_back_cause = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # The office truck day is an Event. These fields are the sponsor's start sheet.
+    event_id = db.Column(db.Integer, db.ForeignKey("event.id"))
+    office_address = db.Column(db.String(240))
+    guest_count = db.Column(db.Integer)
+    preferred_weekday = db.Column(db.String(3))
+    booked_date = db.Column(db.String(10))
+    available_dates = db.Column(db.Text)
+    host_token = db.Column(db.String(64))
+    goal_notified = db.Column(db.Boolean, default=False)
 
     views = db.relationship("CampaignView", backref="campaign", lazy=True)
     quote_requests = db.relationship("QuoteRequest", backref="campaign", lazy=True)
+    event = db.relationship("Event", foreign_keys=[event_id])
 
     def get_suggested_dates(self):
         try:
@@ -922,6 +932,16 @@ class CampaignPage(db.Model):
 
     def set_suggested_dates(self, dates):
         self.suggested_dates = json.dumps(list(dates or []))
+
+    def get_available_dates(self):
+        try:
+            data = json.loads(self.available_dates) if self.available_dates else []
+            return [item for item in data if isinstance(item, str)]
+        except (TypeError, ValueError):
+            return []
+
+    def set_available_dates(self, dates):
+        self.available_dates = json.dumps(list(dates or []))
 
 
 class CampaignView(db.Model):

@@ -1,9 +1,10 @@
-"""Classic menu and minimum for Green Truck campaign pages.
+"""Classic menu, combo price, and goal for Green Truck campaign pages.
 
 Verbatim from Kam's Drive doc "Classic Street and Extended Menu", 2025-06-09.
-No per-item prices. The catering minimum is separate.
+The office reaches GREEN_TRUCK_MINIMUM by coworkers pre-buying COMBO_PRICE meals.
 """
 
+import math
 import os
 
 CLASSIC_MENU = [
@@ -46,4 +47,46 @@ def minimum_amount():
 
 
 def minimum_label():
-    return f"Minimum ${minimum_amount():,} + tip"
+    return f"Minimum ${minimum_amount():,}"
+
+
+def combo_price():
+    raw = (os.environ.get("COMBO_PRICE") or "18").strip()
+    try:
+        amount = int(raw)
+    except ValueError:
+        amount = 18
+    if amount < 1:
+        amount = 18
+    return amount
+
+
+def combo_description():
+    text = (os.environ.get("COMBO_DESCRIPTION") or "entree + side + drink").strip()
+    return text or "entree + side + drink"
+
+
+def combo_label():
+    return f"Combo ${combo_price()} · {combo_description()}"
+
+
+def combos_needed():
+    return math.ceil(minimum_amount() / combo_price())
+
+
+def campaign_days():
+    """How long an office campaign stays open after the sponsor starts it."""
+    raw = (os.environ.get("CAMPAIGN_DAYS") or "7").strip()
+    try:
+        days = int(raw)
+    except ValueError:
+        days = 7
+    if days < 1:
+        days = 7
+    return days
+
+
+ENTREES = [
+    item for item in CLASSIC_MENU
+    if item["name"] not in {"Golden Rounds", "Cilantro-lime Fresca (seasonal)"}
+]

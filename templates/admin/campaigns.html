@@ -52,9 +52,13 @@
             <thead>
                 <tr>
                     <th>Company</th>
-                    <th>Contact</th>
-                    <th>Views</th>
-                    <th>Requests</th>
+                    <th>Sponsor</th>
+                    <th>Address</th>
+                    <th>Guests</th>
+                    <th>Weekday</th>
+                    <th>Raised</th>
+                    <th>Combos</th>
+                    <th>Status</th>
                     <th></th>
                 </tr>
             </thead>
@@ -65,18 +69,23 @@
                         <a href="{{ url_for('admin_campaign_detail', campaign_id=page.id) }}"><strong>{{ page.company_name }}</strong></a>
                         <div class="small text-secondary">/c/{{ page.slug }}</div>
                     </td>
+                    {% set office = offices.get(page.id) %}
                     <td>
                         {{ page.contact_name or "—" }}
                         {% if page.contact_email %}<div class="small text-secondary">{{ page.contact_email }}</div>{% endif %}
                     </td>
-                    <td>{{ views.get(page.id, 0) }} <span class="text-secondary">/ {{ unique.get(page.id, 0) }} unique</span></td>
-                    <td>{{ requests.get(page.id, 0) }}</td>
+                    <td>{{ page.office_address or "—" }}</td>
+                    <td>{{ page.guest_count if page.guest_count is not none else "—" }}</td>
+                    <td>{{ office.weekday_label or "—" }}</td>
+                    <td>${{ "{:,.0f}".format(office.raised) }}</td>
+                    <td>{{ office.meals }} / {{ office.needed }}</td>
+                    <td>{{ office.status or "—" }}</td>
                     <td class="text-end">
                         <button type="button" class="btn btn-sm btn-dark" data-copy="{{ url_for('campaign_page', slug=page.slug, _external=True) }}">Copy link</button>
                     </td>
                 </tr>
                 {% else %}
-                <tr><td colspan="5">No campaigns yet. Import a CSV of fictional sample companies, or the live list when this is deployed.</td></tr>
+                <tr><td colspan="9">No campaigns yet. Import a CSV of fictional sample companies, or the live list when this is deployed.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

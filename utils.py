@@ -48,9 +48,9 @@ def create_stripe_payment_intent(amount, customer_email, description):
             capture_method='manual',  # Don't charge immediately
             receipt_email=customer_email,
             description=description,
-            # Restrict to card payments only to avoid redirect issues
+            # Cards only. Apple Pay and Google Pay can still arrive as a card.
+            # Do not add cashapp or other redirect methods.
             payment_method_types=['card'],
-            # Disable automatic payment methods that require redirects
             automatic_payment_methods={'enabled': False},
             metadata={
                 'customer_email': customer_email,
@@ -64,6 +64,46 @@ def create_stripe_payment_intent(amount, customer_email, description):
     except Exception as e:
         logging.error(f"Error creating PaymentIntent: {str(e)}")
         return None
+
+def release_stripe_hold(payment_intent_id):
+    """Release an uncaptured authorization. Simulated pledges have nothing to release."""
+    if not payment_intent_id or str(payment_intent_id).startswith("sim_"):
+        return True
+    if not stripe.api_key:
+        logging.info("No Stripe key; hold %s will expire on its own", payment_intent_id)
+        return False
+    try:
+        stripe.PaymentIntent.cancel(payment_intent_id)
+        logging.info("Released hold %s", payment_intent_id)
+        return True
+    except Exception as exc:
+        logging.error("Could not release hold %s: %s", payment_intent_id, exc)
+        return False
+
+
+def release_and_notify_pledgers(event):
+    """Release uncaptured card holds and send the cancellation email.
+
+    Shared by admin deletion and by a campaign that misses its deadline.
+    """
+    from models import Pledge
+
+    pledges = Pledge.query.filter_by(event_id=event.id).all()
+    when = event.date.strftime("%B %d, %Y at %I:%M %p") if event.date else "the scheduled day"
+    for pledge in pledges:
+        if pledge.status != "pending":
+            continue
+        release_stripe_hold(pledge.stripe_payment_intent_id)
+        pledge.status = "cancelled"
+        send_email(
+            pledge.email,
+            f"Event Cancelled: {event.name}",
+            f"We regret to inform you that the event '{event.name}' scheduled for {when} has been cancelled.\n\n"
+            f"Your pledge of ${pledge.amount:.2f} has not been charged and no payment was processed.\n\n"
+            "We apologize for any inconvenience.",
+        )
+    return pledges
+
 
 def charge_stripe_payment(payment_intent_id, original_amount, description):
     """Charge a previously created PaymentIntent with 4.5% processing fee"""
