@@ -104,6 +104,8 @@ def test_office_reaches_the_goal_and_books_a_day(client):
     }, follow_redirects=True)
     assert started.status_code == 200
     assert b"Share" in started.data
+    assert b"gt-menu-card" in started.data
+    assert b">Menu</span>" in started.data
     assert b"0 of 98 combos" in started.data
     assert b"0%" in started.data
     assert b"0.0%" not in started.data

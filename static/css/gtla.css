@@ -426,6 +426,31 @@
 .gt-event-side .gt-meter { background: #e4dfd8; }
 .gt-event-side .gt-meter span { background: #146c36; }
 .gt-event-side .gt-meter i { background: #161616; }
+.gt-menu-card {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 0 0 .8rem;
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: #111;
+    cursor: pointer;
+}
+.gt-menu-card img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
+.gt-menu-card span {
+    position: absolute;
+    left: .7rem;
+    bottom: .7rem;
+    padding: .3rem .7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .94);
+    color: #161616;
+    font-size: .85rem;
+    font-weight: 600;
+}
 .gt-menu-readable { max-height: none; overflow: visible; margin: .6rem 0 1rem; }
 .gt-menu-readable li { border-top-color: rgba(255,255,255,.28); }
 @media (min-width: 900px) {
@@ -438,7 +463,8 @@
     }
     .gt-event-head { grid-column: 1; }
     .gt-event-actions { grid-column: 1; }
-    .gt-event-side { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
+    .gt-event-side { grid-column: 2; grid-row: 1; margin: 0; }
+    .gt-menu-card { grid-column: 2; grid-row: 2; margin: 0; }
 }
 .gt-meter { position: relative; height: 14px; margin: .7rem 0 .45rem; border-radius: 99px; background: rgba(255,255,255,.28); }
 .gt-meter span { display: block; height: 100%; border-radius: inherit; background: #fff; }

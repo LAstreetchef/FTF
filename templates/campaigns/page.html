@@ -230,6 +230,11 @@
                     </div>
                     {% endif %}
                 </aside>
+                {% set board = photos['brand-classic-menu-board-01.jpg'] %}
+                <button class="gt-menu-card" type="button" data-open-menu>
+                    <img src="{{ board.src }}" alt="{{ board.alt }}">
+                    <span>Menu</span>
+                </button>
                 <div class="gt-event-actions">
                 {% if office.booked %}
                 <p>Booked {{ office.booked_label }}. Your meal is on us.</p>
