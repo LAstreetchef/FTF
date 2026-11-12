@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Green Truck X {{ page.company_name }}</title>
+    <meta name="description" content="Green Truck classic menu for {{ page.company_name }}.">
+    <link rel="canonical" href="{{ url_for('campaign_page', slug=page.slug, _external=True) }}">
+    <meta property="og:url" content="{{ url_for('campaign_page', slug=page.slug, _external=True) }}">
+    <meta property="og:title" content="Green Truck X {{ page.company_name }}">
+    <meta property="og:description" content="{{ office.host_line }} {{ office.percent_label }}. {{ office.meals }} of {{ office.needed }} combos. {{ combo_label }}.">
+    <meta property="og:image" content="{{ url_for('campaign_card', slug=page.slug, _external=True) }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="robots" content="noindex">
+    <meta name="theme-color" content="#111111">
+    <link rel="icon" href="{{ url_for('static', filename='images/gtla-mark.svg') }}">
+    {% set hero = photos['truck-exterior-02.jpg'] %}
+    {% if hero.webp_srcset %}
+    <link rel="preload" as="image" href="{{ hero.src }}" imagesrcset="{{ hero.webp_srcset }}" imagesizes="100vw" type="image/webp" fetchpriority="high">
+    {% endif %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@420;520;600&family=Newsreader:ital,opsz,wght@0,6..72,420;0,6..72,520;1,6..72,420&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gtla.css') }}">
+</head>
+<body class="gt-page">
+    {% macro frame(name, sizes='100vw', eager=False, klass='') %}
+    {% set photo = photos[name] %}
+    <figure class="gt-shot {{ klass }}{% if photo.vintage %} gt-vintage{% endif %}">
+        {% if photo.src %}
+        <picture>
+            {% if photo.webp_srcset %}
+            <source type="image/webp" srcset="{{ photo.webp_srcset }}" sizes="{{ sizes }}">
+            {% endif %}
+            <img src="{{ photo.src }}"
+                 {% if photo.srcset %}srcset="{{ photo.srcset }}" sizes="{{ sizes }}"{% endif %}
+                 alt="{{ photo.alt }}"
+                 width="{{ photo.width }}" height="{{ photo.height }}"
+                 {% if eager %}loading="eager" fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                 decoding="async">
+        </picture>
+        {% else %}
+        <div class="gt-ph" role="img" aria-label="Green Truck photograph unavailable"></div>
+        {% endif %}
+    </figure>
+    {% endmacro %}
+
+    <a class="gt-skip" href="#office-sheet">Skip to the truck day</a>
+    <header class="gt-bar">
+        <a class="gt-lockup" href="#hero">
+            <img src="{{ url_for('static', filename='images/gtla-mark.svg') }}" alt="" width="36" height="22">
+            <span>Green Truck</span>
+        </a>
+        <div class="gt-bar-side">
+            {% if page.logo_url %}
+            <img class="gt-company-logo" src="{{ page.logo_url }}" alt="{{ page.company_name }}" height="32" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+            {% else %}
+            <span class="gt-company-name">{{ page.company_name }}</span>
+            {% endif %}
+        </div>
+    </header>
+
+    <nav class="gt-dots" aria-label="Page sections">
+        <a href="#hero" aria-label="Hero"></a>
+        <a href="#menu" aria-label="Classic menu"></a>
+        <a href="#proof" aria-label="Story"></a>
+    </nav>
+    <button class="gt-sticky-cta" type="button" data-open-office>{% if office.started %}Your order{% else %}Book now{% endif %}</button>
+
+    <main class="gt-chapters">
+        <section class="gt-chapter" id="hero">
+            <div class="gt-chapter-bg gt-ken">
+                {{ frame('truck-exterior-02.jpg', '100vw', True) }}
+            </div>
+            <div class="gt-overlay">
+                <p class="gt-kicker">Holiday 2026{% if office.city %} · {{ office.city }}{% endif %}</p>
+                <h1>Green Truck <span class="gt-x">X</span> {{ page.company_name }}</h1>
+                <p class="gt-kicker">A note from Green Truck</p>
+                <blockquote>
+                    <p>{{ page.personal_note }}</p>
+                    <footer>— Green Truck</footer>
+                </blockquote>
+                <button class="gt-button" type="button" data-open-office>{% if office.started %}Your order{% else %}Book now{% endif %}</button>
+            </div>
+        </section>
+
+        <section class="gt-chapter" id="menu">
+            <div class="gt-chapter-bg">
+                {{ frame('food-burger-mother-trucker-01.jpg', '100vw') }}
+            </div>
+            <div class="gt-overlay gt-overlay-menu">
+                <p class="gt-kicker">{{ page.company_name }} · classic menu</p>
+                <h2>The menu.</h2>
+                <p class="gt-price">{{ combo_label }}</p>
+                <button class="gt-button" type="button" data-open-menu>See the menu</button>
+                <ul class="gt-menu">
+                    {% for item in classic_menu %}
+                    <li>
+                        <strong>{{ item.name }}</strong>
+                        {% if item.detail %}<span>{{ item.detail }}</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+
+        <section class="gt-chapter" id="proof">
+            <div class="gt-chapter-bg">
+                {{ frame('cabin-dining-room-01.jpg', '100vw') }}
+            </div>
+            <div class="gt-overlay gt-overlay-proof">
+                <p class="gt-kicker">December 6, 2006 · Malibu</p>
+                <h2>Twenty years of this truck.</h2>
+                <p>A cabin table, then Coachella, film sets, and the Truck Stop in Culver City. Same kitchen for {{ page.company_name }}.</p>
+                <div class="gt-strip" tabindex="0" aria-label="Green Truck photographs">
+                    {% set story = [
+                        'cabin-dining-table-01.jpg',
+                        'cabin-dining-lights-01.jpg',
+                        'truck-desert-vintage-01.jpg',
+                        'truck-santa-monica-pier-01.jpg',
+                        'coachella-crowd-01.jpg',
+                        'event-film-set-01.jpg',
+                        'event-city-hall-night-01.jpg',
+                        'fleet-commissary-yard-01.jpg',
+                        'truckstop-exterior-01.jpg'
+                    ] %}
+                    {% for name in story %}
+                    {{ frame(name, '(max-width: 700px) 78vw, 42vw') }}
+                    {% endfor %}
+                </div>
+                <footer class="gt-site-footer"><strong>GTLA</strong><span>Culver City · Since 2006</span></footer>
+            </div>
+        </section>
+
+        <section class="gt-fade" id="footer-show" aria-roledescription="carousel" aria-label="More Green Truck photographs">
+            <div class="gt-fade-stage">
+                {% for name in [
+                    'brand-classic-menu-board-01.jpg',
+                    'food-avocado-toast-herbs-01.jpg',
+                    'brand-inspiration-card-01.jpg',
+                    'brand-breakfast-popup-card-01.jpg',
+                    'event-string-lights-crowd-01.jpg',
+                    'cabin-wine-toast-01.jpg',
+                    'food-mother-trucker-graphic-01.jpg',
+                    'press-peta-award-01.jpg',
+                    'truck-field-solar-01.jpg',
+                    'food-burger-magenta-studio-01.jpg',
+                    'food-veggie-burger-chips-01.jpg',
+                    'food-paleo-bowl-egg-02.jpg'
+                ] %}
+                {% set photo = photos[name] %}
+                <figure class="gt-fade-slide{% if loop.first %} is-active{% endif %}">
+                    <picture>
+                        {% if photo.webp_srcset %}
+                        <source type="image/webp" sizes="100vw" {% if loop.index0 < 2 %}srcset="{{ photo.webp_srcset }}"{% else %}data-srcset="{{ photo.webp_srcset }}"{% endif %}>
+                        {% endif %}
+                        <img {% if loop.index0 < 2 %}src="{{ photo.src }}"{% if photo.srcset %} srcset="{{ photo.srcset }}" sizes="100vw"{% endif %} loading="eager"{% else %}data-src="{{ photo.src }}"{% if photo.srcset %} data-srcset="{{ photo.srcset }}"{% endif %} loading="lazy"{% endif %}
+                             alt="{{ photo.alt }}" width="{{ photo.width }}" height="{{ photo.height }}" decoding="async">
+                    </picture>
+                </figure>
+                {% endfor %}
+            </div>
+            <div class="gt-fade-dots">
+                {% for _ in range(12) %}
+                <button type="button" data-fade="{{ loop.index0 }}" aria-label="Photograph {{ loop.index }} of 12"{% if loop.first %} class="is-on"{% endif %}></button>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <dialog class="gt-sheet{% if office.started %} gt-event{% endif %}" id="office-sheet" {% if open_sheet %}open{% endif %}>
+        <div class="gt-sheet-photo" aria-hidden="true">
+            {{ frame('truck-exterior-04.jpg', '100vw') }}
+        </div>
+        <button class="gt-sheet-close" type="button" data-close-office>Close</button>
+        <div id="office-card" class="gt-sheet-scroll">
+            {% if office.cancelled %}
+            <div class="gt-confirm" role="status">
+                <p class="gt-kicker">{{ page.company_name }}</p>
+                <h2>This truck day ended.</h2>
+                <p>The goal wasn't reached in time. Cards were not charged.</p>
+                <button class="gt-button gt-button-dark" type="button" data-close-office>Back to the page</button>
+            </div>
+            {% elif office.started %}
+            <div class="gt-event-copy">
+                {% if thanks %}
+                <div class="gt-confirm gt-thanks" role="status">
+                    <p class="gt-kicker">Share to fill it faster</p>
+                    <h2>You’re in.</h2>
+                    <p>{{ thanks.quantity }} combo{{ '' if thanks.quantity == 1 else 's' }}{% if thanks.gift %} for {{ thanks.recipient }}{% endif %}.</p>
+                    {% if thanks.ticket %}<p>Ticket {{ thanks.ticket }}</p>{% endif %}
+                    <p>You brought in {{ thanks.brought }} combos.</p>
+                    <button class="gt-button" type="button" data-open-share data-share-personal data-share-url="{{ thanks.url }}" data-share-text="{{ thanks.text }}" data-share-mail="{{ thanks.mailto }}" data-share-sms="{{ thanks.sms }}">Share</button>
+                    <div id="thanks-qr" hidden>{{ thanks.qr }}</div>
+                </div>
+                {% endif %}
+                <header class="gt-event-head">
+                    <h2>Green Truck X {{ page.company_name }}</h2>
+                    <p>{{ office.host_line }}</p>
+                    <p>{{ office.when }}{% if office.city %} · {{ office.city }}{% endif %}</p>
+                    {% if office.host %}
+                    {% if just_started %}<p class="gt-kicker">You're the host</p>{% endif %}
+                    <p class="gt-kicker">How it works for you</p>
+                    <ol class="gt-steps">
+                        <li>Share your link in Slack, email, or the group chat.</li>
+                        <li>Watch the meter. Nudge people before the countdown ends.</li>
+                        <li>When it hits the goal, pick your date.</li>
+                        <li>We confirm and show up.</li>
+                    </ol>
+                    <p class="gt-share-text">{{ office.paste }}</p>
+                    <button class="gt-button" type="button" data-copy="{{ office.paste }}">Copy message</button>
+                    {% endif %}
+                </header>
+                <aside class="gt-event-side">
+                    <p><strong>${{ "{:,.0f}".format(office.raised) }}</strong> raised · ${{ "{:,.0f}".format(office.to_go) }} to go · {{ office.percent_label }}</p>
+                    <p>{{ office.meals }} of {{ office.needed }} combos · {{ office.gap }} combos to go{% if office.team_meals %} · {{ office.team_meals }} team combos{% endif %}</p>
+                    <div class="gt-meter" aria-hidden="true">
+                        <span style="width: {{ office.percent }}%"></span>
+                        <i style="left:25%"></i><i style="left:50%"></i><i style="left:75%"></i><i style="left:100%"></i>
+                    </div>
+                    {% if office.milestone %}<p>{{ office.milestone }}</p>{% endif %}
+                    {% if office.countdown %}
+                    <p class="gt-countdown{% if office.urgent %} is-urgent{% endif %}" data-deadline="{{ office.closes_at }}" {% if office.urgent %}data-urgent="1" data-gap="{{ office.gap }}"{% endif %}>{{ office.countdown }}</p>
+                    {% endif %}
+                    {% if office.wall %}
+                    <div class="gt-ticker">
+                        {% for person in office.wall %}
+                        <span>{{ person.name }} · {{ person.count }}{% if person.team %} team{% endif %}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </aside>
+                {% set board = photos['brand-classic-menu-board-01.jpg'] %}
+                <button class="gt-menu-card" type="button" data-open-menu>
+                    <img src="{{ board.src }}" alt="{{ board.alt }}">
+                    <span>Menu</span>
+                </button>
+                <div class="gt-event-actions">
+                {% if office.booked %}
+                <p>Booked {{ office.booked_label }}. Your meal is on us.</p>
+                {% elif office.host and office.goal_met %}
+                <form method="post" action="{{ url_for('campaign_book', slug=page.slug) }}">
+                    <p>The office made it. Pick one {{ office.weekday_label }}.</p>
+                    {% if errors %}<div class="gt-errors" role="alert">{% for error in errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
+                    <div class="gt-chips">
+                        {% for iso, label in office.dates %}
+                        <button type="button" class="gt-chip" data-book="{{ iso }}">{{ label }}</button>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="event_date" id="book-date" required>
+                    <button class="gt-button gt-button-primary" type="submit">Book this day</button>
+                </form>
+                {% else %}
+                <button class="gt-button gt-button-primary gt-cta" type="button" data-open-pledge>Get my combo — ${{ combo_price }}</button>
+                {% endif %}
+                {% if office.close_gap %}
+                <button class="gt-button" type="button" data-open-pledge data-qty="{{ office.gap }}">Close the gap — {{ office.gap }} combos</button>
+                {% endif %}
+                {% if office.host %}<p>Sponsor eats free once booked.</p>{% endif %}
+                {% set board = photos['brand-classic-menu-board-01.jpg'] %}
+                <button class="gt-menu-chip" type="button" data-open-menu>
+                    <img src="{{ board.src }}" alt="{{ board.alt }}" width="72" height="72">
+                    <span>See the menu</span>
+                </button>
+                <ul class="gt-menu gt-menu-readable">
+                    {% for item in classic_menu %}
+                    <li><strong>{{ item.name }}</strong>{% if item.detail %}<span>{{ item.detail }}</span>{% endif %}</li>
+                    {% endfor %}
+                </ul>
+                <button class="gt-button" type="button" data-open-share data-share-url="{{ office.share_url }}" data-share-text="{{ office.share_text }}" data-share-mail="{{ office.mailto }}" data-share-sms="{{ office.sms }}">Share</button>
+                </div>
+            </div>
+            {% else %}
+            <form class="gt-form" method="post" action="{{ url_for('campaign_start', slug=page.slug) }}">
+                <p class="gt-kicker">{{ page.company_name }}</p>
+                <h2>Bring the truck to your office</h2>
+                <p>You start it. Coworkers each chip in for an ${{ combo_price }} combo. Nobody is charged unless the office hits ${{ "{:,}".format(office.goal) }} in {{ office.days or 7 }} days. Then you pick the date, and your meal is on us.</p>
+                <p class="gt-price">{{ combo_label }}</p>
+                <button class="gt-button" type="button" data-open-menu>See the menu</button>
+                {% if errors %}<div class="gt-errors" role="alert">{% for error in errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
+                <p class="gt-honeypot"><label>Website <input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></p>
+                <div class="gt-field">
+                    <label for="organizer_name">Name</label>
+                    <input id="organizer_name" name="organizer_name" type="text" autocomplete="name" value="{{ form.get('organizer_name', page.contact_name or '') }}" required>
+                </div>
+                <div class="gt-field">
+                    <label for="organizer_email">Email</label>
+                    <input id="organizer_email" name="organizer_email" type="email" autocomplete="email" inputmode="email" value="{{ form.get('organizer_email', page.contact_email or '') }}" required>
+                </div>
+                <div class="gt-field">
+                    <label for="office_address">Office address</label>
+                    <input id="office_address" name="office_address" type="text" autocomplete="street-address" value="{{ form.get('office_address', '') }}" required>
+                </div>
+                <div class="gt-field">
+                    <label for="guest_count">Approx. guests</label>
+                    <input id="guest_count" name="guest_count" type="number" inputmode="numeric" min="1" max="5000" value="{{ form.get('guest_count', '') }}" required>
+                </div>
+                <div class="gt-field">
+                    <label>Preferred day of the week</label>
+                    <div class="gt-chips">
+                        {% for key, label in weekdays %}
+                        <button type="button" class="gt-chip{% if form.get('weekday') == key %} is-on{% endif %}" data-weekday="{{ key }}">{{ label }}</button>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="weekday" id="weekday" value="{{ form.get('weekday', '') }}" required>
+                </div>
+                <label class="gt-check"><input type="checkbox" name="sponsor_anonymous" value="1" {% if form.get('sponsor_anonymous') %}checked{% endif %}> Keep my name off the page</label>
+                <button class="gt-button gt-button-primary" type="submit">Book now</button>
+            </form>
+            {% endif %}
+        </div>
+    </dialog>
+
+    {% if office.started %}
+    <dialog class="gt-sheet" id="pledge-sheet" {% if open_pledge %}open{% endif %}>
+        <div class="gt-sheet-photo" aria-hidden="true">{{ frame('truck-exterior-04.jpg', '100vw') }}</div>
+        <button class="gt-sheet-close" type="button" data-close-pledge>Close</button>
+        <form id="pledge-form" class="gt-form gt-sheet-scroll" method="post" action="{{ url_for('campaign_pledge', slug=page.slug) }}" data-fee-rate="{{ fee_rate }}">
+            <p class="gt-kicker">{{ page.company_name }}</p>
+            <h2>Get my combo</h2>
+            <p class="gt-recap">{{ office.when }}{% if office.city %} · {{ office.city }}{% endif %}</p>
+            <p class="gt-recap">${{ "{:,.0f}".format(office.raised) }} of ${{ "{:,}".format(office.goal) }} · {{ office.percent_label }} · {{ office.meals }} of {{ office.needed }} combos</p>
+            <p class="gt-honeypot"><label>Website <input type="text" name="company_website" tabindex="-1" autocomplete="off"></label></p>
+            {% if errors and open_pledge %}<div class="gt-errors" role="alert">{% for error in errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
+            <div class="gt-qty">
+                <button type="button" data-qty="-1" aria-label="Fewer combos">−</button>
+                <input id="combo-qty" name="quantity" type="number" min="1" max="200" value="{{ form.get('quantity', '1') }}" inputmode="numeric">
+                <button type="button" data-qty="1" aria-label="More combos">+</button>
+                <strong id="combo-total" data-unit-cents="{{ unit_cents }}" data-fee-rate="{{ fee_rate }}">${{ "%.2f"|format(unit_cents / 100) }}</strong>
+            </div>
+            <ul class="gt-fee-lines">
+                <li><span>Combos × <span id="fee-qty">1</span></span><span id="fee-subtotal"></span></li>
+                <li><span>Service fee {{ "%.1f"|format(fee_rate * 100) }}%</span><span id="fee-amount"></span></li>
+                <li><strong>Total</strong><strong id="fee-total"></strong></li>
+            </ul>
+            <div class="gt-chips">
+                <button type="button" class="gt-chip" data-team-qty="5">5 for the team</button>
+                <button type="button" class="gt-chip" data-team-qty="10">10 for the team</button>
+                <button type="button" class="gt-chip" data-team-qty="20">20 for the team</button>
+            </div>
+            <input type="hidden" name="team_pool" id="team-pool" value="{{ form.get('team_pool', '') }}">
+            <label class="gt-check"><input id="gift-toggle" name="gift" type="checkbox" {% if form.get('gift') %}checked{% endif %}> Gift a combo</label>
+            <div id="gift-fields" {% if not form.get('gift') %}hidden{% endif %}>
+                <div class="gt-field">
+                    <label for="recipient_name">Recipient</label>
+                    <input id="recipient_name" name="recipient_name" type="text" value="{{ form.get('recipient_name', '') }}">
+                </div>
+                <div class="gt-field">
+                    <label for="recipient_email">Their email <span>optional</span></label>
+                    <input id="recipient_email" name="recipient_email" type="email" value="{{ form.get('recipient_email', '') }}">
+                </div>
+            </div>
+            <div class="gt-field">
+                <label for="entree">Entree <span>optional</span></label>
+                <select id="entree" name="entree">
+                    <option value="">No preference</option>
+                    {% for item in entrees %}
+                    <option value="{{ item.name }}" {% if form.get('entree') == item.name %}selected{% endif %}>{{ item.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="gt-field">
+                <label for="supporter_name">Name</label>
+                <input id="supporter_name" name="supporter_name" type="text" autocomplete="name" value="{{ form.get('supporter_name', '') }}" required>
+            </div>
+            <div class="gt-field">
+                <label for="supporter_email">Email</label>
+                <input id="supporter_email" name="supporter_email" type="email" autocomplete="email" value="{{ form.get('supporter_email', '') }}" required>
+            </div>
+            <p class="gt-note">Only charged if your office hits the goal.</p>
+            {% if payments_mode == 'stripe' %}
+            <div id="card-element" class="gt-card"></div>
+            <input type="hidden" name="stripe_payment_method" id="stripe-method">
+            {% endif %}
+            <button class="gt-button gt-button-primary" id="pledge-submit" type="submit">Pledge</button>
+        </form>
+    </dialog>
+    {% endif %}
+
+    <dialog class="gt-share-dialog" id="share-sheet">
+        <button class="gt-sheet-close" type="button" data-close-share>Close</button>
+        <div class="gt-form gt-sheet-scroll">
+            <h2>Share</h2>
+            <p id="share-preview" class="gt-share-text"></p>
+            <div class="gt-share-actions">
+                <button class="gt-button" type="button" id="share-copy">Copy link</button>
+                <button class="gt-button" type="button" id="share-slack">Slack</button>
+                <a class="gt-button" id="share-email">Email</a>
+                <a class="gt-button" id="share-sms">Text</a>
+            </div>
+            <div class="gt-qr" id="share-qr-office">{{ office.qr }}</div>
+            <div class="gt-qr" id="share-qr-personal" hidden></div>
+        </div>
+    </dialog>
+
+    <dialog class="gt-menu-board" id="menu-board">
+        <button class="gt-sheet-close" type="button" data-close-menu>Close</button>
+        {{ frame('brand-classic-menu-board-01.jpg', '100vw') }}
+        <p>{{ combo_label }}</p>
+    </dialog>
+
+    {% if stripe_key %}<script src="https://js.stripe.com/v3/"></script>{% endif %}
+    <script>
+    (function () {
+        var stripe = null;
+        var card = null;
+        var stripeKey = {{ stripe_key|tojson }};
+        function dialog(id) { return document.getElementById(id); }
+        document.querySelectorAll("dialog").forEach(function (el) {
+            el.addEventListener("wheel", function (event) {
+                var scroller = event.target.closest && event.target.closest(".gt-sheet-scroll");
+                if (scroller) return;
+                scroller = el.querySelector(".gt-sheet-scroll");
+                if (!scroller || scroller.scrollHeight <= scroller.clientHeight + 1) return;
+                var max = scroller.scrollHeight - scroller.clientHeight;
+                scroller.scrollTop = Math.max(0, Math.min(max, scroller.scrollTop + event.deltaY));
+                event.preventDefault();
+            }, { passive: false });
+        });
+        function show(el) {
+            if (el && el.showModal && !el.open) el.showModal();
+        }
+        function hide(el) {
+            if (el && el.close && el.open) el.close();
+        }
+        function mountCard() {
+            var slot = document.getElementById("card-element");
+            if (!slot || !window.Stripe || !stripeKey || slot.childElementCount) return;
+            if (!stripe) stripe = window.Stripe(stripeKey);
+            card = stripe.elements().create("card", { style: { base: { color: "#fff", fontSize: "16px" } } });
+            card.mount(slot);
+        }
+        function refreshSticky() {
+            var cardEl = document.getElementById("office-card");
+            var started = cardEl && (cardEl.querySelector("[data-open-share]") || cardEl.querySelector("[data-book]") || cardEl.querySelector(".gt-confirm"));
+            if (!started) return;
+            document.querySelectorAll("[data-open-office]").forEach(function (button) {
+                button.textContent = "Your order";
+            });
+        }
+        function swap(html) {
+            var next = document.createElement("div");
+            next.innerHTML = html;
+            var incoming = next.querySelector("#office-card");
+            var current = document.getElementById("office-card");
+            if (incoming && current) current.replaceWith(incoming);
+            card = null;
+            mountCard();
+            refreshSticky();
+            tick();
+            hide(dialog("pledge-sheet"));
+            show(dialog("office-sheet"));
+        }
+        function send(form) {
+            var data = new FormData(form);
+            fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: { "X-Requested-With": "fetch" },
+                redirect: "follow"
+            }).then(function (response) { return response.text(); }).then(swap).catch(function () { form.submit(); });
+        }
+        if (dialog("office-sheet") && dialog("office-sheet").hasAttribute("open")) {
+            hide(dialog("office-sheet"));
+            show(dialog("office-sheet"));
+        }
+        mountCard();
+        function money(cents) { return "$" + (cents / 100).toFixed(2); }
+        function setQty(next, team) {
+            var input = document.getElementById("combo-qty");
+            var total = document.getElementById("combo-total");
+            var pool = document.getElementById("team-pool");
+            if (!input || !total) return;
+            var unit = parseInt(total.getAttribute("data-unit-cents"), 10) || 0;
+            var rate = parseFloat(total.getAttribute("data-fee-rate")) || 0;
+            next = Math.max(1, Math.min(200, next));
+            input.value = String(next);
+            var subtotal = unit * next;
+            var fee = Math.round(subtotal * rate);
+            var all = subtotal + fee;
+            total.textContent = money(subtotal);
+            var qtyLabel = document.getElementById("fee-qty");
+            var subLabel = document.getElementById("fee-subtotal");
+            var feeLabel = document.getElementById("fee-amount");
+            var allLabel = document.getElementById("fee-total");
+            var submit = document.getElementById("pledge-submit");
+            if (qtyLabel) qtyLabel.textContent = String(next);
+            if (subLabel) subLabel.textContent = money(subtotal);
+            if (feeLabel) feeLabel.textContent = money(fee);
+            if (allLabel) allLabel.textContent = money(all);
+            if (submit) submit.textContent = "Pledge " + money(all) + " · only charged if goal met";
+            if (pool) pool.value = team ? "1" : "";
+        }
+        function tick() {
+            document.querySelectorAll("[data-deadline]").forEach(function (el) {
+                var end = Date.parse(el.getAttribute("data-deadline"));
+                var left = end - Date.now();
+                var gap = el.getAttribute("data-gap") || "0";
+                if (!(left > 0)) { el.textContent = "Closed"; return; }
+                if (el.getAttribute("data-urgent") === "1" || left <= 48 * 3600 * 1000) {
+                    var mins = Math.floor(left / 60000);
+                    var hh = String(Math.floor(mins / 60)).padStart(2, "0");
+                    var mm = String(mins % 60).padStart(2, "0");
+                    el.textContent = "Ends in " + hh + ":" + mm + ". " + gap + " combos to go or nobody eats.";
+                    el.classList.add("is-urgent");
+                    return;
+                }
+                var days = Math.floor(left / 86400000);
+                var hours = Math.floor((left % 86400000) / 3600000);
+                var minutes = Math.floor((left % 3600000) / 60000);
+                el.textContent = days ? (days + "d " + hours + "h " + minutes + "m left") : (hours + "h " + minutes + "m left");
+            });
+        }
+        tick();
+        setQty(parseInt((document.getElementById("combo-qty") || {}).value, 10) || 1, false);
+        setInterval(tick, 30000);
+        var heroButton = document.querySelector("#hero [data-open-office]");
+        var stickyButton = document.querySelector(".gt-sticky-cta");
+        var chapterScroller = document.querySelector(".gt-chapters");
+        if (heroButton && stickyButton && chapterScroller && "IntersectionObserver" in window) {
+            new IntersectionObserver(function (entries) {
+                stickyButton.hidden = entries[0].isIntersecting;
+            }, { root: chapterScroller, threshold: 0.5 }).observe(heroButton);
+        }
+        document.addEventListener("click", function (event) {
+            var target = event.target.closest("button, a");
+            if (!target) return;
+            if (target.hasAttribute("data-open-office")) {
+                event.preventDefault();
+                show(dialog("office-sheet"));
+            } else if (target.hasAttribute("data-close-office")) {
+                hide(dialog("office-sheet"));
+            } else if (target.hasAttribute("data-open-menu")) {
+                event.preventDefault();
+                var menu = dialog("menu-board");
+                var office = dialog("office-sheet");
+                if (office && office.open) menu.dataset.returnOffice = "1";
+                try { show(menu); }
+                catch (err) { hide(office); show(menu); }
+            } else if (target.hasAttribute("data-close-menu")) {
+                var board = dialog("menu-board");
+                hide(board);
+                if (board.dataset.returnOffice) show(dialog("office-sheet"));
+            } else if (target.hasAttribute("data-weekday")) {
+                var hidden = document.getElementById("weekday");
+                if (hidden) hidden.value = target.getAttribute("data-weekday");
+                document.querySelectorAll("[data-weekday]").forEach(function (chip) { chip.classList.remove("is-on"); });
+                target.classList.add("is-on");
+            } else if (target.hasAttribute("data-book")) {
+                var book = document.getElementById("book-date");
+                if (book) book.value = target.getAttribute("data-book");
+                document.querySelectorAll("[data-book]").forEach(function (chip) { chip.classList.remove("is-on"); });
+                target.classList.add("is-on");
+            } else if (target.hasAttribute("data-open-pledge")) {
+                if (target.getAttribute("data-qty")) setQty(parseInt(target.getAttribute("data-qty"), 10) || 1, false);
+                var pledgeSheet = dialog("pledge-sheet");
+                try { show(pledgeSheet); }
+                catch (err) { hide(dialog("office-sheet")); show(pledgeSheet); }
+            } else if (target.hasAttribute("data-close-pledge")) {
+                hide(dialog("pledge-sheet"));
+                show(dialog("office-sheet"));
+            } else if (target.hasAttribute("data-team-qty")) {
+                setQty(parseInt(target.getAttribute("data-team-qty"), 10) || 1, true);
+                document.querySelectorAll("[data-team-qty]").forEach(function (chip) { chip.classList.remove("is-on"); });
+                target.classList.add("is-on");
+            } else if (target.hasAttribute("data-qty")) {
+                var input = document.getElementById("combo-qty");
+                var nextQty = (parseInt(input && input.value, 10) || 1) + parseInt(target.getAttribute("data-qty"), 10);
+                setQty(nextQty, false);
+                document.querySelectorAll("[data-team-qty]").forEach(function (chip) { chip.classList.remove("is-on"); });
+            } else if (target.hasAttribute("data-copy")) {
+                var copied = target.getAttribute("data-copy");
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(copied).then(function () { target.textContent = "Copied"; });
+                }
+            } else if (target.hasAttribute("data-open-share")) {
+                event.preventDefault();
+                var shareUrl = target.getAttribute("data-share-url");
+                var shareText = target.getAttribute("data-share-text") || shareUrl;
+                if (navigator.share) {
+                    navigator.share({ title: "Green Truck", text: shareText, url: shareUrl }).catch(function () {});
+                    return;
+                }
+                var preview = document.getElementById("share-preview");
+                if (preview) preview.textContent = shareText;
+                var copy = document.getElementById("share-copy");
+                var slack = document.getElementById("share-slack");
+                if (copy) copy.onclick = function () {
+                    if (navigator.clipboard) navigator.clipboard.writeText(shareUrl);
+                    copy.textContent = "Copied";
+                };
+                if (slack) slack.onclick = function () {
+                    if (navigator.clipboard) navigator.clipboard.writeText(shareText);
+                    slack.textContent = "Copied";
+                };
+                var mail = document.getElementById("share-email");
+                var sms = document.getElementById("share-sms");
+                if (mail) mail.href = target.getAttribute("data-share-mail") || "#";
+                if (sms) sms.href = target.getAttribute("data-share-sms") || "#";
+                var personal = document.getElementById("share-qr-personal");
+                var officeQr = document.getElementById("share-qr-office");
+                var source = document.getElementById("thanks-qr");
+                if (personal && source && target.hasAttribute("data-share-personal")) {
+                    personal.innerHTML = source.innerHTML;
+                    personal.hidden = false;
+                    if (officeQr) officeQr.hidden = true;
+                } else {
+                    if (personal) personal.hidden = true;
+                    if (officeQr) officeQr.hidden = false;
+                }
+                show(dialog("share-sheet"));
+            } else if (target.hasAttribute("data-close-share")) {
+                hide(dialog("share-sheet"));
+            }
+        });
+        document.addEventListener("change", function (event) {
+            if (!event.target || event.target.id !== "gift-toggle") return;
+            var fields = document.getElementById("gift-fields");
+            if (fields) fields.hidden = !event.target.checked;
+        });
+        if (dialog("pledge-sheet") && dialog("pledge-sheet").hasAttribute("open")) {
+            hide(dialog("pledge-sheet"));
+            show(dialog("pledge-sheet"));
+        }
+        document.addEventListener("submit", function (event) {
+            var form = event.target;
+            var home = form.closest ? form.closest("#office-sheet, #pledge-sheet") : null;
+            if (!form || !home) return;
+            if (!window.fetch) return;
+            event.preventDefault();
+            if (form.id === "pledge-form" && card) {
+                var name = (document.getElementById("supporter_name") || {}).value || "";
+                var email = (document.getElementById("supporter_email") || {}).value || "";
+                stripe.createPaymentMethod({ type: "card", card: card, billing_details: { name: name, email: email } }).then(function (result) {
+                    if (result.error) return;
+                    document.getElementById("stripe-method").value = result.paymentMethod.id;
+                    send(form);
+                });
+                return;
+            }
+            send(form);
+        });
+    })();
+    (function () {
+        var root = document.getElementById("footer-show");
+        if (!root) return;
+        var slides = Array.prototype.slice.call(root.querySelectorAll(".gt-fade-slide"));
+        var dots = Array.prototype.slice.call(root.querySelectorAll(".gt-fade-dots button"));
+        var index = 0;
+        var timer = null;
+        var hovering = false;
+        var holding = false;
+        var visible = false;
+        var startX = 0;
+        var startY = 0;
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function load(slide) {
+            if (!slide) return;
+            var source = slide.querySelector("source");
+            var img = slide.querySelector("img");
+            if (source) {
+                var webp = source.getAttribute("data-srcset");
+                if (webp && !source.getAttribute("srcset")) source.setAttribute("srcset", webp);
+            }
+            if (!img) return;
+            var src = img.getAttribute("data-src");
+            if (src && !img.getAttribute("src")) img.setAttribute("src", src);
+            var set = img.getAttribute("data-srcset");
+            if (set && !img.getAttribute("srcset")) {
+                img.setAttribute("srcset", set);
+                img.setAttribute("sizes", "100vw");
+            }
+        }
+        function warm(i) {
+            var neighbors = [i, i + 1];
+            if (i !== 0) neighbors.push(i - 1);
+            neighbors.forEach(function (n) {
+                load(slides[(n + slides.length) % slides.length]);
+            });
+        }
+        function show(i) {
+            index = (i + slides.length) % slides.length;
+            slides.forEach(function (slide, n) {
+                slide.classList.toggle("is-active", n === index);
+            });
+            dots.forEach(function (dot, n) {
+                dot.classList.toggle("is-on", n === index);
+            });
+            warm(index);
+        }
+        function arm() {
+            clearInterval(timer);
+            timer = null;
+            if (reduce || hovering || holding || !visible) return;
+            timer = setInterval(function () { show(index + 1); }, 5000);
+        }
+        dots.forEach(function (dot) {
+            dot.addEventListener("click", function (event) {
+                event.stopPropagation();
+                show(parseInt(dot.getAttribute("data-fade"), 10));
+                arm();
+            });
+        });
+        root.addEventListener("pointerdown", function (event) {
+            if (event.target.closest(".gt-fade-dots")) return;
+            if (event.button && event.button !== 0) return;
+            holding = true;
+            startX = event.clientX;
+            startY = event.clientY;
+            if (root.setPointerCapture) {
+                try { root.setPointerCapture(event.pointerId); } catch (err) {}
+            }
+            arm();
+        });
+        root.addEventListener("pointerup", function (event) {
+            if (!holding) return;
+            holding = false;
+            if (!event.target.closest(".gt-fade-dots")) {
+                var dx = event.clientX - startX;
+                var dy = event.clientY - startY;
+                if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 18) {
+                    /* vertical scroll of the chapter strip */
+                } else if (dx <= -36) show(index + 1);
+                else if (dx >= 36) show(index - 1);
+                else if (Math.abs(dx) < 14 && Math.abs(dy) < 14) show(index + 1);
+            }
+            arm();
+        });
+        root.addEventListener("pointercancel", function () { holding = false; arm(); });
+        root.addEventListener("pointerenter", function (event) {
+            if (event.pointerType !== "mouse") return;
+            hovering = true;
+            arm();
+        });
+        root.addEventListener("pointerleave", function (event) {
+            if (event.pointerType !== "mouse") return;
+            hovering = false;
+            arm();
+        });
+        if ("IntersectionObserver" in window) {
+            var watcher = new IntersectionObserver(function (entries) {
+                visible = entries[0].isIntersecting;
+                arm();
+            }, { threshold: 0.35 });
+            watcher.observe(root);
+        } else {
+            visible = true;
+        }
+        warm(0);
+        arm();
+    })();
+    </script>
+</body>
+</html>

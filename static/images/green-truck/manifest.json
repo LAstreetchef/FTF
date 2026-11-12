@@ -1,0 +1,467 @@
+{
+  "note": "Green Truck photographs. filename matches a file in img/. WebP siblings (name-800.webp and, when the original is wide enough, name-1600.webp) are the responsive sources. truck-desert-vintage-01 is a 2008 low-res archive and is displayed small. Drive file ids are not stored here.",
+  "images": [
+    {
+      "filename": "truck-exterior-01.jpg",
+      "category": "truck",
+      "description": "Classic olive-green Green Truck side wrap with cursive logo and greentruckonthego.com",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "truck-exterior-02.jpg",
+      "category": "truck",
+      "description": "Full side wrap with ORGANIC SUSTAINABLE LOCAL lettering and wood-panel graphic",
+      "width": 2000,
+      "height": 1125
+    },
+    {
+      "filename": "truck-exterior-03.jpg",
+      "category": "truck",
+      "description": "Green Truck on turf with solar panels and FARM TO TABLE LOCAL ORGANIC wrap",
+      "width": 1999,
+      "height": 1625
+    },
+    {
+      "filename": "truck-exterior-04.jpg",
+      "category": "truck",
+      "description": "Farm to Truck wrap with open service window, salad/taco menus, and solar panels",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "truck-desert-vintage-01.jpg",
+      "category": "truck",
+      "description": "Early Green Truck in desert twilight with Joshua tree (2008 archive, low-res)",
+      "width": 604,
+      "height": 453
+    },
+    {
+      "filename": "event-evening-crowd-01.jpg",
+      "category": "crowd",
+      "description": "Green Truck at evening outdoor event under string lights with guests queued",
+      "width": 2000,
+      "height": 1498
+    },
+    {
+      "filename": "coachella-crowd-01.jpg",
+      "category": "crowd",
+      "description": "Coachella Valley crowd around Green Truck with Mother Truckin Right it's Organic banner",
+      "width": 1792,
+      "height": 1360
+    },
+    {
+      "filename": "event-film-set-01.jpg",
+      "category": "crowd",
+      "description": "Green Truck on a film/production set plaza with lighting gear nearby",
+      "width": 1600,
+      "height": 1200
+    },
+    {
+      "filename": "crew-jimmy-kimmel-01.jpg",
+      "category": "crew",
+      "description": "Catering crew lined up at Jimmy Kimmel Live buffet station",
+      "width": 1600,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-serving-01.jpg",
+      "category": "crew",
+      "description": "Host in hat serving sliders and juices at the cabin communal table",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "cabin-serving-02.jpg",
+      "category": "crew",
+      "description": "Serving gourmet sliders to guests at the Malibu cabin dining table",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "cabin-counter-serving-01.jpg",
+      "category": "crew",
+      "description": "Pass-through kitchen counter with guests and A-grade health rating visible",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "food-paleo-bowl-01.jpg",
+      "category": "food",
+      "description": "Paleo bowl with sunny-side egg, bacon, ground meat, avocado, and kale",
+      "width": 2000,
+      "height": 1499
+    },
+    {
+      "filename": "food-burger-mother-trucker-01.jpg",
+      "category": "food",
+      "description": "MotherTrucker Vegan Burger",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "food-bowl-kale-yeah-01.jpg",
+      "category": "food",
+      "description": "Organic Kale Yeah Bowl",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "food-drink-cilantro-lime-01.jpg",
+      "category": "food",
+      "description": "Cilantro-lime Fresca (seasonal)",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "food-burger-chipotle-cheddar-01.jpg",
+      "category": "food",
+      "description": "Chipotle cheddar burger with caramelized onions and melted cheddar",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "food-sandwich-chicken-pesto-01.jpg",
+      "category": "food",
+      "description": "Organic Chicken Pesto Sandwich",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "food-bowl-takeout-01.jpg",
+      "category": "food",
+      "description": "Colorful plant-forward takeout bowl with avocado, seared protein, pineapple, and pink dressing",
+      "width": 2000,
+      "height": 1125
+    },
+    {
+      "filename": "food-bowl-avocado-quinoa-01.jpg",
+      "category": "food",
+      "description": "Square bowl of greens, quinoa, avocado slices, and goji berries",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "food-sliders-01.jpg",
+      "category": "food",
+      "description": "Gourmet sliders on white platter and wooden board",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "food-tacos-avocado-01.jpg",
+      "category": "food",
+      "description": "Open-faced avocado greens tacos on rectangular white platters",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "food-bowl-truck-branding-01.jpg",
+      "category": "food",
+      "description": "Paleo-style bowl held in front of lime Green Truck wrap with @greentruck",
+      "width": 1200,
+      "height": 1600
+    },
+    {
+      "filename": "food-chili-burger-01.jpg",
+      "category": "food",
+      "description": "Chili burger with chips in cardboard tray against Green Truck branding",
+      "width": 1200,
+      "height": 1600
+    },
+    {
+      "filename": "cabin-dining-room-01.jpg",
+      "category": "cabin",
+      "description": "Malibu cabin communal dining room with live-edge table and industrial pendants",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "cabin-common-room-01.jpg",
+      "category": "cabin",
+      "description": "Bright cabin common room with plants, brick floor, and patio opening",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "cabin-kitchenette-01.jpg",
+      "category": "cabin",
+      "description": "Cabin kitchenette with farmhouse sink and water filtration under live-edge counter",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "brand-menu-plants-01.jpg",
+      "category": "brand",
+      "description": "Hand-lettered Green Truck salad bowls chalkboard with vertical herb garden",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "cabin-dining-crowd-01.jpg",
+      "category": "cabin",
+      "description": "Guests eating burgers and green juices at the cabin communal table",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "cabin-toast-crowd-01.jpg",
+      "category": "cabin",
+      "description": "Group toasting with colorful mason-jar juices around the cabin table",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "truckstop-exterior-01.jpg",
+      "category": "truckstop",
+      "description": "The Truck Stop Los Angeles storefront with red awning listing Market Coffee Food Trucks",
+      "width": 2000,
+      "height": 1644
+    },
+    {
+      "filename": "truckstop-exterior-02.jpg",
+      "category": "truckstop",
+      "description": "Truck Stop Los Angeles facade with Market Deli Food Trucks awning and pin logo",
+      "width": 1500,
+      "height": 2000
+    },
+    {
+      "filename": "cabin-dining-table-01.jpg",
+      "category": "cabin",
+      "description": "Empty long communal dining table in the Malibu cabin with red pendant lights",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-dining-lights-01.jpg",
+      "category": "cabin",
+      "description": "Cabin dining room with red pendant lights and wood table ready for service",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-outdoor-planter-01.jpg",
+      "category": "cabin",
+      "description": "Cabin exterior planter wall with chalkboard and potted herbs",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-dining-crowd-02.jpg",
+      "category": "cabin",
+      "description": "Guests dining at the Malibu cabin communal table with bowls and juices",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-toast-crowd-02.jpg",
+      "category": "cabin",
+      "description": "Cabin dinner toast with packed communal table of guests",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-dining-crowd-03.jpg",
+      "category": "cabin",
+      "description": "Guests eating gourmet burgers and salads at cabin table",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "cabin-bar-counter-01.jpg",
+      "category": "cabin",
+      "description": "Two guests at the cabin pass-through bar counter",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "truck-service-window-01.jpg",
+      "category": "truck",
+      "description": "Green Truck service window with guest reviewing Fish Tacos and burger menus",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truck-santa-monica-pier-01.jpg",
+      "category": "truck",
+      "description": "Early Green Truck cart on Santa Monica Pier with Pacific Park coaster behind",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truck-exterior-side-01.jpg",
+      "category": "truck",
+      "description": "Full side wrap ORGANIC sustainable LOCAL with open service windows and solar",
+      "width": 1800,
+      "height": 1012
+    },
+    {
+      "filename": "truck-night-event-01.jpg",
+      "category": "truck",
+      "description": "Green Truck at night outdoor event with solar panels and prayer flags",
+      "width": 1800,
+      "height": 1200
+    },
+    {
+      "filename": "fleet-commissary-yard-01.jpg",
+      "category": "truckstop",
+      "description": "Aerial view of Green Truck fleet with solar panels at Truck Stop commissary yard",
+      "width": 1800,
+      "height": 1012
+    },
+    {
+      "filename": "truckstop-coming-soon-01.jpg",
+      "category": "truckstop",
+      "description": "The Truck Stop storefront with Coming Soon window graphics and red awnings",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truckstop-windows-branding-01.jpg",
+      "category": "truckstop",
+      "description": "Truck Stop window vinyl branding mockup spanning storefront glass",
+      "width": 1800,
+      "height": 1388
+    },
+    {
+      "filename": "crew-owner-hq-01.jpg",
+      "category": "crew",
+      "description": "Owner at Truck Stop HQ giving peace sign above Green Truck fleet and solar roof.",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "truck-union-square-01.jpg",
+      "category": "truck",
+      "description": "Early Eat Green / Green Truck cart on city street (Union Square era)",
+      "width": 800,
+      "height": 600
+    },
+    {
+      "filename": "food-ultimate-mother-burger-01.jpg",
+      "category": "food",
+      "description": "Ultimate Mother sprout burger close-up on toasted bun",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "food-juice-bar-spread-01.jpg",
+      "category": "food",
+      "description": "Catering juice bar spread with citrus, cilantro, radishes, and fresh-pressed juices",
+      "width": 720,
+      "height": 703
+    },
+    {
+      "filename": "food-berry-cups-01.jpg",
+      "category": "food",
+      "description": "Four cups of mixed berries with Green Truck sticker",
+      "width": 800,
+      "height": 1200
+    },
+    {
+      "filename": "event-festival-crowd-01.jpg",
+      "category": "crowd",
+      "description": "Dense festival crowd gathered around Green Truck under palm trees",
+      "width": 1800,
+      "height": 1350
+    },
+    {
+      "filename": "event-city-hall-night-01.jpg",
+      "category": "crowd",
+      "description": "Green Truck at dusk beneath lit Beaux-Arts civic dome (Pasadena City Hall area)",
+      "width": 600,
+      "height": 800
+    },
+    {
+      "filename": "press-jamie-oliver-01.jpg",
+      "category": "brand",
+      "description": "Beach Reporter clipping: Jamie Oliver goes GREEN featuring Green Truck",
+      "width": 688,
+      "height": 1022
+    },
+    {
+      "filename": "brand-classic-menu-board-01.jpg",
+      "category": "brand",
+      "description": "Classic seasonal menu board: Cilantro Lime Fresca, Golden Rounds, Mother Trucker Vegan Burger, Chipotle Cheddar Burger, Chicken Pesto Sandwich, Super-Food Bowl or Wrap, Kale Yeah Bowl, and Paleo Bowl, with plant illustration",
+      "width": 1704,
+      "height": 1242
+    },
+    {
+      "filename": "food-avocado-toast-herbs-01.jpg",
+      "category": "food",
+      "description": "Rustic outdoor still life: mason jars of dried herbs and seeds, avocado toast on a wood slice, and a glass of fresh herbs against a corrugated metal backdrop",
+      "width": 640,
+      "height": 426
+    },
+    {
+      "filename": "brand-inspiration-card-01.jpg",
+      "category": "brand",
+      "description": "Our Inspiration / Craft Cuisine Anywhere promo card with a plated breakfast of eggs, salsa, and greens",
+      "width": 1056,
+      "height": 816
+    },
+    {
+      "filename": "brand-breakfast-popup-card-01.jpg",
+      "category": "brand",
+      "description": "Breakfast Pop-Up / Rise n' Shine With Us promo card: guests at an outdoor table holding colorful breakfast and acai bowls",
+      "width": 1056,
+      "height": 816
+    },
+    {
+      "filename": "event-string-lights-crowd-01.jpg",
+      "category": "event",
+      "description": "Evening outdoor service: the olive-green Green Truck with a large crowd queued under string lights",
+      "width": 2000,
+      "height": 1498
+    },
+    {
+      "filename": "cabin-wine-toast-01.jpg",
+      "category": "cabin",
+      "description": "Guests toasting with wine around a packed indoor dining table, artwork on the wall behind them",
+      "width": 2000,
+      "height": 1333
+    },
+    {
+      "filename": "food-mother-trucker-graphic-01.jpg",
+      "category": "food",
+      "description": "Stacked Mother Trucker burger held up in front of a Did Somebody Say Mother Trucker graphic",
+      "width": 1280,
+      "height": 960
+    },
+    {
+      "filename": "press-peta-award-01.jpg",
+      "category": "press",
+      "description": "Framed PETA Vegan-Friendly Food Truck Award certificate presented to Green Truck, 2017 honorable mention",
+      "width": 2000,
+      "height": 1500
+    },
+    {
+      "filename": "truck-field-solar-01.jpg",
+      "category": "truck",
+      "description": "Green Truck parked in a golden-hour field with roof solar panels and a chalkboard sign in front",
+      "width": 801,
+      "height": 601
+    },
+    {
+      "filename": "food-burger-magenta-studio-01.jpg",
+      "category": "food",
+      "description": "Studio shot of a veggie burger on a white paper plate held against a solid magenta background",
+      "width": 2000,
+      "height": 2000
+    },
+    {
+      "filename": "food-veggie-burger-chips-01.jpg",
+      "category": "food",
+      "description": "Close-up veggie burger with tomato and greens, sweet potato chips on the side, on a green background",
+      "width": 2000,
+      "height": 2000
+    },
+    {
+      "filename": "food-paleo-bowl-egg-02.jpg",
+      "category": "food",
+      "description": "Overhead paleo bowl with a sunny-side egg, avocado, pico, seasoned meat, and greens on a rustic wood surface",
+      "width": 2000,
+      "height": 1500
+    }
+  ]
+}

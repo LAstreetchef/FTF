@@ -1,0 +1,13 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.db
+instance/
+.pytest_cache/
+*.log
+cookies*.txt
+*_cookies.txt
+.pythonlibs/
+.DS_Store

@@ -893,3 +893,85 @@ class PledgeMessage(db.Model):
     # Relationships
     pledge = db.relationship('Pledge', backref='messages')
     admin = db.relationship('Admin', backref='sent_messages')
+
+
+class CampaignPage(db.Model):
+    """One holiday sales page for one prospect company. Green Truck only."""
+    __tablename__ = "campaign_page"
+
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    company_name = db.Column(db.String(160), nullable=False)
+    contact_name = db.Column(db.String(120))
+    contact_email = db.Column(db.String(200))
+    personal_note = db.Column(db.Text)
+    logo_url = db.Column(db.String(500))
+    suggested_dates = db.Column(db.Text)  # JSON list of YYYY-MM-DD strings
+    give_back_cause = db.Column(db.String(200))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # The office truck day is an Event. These fields are the sponsor's start sheet.
+    event_id = db.Column(db.Integer, db.ForeignKey("event.id"))
+    office_address = db.Column(db.String(240))
+    guest_count = db.Column(db.Integer)
+    preferred_weekday = db.Column(db.String(3))
+    booked_date = db.Column(db.String(10))
+    available_dates = db.Column(db.Text)
+    host_token = db.Column(db.String(64))
+    goal_notified = db.Column(db.Boolean, default=False)
+    sponsor_anonymous = db.Column(db.Boolean, default=False)
+
+    views = db.relationship("CampaignView", backref="campaign", lazy=True)
+    quote_requests = db.relationship("QuoteRequest", backref="campaign", lazy=True)
+    event = db.relationship("Event", foreign_keys=[event_id])
+
+    def get_suggested_dates(self):
+        try:
+            data = json.loads(self.suggested_dates) if self.suggested_dates else []
+            return [item for item in data if isinstance(item, str)]
+        except (TypeError, ValueError):
+            return []
+
+    def set_suggested_dates(self, dates):
+        self.suggested_dates = json.dumps(list(dates or []))
+
+    def get_available_dates(self):
+        try:
+            data = json.loads(self.available_dates) if self.available_dates else []
+            return [item for item in data if isinstance(item, str)]
+        except (TypeError, ValueError):
+            return []
+
+    def set_available_dates(self, dates):
+        self.available_dates = json.dumps(list(dates or []))
+
+
+class CampaignView(db.Model):
+    """A page open. The visitor hash is not a raw IP address."""
+    __tablename__ = "campaign_view"
+
+    id = db.Column(db.Integer, primary_key=True)
+    campaign_id = db.Column(db.Integer, db.ForeignKey("campaign_page.id"), nullable=False, index=True)
+    viewed_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    visitor_hash = db.Column(db.String(32), index=True)
+    referrer = db.Column(db.String(300))
+
+
+class QuoteRequest(db.Model):
+    """An office asking Green Truck for a holiday truck day or a drop-off."""
+    __tablename__ = "quote_request"
+
+    id = db.Column(db.Integer, primary_key=True)
+    campaign_id = db.Column(db.Integer, db.ForeignKey("campaign_page.id"), nullable=False, index=True)
+    organizer_name = db.Column(db.String(120), nullable=False)
+    organizer_email = db.Column(db.String(200), nullable=False)
+    service_format = db.Column(db.String(20), nullable=False)  # truck or dropoff
+    event_date = db.Column(db.String(40), nullable=False)
+    headcount = db.Column(db.Integer, nullable=False)
+    location = db.Column(db.String(240), nullable=False)
+    notes = db.Column(db.Text)
+    give_back = db.Column(db.Boolean, default=False)
+    cause = db.Column(db.String(200))
+    give_back_percent = db.Column(db.Integer)
+    preorder_requested = db.Column(db.Boolean, default=False)
+    email_notified = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

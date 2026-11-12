@@ -9,7 +9,7 @@ from app import db
 # the newest OpenAI model is "gpt-5" which was released August 7, 2025.
 # do not change this unless explicitly requested by the user
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
+openai_client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 FOOD_TRUCK_KNOWLEDGE_BASE = """
 You are a helpful customer support assistant for the Food Truck Fundraiser platform. Always provide specific, accurate answers based on the information below.
@@ -150,6 +150,9 @@ def get_ai_response(conversation_id, user_message, conversation_history=None):
         # Add current user message
         messages.append({"role": "user", "content": user_message})
         
+        if openai_client is None:
+            raise RuntimeError("OPENAI_API_KEY is not configured")
+
         # Get AI response
         response = openai_client.chat.completions.create(
             model="gpt-4o",  # Using reliable GPT-4o model for consistent responses
@@ -301,6 +304,9 @@ def generate_conversation_summary(conversation):
             sender = msg.sender_type.upper()
             conversation_text += f"{sender}: {msg.content}\n"
         
+        if openai_client is None:
+            return "AI summaries are unavailable until OPENAI_API_KEY is configured."
+
         # Generate summary
         response = openai_client.chat.completions.create(
             model="gpt-5",

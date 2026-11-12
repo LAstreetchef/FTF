@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Holiday campaigns — GTLA{% endblock %}
+
+{% block content %}
+<div class="gt-admin">
+    <p class="gt-kicker">Green Truck · December 2026</p>
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
+        <h1 class="mb-0">Holiday campaigns</h1>
+        <a class="btn btn-outline-dark" href="{{ url_for('admin_dashboard') }}">Back to admin</a>
+    </div>
+    <p class="text-secondary">Each company gets one page. The link in the email should open that page first. These pages are Green Truck only.</p>
+
+    <div class="row g-4 mb-5">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h5">Import a CSV</h2>
+                    <p class="mb-2">Columns, in any order. <code>company</code> is required. Re-importing the same <code>slug</code> updates the page and keeps its views and requests.</p>
+                    <p class="small text-secondary mb-3"><code>{{ csv_fields|join(', ') }}</code></p>
+                    <p class="small">Dates look like <code>2026-12-04|2026-12-09|2026-12-11</code>. Use fake rows in this public repo. Put real prospects only in the live database.</p>
+                    <form method="post" action="{{ url_for('admin_campaign_import') }}" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center">
+                        <input class="form-control" type="file" name="csv_file" accept=".csv,text/csv" required>
+                        <button class="btn btn-dark" type="submit">Create pages</button>
+                        <a href="{{ url_for('admin_campaign_sample_csv') }}">Sample CSV</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h5">Photographs</h2>
+                    <p>{{ photos_filled }} of {{ photos_total }} frames have a Green Truck photograph in the repo. Empty frames stay labeled placeholders until a file is added.</p>
+                    <p class="small text-secondary">Drop files in <code>static/images/green-truck/</code> and set <code>file</code> in <code>manifest.json</code>, or upload here. Uploads stay on the server and are not committed.</p>
+                    <form method="post" action="{{ url_for('admin_campaign_photo_upload') }}" enctype="multipart/form-data" class="d-grid gap-2">
+                        <select class="form-select" name="slot" required>
+                            {% for slot in photo_slots %}
+                            <option value="{{ slot.id }}">{{ slot.file }}{% if slot.placeholder %} — missing{% else %} — ready{% endif %}</option>
+                            {% endfor %}
+                        </select>
+                        <input class="form-control" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required>
+                        <button class="btn btn-outline-dark" type="submit">Upload into this frame</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Sponsor</th>
+                    <th>Address</th>
+                    <th>Guests</th>
+                    <th>Weekday</th>
+                    <th>Raised</th>
+                    <th>Combos</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for page in pages %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('admin_campaign_detail', campaign_id=page.id) }}"><strong>{{ page.company_name }}</strong></a>
+                        <div class="small text-secondary">/c/{{ page.slug }}</div>
+                    </td>
+                    {% set office = offices.get(page.id) %}
+                    <td>
+                        {{ page.contact_name or "—" }}
+                        {% if page.sponsor_anonymous %}<div class="small">Name off the page</div>{% endif %}
+                        {% if page.contact_email %}<div class="small text-secondary">{{ page.contact_email }}</div>{% endif %}
+                    </td>
+                    <td>{{ page.office_address or "—" }}</td>
+                    <td>{{ page.guest_count if page.guest_count is not none else "—" }}</td>
+                    <td>{{ office.weekday_label or "—" }}</td>
+                    <td>${{ "{:,.0f}".format(office.raised) }}</td>
+                    <td>{{ office.meals }} / {{ office.needed }}</td>
+                    <td>{{ office.status or "—" }}</td>
+                    <td class="text-end">
+                        <button type="button" class="btn btn-sm btn-dark" data-copy="{{ url_for('campaign_page', slug=page.slug, _external=True) }}">Copy link</button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="9">No campaigns yet. Import a CSV of fictional sample companies, or the live list when this is deployed.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+document.querySelectorAll("[data-copy]").forEach(function (button) {
+    button.addEventListener("click", function () {
+        var link = button.getAttribute("data-copy");
+        var done = function () { button.textContent = "Copied"; };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(done);
+        } else {
+            done();
+        }
+    });
+});
+</script>
+{% endblock %}

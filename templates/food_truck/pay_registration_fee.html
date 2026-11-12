@@ -74,6 +74,15 @@
                         <small class="text-muted">One-time fee per food truck</small>
                     </div>
 
+                    {% if config.get('PAYMENTS_MODE') == 'simulate' %}
+                    <div class="alert alert-warning">
+                        Stripe test keys are not configured. This records the $25 registration fee locally, approves the truck, and does not charge a card.
+                    </div>
+                    <form method="POST" action="{{ url_for('confirm_food_truck_registration_fee_payment', truck_id=truck.id) }}">
+                        <input type="hidden" name="simulate" value="1">
+                        <button type="submit" class="btn btn-success btn-lg">Approve truck (local simulation)</button>
+                    </form>
+                    {% else %}
                     <!-- Payment Form -->
                     <form id="payment-form">
                         <div class="form-group mb-3">
@@ -91,6 +100,7 @@
                             </button>
                         </div>
                     </form>
+                    {% endif %}
                 </div>
             </div>
 
@@ -112,6 +122,7 @@
     </div>
 </div>
 
+{% if config.get('PAYMENTS_MODE') != 'simulate' %}
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 // Initialize Stripe
@@ -210,4 +221,5 @@ form.addEventListener('submit', async function(event) {
     }
 });
 </script>
+{% endif %}
 {% endblock %}

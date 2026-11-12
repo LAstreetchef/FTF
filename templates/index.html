@@ -3,41 +3,21 @@
 {% block title %}{{ get_text('site_title', get_language_from_request()) }} Los Angeles - Food Truck Fundraising in LA{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="row">
-    <div class="col-12">
-        <div class="hero-section text-center">
-            <div class="container position-relative">
-                <h1 class="display-3 mb-4" style="font-family: 'Dancing Script', cursive;">
-                    <i data-feather="truck" class="me-3" style="width: 60px; height: 60px;"></i>
-                    {{ get_text('hero_title', get_language_from_request()) }}
-                </h1>
-                <p class="lead fs-4 mb-5">🍕💰 {{ get_text('hero_subtitle', get_language_from_request()) }} 💵🍔</p>
-                <div class="d-flex flex-wrap justify-content-center gap-3">
-                    <a class="btn btn-cta btn-lg" href="{{ url_for('events_list') }}" role="button">
-                        <i data-feather="calendar" class="me-2"></i>
-                        {{ get_text('events', get_language_from_request()) }}
-                    </a>
-                    <a class="btn btn-outline-light btn-lg" href="{{ url_for('organizer_login') }}" role="button">
-                        <i data-feather="plus-circle" class="me-2"></i>
-                        {{ get_text('get_started', get_language_from_request()) }}
-                    </a>
-                    <button type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#tutorialModal">
-                        <i data-feather="play-circle" class="me-2"></i>
-                        {{ get_text('start_tutorial', get_language_from_request()) }}
-                    </button>
-                </div>
-            </div>
-        </div>
+<section class="gt-home">
+    <p class="gt-kicker">GTLA · Los Angeles</p>
+    <h1>{{ get_text('hero_title', get_language_from_request()) }}</h1>
+    <p class="lead">{{ get_text('hero_subtitle', get_language_from_request()) }}</p>
+    <div class="gt-actions">
+        <a class="btn btn-dark" href="{{ url_for('events_list') }}">{{ get_text('events', get_language_from_request()) }}</a>
+        <a class="btn btn-outline-dark" href="{{ url_for('organizer_login') }}">{{ get_text('get_started', get_language_from_request()) }}</a>
+        <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#tutorialModal">{{ get_text('start_tutorial', get_language_from_request()) }}</button>
     </div>
-</div>
+</section>
 
 <!-- How It Works -->
 <div class="row mb-5">
     <div class="col-12">
-        <h2 class="text-center mb-5 display-6" style="color: var(--foodie-earth); font-weight: 700;">
-            🍽️ {{ get_text('how_it_works', get_language_from_request()) }} ✨
-        </h2>
+        <h2 class="mb-4">{{ get_text('how_it_works', get_language_from_request()) }}</h2>
         <div class="row g-4">
             <div class="col-md-4">
                 <div class="stats-card h-100">

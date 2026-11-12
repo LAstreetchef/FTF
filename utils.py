@@ -9,7 +9,19 @@ from app import mail, db
 from datetime import datetime
 
 def send_email(recipient, subject, body, html=None):
-    """Send email using Flask-Mail with Gmail SMTP"""
+    """Send mail through Resend's HTTPS API, or SMTP when that is what is configured.
+
+    Render's free web service can open HTTPS. It often cannot open SMTP ports.
+    """
+    if not recipient:
+        return False
+    from app import app
+    if app.config.get("MAIL_SUPPRESS_SEND"):
+        logging.info("Email suppressed for %s: %s", recipient, subject)
+        return False
+    resend_key = (os.environ.get("RESEND_API_KEY") or app.config.get("RESEND_API_KEY") or "").strip()
+    if resend_key:
+        return _send_resend(resend_key, recipient, subject, body, html)
     try:
         msg = Message(
             subject=subject,
@@ -18,44 +30,85 @@ def send_email(recipient, subject, body, html=None):
             html=html if html else body
         )
         mail.send(msg)
-        logging.info(f"Email sent to {recipient}: {subject}")
+        logging.info("Email sent via SMTP to %s: %s", recipient, subject)
         return True
     except Exception as e:
-        logging.error(f"Failed to send email to {recipient}: {str(e)}")
+        logging.error("Failed to send email to %s: %s", recipient, e)
         return False
+
+
+def _send_resend(api_key, recipient, subject, body, html):
+    import requests
+    from app import app
+    sender = (os.environ.get("MAIL_DEFAULT_SENDER") or app.config.get("MAIL_DEFAULT_SENDER") or "").strip()
+    if not sender or sender == "noreply@localhost":
+        logging.error("MAIL_DEFAULT_SENDER is required before Resend can send")
+        return False
+    payload = {"from": sender, "to": [recipient], "subject": subject or ""}
+    if html:
+        payload["html"] = html
+    text = body or ""
+    if text:
+        payload["text"] = text
+    elif not html:
+        payload["text"] = " "
+    try:
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+            json=payload,
+            timeout=15,
+        )
+    except Exception as exc:
+        logging.error("Resend request failed for %s: %s", recipient, exc)
+        return False
+    if response.status_code >= 400:
+        logging.error("Resend rejected email to %s: HTTP %s", recipient, response.status_code)
+        return False
+    logging.info("Email sent via Resend to %s: %s", recipient, subject)
+    return True
 
 def generate_ticket_code():
     """Generate a unique e-ticket code"""
     characters = string.ascii_uppercase + string.digits
     return ''.join(secrets.choice(characters) for _ in range(8))
 
-def create_stripe_payment_intent(amount, customer_email, description):
-    """Create a Stripe PaymentIntent for future charging"""
+def create_stripe_payment_intent(amount, customer_email, description, metadata=None, amount_cents=None):
+    """Create a Stripe PaymentIntent for future charging.
+
+    Cards only. Apple Pay and Google Pay may arrive as a card PaymentMethod.
+    Do not add Cash App Pay.
+    """
     try:
-        # Use the correct Stripe key based on current mode configuration
-        # Convert amount to cents
-        amount_cents = int(amount * 100)
+        # Convert amount to cents unless the caller already passed the Price total.
+        cents = int(amount_cents) if amount_cents is not None else int(amount * 100)
         
         # Get the current stripe key that was configured in app.py based on test mode
         current_key = stripe.api_key
         mode = "TEST" if current_key and current_key.startswith('sk_test_') else "LIVE"
         logging.info(f"Creating payment intent in {mode} mode")
+
+        meta = {
+            "customer_email": (customer_email or "")[:500],
+            "description": (description or "")[:500],
+        }
+        for key, value in (metadata or {}).items():
+            if value is None:
+                continue
+            meta[str(key)[:40]] = str(value)[:500]
         
         # Create PaymentIntent with current configured key
         intent = stripe.PaymentIntent.create(
-            amount=amount_cents,
+            amount=cents,
             currency='usd',
             capture_method='manual',  # Don't charge immediately
             receipt_email=customer_email,
             description=description,
-            # Restrict to card payments only to avoid redirect issues
+            # Cards only. Apple Pay and Google Pay can still arrive as a card.
+            # Do not add cashapp or other redirect methods.
             payment_method_types=['card'],
-            # Disable automatic payment methods that require redirects
             automatic_payment_methods={'enabled': False},
-            metadata={
-                'customer_email': customer_email,
-                'description': description
-            }
+            metadata=meta,
         )
         
         logging.info(f"Created PaymentIntent {intent.id} for ${amount}")
@@ -64,6 +117,46 @@ def create_stripe_payment_intent(amount, customer_email, description):
     except Exception as e:
         logging.error(f"Error creating PaymentIntent: {str(e)}")
         return None
+
+def release_stripe_hold(payment_intent_id):
+    """Release an uncaptured authorization. Simulated pledges have nothing to release."""
+    if not payment_intent_id or str(payment_intent_id).startswith("sim_"):
+        return True
+    if not stripe.api_key:
+        logging.info("No Stripe key; hold %s will expire on its own", payment_intent_id)
+        return False
+    try:
+        canceled = stripe.PaymentIntent.cancel(payment_intent_id)
+        logging.info("Released hold %s status %s", payment_intent_id, getattr(canceled, "status", "canceled"))
+        return True
+    except Exception as exc:
+        logging.error("Could not release hold %s: %s", payment_intent_id, exc)
+        return False
+
+
+def release_and_notify_pledgers(event):
+    """Release uncaptured card holds and send the cancellation email.
+
+    Shared by admin deletion and by a campaign that misses its deadline.
+    """
+    from models import Pledge
+
+    pledges = Pledge.query.filter_by(event_id=event.id).all()
+    when = event.date.strftime("%B %d, %Y at %I:%M %p") if event.date else "the scheduled day"
+    for pledge in pledges:
+        if pledge.status != "pending":
+            continue
+        release_stripe_hold(pledge.stripe_payment_intent_id)
+        pledge.status = "cancelled"
+        send_email(
+            pledge.email,
+            f"Event Cancelled: {event.name}",
+            f"We regret to inform you that the event '{event.name}' scheduled for {when} has been cancelled.\n\n"
+            f"Your pledge of ${pledge.amount:.2f} has not been charged and no payment was processed.\n\n"
+            "We apologize for any inconvenience.",
+        )
+    return pledges
+
 
 def charge_stripe_payment(payment_intent_id, original_amount, description):
     """Charge a previously created PaymentIntent with 4.5% processing fee"""

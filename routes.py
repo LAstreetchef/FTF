@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import app, db, mail
 from models import Admin, Organizer, FoodTruck, FoodTruckOwner, Event, Pledge, EmailLog, AuthToken, PledgeTransfer, PledgeTransferConsent, Payout, SupportConversation, SupportMessage, OrganizerPayout, FoodTruckPayout, OrganizerTier, AmbassadorChallenge, OrganizerChallengeProgress, PledgeMessage
 from sqlalchemy import text
-from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment
+from utils import send_email, generate_ticket_code, create_stripe_payment_intent, charge_stripe_payment, release_and_notify_pledgers
 import stripe
 import os
 import json
@@ -213,7 +213,7 @@ def houston_landing():
         <h4>Test Login → Dashboard Flow:</h4>
         <ol>
             <li><a href="/organizer/login" target="_blank">1. Open Organizer Login</a></li>
-            <li>Login with: kammiceli@gmail.com / password</li>
+            <li>Use the organizer account you registered. There is no built-in password.</li>
             <li>Should redirect to dashboard automatically</li>
         </ol>
         <p><strong>If failing:</strong> Check browser console and server logs</p>
@@ -279,9 +279,7 @@ def admin_login():
                      request.form.get('iframe_context') == 'true'
         user_agent = request.headers.get('User-Agent', '')
         
-        logging.info(f"Admin login attempt - Username: {username}, Embedded: {is_embedded}")
-        logging.info(f"Request details - Referrer: {request.referrer}, Iframe field: {request.form.get('iframe_context')}")
-        logging.info(f"Form data: {dict(request.form)}")
+        logging.info("Admin login attempt for %s (embedded=%s)", username, is_embedded)
         
         admin = Admin.query.filter_by(username=username).first()
         logging.info(f"Admin found in database: {admin is not None}")
@@ -306,8 +304,7 @@ def admin_login():
                 session['authenticated'] = True
                 session['login_time'] = datetime.now().isoformat()
                 
-                logging.info(f"Admin {username} logged in successfully, session set with admin_id: {admin.id}")
-                logging.info(f"Session contents after login: {dict(session)}")
+                logging.info("Admin %s logged in", username)
                 flash('Successfully logged in as admin', 'success')
                 
                 # Always return a page that handles both iframe and regular contexts
@@ -1796,7 +1793,7 @@ def database_sync():
         
         # Step 1: Detect current database environment
         database_url = os.environ.get("DATABASE_URL", "")
-        if "ep-royal-morning-adkc9dgx.c-2.us-east-1.aws.neon.tech" in database_url:
+        if database_url.startswith("postgresql"):
             env = "PRODUCTION"
         else:
             env = "DEVELOPMENT"
@@ -1837,13 +1834,13 @@ def database_sync():
                 'email': 'holeechowtruck@gmail.com',
                 'name': 'Ho Lee Chow Test Owner',
                 'business_name': 'Ho Lee Chow Food Truck',
-                'password': 'password123'
+                'password': secrets.token_urlsafe(24)
             },
             {
                 'email': 'test@foodtruck.com', 
                 'name': 'Test Food Truck Owner',
                 'business_name': 'Test Food Truck',
-                'password': 'password123'
+                'password': secrets.token_urlsafe(24)
             }
         ]
         
@@ -1882,8 +1879,8 @@ def database_sync():
         
         <h3>🚚 Food Truck Login</h3>
         <p><strong>Test Accounts:</strong><br>
-        📧 holeechowtruck@gmail.com / password123<br>
-        📧 test@foodtruck.com / password123</p>
+        📧 holeechowtruck@gmail.com / disabled<br>
+        📧 test@foodtruck.com / disabled</p>
         
         <p><a href='/food-truck/login' class='btn'>🚚 Go to Food Truck Login</a></p>
         <p><a href='/admin/login' class='btn'>🔧 Go to Admin Login</a></p>
@@ -1923,7 +1920,7 @@ def production_setup_simple():
             owner.email = 'holeechowtruck@gmail.com'
             owner.name = 'Ho Lee Chow Test'
             owner.business_name = 'Ho Lee Chow'
-            owner.password_hash = generate_password_hash('password123')
+            owner.password_hash = generate_password_hash(secrets.token_urlsafe(24))
             owner.status = 'approved'
             db.session.add(owner)
             db.session.commit()
@@ -1931,7 +1928,7 @@ def production_setup_simple():
         else:
             results.append(f"✅ Test account exists: {existing.email}")
         
-        return f"<h1>Setup Complete</h1><ul>{''.join([f'<li>{r}</li>' for r in results])}</ul><p>Login: holeechowtruck@gmail.com / password123</p><p><a href='/food-truck/login'>Test Login</a></p>"
+        return f"<h1>Setup Complete</h1><ul>{''.join([f'<li>{r}</li>' for r in results])}</ul><p>Login: holeechowtruck@gmail.com / disabled</p><p><a href='/food-truck/login'>Test Login</a></p>"
         
     except Exception as e:
         return f"<h1>Error</h1><p>{str(e)}</p>"
@@ -2166,10 +2163,10 @@ def update_pledge_totals():
     try:
         if request.method == 'POST':
             username = request.form.get('username', 'support@foodtruckfundraiser.com')
-            password = request.form.get('password', 'password')
+            password = request.form.get('password', '')
         else:
             username = 'support@foodtruckfundraiser.com'
-            password = 'password'
+            password = ''
         
         # Find admin user
         admin = Admin.query.filter_by(username=username).first()
@@ -2192,12 +2189,7 @@ def update_pledge_totals():
             'username': username,
             'admin_exists': True,
             'admin_id': admin.id,
-            'password_valid': password_valid,
-            'password_hash_prefix': admin.password_hash[:20] + '...',
-            'test_credentials': {
-                'username': 'support@foodtruckfundraiser.com',
-                'password': 'password'
-            }
+            'password_valid': password_valid
         })
         
     except Exception as e:
@@ -2723,17 +2715,10 @@ def admin_delete_event(event_id):
         flash(f'Cannot delete event "{event.name}" - it has {len(charged_pledges)} charged pledges. Contact customers first.', 'error')
         return redirect(url_for('admin_events'))
     
-    # For events with pending pledges, notify users about cancellation
+    # For events with pending pledges, release the card hold and notify them.
     if pledges:
         try:
-            # Send cancellation emails to pledgers
-            for pledge in pledges:
-                send_email(
-                    pledge.email,
-                    f"Event Cancelled: {event.name}",
-                    f"We regret to inform you that the event '{event.name}' scheduled for {event.date.strftime('%B %d, %Y at %I:%M %p')} has been cancelled.\n\nYour pledge of ${pledge.amount:.2f} has not been charged and no payment was processed.\n\nWe apologize for any inconvenience."
-                )
-            
+            release_and_notify_pledgers(event)
             # Send notification to organizer
             if event.organizer:
                 send_email(
@@ -2777,10 +2762,8 @@ def organizer_login():
         # Enhanced iframe detection (same as admin)
         is_embedded = (request.referrer and 'thefoodtruckstop.com' in request.referrer) or \
                      request.form.get('iframe_context') == 'true'
-        
-        logging.info(f"Organizer login attempt - Email: {email}, Embedded: {is_embedded}")
-        logging.info(f"Request details - Referrer: {request.referrer}, Iframe field: {request.form.get('iframe_context')}")
-        logging.info(f"Form data: {dict(request.form)}")
+
+        logging.info("Organizer login attempt for %s (embedded=%s)", email, is_embedded)
         
         organizer = Organizer.query.filter_by(email=email).first()
         if organizer and check_password_hash(organizer.password_hash, password):
@@ -2813,8 +2796,7 @@ def organizer_login():
             db.session.add(token_record)
             db.session.commit()
             
-            logging.info(f"Organizer {email} logged in successfully, session set with organizer_id: {organizer.id}")
-            logging.info(f"Session contents after login: {dict(session)}")
+            logging.info("Organizer %s logged in", email)
             flash('Successfully logged in', 'success')
             
             # Create a response with enhanced cookie handling for iframe
@@ -2893,11 +2875,11 @@ def organizer_login():
             if 'session' in session:
                 # Force session cookie to be set with iframe-compatible attributes
                 response.set_cookie(
-                    'session', 
+                    'session',
                     session.get('_id', ''),
-                    secure=True,
-                    samesite='None',
-                    httponly=False,  # Allow JS access for debugging
+                    secure=app.config.get('SESSION_COOKIE_SECURE', False),
+                    samesite=app.config.get('SESSION_COOKIE_SAMESITE', 'Lax'),
+                    httponly=True,
                     path='/',
                     domain=None
                 )
@@ -3174,9 +3156,6 @@ def organizer_dashboard():
     auth_token = request.args.get('auth_token')
     
     logging.info(f"Dashboard access - Organizer ID: {organizer_id}, User type: {user_type}, Embedded: {is_embedded}")
-    logging.info(f"Auth token provided: {auth_token is not None}")
-    logging.info(f"Session data: {dict(session)}")
-    logging.info(f"Request cookies: {dict(request.cookies)}")
     
     # Check if we have a valid auth token (for iframe compatibility)
     if not organizer_id and auth_token:
@@ -3460,7 +3439,7 @@ def organizer_pay_fee(event_id):
                 event.organizer_fee_payment_intent = None
                 db.session.commit()
             
-            logging.info(f"Creating organizer fee payment with {mode} key: {current_secret_key[:20]}...")
+            logging.info(f"Creating organizer fee payment in {mode} mode")
             
             # Create payment intent with current configured key
             payment_intent = stripe.PaymentIntent.create(
@@ -3532,7 +3511,7 @@ def food_truck_pay_registration_fee(truck_id):
                 logging.error(f"CRITICAL: Invalid Stripe key format: {current_secret_key[:20]}...")
                 return jsonify({'error': 'Payment system misconfigured'}), 500
             
-            logging.info(f"Creating food truck registration payment with {mode} key: {current_secret_key[:20]}...")
+            logging.info(f"Creating food truck registration payment in {mode} mode")
             
             # Create Stripe payment intent for $25 registration fee
             payment_intent = stripe.PaymentIntent.create(
@@ -3580,8 +3559,19 @@ def confirm_food_truck_registration_fee_payment(truck_id):
     try:
         # Runtime assertion: Ensure Stripe is properly configured
         current_secret_key = stripe.api_key
+        if request.form.get('simulate') == '1':
+            if app.config.get('PAYMENTS_MODE') != 'simulate':
+                return jsonify({'error': 'Payment simulation is disabled'}), 403
+            truck.registration_fee_charged = True
+            truck.status = 'approved'
+            truck.approved_at = datetime.utcnow()
+            truck.registration_fee_payment_intent = 'simulated'
+            db.session.commit()
+            flash('Registration recorded locally. No card was charged. This truck can now be chosen for events.', 'success')
+            return redirect(url_for('food_truck_dashboard'))
+
         if not current_secret_key or not current_secret_key.startswith(('sk_test_', 'sk_live_')):
-            logging.error(f"CRITICAL: Invalid Stripe key for payment retrieval: {current_secret_key[:20] if current_secret_key else 'None'}...")
+            logging.error("Stripe secret key is missing or is not a test/live key")
             return jsonify({'error': 'Payment system misconfigured'}), 500
         
         # Verify the payment intent was successful
@@ -3642,6 +3632,19 @@ def confirm_organizer_fee_payment(event_id):
         return jsonify({'error': 'Access denied'}), 403
     
     try:
+        if request.form.get('simulate') == '1':
+            if app.config.get('PAYMENTS_MODE') != 'simulate':
+                flash('Payment simulation is disabled. Use Stripe to publish this event.', 'error')
+                return redirect(url_for('organizer_pay_fee', event_id=event_id))
+            event.organizer_fee_charged = True
+            event.organizer_fee_payment_intent = 'simulated'
+            db.session.commit()
+            flash('Event published. The organizer fee was recorded locally and no card was charged.', 'success')
+            destination = url_for('organizer_dashboard')
+            if auth_token:
+                destination += f'?auth_token={auth_token}'
+            return redirect(destination)
+
         # Verify the payment intent was successful
         if not event.organizer_fee_payment_intent:
             return jsonify({'error': 'No payment intent found'}), 400
@@ -4081,6 +4084,62 @@ def event_detail(event_id):
     
     return render_template('events/detail.html', event=event)
 
+def _create_simulated_pledge(event):
+    """Record a pledge without Stripe. Used only when payments are in local simulation mode."""
+    email = (request.form.get('email') or '').strip()
+    try:
+        amount = float(request.form.get('amount') or 0)
+    except (TypeError, ValueError):
+        amount = 0
+    if not email or amount <= 0:
+        flash('Email and a pledge amount are required.', 'error')
+        return redirect(url_for('make_pledge', event_id=event.id))
+
+    is_gift = request.form.get('is_gift') == 'on'
+    selected_menu_items = []
+    selected_menu_items_json = request.form.get('selected_menu_items')
+    if selected_menu_items_json:
+        try:
+            selected_menu_items = json.loads(selected_menu_items_json)
+        except (json.JSONDecodeError, TypeError):
+            selected_menu_items = []
+
+    processing_fee = round(amount * 0.045, 2)
+    pledge = Pledge(
+        email=email,
+        amount=amount,
+        processing_fee=processing_fee,
+        stripe_token='simulated',
+        stripe_payment_intent_id=f'sim_{uuid.uuid4().hex}',
+        event_id=event.id,
+        is_gift=is_gift,
+        recipient_name=request.form.get('recipient_name') if is_gift else None,
+        recipient_email=request.form.get('recipient_email') if is_gift else None,
+        gift_message=request.form.get('gift_message') if is_gift else None,
+        status='pending',
+    )
+    if selected_menu_items:
+        pledge.set_selected_menu_items(selected_menu_items)
+    db.session.add(pledge)
+    db.session.commit()
+    event.update_pledge_total()
+
+    if event.status in ['approved', 'completed']:
+        pledge.status = 'charged'
+        pledge.charged_at = datetime.utcnow()
+        pledge.ticket_code = generate_ticket_code()
+        db.session.commit()
+        flash('Pledge recorded and marked charged because this event is already confirmed. No card was billed.', 'success')
+        return redirect(url_for('pledge_success', pledge_id=pledge.id))
+
+    if event.is_goal_met() and event.status == 'pending':
+        event.status = 'funded'
+        db.session.commit()
+
+    flash('Pledge saved. No card was billed — add Stripe test keys to charge a test card instead.', 'success')
+    return redirect(url_for('pledge_success', pledge_id=pledge.id))
+
+
 @app.route('/events/<int:event_id>/pledge', methods=['GET', 'POST'])
 def make_pledge(event_id):
     """Handle pledge creation with Stripe tokenization"""
@@ -4096,6 +4155,12 @@ def make_pledge(event_id):
         return redirect(url_for('event_detail', event_id=event_id))
     
     if request.method == 'POST':
+        if app.config.get('PAYMENTS_MODE') == 'simulate':
+            return _create_simulated_pledge(event)
+        if app.config.get('PAYMENTS_MODE') != 'stripe':
+            flash('Payments are not configured. Add Stripe test keys to the environment.', 'error')
+            return redirect(url_for('make_pledge', event_id=event_id))
+
         email = request.form['email']
         amount = float(request.form['amount'])
         stripe_payment_method = request.form.get('stripe_payment_method')
@@ -4138,7 +4203,7 @@ def make_pledge(event_id):
                         flash('Payment system not configured', 'error')
                         return redirect(url_for('make_pledge', event_id=event_id))
                     
-                    logging.info(f"Confirming payment with {mode} key: {current_key[:20]}...")
+                    logging.info(f"Confirming payment in {mode} mode")
                     
                     # Attach and confirm the payment intent using configured stripe key
                     intent = stripe.PaymentIntent.confirm(
@@ -4294,16 +4359,19 @@ def make_pledge(event_id):
                 
             flash('An unexpected error occurred while processing your pledge. Please try again or contact support if the issue persists.', 'error')
     
-    # Use the correct publishable key based on mode (respects test mode)
+    payments_mode = app.config.get('PAYMENTS_MODE')
     stripe_publishable_key = app.config.get('STRIPE_PUBLISHABLE_KEY')
-    if not stripe_publishable_key:
-        logging.error("CRITICAL: Stripe publishable key not found for pledge form")
+    if payments_mode == 'stripe' and not stripe_publishable_key:
+        logging.error("Stripe publishable key is missing")
         flash('Payment system not configured', 'error')
         return redirect(url_for('events_list'))
-    
-    return render_template('pledge/form.html', 
-                          event=event, 
-                          stripe_publishable_key=stripe_publishable_key)
+    if payments_mode == 'disabled':
+        flash('Payments are not configured. Add Stripe test keys to the environment.', 'error')
+
+    return render_template('pledge/form.html',
+                          event=event,
+                          stripe_publishable_key=stripe_publishable_key,
+                          payments_mode=payments_mode)
 
 @app.route('/pledge/<int:pledge_id>/success')
 def pledge_success(pledge_id):
@@ -4718,15 +4786,15 @@ def internal_error(error):
     try:
         admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
         if admin:
-            password_test = admin.password_hash and check_password_hash(admin.password_hash, 'password')
+            password_test = admin.password_hash and check_password_hash(admin.password_hash, secrets.token_urlsafe(24))
             return f"""
             <h3>Admin Debug Info</h3>
             <p><strong>Username:</strong> {admin.username}</p>
             <p><strong>ID:</strong> {admin.id}</p>
             <p><strong>Password Hash (first 30 chars):</strong> {admin.password_hash[:30]}...</p>
-            <p><strong>Password 'password' test:</strong> {'✓ PASS' if password_test else '✗ FAIL'}</p>
+            <p><strong>Stored password check:</strong> not published</p>
             <hr>
-            <p>Try logging in with: support@foodtruckfundraiser.com / password</p>
+            <p>Admin passwords are set with the ADMIN_PASSWORD environment variable.</p>
             <p><a href="/admin/login">Go to Admin Login</a></p>
             """
         else:
@@ -4741,7 +4809,7 @@ def login_admin_direct():
     if request.method == 'POST':
         # Process login
         admin = Admin.query.filter_by(username='support@foodtruckfundraiser.com').first()
-        if admin and check_password_hash(admin.password_hash, 'password'):
+        if admin and check_password_hash(admin.password_hash, secrets.token_urlsafe(24)):
             # Clear any existing session data first
             session.clear()
             # Set new session data
@@ -4803,22 +4871,22 @@ def setup_admin():
         if admin:
             # Update existing admin password
             old_hash = admin.password_hash[:20] + '...'
-            admin.password_hash = generate_password_hash('password')
+            admin.password_hash = generate_password_hash(secrets.token_urlsafe(24))
             db.session.commit()
             
             # Test the password
-            test_result = check_password_hash(admin.password_hash, 'password')
+            test_result = check_password_hash(admin.password_hash, secrets.token_urlsafe(24))
             
             return f"""
             {debug_info}Admin user updated successfully!<br>
             Old hash: {old_hash}<br>
             Password test: {'PASS' if test_result else 'FAIL'}<br><br>
-            <strong>You can now login with support@foodtruckfundraiser.com / password</strong><br><br>
+            <strong>Set ADMIN_EMAIL and ADMIN_PASSWORD instead of using a built-in password.</strong><br><br>
             <hr>
             <h4>Quick Login Test:</h4>
             <form action="/admin/login" method="POST" style="margin: 10px 0;">
                 <input type="hidden" name="username" value="support@foodtruckfundraiser.com">
-                <input type="hidden" name="password" value="password">
+                <input type="hidden" name="password" value="">
                 <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">
                     Login as Admin Now
                 </button>
@@ -4829,23 +4897,23 @@ def setup_admin():
             # Create new admin
             new_admin = Admin(
                 username='support@foodtruckfundraiser.com',
-                password_hash=generate_password_hash('password')
+                password_hash=generate_password_hash(secrets.token_urlsafe(24))
             )
             db.session.add(new_admin)
             db.session.commit()
             
             # Test the password
-            test_result = check_password_hash(new_admin.password_hash, 'password')
+            test_result = check_password_hash(new_admin.password_hash, secrets.token_urlsafe(24))
             
             return f"""
             {debug_info}Admin user created successfully!<br>
             Password test: {'PASS' if test_result else 'FAIL'}<br><br>
-            <strong>You can now login with support@foodtruckfundraiser.com / password</strong><br><br>
+            <strong>Set ADMIN_EMAIL and ADMIN_PASSWORD instead of using a built-in password.</strong><br><br>
             <hr>
             <h4>Quick Login Test:</h4>
             <form action="/admin/login" method="POST" style="margin: 10px 0;">
                 <input type="hidden" name="username" value="support@foodtruckfundraiser.com">
-                <input type="hidden" name="password" value="password">
+                <input type="hidden" name="password" value="">
                 <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">
                     Login as Admin Now
                 </button>
@@ -4873,7 +4941,7 @@ def setup_admin():
         test_data = {
             'email': 'debugtest@example.com',
             'name': 'Debug Test User', 
-            'password': 'testpassword123'
+            'password': secrets.token_urlsafe(24)
         }
         
         # Check if test user already exists
@@ -4981,53 +5049,9 @@ def food_truck_register():
 
 @app.route('/food-truck/login', methods=['GET', 'POST'])
 def food_truck_login():
-    """Food truck owner login with automatic database setup"""
+    """Food truck owner login"""
     try:
-        # Check if we need to set up database columns (for production deployment)
-        setup_needed = False
-        setup_message = ""
-        
-        # Special setup mode for production deployment
-        if request.method == 'POST' and request.form.get('email') == 'holeechowtruck@gmail.com' and request.form.get('password') == 'setup123':
-            try:
-                # Add database columns if they don't exist
-                try:
-                    db.session.execute(text("SELECT payout_method FROM food_truck_owner LIMIT 1"))
-                    setup_message += "✅ Database columns already exist. "
-                except:
-                    db.session.execute(text("""
-                        ALTER TABLE food_truck_owner 
-                        ADD COLUMN IF NOT EXISTS payout_method VARCHAR(50),
-                        ADD COLUMN IF NOT EXISTS payout_setup_completed BOOLEAN DEFAULT FALSE,
-                        ADD COLUMN IF NOT EXISTS paypal_email VARCHAR(255)
-                    """))
-                    db.session.commit()
-                    setup_message += "✅ Added database columns. "
-                
-                # Create test account
-                existing = FoodTruckOwner.query.filter_by(email='holeechowtruck@gmail.com').first()
-                if not existing:
-                    from werkzeug.security import generate_password_hash
-                    owner = FoodTruckOwner(
-                        email='holeechowtruck@gmail.com',
-                        name='Ho Lee Chow Test',
-                        business_name='Ho Lee Chow',
-                        password_hash=generate_password_hash('password123'),
-                        status='approved'
-                    )
-                    db.session.add(owner)
-                    db.session.commit()
-                    setup_message += "✅ Created test account. "
-                else:
-                    setup_message += f"✅ Test account exists. "
-                
-                setup_message += "Now use: holeechowtruck@gmail.com / password123"
-                flash(f'Database Setup Complete! {setup_message}', 'success')
-                
-            except Exception as setup_error:
-                flash(f'Setup Error: {str(setup_error)}', 'error')
-        
-        elif request.method == 'POST':
+        if request.method == 'POST':
             email = request.form.get('email')
             password = request.form.get('password')
             
@@ -5125,7 +5149,7 @@ def food_truck_payouts_disabled():
                          processing_amount=processing_amount,
                          total_processing_fees=total_processing_fees)
 
-@app.route('/food-truck/payout-settings', methods=['POST'])
+@app.route('/food-truck/payout-settings', methods=['POST'], endpoint='update_food_truck_payout_settings')
 def update_food_truck_payout_settings_disabled():
     """Update food truck payout settings"""
     if not session.get('authenticated') or session.get('user_type') != 'food_truck_owner':
