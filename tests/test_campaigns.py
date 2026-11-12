@@ -41,7 +41,8 @@ def test_csv_import_and_green_truck_page(client):
     page = client.get("/c/northwind-labs")
     assert page.status_code == 200
     body = page.data
-    assert b"Northwind Labs" in body and b"Holiday Truck Day" in body
+    assert b"Green Truck X Northwind Labs" in body
+    assert b"Holiday Truck Day" not in body
     assert b"GTLA" in body
     assert b"A note from Green Truck" in body
     assert b"Kam" not in body
