@@ -52,7 +52,7 @@ def test_csv_import_and_green_truck_page(client):
     assert b"Super-Food Salad Bowl" in body
     assert b"$1,750" in body
     assert b"Combo $18" in body
-    assert b"Start our truck day" in body
+    assert b"Book now" in body
     assert b"See the menu" in body
     assert b"only be charged if this event reaches its funding goal" not in body
     assert b"Coachella" in body

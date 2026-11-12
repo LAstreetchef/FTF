@@ -65,7 +65,7 @@
         <a href="#menu" aria-label="Classic menu"></a>
         <a href="#proof" aria-label="Story"></a>
     </nav>
-    <button class="gt-sticky-cta" type="button" data-open-office>{% if office.started %}Your order{% else %}Start our truck day{% endif %}</button>
+    <button class="gt-sticky-cta" type="button" data-open-office>{% if office.started %}Your order{% else %}Book now{% endif %}</button>
 
     <main class="gt-chapters">
         <section class="gt-chapter" id="hero">
@@ -81,7 +81,7 @@
                     <p>{{ page.personal_note }}</p>
                     <footer>— Green Truck</footer>
                 </blockquote>
-                <button class="gt-button" type="button" data-open-office>{% if office.started %}Your order{% else %}Start our truck day{% endif %}</button>
+                <button class="gt-button" type="button" data-open-office>{% if office.started %}Your order{% else %}Book now{% endif %}</button>
             </div>
         </section>
 
@@ -301,7 +301,7 @@
                     <input type="hidden" name="weekday" id="weekday" value="{{ form.get('weekday', '') }}" required>
                 </div>
                 <label class="gt-check"><input type="checkbox" name="sponsor_anonymous" value="1" {% if form.get('sponsor_anonymous') %}checked{% endif %}> Keep my name off the page</label>
-                <button class="gt-button gt-button-primary" type="submit">Start our truck day</button>
+                <button class="gt-button gt-button-primary" type="submit">Book now</button>
             </form>
             {% endif %}
         </div>

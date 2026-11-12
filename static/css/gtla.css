@@ -97,7 +97,7 @@
     line-height: .96;
     margin: 0 0 .7rem;
 }
-.gt-overlay h1 { font-size: clamp(2.7rem, 8vw, 5.2rem); }
+.gt-overlay h1 { font-size: clamp(2.16rem, 6.4vw, 4.16rem); }
 .gt-overlay h2 { font-size: clamp(2.1rem, 5vw, 3.4rem); }
 .gt-lede, .gt-overlay blockquote { margin: 0 0 .9rem; max-width: 38rem; }
 .gt-overlay blockquote { font-family: Newsreader, Georgia, serif; font-size: clamp(1.25rem, 2.4vw, 1.7rem); line-height: 1.25; }
